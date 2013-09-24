@@ -34,7 +34,7 @@ class ElementTest(unittest.TestCase):
 
     def setUp(self):
         self.counter = self.Incrementer()
-        self.element = elements.Element()
+        self.element = elements.Primitive()
 
     def test_set_value(self):
         self.element.register(self.counter.increment)

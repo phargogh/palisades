@@ -1,6 +1,7 @@
 import unittest
 
 from palisades import core
+from palisades import elements
 
 class CommunicatorTest(unittest.TestCase):
     class SampleEmitter(core.Communicator):
@@ -33,14 +34,17 @@ class ElementTest(unittest.TestCase):
 
     def setUp(self):
         self.counter = self.Incrementer()
-        self.element = core.UIElement()
+        self.element = elements.Element()
 
     def test_set_value(self):
         self.element.register(self.counter.increment)
         self.element.set_value('aaa') # increment
-        self.element.set_value('aaa')  # no increment
-        self.element.set_value('b')  # increment
+        self.assertEqual(self.counter.counter, 1)
 
+        self.element.set_value('aaa')  # no increment
+        self.assertEqual(self.counter.counter, 1)
+
+        self.element.set_value('b')  # increment
         self.assertEqual(self.counter.counter, 2)
 
     def test_is_enabled(self):
@@ -53,10 +57,10 @@ class ElementTest(unittest.TestCase):
     def test_set_value_when_disabled(self):
         self.assertEqual(self.element.is_enabled(), True)
         self.element.set_value('aaa')
-        self.assertEqual(self.element.get_value(), 'aaa')
+        self.assertEqual(self.element.value(), 'aaa')
         self.element.disable()
         self.element.set_value('bbb')
-        self.assertEqual(self.element.get_value(), 'aaa')
+        self.assertEqual(self.element.value(), 'aaa')
 
 class FileTest(unittest.TestCase):
     def setUp(self):

@@ -20,6 +20,11 @@ class Element(core.Communicator):
     _enabled = True
 
     def set_value(self, new_value):
+        """Set the value of this element.  If the element's value changes, all
+        registered callbacks will be emitted.
+
+        Returns nothing."""
+
         if not self.is_enabled():
             return
 
@@ -36,14 +41,25 @@ class Element(core.Communicator):
         return self._value
 
     def _set_enabled(self, enabled):
+        """Set the local, private attribute indicating whether this element is
+        enabled.  All registered callbacks will be notified.
+
+        Returns nothing."""
+
         self._enabled = enabled
         self.emit()
 
     def enable(self):
+        """Enable the element.  Returns nothing,"""
         self._set_enabled(True)
 
     def disable(self):
+        """Disable the element.  Returns nothing."""
         self._set_enabled(False)
 
     def is_enabled(self):
+        """Check if the element is enabled.
+
+        Returns a boolean."""
+
         return self._enabled

@@ -17,7 +17,7 @@ class Communicator(object):
     # signal['condition'] - the condition under which this signal is emitted
     # When a signal is emitted, data about the signal should also be passed.
     callbacks = []
-    
+
     def register(self, callback):
         """This function appends the target function call to the list of 
         signals stored by this element"""
@@ -26,12 +26,12 @@ class Communicator(object):
             'condition': True,
         }
         self.callbacks.append(signal)
-        
+
     def emit(self):
         for signal in self.callbacks:
             if signal['condition']:
                 signal['target']()
-                
+
     def remove(self, target):
         """"""
         try:
@@ -49,34 +49,34 @@ class UIElement(Communicator):
     value = None
     enabled = True
     args_id = None
-    
+
     def set_value(self, new_value):
 # TODO: Is it better python form to raise an exception here instead of
 # just not doing anything?
         if not self.is_enabled():
             return
 
-        old_value = self.value    
+        old_value = self.value
         self.value = new_value
         if old_value != new_value:
             self.emit()
-        
+
     def get_value(self):
         return self.value
 
     def _set_enabled(self, enabled):
         self.enabled = enabled
         self.emit()
-        
+
     def enable(self):
         self._set_enabled(True)
-        
+
     def disable(self):
         self._set_enabled(False)
-       
+
     def is_enabled(self):
         return self.enabled
-       
+
 
 class Group(UIElement):
     elements = []
@@ -95,7 +95,7 @@ class Group(UIElement):
                     # Args_id does not exist, so we don't care about its output value.
                     pass
         return output_args
-                    
+
 class Labeled(object):
     label = u""
 
@@ -108,7 +108,7 @@ class Labeled(object):
 
 class Text(UIElement, Labeled):
     value = u""
-        
+
     def set_value(self, new_value):
         # enforce all strings to be utf-8
         cast_value = new_value.decode('utf-8')
@@ -116,12 +116,12 @@ class Text(UIElement, Labeled):
 
 class File(Text):
     pass
-  
+
 class OneShotForm(Group):
 # Special case group for a one-shot form submission, like what we
 # use with a model run.
    pass
-    
+
 # This is the default element type registry, which will be a default
 # argument to the UI's registry object.
 ELEMENT_REGISTRY = {

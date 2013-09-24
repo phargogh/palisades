@@ -11,7 +11,7 @@ class CommunicatorTest(unittest.TestCase):
     def setUp(self):
         self.a = core.Communicator()
         self.b = self.SampleEmitter()
-    
+
     def test_register(self):
         self.a.register(self.b.print_something)
         self.a.emit()
@@ -19,7 +19,7 @@ class CommunicatorTest(unittest.TestCase):
     def test_remove(self):
         self.a.register(self.b.print_something)
         self.a.remove(self.b.print_something)
-       
+
     def test_remove_fails(self):
         self.a.register(self.b.print_something)
         self.a.remove(self.b.print_something)
@@ -34,7 +34,7 @@ class ElementTest(unittest.TestCase):
     def setUp(self):
         self.counter = self.Incrementer()
         self.element = core.UIElement()
-        
+
     def test_set_value(self):
         self.element.register(self.counter.increment)
         self.element.set_value('aaa') # increment
@@ -49,7 +49,7 @@ class ElementTest(unittest.TestCase):
         self.assertEqual(self.element.is_enabled(), False)
         self.element.enable()
         self.assertEqual(self.element.is_enabled(), True)
-       
+
     def test_set_value_when_disabled(self):
         self.assertEqual(self.element.is_enabled(), True)
         self.element.set_value('aaa')

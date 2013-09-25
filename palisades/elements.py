@@ -115,6 +115,13 @@ class Group(Element):
     _registrar = ELEMENTS  # default element registrar
     _elements = []
     _gui_widget = None
+    _defaults = {
+        'elements': []
+    }
+
+    def __init__(self, configuration):
+        Element.__init__(self, configuration)
+        self.create_elements(configuration['elements'])
 
     def set_layout(self, layout = LAYOUT_VERTICAL_LIST):
         self._layout = layout

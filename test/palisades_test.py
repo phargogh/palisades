@@ -101,3 +101,4 @@ class FileTest(unittest.TestCase):
         self.element.set_value('aaa')
         returned_string = self.element.get_value()
         self.assertEqual(type(returned_string), unicode)
+

@@ -35,6 +35,7 @@ class Element(core.Communicator):
 
     def __init__(self, configuration):
         core.Communicator.__init__(self)
+        configuration = self._apply_defaults(configuration)
         self._gui_widget = _default_widget(configuration)
 
     def _apply_defaults(self, configuration):

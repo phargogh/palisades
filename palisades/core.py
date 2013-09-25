@@ -44,6 +44,23 @@ class Communicator(object):
             raise SignalNotFound(('Signal %s ' % str(target),
                 'was not found or was previously removed'))
 
+def apply_defaults(configuration, defaults):
+    """Take the input configuration and apply default values if and only if the
+    configuration option was not specified by the user.
+
+    configuration - a python dictionary of configuration options
+    defaults - a python dictionary of default values.
+
+    Returns a dictionary with rendered default values."""
+
+    sanitized_config = configuration.copy()
+    for key, default_value in defaults.iteritems():
+        if key not in configuration:
+            sanitized_config[key] = default_value
+
+    return sanitized_config
+
+
 class UIElement(Communicator):
     attributes = {}
     value = None

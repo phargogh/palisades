@@ -9,18 +9,17 @@ LAYOUT_HORIZONTAL_LIST = 2
 LAYOUT_GRID = 3
 
 DISPLAYS = {
-    'Qt': ui.Qt4
+    'Qt': ui
 }
 
 
-UI_LIB = ui.Qt4()
+UI_LIB = ui
 
 # Assume this is a window for a moment.
 class Application(object):
-    _gui
+    _gui = ui.Application()
 
     def __init__(self, config_uri):
-        self._gui = ui.Qt4()
         configuration = fileio.read_config(config_uri)
 
 class Element(core.Communicator):
@@ -28,31 +27,19 @@ class Element(core.Communicator):
     provides fundamental functionality shared by all elements."""
     _enabled = True
     _required = False
-    _application
-    _default_widget = UI_LIB.Empty
-    _gui_widget
+    _application = None
+    _default_widget = None
+    _gui_widget = None
     _default_config = {}
 
     def __init__(self, configuration):
         core.Communicator.__init__(self)
-        configuration = self._apply_defaults(configuration)
-        self._gui_widget = _default_widget(configuration)
+        configuration = core.apply_defaults(configuration, self._default_config)
 
-    def _apply_defaults(self, configuration):
-        """Take the input configuration and apply default values if the
-        configuration option was not specified.
-
-        configuration - a python dictionary of configuration options for this
-            element.
-
-        Returns a dictionary with rendered default values."""
-
-        sanitized_config = configuration.copy()
-        for key, default_value in self._default_config.iteritems():
-            if key not in configuration:
-                sanitized_config[key] = default_value
-
-        return sanitized_config
+        # we only want to create this element's widget object if one is
+        # specified
+        if self._default_widget is not None:
+            self._gui_widget = self._default_widget(configuration)
 
     def set_root(self, root_ptr):
         if not isinstance(root_ptr, Application):
@@ -127,7 +114,7 @@ class Group(Element):
     _layout = LAYOUT_VERTICAL_LIST
     _registrar = ELEMENTS  # default element registrar
     _elements = []
-    _gui_widget
+    _gui_widget = None
 
     def set_layout(self, layout = LAYOUT_VERTICAL_LIST):
         self._layout = layout

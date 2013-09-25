@@ -34,7 +34,7 @@ class ElementTest(unittest.TestCase):
 
     def setUp(self):
         self.counter = self.Incrementer()
-        self.element = elements.Primitive()
+        self.element = elements.Primitive({})
 
     def test_set_value(self):
         self.element.register(self.counter.increment)
@@ -61,6 +61,28 @@ class ElementTest(unittest.TestCase):
         self.element.disable()
         self.element.set_value('bbb')
         self.assertEqual(self.element.value(), 'aaa')
+
+
+class CoreTest(unittest.TestCase):
+    """A test class for functions found in palisades.core."""
+    def test_apply_defaults(self):
+        defaults = {
+            'a': 'test_value',
+            'b': 'another'
+        }
+
+        test_configuration = {
+            0: 'something',
+            'a': 'custom_value',
+        }
+
+        expected_result = {
+            0: 'something',
+            'a': 'custom_value',
+            'b': 'another'
+        }
+        self.assertEqual(core.apply_defaults(test_configuration, defaults),
+            expected_result)
 
 class FileTest(unittest.TestCase):
     def setUp(self):

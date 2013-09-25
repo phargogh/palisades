@@ -13,21 +13,25 @@ class Application():
     app = QtGui.QApplication([''])
 
 class Empty(QtGui.QWidget):
-    def __init__(self, configuration, layout=None):
+    def __init__(self, configuration={}, layout=None):
         QtGui.QWidget.__init__(self)
         if layout is not None:
-            self.set_layout(LAYOUTS[layout])
+            self.set_layout(layout)
 
     def set_layout(self, layout):
-        self.setLayout(layout)
+        self.setLayout(LAYOUTS[layout]())
 
     def add_element(self, element_ptr):
         if isinstance(self.layout(), QtGui.QGridLayout):
             for index, sub_element in enumerate(element_ptr.elements):
                 if sub_element.sizeHint().isValid():
-                    subElement.sedMinimumSize(subElement.sizeHint())
-                self.layout().addWidget(sub_element, self.layout.rowCount(),
+                    sub_element.setMinimumSize(sub_element.sizeHint())
+                self.layout().addWidget(sub_element, self.layout().rowCount(),
                     index)
+                print sub_element
+        else:
+            print self.layout()
+            print 'not yet implemented'
 
 
 class ValidationButton(QtGui.QPushButton):
@@ -52,7 +56,7 @@ class Text():
     _help_button = HelpButton()
     elements = []
 
-    def __init__(self):
+    def __init__(self, configuration):
         self.elements = [
             self._validation_button,
             self._label,
@@ -61,10 +65,11 @@ class Text():
             self._help_button
         ]
 
-class File():
+class File(Text):
     _file_button = FileButton()
 
-    def __init__(self):
+    def __init__(self, configuration):
+        Text.__init__(self, configuration)
         self.elements = [
             self._validation_button,
             self._label,

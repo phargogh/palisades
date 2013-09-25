@@ -125,6 +125,7 @@ class LabeledPrimitive(Primitive):
 
 class Text(LabeledPrimitive):
     _value = u""
+    _default_widget = ui.Text
 
     def set_value(self, new_value):
         # enforce all strings to be utf-8
@@ -132,8 +133,7 @@ class Text(LabeledPrimitive):
         LabeledPrimitive.set_value(self, cast_value)
 
 class File(Text):
-    pass
-
+    _default_widget = ui.File
 
 ELEMENTS = {
     'file': File,
@@ -160,6 +160,7 @@ class Group(Element):
 
     def set_layout(self, layout = palisades.LAYOUT_VERTICAL):
         self._layout = layout
+        self._gui_widget.set_layout(layout)
 
     def _add_element(self, element_ptr):
         """Add an element to this group's layout."""
@@ -182,6 +183,7 @@ class Group(Element):
 
             # Add the newly created element to this group's Widget.
             self._add_element(new_element)
+            print new_element
 
     def show(self):
         self._gui_widget.show()

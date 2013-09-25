@@ -1,13 +1,9 @@
+import palisades
 from palisades import fileio
 from palisades import ui
 from palisades import core
 
 from PyQt4 import QtGui
-
-LAYOUT_VERTICAL = 0
-LAYOUT_VERTICAL_LIST = 1
-LAYOUT_HORIZONTAL_LIST = 2
-LAYOUT_GRID = 3
 
 DISPLAYS = {
     'Qt': ui
@@ -118,7 +114,7 @@ class Primitive(Element):
 
 class LabeledPrimitive(Primitive):
     _label = u""
-    _preferred_layout = LAYOUT_GRID
+    _preferred_layout = palisades.LAYOUT_GRID
 
     def set_label(self, new_label):
         cast_label = new_label.decode("utf-8")
@@ -148,7 +144,7 @@ ELEMENTS = {
 class Group(Element):
     """The Group class allows for elements to be grouped together."""
 
-    _layout = LAYOUT_VERTICAL_LIST
+    _layout = palisades.LAYOUT_VERTICAL
     _registrar = ELEMENTS  # default element registrar
     _elements = []
     _gui_widget = None
@@ -159,10 +155,10 @@ class Group(Element):
 
     def __init__(self, configuration):
         Element.__init__(self, configuration)
-
+        self.set_layout(palisades.LAYOUT_GRID)
         self.create_elements(configuration['elements'])
 
-    def set_layout(self, layout = LAYOUT_VERTICAL_LIST):
+    def set_layout(self, layout = palisades.LAYOUT_VERTICAL):
         self._layout = layout
 
     def _add_element(self, element_ptr):

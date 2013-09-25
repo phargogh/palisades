@@ -1,11 +1,12 @@
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
-# TODO: make these constants part of palisades.__init__
+import palisades
+
 LAYOUTS = {
-    1: QtGui.QVBoxLayout,
-    2: QtGui.QHBoxLayout,
-    3: QtGui.QGridLayout,
+    palisades.LAYOUT_VERTICAL: QtGui.QVBoxLayout,
+    palisades.LAYOUT_HORIZONTAL: QtGui.QHBoxLayout,
+    palisades.LAYOUT_GRID: QtGui.QGridLayout,
 }
 
 class Application():

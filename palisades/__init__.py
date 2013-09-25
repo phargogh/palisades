@@ -17,3 +17,8 @@ if __version__ == 'dev' and build_data == None:
     del sys.modules[__name__].key
     del sys.modules[__name__].value
 
+
+# Layouts, for later reference.
+LAYOUT_VERTICAL = 1
+LAYOUT_HORIZONTAL = 2
+LAYOUT_GRID = 3

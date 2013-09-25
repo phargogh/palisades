@@ -13,6 +13,8 @@ DISPLAYS = {
 }
 
 
+UI_LIB = ui.Qt4()
+
 # Assume this is a window for a moment.
 class Application(object):
     _gui
@@ -27,7 +29,29 @@ class Element(core.Communicator):
     _enabled = True
     _required = False
     _application
+    _default_widget = UI_LIB.Empty
     _gui_widget
+    _default_config = {}
+
+    def __init__(self, configuration):
+        core.Communicator.__init__(self)
+        self._gui_widget = _default_widget(configuration)
+
+    def _apply_defaults(self, configuration):
+        """Take the input configuration and apply default values if the
+        configuration option was not specified.
+
+        configuration - a python dictionary of configuration options for this
+            element.
+
+        Returns a dictionary with rendered default values."""
+
+        sanitized_config = configuration.copy()
+        for key, default_value in self._default_config.iteritems():
+            if key not in configuration:
+                sanitized_config[key] = default_value
+
+        return sanitized_config
 
     def set_root(self, root_ptr):
         if not isinstance(root_ptr, Application):

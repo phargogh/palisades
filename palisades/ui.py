@@ -1,11 +1,33 @@
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
+# TODO: make these constants part of palisades.__init__
+LAYOUTS = {
+    1: QtGui.QVBoxLayout,
+    2: QtGui.QHBoxLayout,
+    3: QtGui.QGridLayout,
+}
+
 class Application():
     app = QtGui.QApplication([''])
 
 class Empty(QtGui.QWidget):
-    pass
+    def __init__(self, configuration, layout=None):
+        QtGui.QWidget.__init__(self)
+        if layout is not None:
+            self.set_layout(LAYOUTS[layout])
+
+    def set_layout(self, layout):
+        self.setLayout(layout)
+
+    def add_element(self, element_ptr):
+        if isinstance(self.layout(), QtGui.QGridLayout):
+            for index, sub_element in enumerate(element_ptr.elements):
+                if sub_element.sizeHint().isValid():
+                    subElement.sedMinimumSize(subElement.sizeHint())
+                self.layout().addWidget(sub_element, self.layout.rowCount(),
+                    index)
+
 
 class ValidationButton(QtGui.QPushButton):
     pass

@@ -4,6 +4,9 @@ from palisades import core
 
 ELEMENTS = {}
 LAYOUT_VERTICAL = 0
+LAYOUT_VERTICAL_LIST = 1
+LAYOUT_HORIZONTAL_LIST = 2
+LAYOUT_GRID = 3
 
 DISPLAYS = {
     'Qt': ui.Qt4
@@ -12,7 +15,10 @@ DISPLAYS = {
 
 # Assume this is a window for a moment.
 class Application(object):
+    _gui
+
     def __init__(self, config_uri):
+        self._gui = ui.Qt4()
         configuration = fileio.read_config(config_uri)
 
 class Element(core.Communicator):
@@ -20,6 +26,13 @@ class Element(core.Communicator):
     provides fundamental functionality shared by all elements."""
     _enabled = True
     _required = False
+    _application
+    _gui_widget
+
+    def set_root(self, root_ptr):
+        if not isinstance(root_ptr, Application):
+            raise TypeError('Root class must be an elements.Application')
+        self._application = root_ptr
 
     def _set_enabled(self, enabled):
         """Set the local, private attribute indicating whether this element is
@@ -52,6 +65,10 @@ class Element(core.Communicator):
 
         return self._required
 
+    def widget(self):
+        """Return the instance of the GUI Widget representing this element"""
+        return self._gui_widget
+
 class Primitive(Element):
     """The Primitive class is the base class for all elements that take user
     input."""
@@ -79,5 +96,64 @@ class Primitive(Element):
         """Get the value of this element."""
         return self._value
 
+class Group(Element):
+    """The Group class allows for elements to be grouped together."""
+
+    _layout = LAYOUT_VERTICAL_LIST
+    _registrar = ELEMENTS  # default element registrar
+    _elements = []
+    _gui_widget
+
+    def set_layout(self, layout = LAYOUT_VERTICAL_LIST):
+        self._layout = layout
+
+    def _add_element(self, element_ptr):
+        """Add an element to this group's layout."""
+        _elements.append(element_ptr)
+        self._gui_widget.add_element(element_ptr.widget())
+
+    def create_elements(self, elements_configuration):
+        """Creates elements belonging to this Group.
+
+            elements_configuration - a list of dictionaries, where each
+                dictionary contains information about the element.
+
+            Returns nothing."""
+
+        for element_config in elements_configuration:
+            # Create the new element.  This creates the element with all of its
+            # attributes, and even creates the Widget in memory with all of its
+            # attributes.
+            new_element = _registrar[element_config['type']](element_config)
+
+            # Add the newly created element to this group's Widget.
+            self._add_element(new_element)
+
+
+
+
+
+
+class LabeledPrimitive(Primitive):
+    _label = u""
+    _preferred_layout = LAYOUT_GRID
+
+    def set_label(self, new_label):
+        cast_label = new_label.decode("utf-8")
+        self._label = cast_label
+
+    def label(self):
+        return self._label
+
+class Text(LabeledPrimitive):
+    _value = u""
+
+    def set_value(self, new_value):
+        # enforce all strings to be utf-8
+        cast_value = new_value.decode('utf-8')
+        LabeledPrimitive.set_value(self, cast_value)
+
+class File(Text):
+    pass
 
 

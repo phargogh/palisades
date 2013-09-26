@@ -36,17 +36,18 @@ class Empty(QtGui.QWidget):
             print self.layout()
             print 'not yet implemented'
 
-
-class InformationButton(QtGui.QPushButton):
+class Button(QtGui.QPushButton):
     _icon = None
-
     def __init__(self):
         QtGui.QPushButton.__init__(self)
-        self.setFlat(True)
-        self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-
         if self._icon is not None:
             self.setIcon(QtGui.QIcon(self._icon))
+
+class InformationButton(Button):
+    def __init__(self):
+        Button.__init__(self)
+        self.setFlat(True)
+        self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
 class ValidationButton(InformationButton):
     pass
@@ -57,8 +58,9 @@ class Label(QtGui.QLabel):
 class TextField(QtGui.QLineEdit):
     pass
 
-class FileButton(QtGui.QPushButton):
-    pass
+class FileButton(Button):
+    _icon = os.path.join(ICONS, 'document-open.png')
+
 
 class HelpButton(InformationButton):
     _icon = os.path.join(ICONS, 'info.png')

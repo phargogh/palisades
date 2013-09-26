@@ -122,6 +122,7 @@ class Primitive(Element):
 
     def value(self):
         """Get the value of this element."""
+        self._value = self.widget().value()
         return self._value
 
     def validate(self):

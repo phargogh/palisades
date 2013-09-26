@@ -94,6 +94,9 @@ class Text():
     def set_callback(self, callback):
         self._text_field.textChanged.connect(callback)
 
+    def value(self):
+        return unicode(self._text_field.text(), 'utf-8')
+
 class File(Text):
 
     def __init__(self, configuration):

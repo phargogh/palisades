@@ -121,6 +121,7 @@ class LabeledPrimitive(Primitive):
     def set_label(self, new_label):
         cast_label = new_label.decode("utf-8")
         self._label = cast_label
+        self.widget().set_label(cast_label)
 
     def label(self):
         return self._label

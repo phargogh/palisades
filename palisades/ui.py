@@ -74,7 +74,7 @@ class Text():
         self._text_field = TextField()
         self._help_button = HelpButton()
 
-        self._label.setText(configuration['label'])
+        self.set_label(configuration['label'])
         self._text_field.setMaximumWidth(configuration['width'])
 
         self.elements = [
@@ -87,6 +87,9 @@ class Text():
 
     def set_value(self, value):
         self._text_field.setText(value)
+
+    def set_label(self, value):
+        self._label.setText(value)
 
 class File(Text):
 

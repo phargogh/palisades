@@ -85,6 +85,9 @@ class Text():
             self._help_button
         ]
 
+    def set_value(self, value):
+        self._text_field.setText(value)
+
 class File(Text):
 
     def __init__(self, configuration):

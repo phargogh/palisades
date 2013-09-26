@@ -1,3 +1,5 @@
+import os
+
 import palisades
 from palisades import fileio
 from palisades import ui
@@ -127,19 +129,30 @@ class Text(LabeledPrimitive):
     _value = u""
     _default_widget = ui.Text
     _default_config = {
-        'width': 60
+        'width': 60,
+        'defaultValue': '',
     }
+
+    def __init__(self, configuration):
+        LabeledPrimitive.__init__(self, configuration)
+        self.set_value(configuration['defaultValue'])
 
     def set_value(self, new_value):
         # enforce all strings to be utf-8
         cast_value = new_value.decode('utf-8')
         LabeledPrimitive.set_value(self, cast_value)
+        self.widget().set_value(cast_value)
 
 class File(Text):
     _default_widget = ui.File
     _default_config = {
-        'width': 10000  # effectively unlimitied.
+        'width': 10000,  # effectively unlimitied.
+        'defaultValue': '',
     }
+
+    def set_value(self, new_value):
+        absolute_path = os.path.abspath(new_value)
+        Text.set_value(self, absolute_path)
 
 ELEMENTS = {
     'file': File,

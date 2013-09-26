@@ -1,3 +1,5 @@
+import os
+
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
@@ -8,6 +10,7 @@ LAYOUTS = {
     palisades.LAYOUT_HORIZONTAL: QtGui.QHBoxLayout,
     palisades.LAYOUT_GRID: QtGui.QGridLayout,
 }
+ICONS = os.path.join(os.path.dirname(__file__), 'icons')
 
 class Application():
     app = QtGui.QApplication([''])
@@ -35,10 +38,15 @@ class Empty(QtGui.QWidget):
 
 
 class InformationButton(QtGui.QPushButton):
+    _icon = None
+
     def __init__(self):
         QtGui.QPushButton.__init__(self)
         self.setFlat(True)
         self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+
+        if self._icon is not None:
+            self.setIcon(QtGui.QIcon(self._icon))
 
 class ValidationButton(InformationButton):
     pass
@@ -53,7 +61,7 @@ class FileButton(QtGui.QPushButton):
     pass
 
 class HelpButton(InformationButton):
-    pass
+    _icon = os.path.join(ICONS, 'info.png')
 
 class Text():
     elements = []

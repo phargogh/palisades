@@ -1,4 +1,5 @@
 import os
+import threading
 
 import palisades
 from palisades import fileio
@@ -123,6 +124,25 @@ class Primitive(Element):
         """Get the value of this element."""
         return self._value
 
+    def validate(self):
+        validation_dict = self.config['validateAs']
+        validation_dict['value'] = self.value()
+        self._validator.validate(validation_dict)  # this starts the thread
+
+        # start a thread here that checks the status of the validator thread.
+        self.timer = threading.Timer(0.1, self.check_validator)
+        self.timer.start()
+
+    def check_validator(self):
+        if self._validator.thread_finished():
+            self.timer.cancel()  # stop the timer thread
+            error, state = self._validator.get_error()
+
+            self.set_error(error, state)
+
+    def set_error(self, error, state):
+        print(error, state)
+        # eventually, this will also need to trigger elements to be enabled.
 
 class LabeledPrimitive(Primitive):
     _label = u""
@@ -148,6 +168,7 @@ class Text(LabeledPrimitive):
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
         self.set_value(configuration['defaultValue'])
+        self.widget().set_callback(self.validate)
 
     def set_value(self, new_value):
         # enforce all strings to be utf-8

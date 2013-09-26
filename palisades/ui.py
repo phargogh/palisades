@@ -91,6 +91,9 @@ class Text():
     def set_label(self, value):
         self._label.setText(value)
 
+    def set_callback(self, callback):
+        self._text_field.textChanged.connect(callback)
+
 class File(Text):
 
     def __init__(self, configuration):

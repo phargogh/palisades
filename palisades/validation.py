@@ -65,7 +65,6 @@ class Registrar(object):
     def get_func(self, mapKey):
         return self.map[mapKey]
 
-
 class Validator(Registrar):
     """Validator class contains a reference to an object's type-specific
         checker.

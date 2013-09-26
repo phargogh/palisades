@@ -4,6 +4,7 @@ import palisades
 from palisades import fileio
 from palisades import ui
 from palisades import core
+from palisades import validation
 
 from PyQt4 import QtGui
 
@@ -40,6 +41,7 @@ class Element(core.Communicator):
     def __init__(self, configuration):
         core.Communicator.__init__(self)
         configuration = core.apply_defaults(configuration, self._default_config)
+        self.config = configuration
 
         # we only want to create this element's widget object if one is
         # specified
@@ -91,6 +93,14 @@ class Primitive(Element):
     input."""
 
     _value = None
+    _default_config = {
+        'validateAs': {'type': 'disabled'}
+    }
+
+    def __init__(self, configuration):
+        Element.__init__(self, configuration)
+        self._validator = validation.Validator(
+            self.config['validateAs']['type'])
 
     def set_value(self, new_value):
         """Set the value of this element.  If the element's value changes, all
@@ -132,6 +142,7 @@ class Text(LabeledPrimitive):
     _default_config = {
         'width': 60,
         'defaultValue': '',
+        'validateAs': {'type': 'string'},
     }
 
     def __init__(self, configuration):
@@ -149,6 +160,7 @@ class File(Text):
     _default_config = {
         'width': 10000,  # effectively unlimitied.
         'defaultValue': '',
+        'validateAs': {'type': 'file'},
     }
 
     def set_value(self, new_value):
@@ -169,7 +181,7 @@ class Group(Element):
     _elements = []
     _gui_widget = None
     _default_widget = ui.Empty
-    _defaults = {
+    _default_config = {
         'elements': []
     }
 

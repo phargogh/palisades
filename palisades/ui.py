@@ -34,7 +34,13 @@ class Empty(QtGui.QWidget):
             print 'not yet implemented'
 
 
-class ValidationButton(QtGui.QPushButton):
+class InformationButton(QtGui.QPushButton):
+    def __init__(self):
+        QtGui.QPushButton.__init__(self)
+        self.setFlat(True)
+        self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+
+class ValidationButton(InformationButton):
     pass
 
 class Label(QtGui.QLabel):
@@ -46,7 +52,7 @@ class TextField(QtGui.QLineEdit):
 class FileButton(QtGui.QPushButton):
     pass
 
-class HelpButton(QtGui.QPushButton):
+class HelpButton(InformationButton):
     pass
 
 class Text():

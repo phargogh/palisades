@@ -93,7 +93,6 @@ class Primitive(Element):
     """The Primitive class is the base class for all elements that take user
     input."""
 
-    _value = None
     _default_config = {
         'validateAs': {'type': 'disabled'}
     }
@@ -112,18 +111,16 @@ class Primitive(Element):
         if not self.is_enabled():
             return
 
-        old_value = self._value
-        self._value = new_value
-
         # If the value of this element has changed, we want to trigger all the
         # elements that requested notification.
+        old_value = self.value()
         if old_value != new_value:
+            self.widget().set_value(new_value)
             self.emit()
 
     def value(self):
         """Get the value of this element."""
-        self._value = self.widget().value()
-        return self._value
+        return self.widget().value()
 
     def validate(self):
         validation_dict = self.config['validateAs']

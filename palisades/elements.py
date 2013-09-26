@@ -126,6 +126,9 @@ class LabeledPrimitive(Primitive):
 class Text(LabeledPrimitive):
     _value = u""
     _default_widget = ui.Text
+    _default_config = {
+        'width': 60
+    }
 
     def set_value(self, new_value):
         # enforce all strings to be utf-8
@@ -134,6 +137,9 @@ class Text(LabeledPrimitive):
 
 class File(Text):
     _default_widget = ui.File
+    _default_config = {
+        'width': 10000  # effectively unlimitied.
+    }
 
 ELEMENTS = {
     'file': File,

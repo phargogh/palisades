@@ -55,7 +55,7 @@ def apply_defaults(configuration, defaults):
 
     sanitized_config = configuration.copy()
     for key, default_value in defaults.iteritems():
-        if key not in configuration:
+        if key not in sanitized_config:
             sanitized_config[key] = default_value
 
     return sanitized_config

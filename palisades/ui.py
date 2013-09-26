@@ -59,6 +59,7 @@ class Text():
         self._help_button = HelpButton()
 
         self._label.setText(configuration['label'])
+        self._text_field.setMaximumWidth(configuration['width'])
 
         self.elements = [
             self._validation_button,

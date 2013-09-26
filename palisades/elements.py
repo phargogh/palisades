@@ -180,10 +180,10 @@ class Group(Element):
             # attributes, and even creates the Widget in memory with all of its
             # attributes.
             new_element = self._registrar[element_config['type']](element_config)
+            print new_element
 
             # Add the newly created element to this group's Widget.
             self._add_element(new_element)
-            print new_element
 
     def show(self):
         self._gui_widget.show()

@@ -66,7 +66,7 @@ class Registrar(object):
         return self.map[mapKey]
 
 
-class Validator(registrar.Registrar):
+class Validator(Registrar):
     """Validator class contains a reference to an object's type-specific
         checker.
         It is assumed that one single iui input element will have its own
@@ -83,7 +83,7 @@ class Validator(registrar.Registrar):
 
     def __init__(self, validator_type):
         #allElements is a pointer to a python dict: str id -> obj pointer.
-        registrar.Registrar.__init__(self)
+        Registrar.__init__(self)
 
         updates = {'disabled': Checker,
                    'GDAL': GDALChecker,
@@ -284,7 +284,7 @@ class ValidationAssembler(object):
             return True
         return False
 
-class Checker(registrar.Registrar):
+class Checker(Registrar):
     """The Checker class defines a superclass for all classes that actually
         perform validation.  Specific subclasses exist for validating specific
         features.  These can be broken up into two separate groups based on the
@@ -319,7 +319,7 @@ class Checker(registrar.Registrar):
             """
     #self.map is used for restrictions
     def __init__(self):
-        registrar.Registrar.__init__(self)
+        Registrar.__init__(self)
         self.checks = []
         self.ignore = ['type', 'value']
         self.value = None

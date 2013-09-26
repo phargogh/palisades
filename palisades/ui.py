@@ -97,6 +97,10 @@ class Text():
     def value(self):
         return unicode(self._text_field.text(), 'utf-8')
 
+    def set_error(error, state):
+        # set the error message in the Qt-style validation button.
+        pass
+
 class File(Text):
 
     def __init__(self, configuration):

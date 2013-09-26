@@ -136,11 +136,7 @@ class Primitive(Element):
             self.timer.cancel()  # stop the timer thread
             error, state = self._validator.get_error()
 
-            self.set_error(error, state)
-
-    def set_error(self, error, state):
-        print(error, state)
-        # eventually, this will also need to trigger elements to be enabled.
+            self.widget().set_error(error, state)
 
 class LabeledPrimitive(Primitive):
     _label = u""

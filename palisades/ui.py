@@ -155,6 +155,9 @@ class ValidationButton(InformationButton):
             button's icon according to the error contained in error_string.
             error_string is a python string."""
 
+        if state == None:
+            state = 'pass'
+
         self.error_text = error_string
         self.error_state = state
         button_is_flat = False

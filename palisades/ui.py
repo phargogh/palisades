@@ -37,10 +37,13 @@ class Empty(QtGui.QWidget):
     def set_layout(self, layout):
         self.setLayout(LAYOUTS[layout]())
 
-    def add_element(self, element_ptr):
+    def add_element(self, element_ptr, row_index=None):
         layout = self.layout()
         if isinstance(layout, QtGui.QGridLayout):
-            row = layout.rowCount()
+            if row_index is None:
+                row = layout.rowCount()
+            else:
+                row = row_index
             for column, sub_element in enumerate(element_ptr.elements):
                 if sub_element.sizeHint().isValid():
                     sub_element.setMinimumSize(sub_element.sizeHint())
@@ -265,8 +268,39 @@ class File(Text):
             self._help_button
         ]
 
+# TODO: make this a QWidget, and a widget inside this widget's layout be the
+# form with all its element.  This will mean creating wrapper functions for most
+# of the calls to the UI embedded herein.
 class FormWindow(Empty):
     """A Form is a window where you have a set of inputs that the user fills in
     or configures and then presses 'submit'."""
     def __init__(self, configuration={}, layout=None):
         Empty.__init__(self, configuration, layout)
+
+        self.setLayout(QtGui.QGridLayout())
+        self.runButton = QtGui.QPushButton(' Run')
+        self.runButton.setIcon(QtGui.QIcon(os.path.join(ICONS,
+            'dialog-ok.png')))
+
+        self.cancelButton = QtGui.QPushButton(' Quit')
+        self.cancelButton.setIcon(QtGui.QIcon(os.path.join(ICONS,
+            'dialog-close.png')))
+
+        self.resetButton = QtGui.QPushButton(' Reset')
+        self.resetButton.setIcon(QtGui.QIcon(os.path.join(ICONS,
+            'edit-undo.png')))
+
+        #create the buttonBox (a container for buttons)
+        self.buttonBox = QtGui.QDialogButtonBox()
+        self.buttonBox.addButton(self.runButton, QtGui.QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton(self.cancelButton, QtGui.QDialogButtonBox.RejectRole)
+        self.buttonBox.addButton(self.resetButton, QtGui.QDialogButtonBox.ResetRole)
+
+        #connect the buttons to their functions.
+#        self.runButton.clicked.connect(self.okPressed)
+#        self.cancelButton.clicked.connect(self.closeWindow)
+#        self.resetButton.clicked.connect(self.resetParametersToDefaults)
+
+        #add the buttonBox to the window.
+        self.layout().addWidget(self.buttonBox, 1, 1,
+            4, 1)

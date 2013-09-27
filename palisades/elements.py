@@ -203,12 +203,7 @@ class Group(Element):
 
     def __init__(self, configuration):
         Element.__init__(self, configuration)
-        self.set_layout(palisades.LAYOUT_GRID)
         self.create_elements(configuration['elements'])
-
-    def set_layout(self, layout = palisades.LAYOUT_VERTICAL):
-        self._layout = layout
-        self._gui_widget.set_layout(layout)
 
     def _add_element(self, element_ptr):
         """Add an element to this group's layout."""
@@ -239,7 +234,7 @@ class Group(Element):
 class Form(Group):
     _registrar = ELEMENTS
     _elements = []
-    _defailt_widget = ui.FormWindow
+    _default_widget = ui.FormWindow
     _default_config = {
         'elements': [],
     }

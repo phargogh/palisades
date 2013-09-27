@@ -128,7 +128,7 @@ class Primitive(Element):
         self._validator.validate(validation_dict)  # this starts the thread
 
         # start a thread here that checks the status of the validator thread.
-        self.timer = threading.Timer(0.1, self.check_validator)
+        self.timer = ui.Timer(0.1, self.check_validator)
         self.timer.start()
 
     def check_validator(self):
@@ -137,6 +137,7 @@ class Primitive(Element):
             error, state = self._validator.get_error()
 
             self.widget().set_error(error, state)
+
 
 class LabeledPrimitive(Primitive):
     _label = u""

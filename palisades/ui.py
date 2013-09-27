@@ -244,6 +244,12 @@ class Text():
     def set_error(self, error, state):
         # set the error message in the Qt-style validation button.
         self._validation_button.set_error(error, state)
+        if self._validation_button.error_state == 'error':
+            self._label.setStyleSheet('color: red')
+            self._text_field.setStyleSheet('border: 1px solid red')
+        else:
+            self._label.setStyleSheet('')
+            self._text_field.setStyleSheet('')
 
 class File(Text):
 

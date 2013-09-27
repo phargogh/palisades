@@ -265,5 +265,8 @@ class File(Text):
             self._help_button
         ]
 
-
-
+class FormWindow(Empty):
+    """A Form is a window where you have a set of inputs that the user fills in
+    or configures and then presses 'submit'."""
+    def __init__(self, configuration={}, layout=None):
+        Empty.__init__(self, configuration, layout)

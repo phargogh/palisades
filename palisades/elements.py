@@ -23,7 +23,7 @@ class Application(object):
 
     def __init__(self, config_uri):
         configuration = fileio.read_config(config_uri)
-        self._window = Group(configuration)
+        self._window = Form(configuration)
 
     def run(self):
         self._window.show()
@@ -236,5 +236,10 @@ class Group(Element):
     def show(self):
         self._gui_widget.show()
 
-
-
+class Form(Group):
+    _registrar = ELEMENTS
+    _elements = []
+    _defailt_widget = ui.FormWindow
+    _default_config = {
+        'elements': [],
+    }

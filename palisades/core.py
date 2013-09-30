@@ -19,23 +19,26 @@ class Communicator(object):
     callbacks = []
 
     def register(self, callback):
-        """This function appends the target function call to the list of 
+        """This function appends the target function call to the list of
         signals stored by this element"""
-        signal = {
-            'target': callback,
-            'condition': True,
-        }
-        self.callbacks.append(signal)
 
-    def emit(self):
-        for signal in self.callbacks:
-            if signal['condition']:
-                signal['target']()
+        self.callbacks.append(callback)
+
+    def emit(self, argument):
+        """Call all of the registered callback functions with the argument
+        passed in.
+
+        argument - the object to be passed to all callbacks.
+
+        Returns nothing."""
+
+        for callback_func in self.callbacks:
+            callback_func(argument)
 
     def remove(self, target):
         """"""
         try:
-            callbacks_list = [cb['target'] for cb in self.callbacks]
+            callbacks_list = [cb for cb in self.callbacks]
             index = callbacks_list.index(target)
             self.callbacks.pop(index)
         except ValueError:

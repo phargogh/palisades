@@ -5,7 +5,7 @@ from palisades import elements
 
 class CommunicatorTest(unittest.TestCase):
     class SampleEmitter(core.Communicator):
-        def print_something(self):
+        def print_something(self, event=None):
             print 'something printed'
 
 
@@ -15,7 +15,7 @@ class CommunicatorTest(unittest.TestCase):
 
     def test_register(self):
         self.a.register(self.b.print_something)
-        self.a.emit()
+        self.a.emit(None)
 
     def test_remove(self):
         self.a.register(self.b.print_something)

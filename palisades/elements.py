@@ -29,7 +29,85 @@ class Application(object):
         self._window.show()
         self._gui.exec_()
 
-class Element(core.Communicator):
+class Element():
+    """Element contains the core logic and interactivity required by all
+    palisades element.
+
+    Public Attributes:
+        self.config - the rendered configuration options used by the Element
+            class.  This is a dictionary containing at least default options.
+        self.config_changed - a communicator.  Triggered when the
+            configuration is changed.
+        self.value_changed - a communicator.  Triggered when the value is
+            changed.
+        self.interactivity_changed - a communicator.  Triggered when the
+            element's is either disabled or enabled.
+
+
+    Private Attributes:
+        self._enabled - boolean, indicates whether the element is enabled.
+        self._parent_ui - a reference to the parent UI.
+        self._default_config - a dictionary containing default configuration
+            options.
+    """
+    def __init__(self, configuration, parent=None):
+        object.__init__(self)
+        self._enabled = True
+        self._parent_ui = parent
+        self._default_config = {}
+
+        # Set up the communicators
+        self.config_changed = core.Communicator()
+        self.value_changed = core.Communicator()
+        self.interactivity_changed = core.Communicator()
+
+        # Render the configuration and save to self.config
+        self.config = core.apply_defaults(configuration, self._default_config)
+
+    def set_default_config(self, new_defaults):
+        """Add default configuration options to this Element instance's default
+        config dictionary.  If this function is called after the element's UI
+        representation is created, it will trigger the UI representation to
+        reload the configuration.
+
+        new_defaults - a python dictionary of default values.  Any duplicate keys
+            contained in this new dictionary will overwrite existing defaults.
+
+        Triggers the config_changed signal to be emitted with the new
+        configuration.
+
+        Returns nothing."""
+
+        self._default_config.update(new_defaults)
+        self.config = core.apply_defaults(configuration, self._default_config)
+        self.config_changed.emit(self.config)
+
+    def is_enabled(self):
+        """Query whether this element is enabled, indicating whether this
+        element can be interacted with by the user.
+
+        Returns a boolean."""
+
+        return self._enabled
+
+    def set_enabled(self, new_state):
+        """Enable or disable this element.
+
+        new_state - A boolean.  If True, enable this element.  If False, disable
+            this element.
+
+        If the enabled state of this element changes, the interactivity_changed
+        signal is emitted with the new state.
+
+        Returns nothing."""
+
+        new_state = bool(new_state)
+
+        if new_state != self._enabled:
+            self._enabled = new_state
+            self.interactivity_changed.emit(new_state)
+
+class OldElement(core.Communicator):
     """The Element class is the base class of all palisades element.  It
     provides fundamental functionality shared by all elements."""
     _enabled = True

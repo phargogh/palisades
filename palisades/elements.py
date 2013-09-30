@@ -79,7 +79,7 @@ class Element():
         Returns nothing."""
 
         self._default_config.update(new_defaults)
-        self.config = core.apply_defaults(configuration, self._default_config)
+        self.config = core.apply_defaults(self.config, self._default_config)
         self.config_changed.emit(self.config)
 
     def is_enabled(self):

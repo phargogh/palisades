@@ -16,7 +16,8 @@ class Communicator(object):
     # signal['target'] - a pointer to the signal's target element and function
     # signal['condition'] - the condition under which this signal is emitted
     # When a signal is emitted, data about the signal should also be passed.
-    callbacks = []
+    def __init__(self):
+        self.callbacks = []
 
     def register(self, callback):
         """This function appends the target function call to the list of

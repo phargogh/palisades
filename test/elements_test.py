@@ -47,3 +47,42 @@ class ElementTest(unittest.TestCase):
             pass
 
         self.assertEqual(self.element.is_enabled(), True)
+
+    def test_default_config(self):
+        def check_config_signal(test_arg):
+            """A function to register with the config_changed communicator."""
+            raise ValueError
+
+        self.element.config_changed.register(check_config_signal)
+        self.assertEqual(self.element._default_config, {})
+        self.assertEqual(self.element.config, {})
+
+        new_defaults = {
+            'a': 'aaa',
+            'b': 'bbb',
+        }
+
+        try:
+            self.element.set_default_config(new_defaults)
+            raise AssertionError('Element callbacks were not triggered')
+        except ValueError:
+            # If the valueError in check_config_signal was raised, this is good!
+            # So we continue on to the next assertion.
+            pass
+        self.assertEqual(self.element._default_config, new_defaults)
+        self.assertEqual(self.element.config, new_defaults)
+
+        new_defaults = {
+            'a': 'ccc',
+        }
+        try:
+            self.element.set_default_config(new_defaults)
+            raise AssertionError('Element callbacks were not triggered')
+        except ValueError:
+            # If the valueError in check_config_signal was raised, this is good!
+            # So we continue on to the next assertion.
+            pass
+        self.assertEqual(self.element._default_config, {'a': 'ccc', 'b': 'bbb'})
+        self.assertEqual(self.element.config, {'a': 'aaa', 'b': 'bbb'})
+
+

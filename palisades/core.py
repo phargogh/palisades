@@ -48,6 +48,7 @@ class Communicator(object):
             raise SignalNotFound(('Signal %s ' % str(target),
                 'was not found or was previously removed'))
 
+# TODO: add optional argument to replace duplicate values.
 def apply_defaults(configuration, defaults):
     """Take the input configuration and apply default values if and only if the
     configuration option was not specified by the user.

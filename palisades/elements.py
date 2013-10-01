@@ -241,10 +241,12 @@ class Group(Element):
         Element.__init__(self, configuration)
         self._registrar = registrar
         self._elements = []
-        self._default_config = {
+        new_defaults = {
             'elements': []
         }
-        self.create_elements(configuration['elements'])
+        self.set_default_config(new_defaults)
+
+        self.create_elements(self.config['elements'])
 
     def _add_element(self, element):
         """Add the element to this group.

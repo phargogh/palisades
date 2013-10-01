@@ -205,7 +205,7 @@ class Text(LabeledPrimitive):
         self.set_default_config(new_defaults)
 
         # Set the value of the element from the config's defaultValue.
-        self.set_value(configuration['defaultValue'])
+        self.set_value(self.config['defaultValue'])
 
     def set_value(self, new_value):
         """Subclassed from LabeledPrimitive.set_value.  Casts all input values

@@ -219,15 +219,15 @@ class Text(LabeledPrimitive):
         LabeledPrimitive.set_value(self, cast_value)
 
 class File(Text):
-    _default_widget = ui.File
-    _default_config = {
-        'width': 10000,  # effectively unlimitied.
-        'defaultValue': '',
-        'validateAs': {'type': 'file'},
-    }
+    def __init__(self, configuration):
+        Text.__init__(self, configuration)
+        new_defaults = {
+            'validateAs': {'type': 'file'},
+        }
+        self.set_default_config(new_defaults)
 
     def set_value(self, new_value):
-        absolute_path = os.path.abspath(new_value)
+        absolute_path = os.path.abspath(os.path.expanduser(new_value))
         Text.set_value(self, absolute_path)
 
 ELEMENTS = {

@@ -18,16 +18,9 @@ UI_LIB = ui
 
 # Assume this is a window for a moment.
 class Application(object):
-    _gui = ui.Application().app
-    _window = None
-
     def __init__(self, config_uri):
         configuration = fileio.read_config(config_uri)
         self._window = Form(configuration)
-
-    def run(self):
-        self._window.show()
-        self._gui.exec_()
 
 class Element():
     """Element contains the core logic and interactivity required by all
@@ -269,10 +262,13 @@ class Group(Element):
 
             self._add_element(new_element)
 
+# The form class represents a single-window form where the user enters various
+# inputs and then does something with them.  The IUI ModelUI would be an example
+# of a form.
+# Defining characteristics of a Form:
+#  * contains a group of elements
+#  * packages up required arguments from elements
+#  * starts a model running when triggered.
 class Form(Group):
-    _registrar = ELEMENTS
-    _elements = []
-    _default_widget = ui.FormWindow
-    _default_config = {
-        'elements': [],
-    }
+    def __init__(self, configuration):
+        Group.__init__(self, configuration)

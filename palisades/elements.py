@@ -201,11 +201,16 @@ class Primitive(Element):
         old_value = self.value()
         if old_value != new_value:
             self._value = new_value
+            self._valid = False
             self.value_changed.emit(new_value)
+            self.validate()
 
     def value(self):
         """Get the value of this element."""
         return self._value
+
+    def is_valid(self):
+        return self._valid
 
     def validate(self):
         validation_dict = self.config['validateAs']

@@ -48,20 +48,26 @@ class Communicator(object):
             raise SignalNotFound(('Signal %s ' % str(target),
                 'was not found or was previously removed'))
 
-# TODO: add optional argument to replace duplicate values.
-def apply_defaults(configuration, defaults):
+def apply_defaults(configuration, defaults, skip_duplicates=True):
     """Take the input configuration and apply default values if and only if the
     configuration option was not specified by the user.
 
     configuration - a python dictionary of configuration options
     defaults - a python dictionary of default values.
+    skip_duplicates - a Boolean.  If true, keys found in the configuration
+        dictionary and in defaults wil be skipped.  If False, the defaults
+        dictionary will be blindly applied to the configuration.  Defaults to
+        True.
 
     Returns a dictionary with rendered default values."""
 
     sanitized_config = configuration.copy()
-    for key, default_value in defaults.iteritems():
-        if key not in sanitized_config:
-            sanitized_config[key] = default_value
+    if skip_duplicates:
+        for key, default_value in defaults.iteritems():
+            if key not in sanitized_config:
+                sanitized_config[key] = default_value
+    else:
+        sanitized_config.update(defaults)
 
     return sanitized_config
 

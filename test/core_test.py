@@ -84,6 +84,14 @@ class CoreTest(unittest.TestCase):
         self.assertEqual(core.apply_defaults(test_configuration, defaults),
             expected_result)
 
+        duplicates_replaced_result = {
+            0: 'something',
+            'a': 'test_value',
+            'b': 'another',
+        }
+        self.assertEqual(core.apply_defaults(test_configuration, defaults,
+            False), duplicates_replaced_result)
+
 class FileTest(unittest.TestCase):
     def setUp(self):
         self.element = core.File()

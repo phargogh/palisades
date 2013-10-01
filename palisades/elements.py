@@ -200,7 +200,7 @@ class Primitive(Element):
         # elements that requested notification.
         old_value = self.value()
         if old_value != new_value:
-            self.widget().set_value(new_value)
+            self._value = new_value
             self.value_changed.emit(new_value)
 
     def value(self):

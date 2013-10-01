@@ -93,3 +93,10 @@ class PrimitiveTest(unittest.TestCase):
         # check that there is no value.
         self.assertEqual(self.primitive.value(), None)
 
+        # Change the value and check that the value has been set
+        self.primitive.set_value('aaa')
+        self.assertEqual(self.primitive.value(), 'aaa')
+
+        # register a callback
+        # change the value
+        # check that the callback was called.

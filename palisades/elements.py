@@ -269,6 +269,7 @@ class Group(Element):
 #  * contains a group of elements
 #  * packages up required arguments from elements
 #  * starts a model running when triggered.
-class Form(Group):
+class Form():
     def __init__(self, configuration):
-        Group.__init__(self, configuration)
+        self._ui = Group(configuration)
+        self._executor = executor.Executor()

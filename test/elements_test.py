@@ -239,3 +239,10 @@ class GroupTest(unittest.TestCase):
         self.assertEqual(len(group._elements), 2)
         self.assertEqual(group._elements[0].__class__, elements.File)
         self.assertEqual(group._elements[1].__class__, elements.Text)
+
+class FormTest(unittest.TestCase):
+    def setUp(self):
+        self.form = elements.Form({})
+
+    def test_form_creation(self):
+        pass

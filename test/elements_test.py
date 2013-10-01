@@ -177,3 +177,13 @@ class TextTest(unittest.TestCase):
 
         self.assertEqual(element.value(), 'text_element')
         assert_utf8(element.value())
+
+    def test_set_value(self):
+        self.primitive.set_value('new_value')
+        self.assertEqual(self.primitive.value(), 'new_value')
+        assert_utf8(self.primitive.value())
+
+        # verify that even a non-string value is cast to a UTF-8 object.
+        self.primitive.set_value(8)
+        self.assertEqual(self.primitive.value(), '8')
+        assert_utf8(self.primitive.value())

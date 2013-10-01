@@ -215,7 +215,7 @@ class Text(LabeledPrimitive):
 
         Returns nothing."""
 
-        cast_value = new_value.decode('utf-8')
+        cast_value = unicode(new_value).decode('utf-8')
         LabeledPrimitive.set_value(self, cast_value)
 
 class File(Text):

@@ -98,5 +98,14 @@ class PrimitiveTest(unittest.TestCase):
         self.assertEqual(self.primitive.value(), 'aaa')
 
         # register a callback
-        # change the value
-        # check that the callback was called.
+        def sample_callback(event=None):
+            raise ValueError
+        self.primitive.value_changed.register(sample_callback)
+
+        # change the value and check that the callback was called.
+        try:
+            self.primitive.set_value('bbb')
+            raise AssertionError('Callback was not called')
+        except ValueError:
+            # The valueError was raised correctly, so we pass.
+            pass

@@ -58,7 +58,6 @@ class Element():
 
         # Set up the communicators
         self.config_changed = core.Communicator()
-        self.value_changed = core.Communicator()
         self.interactivity_changed = core.Communicator()
 
         # Render the configuration and save to self.config
@@ -169,6 +168,64 @@ class OldElement(core.Communicator):
         return self._gui_widget
 
 class Primitive(Element):
+    def __init__(self, configuration):
+        Element.__init__(self, configuration)
+        self._value = None
+        self._valid = False  # Assume invalid until proven otherwise
+        self._validation_error = None
+
+        # Set up our Communicator(s)
+        self.value_changed = core.Communicator()
+
+        # update the default configuration
+        new_defaults = {
+            'validateAs': {'type': 'disabled'}
+        }
+        self.set_default_config(new_defaults)
+
+        # Set up our validator
+        self._validator = validation.Validator(
+            self.config['validateAs']['type'])
+
+    def set_value(self, new_value):
+        """Set the value of this element.  If the element's value changes, all
+        registered callbacks will be emitted.
+
+        Returns nothing."""
+
+        if not self.is_enabled():
+            return
+
+        # If the value of this element has changed, we want to trigger all the
+        # elements that requested notification.
+        old_value = self.value()
+        if old_value != new_value:
+            self.widget().set_value(new_value)
+            self.value_changed.emit(new_value)
+
+    def value(self):
+        """Get the value of this element."""
+        return self._value
+
+    def validate(self):
+        validation_dict = self.config['validateAs']
+        validation_dict['value'] = self.value()
+        self._validator.validate(validation_dict)  # this starts the thread
+
+        # start a thread here that checks the status of the validator thread.
+        self.timer = threading.Timer(0.1, self.check_validator)
+        self.timer.start()
+
+    def check_validator(self):
+        if self._validator.thread_finished():
+            self.timer.cancel()  # stop the timer thread
+            error, state = self._validator.get_error()
+
+            self._valid = state
+            self._validation_error = error
+
+
+class OldPrimitive(Element):
     """The Primitive class is the base class for all elements that take user
     input."""
 

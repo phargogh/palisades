@@ -85,3 +85,11 @@ class ElementTest(unittest.TestCase):
         self.assertEqual(self.element._default_config, {'a': 'ccc', 'b': 'bbb'})
         self.assertEqual(self.element.config, {'a': 'aaa', 'b': 'bbb'})
 
+class PrimitiveTest(unittest.TestCase):
+    def setUp(self):
+        self.primitive = elements.Primitive({})
+
+    def test_set_value(self):
+        # check that there is no value.
+        self.assertEqual(self.primitive.value(), None)
+

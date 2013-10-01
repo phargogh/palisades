@@ -187,3 +187,24 @@ class TextTest(unittest.TestCase):
         self.primitive.set_value(8)
         self.assertEqual(self.primitive.value(), '8')
         assert_utf8(self.primitive.value())
+
+class FileTest(unittest.TestCase):
+    def setUp(self):
+        self.element = elements.File({})
+
+    def test_set_value(self):
+        # verify that the path set is absolute.
+        path = 'a.txt.'
+        cwd = os.getcwd()
+        self.element.set_value(path)
+
+        self.assertEqual(os.path.isabs(self.element.value()), True)
+        self.assertEqual(self.element.value(), os.path.join(cwd, path))
+        assert_utf8(self.element.value())
+
+    def test_set_value_userdir(self):
+        home_dir = os.path.expanduser('~')
+        new_file = 'new.txt'
+
+        self.element.set_value('~/%s' % new_file)
+        self.assertEqual(self.element.value(), os.path.join(home_dir, new_file))

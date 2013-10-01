@@ -106,67 +106,6 @@ class Element():
             self._enabled = new_state
             self.interactivity_changed.emit(new_state)
 
-
-class OldElement(core.Communicator):
-    """The Element class is the base class of all palisades element.  It
-    provides fundamental functionality shared by all elements."""
-    _enabled = True
-    _required = False
-    _application = None
-    _default_widget = None
-    _gui_widget = None
-    _default_config = {}
-
-    def __init__(self, configuration):
-        core.Communicator.__init__(self)
-        configuration = core.apply_defaults(configuration, self._default_config)
-        self.config = configuration
-
-        # we only want to create this element's widget object if one is
-        # specified
-        if self._default_widget is not None:
-            self._gui_widget = self._default_widget(configuration)
-
-    def set_root(self, root_ptr):
-        if not isinstance(root_ptr, Application):
-            raise TypeError('Root class must be an elements.Application')
-        self._application = root_ptr
-
-    def _set_enabled(self, enabled):
-        """Set the local, private attribute indicating whether this element is
-        enabled.  All registered callbacks will be notified.
-
-        Returns nothing."""
-
-        self._enabled = enabled
-        self.emit()
-
-    def enable(self):
-        """Enable the element.  Returns nothing,"""
-        self._set_enabled(True)
-
-    def disable(self):
-        """Disable the element.  Returns nothing."""
-        self._set_enabled(False)
-
-    def is_enabled(self):
-        """Check if the element is enabled.
-
-        Returns a boolean."""
-
-        return self._enabled
-
-    def is_required(self):
-        """Check if the element is required.
-
-        Returns a boolean."""
-
-        return self._required
-
-    def widget(self):
-        """Return the instance of the GUI Widget representing this element"""
-        return self._gui_widget
-
 class Primitive(Element):
     def __init__(self, configuration):
         Element.__init__(self, configuration)

@@ -85,4 +85,3 @@ class ElementTest(unittest.TestCase):
         self.assertEqual(self.element._default_config, {'a': 'ccc', 'b': 'bbb'})
         self.assertEqual(self.element.config, {'a': 'aaa', 'b': 'bbb'})
 
-

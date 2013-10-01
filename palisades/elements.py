@@ -107,6 +107,7 @@ class Element():
             self._enabled = new_state
             self.interactivity_changed.emit(new_state)
 
+
 class OldElement(core.Communicator):
     """The Element class is the base class of all palisades element.  It
     provides fundamental functionality shared by all elements."""
@@ -268,6 +269,37 @@ ELEMENTS = {
 }
 
 class Group(Element):
+    def __init__(self, configuration, registrar=ELEMENTS):
+        Element.__init__(self, configuration)
+        self._registrar = registrar
+        self._elements = []
+        self._default_config = {
+            'elements': []
+        }
+        self.create_elements(configuration['elements'])
+
+    def _add_element(self, element):
+        """Add the element to this group.
+
+            element - an Element instance or subclass.
+
+        Returns nothing."""
+        self._elements.append(element)
+
+    def create_elements(self, elements):
+        """Create the elements contained by this group.
+
+            elements - a list of dictionaries describing the elements to be
+                created.
+
+            Returns nothing."""
+        for element_config in elements:
+            new_element = self._registrar[element_config['type']](element_config)
+            print new_element
+
+            self._add_element(new_element)
+
+class OldGroup(Element):
     """The Group class allows for elements to be grouped together."""
 
     _layout = palisades.LAYOUT_VERTICAL

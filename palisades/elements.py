@@ -210,6 +210,12 @@ class Primitive(Element):
         return self._value
 
     def is_valid(self):
+        """Return the validity of this input.  If the element has not been
+        validated, False will be returned.
+
+        NOTE: If this function is called while validation is in progress, False
+        will always be returned.
+        TODO: fix this behavior so that it makes sense."""
         return self._valid
 
     def validate(self):

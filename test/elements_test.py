@@ -2,6 +2,7 @@ import unittest
 import os
 
 from palisades import elements
+from palisades import validation
 
 TEST_DIR = os.path.dirname(__file__)
 IUI_CONFIG = os.path.join(TEST_DIR, 'data', 'iui_config')
@@ -109,3 +110,19 @@ class PrimitiveTest(unittest.TestCase):
         except ValueError:
             # The valueError was raised correctly, so we pass.
             pass
+
+    def test_validate(self):
+        # Verify that validation has not been performed.
+        self.assertEqual(self.primitive.is_valid(), False)
+
+        # Start validation by setting the value.
+        self.primitive.set_value('aaa')
+
+        # wait until validation thread finishes (using join())
+        # Also need to wait until the primitive's validation Timer object
+        # finishes checking on the validator.
+        self.primitive._validator.thread.join()
+        self.primitive.timer.join()
+
+        # check that validation completed by checking the validity of the input.
+        self.assertEqual(self.primitive.is_valid(), validation.V_PASS)

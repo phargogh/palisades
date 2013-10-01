@@ -12,7 +12,7 @@ class ApplicationTest(unittest.TestCase):
     def test_build_application(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
             'timber_clean.json'))
-        ui.run()
+#        ui.run()
 
 class ElementTest(unittest.TestCase):
     """This is a base class for the simplest possible element object."""

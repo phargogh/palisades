@@ -236,56 +236,6 @@ class Primitive(Element):
             self._validation_error = error
 
 
-class OldPrimitive(Element):
-    """The Primitive class is the base class for all elements that take user
-    input."""
-
-    _default_config = {
-        'validateAs': {'type': 'disabled'}
-    }
-
-    def __init__(self, configuration):
-        Element.__init__(self, configuration)
-        self._validator = validation.Validator(
-            self.config['validateAs']['type'])
-
-    def set_value(self, new_value):
-        """Set the value of this element.  If the element's value changes, all
-        registered callbacks will be emitted.
-
-        Returns nothing."""
-
-        if not self.is_enabled():
-            return
-
-        # If the value of this element has changed, we want to trigger all the
-        # elements that requested notification.
-        old_value = self.value()
-        if old_value != new_value:
-            self.widget().set_value(new_value)
-            self.emit()
-
-    def value(self):
-        """Get the value of this element."""
-        return self.widget().value()
-
-    def validate(self):
-        validation_dict = self.config['validateAs']
-        validation_dict['value'] = self.value()
-        self._validator.validate(validation_dict)  # this starts the thread
-
-        # start a thread here that checks the status of the validator thread.
-        self.timer = ui.Timer(0.1, self.check_validator)
-        self.timer.start()
-
-    def check_validator(self):
-        if self._validator.thread_finished():
-            self.timer.cancel()  # stop the timer thread
-            error, state = self._validator.get_error()
-
-            self.widget().set_error(error, state)
-
-
 class LabeledPrimitive(Primitive):
     _label = u""
     _preferred_layout = palisades.LAYOUT_GRID
@@ -366,48 +316,6 @@ class Group(Element):
             print new_element
 
             self._add_element(new_element)
-
-class OldGroup(Element):
-    """The Group class allows for elements to be grouped together."""
-
-    _layout = palisades.LAYOUT_VERTICAL
-    _registrar = ELEMENTS  # default element registrar
-    _elements = []
-    _gui_widget = None
-    _default_widget = ui.Empty
-    _default_config = {
-        'elements': []
-    }
-
-    def __init__(self, configuration):
-        Element.__init__(self, configuration)
-        self.create_elements(configuration['elements'])
-
-    def _add_element(self, element_ptr):
-        """Add an element to this group's layout."""
-        self._elements.append(element_ptr)
-        self._gui_widget.add_element(element_ptr.widget())
-
-    def create_elements(self, elements_configuration):
-        """Creates elements belonging to this Group.
-
-            elements_configuration - a list of dictionaries, where each
-                dictionary contains information about the element.
-
-            Returns nothing."""
-
-        for element_config in elements_configuration:
-            # Create the new element.  This creates the element with all of its
-            # attributes, and even creates the Widget in memory with all of its
-            # attributes.
-            new_element = self._registrar[element_config['type']](element_config)
-            print new_element
-
-            # Add the newly created element to this group's Widget.
-            self._add_element(new_element)
-
-    def show(self):
-        self._gui_widget.show()
 
 class Form(Group):
     _registrar = ELEMENTS

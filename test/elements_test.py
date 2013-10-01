@@ -208,3 +208,34 @@ class FileTest(unittest.TestCase):
 
         self.element.set_value('~/%s' % new_file)
         self.assertEqual(self.element.value(), os.path.join(home_dir, new_file))
+
+class GroupTest(unittest.TestCase):
+    def setUp(self):
+        self.elements = [
+            {
+                'type': 'file',
+            },
+            {
+                'type': 'text',
+            },
+        ]
+
+    def test_object_creation(self):
+        # check that the object has all the correct elements
+        group = elements.Group({'elements': self.elements})
+
+        self.assertEqual(len(group._elements), 2)
+        self.assertEqual(group._elements[0].__class__, elements.File)
+        self.assertEqual(group._elements[1].__class__, elements.Text)
+
+    def test_element_creation(self):
+        # Create the group and verify there are no elements.
+        group = elements.Group({})
+        self.assertEqual(len(group._elements), 0)
+
+        # Create the sample elements and ensure that they are the correct
+        # classes and that there are the right number of them.
+        group.create_elements(self.elements)
+        self.assertEqual(len(group._elements), 2)
+        self.assertEqual(group._elements[0].__class__, elements.File)
+        self.assertEqual(group._elements[1].__class__, elements.Text)

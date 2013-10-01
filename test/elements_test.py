@@ -126,3 +126,24 @@ class PrimitiveTest(unittest.TestCase):
 
         # check that validation completed by checking the validity of the input.
         self.assertEqual(self.primitive.is_valid(), validation.V_PASS)
+
+class LabeledPrimitiveTest(unittest.TestCase):
+    def setUp(self):
+        self.primitive = elements.LabeledPrimitive({'label':'aaa'})
+
+    def test_set_label(self):
+        # check that the configuration-defined label is set.
+        self.assertEqual(self.primitive.label(), 'aaa')
+
+        # Set the label and check that it was set correctly.
+        self.primitive.set_label('abc')
+        self.assertEqual(self.primitive.label(), 'abc')
+
+        # verify that the set label is unicode, UTF-8
+        label = self.primitive.label()
+        self.assertEqual(label.__class__, unicode)
+        try:
+            label.decode('utf-8')
+        except UnicodeError:
+            raise AssertionError('label is not UTF-8')
+

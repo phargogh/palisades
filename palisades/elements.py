@@ -176,36 +176,47 @@ class Primitive(Element):
 
 
 class LabeledPrimitive(Primitive):
-    _label = u""
-    _preferred_layout = palisades.LAYOUT_GRID
+    def __init__(self, configuration):
+        Primitive.__init__(self, configuration)
+
+        new_defaults = {
+            'label': u""
+        }
+        self.set_default_config(new_defaults)
+        self._label = self.config['label']
 
     def set_label(self, new_label):
         cast_label = new_label.decode("utf-8")
         self._label = cast_label
-        self.widget().set_label(cast_label)
 
     def label(self):
         return self._label
 
 class Text(LabeledPrimitive):
-    _value = u""
-    _default_widget = ui.Text
-    _default_config = {
-        'width': 60,
-        'defaultValue': '',
-        'validateAs': {'type': 'string'},
-    }
-
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
+        self._value = u""
+
+        new_defaults = {
+            'width': 60,
+            'defaultValue': '',
+            'validateAs': {'type': 'string'},
+        }
+        self.set_default_config(new_defaults)
+
+        # Set the value of the element from the config's defaultValue.
         self.set_value(configuration['defaultValue'])
-        self.widget().set_callback(self.validate)
 
     def set_value(self, new_value):
-        # enforce all strings to be utf-8
+        """Subclassed from LabeledPrimitive.set_value.  Casts all input values
+        to utf-8.
+
+            new_value - a python string.
+
+        Returns nothing."""
+
         cast_value = new_value.decode('utf-8')
         LabeledPrimitive.set_value(self, cast_value)
-        self.widget().set_value(cast_value)
 
 class File(Text):
     _default_widget = ui.File

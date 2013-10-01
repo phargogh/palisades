@@ -14,6 +14,16 @@ class ApplicationTest(unittest.TestCase):
             'timber_clean.json'))
 #        ui.run()
 
+def assert_utf8(string):
+    """Assert that the input string is unicode, formatted as UTF-8."""
+    if string.__class__ != unicode:
+        raise AssertionError('String is not a unicode object')
+    try:
+        string.decode('utf-8')
+    except UnicodeError:
+        raise AssertionError('String is not UTF-8')
+
+
 class ElementTest(unittest.TestCase):
     """This is a base class for the simplest possible element object."""
     def setUp(self):
@@ -141,9 +151,29 @@ class LabeledPrimitiveTest(unittest.TestCase):
 
         # verify that the set label is unicode, UTF-8
         label = self.primitive.label()
-        self.assertEqual(label.__class__, unicode)
-        try:
-            label.decode('utf-8')
-        except UnicodeError:
-            raise AssertionError('label is not UTF-8')
+        assert_utf8(label)
 
+class TextTest(unittest.TestCase):
+    def setUp(self):
+        self.primitive = elements.Text({'label':'aaa'})
+
+    def test_set_label(self):
+        # check that the configuration-defined label is set.
+        self.assertEqual(self.primitive.label(), 'aaa')
+
+        # Set the label and check that it was set correctly.
+        self.primitive.set_label('abc')
+        self.assertEqual(self.primitive.label(), 'abc')
+
+        # verify that the set label is unicode, UTF-8
+        label = self.primitive.label()
+        assert_utf8(label)
+
+    def test_default_value(self):
+        element = elements.Text({
+            'label': 'text',
+            'defaultValue': 'text_element'
+        })
+
+        self.assertEqual(element.value(), 'text_element')
+        assert_utf8(element.value())

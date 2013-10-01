@@ -20,6 +20,11 @@ except ImportError:
 
 from dbfpy import dbf
 
+# TODO: make these constants used instead of string conventions
+V_PASS = None
+V_FAIL = 'fail'
+V_ERROR = 'error'
+
 def get_fields(feature):
     """Return a dict with all fields in the given feature.
         

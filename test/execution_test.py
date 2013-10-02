@@ -14,3 +14,11 @@ class ExecutorTest(unittest.TestCase):
         executor = execution.Executor(module, None)
         executor.start()
         executor.join()
+
+    def test_smoke_func_name(self):
+        """Verify executor can run a function not called 'execute'"""
+        module = imp.load_source('sample', os.path.join(DATA_DIR,
+            'sample_scripts.py'))
+        executor = execution.Executor(module, None, func_name='check_the_time')
+        executor.start()
+        executor.join()

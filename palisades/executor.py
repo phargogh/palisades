@@ -261,6 +261,7 @@ class Executor(threading.Thread):
         LOGGER.debug('Printing traceback')
         print(str(traceback.print_exc()) + '\n')
 
+    # TODO: remove.  Not required for new style executor.
     def addOperation(self, op, args=None, uri=None, index=None):
         #op is a string index to self.funcmap
         opDict = {'type': op,
@@ -272,6 +273,7 @@ class Executor(threading.Thread):
         else:
             self.operations.insert(index, opDict)
 
+    # TODO: move this into its own function.
     def print_args(self, args_dict):
         """Write args_dict to a formatted string to the self.write() function.
             args_dict - a dictionary.
@@ -286,6 +288,7 @@ class Executor(threading.Thread):
             self.write(format_str % (name, value))
         self.write("\n\n")
 
+    # TODO: move this into its own function.
     def print_system_info(self, function=None):
         if function == None:
             function = lambda x: self.write(x + '\n')
@@ -331,6 +334,7 @@ class Executor(threading.Thread):
             function('')
         function('')
 
+    # TODO: move this into its own function.
     def format_time(self, seconds):
         """Render the integer number of seconds in a string.  Returns a string.
         """
@@ -518,6 +522,7 @@ class Executor(threading.Thread):
             #Quit the rest of the function
             return
 
+        # TODO: Move this functionality out of the Executor class.
         if workspace != None:
             #Try opening up a file explorer to see the results.
             try:

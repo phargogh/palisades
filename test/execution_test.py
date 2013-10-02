@@ -26,6 +26,7 @@ class ExecutorTest(unittest.TestCase):
         executor.join()
 
     def test_with_logging(self):
+        """Verify only the thread-based logging is included"""
         module = imp.load_source('sample', os.path.join(DATA_DIR,
             'sample_scripts.py'))
 
@@ -34,6 +35,10 @@ class ExecutorTest(unittest.TestCase):
             log_file=temp_file_uri)
         executor.start()
         executor.join()
+
+        # This logging is generated in the main thread, not the worker thread,
+        # which only logs 2 lines.  The number of lines in the log file should
+        # be 2.
         LOGGER.debug('hello.  This should not appear in the log file.')
 
         with open(temp_file_uri) as file_obj:

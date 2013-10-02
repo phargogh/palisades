@@ -4,21 +4,17 @@ import logging
 logging.basicConfig(format='%(asctime)s %(name)-18s %(threadName)-10s %(levelname)-8s \
      %(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %H:%M:%S ')
 
+LOGGER = logging.getLogger('')
+
 class ThreadFilter(logging.Filter):
     def __init__(self, thread_name):
         logging.Filter.__init__(self)
         self.thread_name = thread_name
-        print thread_name
 
     def filter(self, record):
-        print 'filtering'
         if record.threadName == self.thread_name:
-            print 'Record thread name = %s' % record.threadName
-            return 1
-        print 'Record thread name != %s' % record.threadName
-        return 0
-
-LOGGER = logging.getLogger('')
+            return True
+        return False
 
 class Executor(threading.Thread):
     def __init__(self, module, args, func_name='execute'):

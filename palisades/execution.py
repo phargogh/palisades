@@ -22,7 +22,13 @@ class Executor(threading.Thread):
         self.module = module
         self.args = args
         self.func_name = func_name
+
+        # Set up the log file writing here as a logging FileHandler.
+        log_fmt = "%(asctime)s %(name)-18s %(levelname)-8s %(message)s"
+        date_fmt = "%m/%d/%Y %H:%M:%S "
+        formatter = logging.Formatter(log_fmt, date_fmt)
         self.fh = logging.FileHandler('log-%s.foo' % self.name)
+        self.fh.setFormatter(formatter)
         self.fh.addFilter(ThreadFilter(self.name))
         LOGGER.addHandler(self.fh)
 

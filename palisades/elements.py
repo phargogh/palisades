@@ -6,6 +6,7 @@ from palisades import fileio
 from palisades import ui
 from palisades import core
 from palisades import validation
+from palisades import executor
 
 from PyQt4 import QtGui
 

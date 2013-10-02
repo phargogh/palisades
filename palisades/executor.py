@@ -201,9 +201,7 @@ class Executor(threading.Thread):
         self.failure_exception = None
         self.cancelFlag = threading.Event()
         self.operations = []
-        self.funcMap = {'validator': self.runValidator,
-                        'model': self.runModel,
-                        'saveParams': self.saveParamsToDisk}
+        self.funcMap = {'model': self.runModel,}
 
     def write(self, string):
         self.printQueueLock.acquire()

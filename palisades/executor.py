@@ -387,31 +387,6 @@ class Executor(threading.Thread):
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
 
-    def runValidator(self, uri, args):
-        LOGGER.info('Starting validator')
-        validator = imp.load_source('validator', uri)
-        outputList = []
-
-        try:
-            validator.execute(args, outputList)
-
-            if len(outputList) > 0:
-                print('ERRORS:\n')
-                for error in outputList:
-                    self.write(error + '\n')
-                self.setThreadFailed(True)
-            else:
-                print('Validation complete.')
-        except Exception:
-            print('\nProblem occurred while running validation.')
-            self.printTraceback()
-            self.setThreadFailed(True)
-
-    def saveParamsToDisk(self, data=None):
-        LOGGER.info('Saving parameters to disk')
-        self.outputObj.saveLastRun()
-        LOGGER.info('Parameters saved to disk')
-
     def runModel(self, module, args):
         try:
             workspace = args['workspace_dir']

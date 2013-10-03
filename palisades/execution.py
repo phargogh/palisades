@@ -31,21 +31,6 @@ class ThreadFilter(logging.Filter):
             return True
         return False
 
-def print_args(function, args_dict):
-    """Write args_dict to a formatted string to the user-defined function.
-        args_dict - a dictionary.
-
-    returns noting"""
-
-    function("Arguments:")
-    sorted_args = sorted(args_dict.iteritems(), key=lambda x: x[0])
-    max_key_width = max(map(lambda x:len(x[0]), sorted_args))
-    format_str = "%-" + str(max_key_width) + "s %s"
-    for name, value in sorted_args:
-        function(format_str % (name, value))
-    function("")
-
-#TODO: Add a couple tests for locating modules.
 def locate_module(module):
     """Locate and import the requested module.
 

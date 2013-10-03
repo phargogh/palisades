@@ -85,22 +85,52 @@ def _get_module_from_path(module_list, path=None):
         return imported_module
 
 class PythonRunner():
-    def __init__(self, module_string, args, func_name='execute', post_run=[]):
+    """Wrapper object for the executor class
+        * Loads the target module
+        * Runs the executor
+        * contains communicator event objects that other functions can register
+          with.
+    """
+    def __init__(self, module_string, args, func_name='execute'):
+        """Initialization function for the PythonRunner class.
+
+            module_string - a python string.  Must either be a URI to a python
+                source file or a python path string in the form
+                'package.subpackage.module' that can be loaded from the
+                pythonpath.
+            args - a python dictionary of argumnents to be passed to the
+                function specified.
+            func_name='execute' - the function to be called on the loaded
+                module.  Defaults to 'execute' for IUI compatibility."""
+
         module, module_name = locate_module(module_string)
 
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d--%H_%M_%S")
         filename = '%s-log-%s.txt' % (module_name, timestamp)
 
+        # TODO: make the workspace folder
         log_file_uri = os.path.join(args['workspace_dir'], filename)
         self.executor = Executor(module, args, func_name, log_file_uri)
+        self._checker = threading.Timer(0.1, self._check_executor)
 
-        # TODO: Add some communicators here, in case other objects are
-        # interested in executor-related events.
+        self.started = core.Communicator()
+        self.finished = core.Communicator()
 
     def start(self):
+        """Start the execution of the thread.  Emits the started signal.
+
+        Returns nothing."""
+
         self.executor.start()
+        self.started.emit()
 
+    def _check_executor(self):
+        """Check if the executor thread has finished.  If it has finished, emit
+        the finished signal.  Returns nothing."""
 
+        if not self.executor.is_alive():
+            self._checker.cancel()
+            self.finished.emit()
 
 class LogManager():
     LOG_FMT = "%(asctime)s %(name)-18s %(levelname)-8s %(message)s"

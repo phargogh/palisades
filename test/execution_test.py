@@ -23,6 +23,16 @@ def count_lines(file_uri):
     num_lines = i + 1
     return num_lines
 
+class ExecutionUtilsTest(unittest.TestCase):
+    def test_locate_module_path(self):
+        executeable, name = execution.locate_module('os')
+        self.assertEqual(executeable.path.join('aaa', 'bbb'), 'aaa%sbbb' % os.sep)
+
+    def test_locate_module_file(self):
+        module_path = os.path.join(DATA_DIR, 'sample_scripts.py')
+        executeable, name = execution.locate_module(module_path)
+        self.assertEqual(executeable.return_one(), 1)
+
 class ExecutorTest(unittest.TestCase):
     def test_smoke_execute(self):
         module = imp.load_source('sample', os.path.join(DATA_DIR,
@@ -127,3 +137,4 @@ class PythonRunnerTest(unittest.TestCase):
         runner.executor.join()
         shutil.rmtree(new_workspace)
 
+    #TODO: Finish testing the PythonRunner class.

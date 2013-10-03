@@ -20,3 +20,6 @@ def check_the_time(args):
 def try_logging(args):
     LOGGER.debug('Starting the function')
     LOGGER.debug('Finishing the function')
+
+def return_one():
+    return 1

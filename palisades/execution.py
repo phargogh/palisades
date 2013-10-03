@@ -3,6 +3,7 @@ import logging
 import os
 import imp
 import datetime
+import sys
 
 from palisades import core
 
@@ -53,6 +54,7 @@ def locate_module(module):
 
         Returns a tuple of (executeable module, module name)"""
 
+    LOGGER.debug('Trying to import %s' % module)
     if os.path.isfile(module):
         model = imp.load_source('model', module)
        # Model name is name of module file, minus the extension
@@ -60,9 +62,14 @@ def locate_module(module):
         LOGGER.debug('Loading %s from %s', model_name, model)
     else:
         LOGGER.debug('PATH: %s', sys.path)
-        module_list = module.split('.')
-        model = _get_module_from_path(module_list)
-        model_name = module_list[-1]  # model name is last entry in list
+        try:
+            model = __import__(module)
+            model_name = model.__name__
+            LOGGER.debug('Imported directly from the existing PATH')
+        except ImportError:
+            module_list = module.split('.')
+            model = _get_module_from_path(module_list)
+            model_name = module_list[-1]  # model name is last entry in list
         LOGGER.debug('Loading %s from PATH', model_name)
     return (model, model_name)
 
@@ -86,7 +93,13 @@ def _get_module_from_path(module_list, path=None):
     imported_module = imp.load_module(current_name, *module_info)
 
     if len(module_list) > 1:
-        return _get_module_From_path(module_list[1:], imported_module.__path__)
+        try:
+            package_path = imported_module.__path__
+        except AttributeError:
+            # When the imported_module isn't a package
+            package_path = os.path.dirname(imported_module.__file__)
+
+        return _get_module_from_path(module_list[1:], package_path)
     else:
         return imported_module
 

@@ -13,7 +13,7 @@ class ExecutorTest(unittest.TestCase):
     def test_smoke_execute(self):
         module = imp.load_source('sample', os.path.join(DATA_DIR,
             'sample_scripts.py'))
-        executor = execution.Executor(module, None)
+        executor = execution.Executor(module, {})
         executor.start()
         executor.join()
 
@@ -21,7 +21,7 @@ class ExecutorTest(unittest.TestCase):
         """Verify executor can run a function not called 'execute'"""
         module = imp.load_source('sample', os.path.join(DATA_DIR,
             'sample_scripts.py'))
-        executor = execution.Executor(module, None, func_name='check_the_time')
+        executor = execution.Executor(module, {}, func_name='check_the_time')
         executor.start()
         executor.join()
 
@@ -31,7 +31,7 @@ class ExecutorTest(unittest.TestCase):
             'sample_scripts.py'))
 
         temp_file_uri = os.path.join(DATA_DIR, 'test_log.txt')
-        executor = execution.Executor(module, None, func_name='try_logging',
+        executor = execution.Executor(module, {'1':1}, func_name='try_logging',
             log_file=temp_file_uri)
         executor.start()
         executor.join()
@@ -47,4 +47,4 @@ class ExecutorTest(unittest.TestCase):
         num_lines = i + 1
 
         self.assertEqual(num_lines, 2)
-        os.remove(temp_file_uri)
+        #os.remove(temp_file_uri)

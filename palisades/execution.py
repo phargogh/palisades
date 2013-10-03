@@ -1,5 +1,10 @@
 import threading
 import logging
+import os
+import imp
+import datetime
+
+from palisades import core
 
 logging.basicConfig(format='%(asctime)s %(name)-18s %(threadName)-10s %(levelname)-8s \
      %(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %H:%M:%S ')
@@ -39,7 +44,8 @@ def print_args(function, args_dict):
         function(format_str % (name, value))
     function("")
 
-def locate_module(self, module):
+#TODO: Add a couple tests for locating modules.
+def locate_module(module):
     """Locate and import the requested module.
 
         module - a python string, either in python's package.subpackage.module
@@ -87,6 +93,7 @@ def _get_module_from_path(module_list, path=None):
 class PythonRunner():
     """Wrapper object for the executor class
         * Loads the target module
+        * Creates the output workspace
         * Runs the executor
         * contains communicator event objects that other functions can register
           with.
@@ -108,7 +115,12 @@ class PythonRunner():
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d--%H_%M_%S")
         filename = '%s-log-%s.txt' % (module_name, timestamp)
 
-        # TODO: make the workspace folder
+        try:
+            os.makedirs(args['workspace_dir'])
+        except OSError:
+            # workspace already exists, so no need to do anything else.
+            pass
+
         log_file_uri = os.path.join(args['workspace_dir'], filename)
         self.executor = Executor(module, args, func_name, log_file_uri)
         self._checker = threading.Timer(0.1, self._check_executor)
@@ -117,12 +129,14 @@ class PythonRunner():
         self.finished = core.Communicator()
 
     def start(self):
-        """Start the execution of the thread.  Emits the started signal.
+        """Start the execution of the thread and the internal status checker.
+        Emits the started signal.
 
         Returns nothing."""
 
         self.executor.start()
-        self.started.emit()
+        self._checker.start()
+        self.started.emit(self.executor.name)
 
     def _check_executor(self):
         """Check if the executor thread has finished.  If it has finished, emit
@@ -130,7 +144,7 @@ class PythonRunner():
 
         if not self.executor.is_alive():
             self._checker.cancel()
-            self.finished.emit()
+            self.finished.emit(self.executor.name)
 
 class LogManager():
     LOG_FMT = "%(asctime)s %(name)-18s %(levelname)-8s %(message)s"

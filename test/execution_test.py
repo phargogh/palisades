@@ -2,6 +2,7 @@ import unittest
 import imp
 import os
 import logging
+import shutil
 
 from palisades import execution
 
@@ -115,4 +116,14 @@ class LogManagerTest(unittest.TestCase):
         lines = lambda f: [l for l in f]
         for log_msg, reg_msg in zip(lines(log_file), lines(regression_file)):
             self.assertEqual(log_msg, reg_msg)
+
+class PythonRunnerTest(unittest.TestCase):
+    def test_smoke(self):
+        module_path = os.path.join(DATA_DIR, 'sample_scripts.py')
+        new_workspace = os.path.join(DATA_DIR, 'test_workspace')
+        runner = execution.PythonRunner(module_path, {'workspace_dir':
+            new_workspace})
+        runner.start()
+        runner.executor.join()
+        shutil.rmtree(new_workspace)
 

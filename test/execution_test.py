@@ -38,7 +38,8 @@ class ExecutorTest(unittest.TestCase):
 
         # This logging is generated in the main thread, not the worker thread,
         # which only logs 2 lines.  The number of lines in the log file should
-        # be 2.
+        # be 5 (2 from the function, 2 from printing arguments, 1 of blank
+        # space).
         LOGGER.debug('hello.  This should not appear in the log file.')
 
         with open(temp_file_uri) as file_obj:
@@ -46,5 +47,5 @@ class ExecutorTest(unittest.TestCase):
                 pass
         num_lines = i + 1
 
-        self.assertEqual(num_lines, 2)
-        #os.remove(temp_file_uri)
+        self.assertEqual(num_lines, 5)
+        os.remove(temp_file_uri)

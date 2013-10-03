@@ -94,6 +94,9 @@ class PythonRunner():
         log_file_uri = os.path.join(args['workspace_dir'], filename)
         self.executor = Executor(module, args, func_name, log_file_uri)
 
+        # TODO: Add some communicators here, in case other objects are
+        # interested in executor-related events.
+
     def start(self):
         self.executor.start()
 
@@ -116,13 +119,13 @@ class LogManager():
         self._file_formatter = logging.Formatter(self.LOG_FMT, self.DATE_FMT)
 
         if log_uri is not None:
-            self.logfile_handler = logging.FileHandler(self.log_uri)
+            self.logfile_handler = logging.FileHandler(self.log_uri, mode='w')
         else:
             self.logfile_handler = logging.NullHandler()
 
         self.logfile_handler.addFilter(ThreadFilter(thread_name))
-        LOGGER.addHandler(self.logfile_handler)
         self.logfile_handler.setFormatter(self._file_formatter)
+        LOGGER.addHandler(self.logfile_handler)
 
     def print_args(self, args):
         """Log the input arguments dictionary to this manager's logfile.
@@ -167,7 +170,7 @@ class Executor(threading.Thread):
         self.module = module
         self.args = args
         self.func_name = func_name
-        self.log_manager = LogManager(log_file, self.name)
+        self.log_manager = LogManager(self.name, log_file)
 
 
     def run(self):
@@ -176,8 +179,8 @@ class Executor(threading.Thread):
             function = getattr(self.module, self.func_name)
             function(self.args)
         except:
+            LOGGER.debug('error encountered')
             # log some debug information here
-            pass
         finally:
             self.log_manager.close()
 

@@ -153,8 +153,10 @@ class LogManager():
         self.logfile_handler.setFormatter(self._file_formatter)
 
     def close(self):
-        """Close the logfile handler."""
+        """Close the logfile handler and un-register it from the LOGGER
+        object."""
         self.logfile_handler.close()
+        LOGGER.removeHandler(self.logfile_handler)
 
 
 class Executor(threading.Thread):

@@ -9,6 +9,19 @@ TEST_DIR = os.path.dirname(__file__)
 DATA_DIR = os.path.join(TEST_DIR, 'data')
 LOGGER = logging.getLogger('test')
 
+def count_lines(file_uri):
+    """Count the number of lines in a file.
+
+        file_uri - a URI to the file on disk.
+
+        Returns an int."""
+
+    with open(file_uri) as file_obj:
+        for i, line in enumerate(file_obj):
+            pass
+    num_lines = i + 1
+    return num_lines
+
 class ExecutorTest(unittest.TestCase):
     def test_smoke_execute(self):
         module = imp.load_source('sample', os.path.join(DATA_DIR,
@@ -42,10 +55,38 @@ class ExecutorTest(unittest.TestCase):
         # space).
         LOGGER.debug('hello.  This should not appear in the log file.')
 
-        with open(temp_file_uri) as file_obj:
-            for i, line in enumerate(file_obj):
-                pass
-        num_lines = i + 1
-
-        self.assertEqual(num_lines, 5)
+        self.assertEqual(count_lines(temp_file_uri), 5)
         os.remove(temp_file_uri)
+
+class LogManagerTest(unittest.TestCase):
+    def test_creation_logfile(self):
+        """Verify that logging works when we give a uri to the Manager."""
+        log_file = os.path.join(DATA_DIR, 'sample_log.txt')
+        manager = execution.LogManager('MainThread', log_file)
+        LOGGER.debug('Log me!')
+        manager.close()
+        self.assertEqual(count_lines(log_file), 1)
+        os.remove(log_file)
+
+    def test_creation_no_logfile(self):
+        """Verify that logging works when we don't provide a logfile uri."""
+        # When we don't give the handler a URI, it creates a NullHandler
+        # instance, so we don't save any of the logging messages to the log
+        # file.
+        manager = execution.LogManager('sample_thread_name')
+        manager.close()
+        self.assertEqual(manager.logfile_handler.__class__,
+            logging.NullHandler)
+
+
+    def test_print_args_dict(self):
+        """Verify that argument printing is correct."""
+        log_file = os.path.join(DATA_DIR, 'sample_log.txt')
+        self.assertEqual(os.path.exists(log_file), False)
+        manager = execution.LogManager('MainThread', log_file)
+
+        args = {}
+        manager.print_args(args)
+        self.assertEqual(count_lines(log_file), 2)
+
+

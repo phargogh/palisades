@@ -18,3 +18,31 @@ class ConfigTest(unittest.TestCase):
         config_file = os.path.join(FILEIO_DATA, 'read_config_malformed.json')
         self.assertRaises(ValueError, fileio.read_config, config_file)
 
+class PythonSavingTest(unittest.TestCase):
+    def test_save_model_run(self):
+        """Assert a model saves correctly."""
+        test_dictionary = {
+            'a': 1234,
+            'b': 5.5,
+            'c': [0, 1, 2, 3],
+            'd': {'a': 'b'},
+            u'e': 'aaaa',
+            u'f': u'qwerty',
+            1: 'hello',
+            5.5: 'world'
+        }
+        output_file = os.path.join(FILEIO_DATA, 'test_model_save.py')
+        module = 'hello.world'
+        fileio.save_model_run(test_dictionary, module, output_file)
+
+        regression_file = os.path.join(FILEIO_DATA, 'simple_model_save.py')
+        lines = lambda f: [l for l in open(f)]
+        for index, (out_msg, reg_msg) in enumerate(zip(lines(output_file),
+            lines(regression_file))):
+
+            # Skip the first couple lines which include date and version info
+            # and may differ from run to run.
+            if index > 0 and index <5:
+                pass
+            else:
+                self.assertEqual(out_msg, reg_msg)

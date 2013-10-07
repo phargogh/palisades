@@ -213,6 +213,28 @@ class LogManager():
 
 
 class Executor(threading.Thread):
+    """Executor represents a thread of control that runs a python function with
+    a single input.  Once created with the proper inputs, threading.Thread has
+    the following attributes:
+
+        self.module - the loaded module object provided to __init__()
+        self.args   - the argument to the target function.  Usually a dict.
+        self.func_name - the function name that will be called.
+        self.log_manager - the LogManager instance managing logs for this script
+        self.failed - defaults to False.  Indicates whether the thread raised an
+            exception while running.
+        self.execption - defaults to None.  If not None, points to the exception
+            raised while running the thread.
+
+    The Executor.run() function is an overridden function from threading.Thread
+    and is started in the same manner by calling Executor.start().  The run()
+    function is extremely simple by design: Print the arguments to the logfile
+    and run the specified function.  If an execption is raised, it is printed
+    and saved locally for retrieval later on.
+
+    In keeping with convention, a single Executor thread instance is only
+    designed to be run once.  To run the same function again, it is best to
+    create a new Executor instance and run that."""
     def __init__(self, module, args, func_name='execute', log_file=None):
         """Initialization function for the Executor.
 
@@ -226,16 +248,25 @@ class Executor(threading.Thread):
         self.args = args
         self.func_name = func_name
         self.log_manager = LogManager(self.name, log_file)
+        self.failed = False
+        self.exception = None
 
 
     def run(self):
+        """Run the python script provided by the user with the arguments
+        specified.  This function also prints the arguments to the logfile
+        handler.  If an exception is raised in either the loading or execution
+        of the module or function, a traceback is printed and the exception is
+        saved."""
         self.log_manager.print_args(self.args)
         try:
             function = getattr(self.module, self.func_name)
             function(self.args)
-        except:
+        except Exception as error:
             # We deliverately want to catch all possible exceptions.
             self.log_manager.print_message(traceback.print_exc())
+            self.failed = True
+            self.exception = error
         finally:
             self.log_manager.close()
 

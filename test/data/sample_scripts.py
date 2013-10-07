@@ -12,7 +12,7 @@ LOGGER = logging.getLogger('sample_scripts')
 
 def execute(args):
     for i in range(3):
-        time.sleep(1)
+        time.sleep(0.2)
 
 def check_the_time(args):
     print datetime.datetime.now()

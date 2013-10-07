@@ -148,7 +148,8 @@ class Primitive(Element):
 
         NOTE: If this function is called while validation is in progress, False
         will always be returned.
-        TODO: fix this behavior so that it makes sense."""
+        """
+#TODO: fix this behavior so that it makes sense.
         return self._valid
 
     def validate(self):
@@ -273,4 +274,45 @@ class Group(Element):
 class Form():
     def __init__(self, configuration):
         self._ui = Group(configuration)
-        self._executor = executor.Executor()
+        self.elements = self.find_elements()
+
+    def find_elements(self):
+        """Recurse through all elements in this Form's UI and locate all Element
+        objects.
+
+        Returns a list of element object references."""
+
+        all_elements = []
+
+        def append_elements(element_list):
+            for element in element_list:
+                if isinstance(element, Group):
+                    append_elements(element._elements)
+                else:
+                    all_elements.append(element)
+
+        print all_elements
+        return all_elements
+
+
+    def submit(self):
+        # Check the validity of all inputs
+        form_is_valid = False in [e.is_valid() for e in self.elements]
+
+        # if success, assemble the arguments dictionary and send it off to the
+        # base Application
+        if not form_is_valid:
+            print 'Form has invalid inputs.  Check your inputs and try again.'
+        else:
+            # Create the args dictionary and pass it back to the Application.
+            args_dict = {}
+            for element in self.elements:
+                try:
+                    args_dict[element['args_id']] = element.value()
+                except KeyError:
+                    LOGGER.debug('Element %s does not have an args_id', element)
+
+            print args_dict
+            # TODO: submit the args dict and other relevant data back to app.
+
+

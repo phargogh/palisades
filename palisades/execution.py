@@ -4,6 +4,7 @@ import os
 import imp
 import datetime
 import sys
+import traceback
 
 from palisades import core
 
@@ -88,6 +89,10 @@ def _get_module_from_path(module_list, path=None):
     else:
         return imported_module
 
+#TODO: Need ability to run some things pre-run:
+#  * redirect temp folder to workspace
+#  * make the workspace
+#  * execute another script (such as the InVEST logger)
 class PythonRunner():
     """Wrapper object for the executor class
         * Loads the target module
@@ -194,6 +199,12 @@ class LogManager():
         # Restore the logfile formatter to the full file formatting.
         self.logfile_handler.setFormatter(self._file_formatter)
 
+    def print_message(self, message):
+        """Print the input message to the log using the simple print formatter."""
+        self.logfile_handler.setFormatter(self._print_formatter)
+        LOGGER.debug(message)
+        self.logfile_handler.setFormatter(self._file_formatter)
+
     def close(self):
         """Close the logfile handler and un-register it from the LOGGER
         object."""
@@ -223,8 +234,8 @@ class Executor(threading.Thread):
             function = getattr(self.module, self.func_name)
             function(self.args)
         except:
-            LOGGER.debug('error encountered')
-            # log some debug information here
+            # We deliverately want to catch all possible exceptions.
+            self.log_manager.print_message(traceback.print_exc())
         finally:
             self.log_manager.close()
 

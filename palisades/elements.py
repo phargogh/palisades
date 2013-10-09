@@ -1,5 +1,6 @@
 import os
 import threading
+import logging
 
 import palisades
 from palisades import fileio
@@ -16,6 +17,7 @@ DISPLAYS = {
 
 
 UI_LIB = ui
+LOGGER = logging.getLogger('elements')
 
 # Assume this is a window for a moment.
 class Application(object):
@@ -158,6 +160,7 @@ class Primitive(Element):
         self._validator.validate(validation_dict)  # this starts the thread
 
         # start a thread here that checks the status of the validator thread.
+        # TODO: Timer is a one-shot execution.  Make a repeating Timer.
         self.timer = threading.Timer(0.1, self.check_validator)
         self.timer.start()
 
@@ -260,7 +263,7 @@ class Group(Element):
             Returns nothing."""
         for element_config in elements:
             new_element = self._registrar[element_config['type']](element_config)
-            print new_element
+            LOGGER.debug('Creating new element %s', new_element)
 
             self._add_element(new_element)
 
@@ -291,24 +294,28 @@ class Form():
                 else:
                     all_elements.append(element)
 
-        print all_elements
+        append_elements(self._ui._elements)
         return all_elements
 
 
     def submit(self):
         # Check the validity of all inputs
-        form_is_valid = False in [e.is_valid() for e in self.elements]
+        form_data = [(e.is_valid(), e.value()) for e in self.elements]
+        form_is_valid = False in [e[0] for e in form_data]
 
         # if success, assemble the arguments dictionary and send it off to the
         # base Application
         if not form_is_valid:
             print 'Form has invalid inputs.  Check your inputs and try again.'
+            # get the invalid inputs
+            print form_data
+
         else:
             # Create the args dictionary and pass it back to the Application.
             args_dict = {}
             for element in self.elements:
                 try:
-                    args_dict[element['args_id']] = element.value()
+                    args_dict[element.config['args_id']] = element.value()
                 except KeyError:
                     LOGGER.debug('Element %s does not have an args_id', element)
 

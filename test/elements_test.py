@@ -12,7 +12,7 @@ class ApplicationTest(unittest.TestCase):
     def test_build_application(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
             'timber_clean.json'))
-#        ui.run()
+        ui._window.submit()
 
 def assert_utf8(string):
     """Assert that the input string is unicode, formatted as UTF-8."""

@@ -203,7 +203,11 @@ class Primitive(Element):
     def _get_validation_result(self):
         error, state = self._validator.get_error()
 
-        self._valid = state
+        if state == validation.V_PASS:
+            self._valid = True
+        else:
+            self._valid = False
+
         self._validation_error = error
 
 

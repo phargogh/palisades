@@ -137,10 +137,18 @@ class Element():
             self.interactivity_changed.emit(new_state)
 
 class Primitive(Element):
+    """Primitive represents the simplest input element."""
     def __init__(self, configuration):
         Element.__init__(self, configuration)
         self._value = None
-        self._valid = None  # None indicates unknown validity
+
+        # self._valid has 3 possible states:
+        #   None -  indicates validation has not been performed on this value or
+        #           else validation is in progress.
+        #   True -  value passes validation.
+        #   False - value fails validation (either validation failure or a
+        #           warning)
+        self._valid = None
         self._validation_error = None
 
         # Set up our Communicator(s)
@@ -189,7 +197,7 @@ class Primitive(Element):
             self.validate()
 
         # Return whether validation passed (a boolean).
-        return self._valid == validation.V_PASS
+        return self._valid
 
     def validate(self):
         # if validation is already in progress, block until finished.

@@ -31,26 +31,27 @@ class InvalidData(ValueError):
 class ValidationStarted(RuntimeError): pass
 
 class RepeatingTimer(threading.Thread):
+    """A timer thread that calls a function after n seconds until the cancel()
+    function is called."""
     def __init__(self, interval, function):
         threading.Thread.__init__(self)
         self.interval = interval
         self.function = function
         self.finished = threading.Event()
-        self.cancelled = False
 
     def cancel(self):
+        """Cancel this timer thread at the next available opportunity.  Returns
+        nothing."""
         self.finished.set()
-        self.cancelled = True
 
     def run(self):
-        self.finished.wait(self.interval)
-        if not self.finished.is_set():
-            self.function()
-        if self.cancelled:
-            self.finished.set()
-        else:
-            self.finished.clear()
-
+        while True:
+            self.finished.wait(self.interval)
+            if not self.finished.is_set():
+                self.function()
+            else:
+                # If the thread has been cancelled, break out of the loop
+                break
 
 # Assume this is a window for a moment.
 class Application(object):
@@ -200,8 +201,13 @@ class Primitive(Element):
         self._validator.validate(validation_dict)  # this starts the thread
 
         # start a thread here that checks the status of the validator thread.
-        self.timer = RepeatingTimer(0.05, self.check_validator)
-        self.timer.start()
+        try:
+            if not self.timer.is_alive:
+                self.timer.start()
+        except AttributeError:
+            self.timer = RepeatingTimer(0.05, self.check_validator)
+            self.timer.start()
+
 
     def check_validator(self):
         if self._validator.thread_finished():

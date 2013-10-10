@@ -23,6 +23,8 @@ def assert_utf8(string):
     except UnicodeError:
         raise AssertionError('String is not UTF-8')
 
+class RepeatingTimerTest(unittest.TestCase):
+    pass
 
 class ElementTest(unittest.TestCase):
     """This is a base class for the simplest possible element object."""
@@ -123,6 +125,7 @@ class PrimitiveTest(unittest.TestCase):
 
     def test_validate(self):
         # Verify that validation has not been performed.
+        self.assertEqual(self.primitive._valid, None)
         self.assertEqual(self.primitive.is_valid(), True)
 
         # Start validation by setting the value.
@@ -154,6 +157,8 @@ class PrimitiveTest(unittest.TestCase):
         primitive.set_value(4)
         self.assertEqual(primitive.value(), 4)
         self.assertEqual(primitive.is_valid(), True)
+        #TODO: Finish this test.
+
 
 class LabeledPrimitiveTest(unittest.TestCase):
     def setUp(self):

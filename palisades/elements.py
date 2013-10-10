@@ -205,11 +205,11 @@ class Primitive(Element):
             if not self.timer.is_alive:
                 self.timer.start()
         except AttributeError:
-            self.timer = RepeatingTimer(0.05, self.check_validator)
+            self.timer = RepeatingTimer(0.05, self._check_validator)
             self.timer.start()
 
 
-    def check_validator(self):
+    def _check_validator(self):
         if self._validator.thread_finished():
             self.timer.cancel()  # stop the timer thread
             error, state = self._validator.get_error()

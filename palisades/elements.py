@@ -1,6 +1,7 @@
 import os
 import threading
 import logging
+import time
 
 import palisades
 from palisades import fileio
@@ -8,6 +9,7 @@ from palisades import ui
 from palisades import core
 from palisades import validation
 from palisades import executor
+from palisades import execution
 
 from PyQt4 import QtGui
 
@@ -18,6 +20,37 @@ DISPLAYS = {
 
 UI_LIB = ui
 LOGGER = logging.getLogger('elements')
+
+class InvalidData(ValueError):
+    def __init__(self, problem_data):
+        self.data = problem_data
+
+    def __str__(self):
+        return 'Inputs have errors: %s' % repr(self.data)
+
+class ValidationStarted(RuntimeError): pass
+
+class RepeatingTimer(threading.Thread):
+    def __init__(self, interval, function):
+        threading.Thread.__init__(self)
+        self.interval = interval
+        self.function = function
+        self.finished = threading.Event()
+        self.cancelled = False
+
+    def cancel(self):
+        self.finished.set()
+        self.cancelled = True
+
+    def run(self):
+        self.finished.wait(self.interval)
+        if not self.finished.is_set():
+            self.function()
+        if self.cancelled:
+            self.finished.set()
+        else:
+            self.finished.clear()
+
 
 # Assume this is a window for a moment.
 class Application(object):
@@ -106,7 +139,7 @@ class Primitive(Element):
     def __init__(self, configuration):
         Element.__init__(self, configuration)
         self._value = None
-        self._valid = False  # Assume invalid until proven otherwise
+        self._valid = None  # None indicates unknown validity
         self._validation_error = None
 
         # Set up our Communicator(s)
@@ -136,7 +169,7 @@ class Primitive(Element):
         old_value = self.value()
         if old_value != new_value:
             self._value = new_value
-            self._valid = False
+            self._valid = None
             self.value_changed.emit(new_value)
             self.validate()
 
@@ -152,16 +185,23 @@ class Primitive(Element):
         will always be returned.
         """
 #TODO: fix this behavior so that it makes sense.
-        return self._valid
+        # If we don't know the validity and the validator has finished
+        if self._valid == None and self._validator.thread_finished() == True:
+            self.validate()
+            self.timer.join()
+        return self._valid == None
 
     def validate(self):
+        # if validation is already in progress, raise ValidationStarted
+        if not self._validator.thread_finished():
+            raise ValidationStarted
+
         validation_dict = self.config['validateAs']
         validation_dict['value'] = self.value()
         self._validator.validate(validation_dict)  # this starts the thread
 
         # start a thread here that checks the status of the validator thread.
-        # TODO: Timer is a one-shot execution.  Make a repeating Timer.
-        self.timer = threading.Timer(0.1, self.check_validator)
+        self.timer = RepeatingTimer(0.05, self.check_validator)
         self.timer.start()
 
     def check_validator(self):
@@ -278,6 +318,7 @@ class Form():
     def __init__(self, configuration):
         self._ui = Group(configuration)
         self.elements = self.find_elements()
+        self.runner = None
 
     def find_elements(self):
         """Recurse through all elements in this Form's UI and locate all Element
@@ -301,15 +342,19 @@ class Form():
     def submit(self):
         # Check the validity of all inputs
         form_data = [(e.is_valid(), e.value()) for e in self.elements]
-        form_is_valid = False in [e[0] for e in form_data]
+        print form_data
+        form_is_invalid = False in [e[0] for e in form_data]
+        print form_is_invalid
 
         # if success, assemble the arguments dictionary and send it off to the
         # base Application
-        if not form_is_valid:
-            print 'Form has invalid inputs.  Check your inputs and try again.'
-            # get the invalid inputs
-            print form_data
+        if form_is_invalid:
+            invalid_inputs = []
+            for is_valid, value in form_data:
+                if not is_valid:
+                    invalid_inputs.append(value)
 
+            raise InvalidData(invalid_inputs)
         else:
             # Create the args dictionary and pass it back to the Application.
             args_dict = {}
@@ -321,5 +366,12 @@ class Form():
 
             print args_dict
             # TODO: submit the args dict and other relevant data back to app.
+            try:
+                self.runner = execution.PythonRunner(self._ui.config['targetScript'],
+                    args_dict)
+                self.runner.start()
+            except ImportError as error:
+                LOGGER.error('Problem loading %s', self._ui.config['targetScript'])
+                raise
 
 

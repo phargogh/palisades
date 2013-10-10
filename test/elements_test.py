@@ -1,5 +1,6 @@
 import unittest
 import os
+import time
 
 from palisades import elements
 from palisades import validation
@@ -24,7 +25,17 @@ def assert_utf8(string):
         raise AssertionError('String is not UTF-8')
 
 class RepeatingTimerTest(unittest.TestCase):
-    pass
+    def test_timer_smoke(self):
+        """Run the timer and cancel it after a little while."""
+        def new_func():
+            return None
+
+        timer = elements.RepeatingTimer(0.1, new_func)
+        timer.start()
+        time.sleep(0.5)
+        timer.cancel()
+        time.sleep(0.2)
+        self.assertEqual(timer.is_alive(), False)
 
 class ElementTest(unittest.TestCase):
     """This is a base class for the simplest possible element object."""

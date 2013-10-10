@@ -123,7 +123,7 @@ class PrimitiveTest(unittest.TestCase):
 
     def test_validate(self):
         # Verify that validation has not been performed.
-        self.assertEqual(self.primitive.is_valid(), False)
+        self.assertEqual(self.primitive.is_valid(), True)
 
         # Start validation by setting the value.
         self.primitive.set_value('aaa')
@@ -135,11 +135,25 @@ class PrimitiveTest(unittest.TestCase):
         self.primitive.timer.join()
 
         # check that validation completed by checking the validity of the input.
-        self.assertEqual(self.primitive.is_valid(), validation.V_PASS)
+        self.assertEqual(self.primitive.is_valid(), True)
 
     def test_is_valid(self):
         """Verify that element validity works and makes sense."""
-        pass
+        primitive = elements.Primitive({})
+
+        # TEST 1:
+        # Ensure a new primitive has no value and valid (due to default
+        # validation of "type": "disabled").
+        self.assertEqual(primitive.value(), None)
+        self.assertEqual(primitive.is_valid(), True)
+
+        # TEST2:
+        # When no validation is specified in the input dictionary, the default
+        # validation is "type: disabled".  Ensure setting the value still is
+        # valid.
+        primitive.set_value(4)
+        self.assertEqual(primitive.value(), 4)
+        self.assertEqual(primitive.is_valid(), True)
 
 class LabeledPrimitiveTest(unittest.TestCase):
     def setUp(self):

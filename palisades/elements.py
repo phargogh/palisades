@@ -178,18 +178,17 @@ class Primitive(Element):
         return self._value
 
     def is_valid(self):
-        """Return the validity of this input.  If the element has not been
-        validated, False will be returned.
-
-        NOTE: If this function is called while validation is in progress, False
-        will always be returned.
+        """Return the validity of this input.  If an element has not been
+        validated, it will be validated here and will block until validation
+        completes.  Returns a Boolean.
         """
-#TODO: fix this behavior so that it makes sense.
         # If we don't know the validity and the validator has finished
         if self._valid == None and self._validator.thread_finished() == True:
             self.validate()
             self.timer.join()
-        return self._valid == None
+
+        # Return whether validation passed (a boolean).
+        return self._valid == validation.V_PASS
 
     def validate(self):
         # if validation is already in progress, raise ValidationStarted

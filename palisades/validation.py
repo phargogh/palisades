@@ -20,6 +20,11 @@ except ImportError:
 
 from dbfpy import dbf
 
+import palisades
+import elements
+import core
+
+
 # TODO: make these constants used instead of string conventions
 V_PASS = None
 V_FAIL = 'fail'
@@ -104,6 +109,8 @@ class Validator(Registrar):
         self.type_checker = self.init_type_checker(str(validator_type))
         self.validate_funcs = []
         self.thread = None
+        self.timer = elements.RepeatingTimer(0.01, self._check_thread)
+        self.finished = core.Communicator()
 
     def validate(self, valid_dict):
         """Validate the element.  This is a two step process: first, all
@@ -113,6 +120,11 @@ class Validator(Registrar):
 
             Note that this is done in a separate thread.
 
+            valid_dict - a python dictionary describing the validation to be
+                performed.
+            post_run=None - a python callable to be executed at the end of the
+                validation thread.
+
             returns a string if an error is found.  Returns None otherwise."""
 
         if self.thread == None or not self.thread.is_alive():
@@ -120,6 +132,14 @@ class Validator(Registrar):
                 self.type_checker, valid_dict)
 
         self.thread.start()
+
+    def _check_thread(self):
+        """Private utility function to check on the state of the validation
+        thread.  If it has finished, cancel the timer and emit the finished
+        signal.  Returns nothing."""
+        if self.thread_finished():
+            self.timer.cancel()
+            self.finished.emit()
 
     def thread_finished(self):
         """Check to see whether the validator has finished.  This is done by

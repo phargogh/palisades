@@ -143,10 +143,7 @@ class PrimitiveTest(unittest.TestCase):
         self.primitive.set_value('aaa')
 
         # wait until validation thread finishes (using join())
-        # Also need to wait until the primitive's validation Timer object
-        # finishes checking on the validator.
         self.primitive._validator.thread.join()
-        self.primitive.timer.join()
 
         # check that validation completed by checking the validity of the input.
         self.assertEqual(self.primitive.is_valid(), True)

@@ -155,6 +155,7 @@ class Primitive(Element):
         # Set up our validator
         self._validator = validation.Validator(
             self.config['validateAs']['type'])
+        self._validator.finished.register(self._get_validation_result)
 
     def set_value(self, new_value):
         """Set the value of this element.  If the element's value changes, all
@@ -186,36 +187,24 @@ class Primitive(Element):
         # If we don't know the validity and the validator has finished
         if self._valid == None and self._validator.thread_finished() == True:
             self.validate()
-            self.timer.join()
 
         # Return whether validation passed (a boolean).
         return self._valid == validation.V_PASS
 
     def validate(self):
-        # if validation is already in progress, raise ValidationStarted
+        # if validation is already in progress, block until finished.
         if not self._validator.thread_finished():
-            raise ValidationStarted
+            self._validator.thread.join()
 
         validation_dict = self.config['validateAs']
         validation_dict['value'] = self.value()
         self._validator.validate(validation_dict)  # this starts the thread
 
-        # start a thread here that checks the status of the validator thread.
-        try:
-            if not self.timer.is_alive:
-                self.timer.start()
-        except AttributeError:
-            self.timer = RepeatingTimer(0.05, self._check_validator)
-            self.timer.start()
+    def _get_validation_result(self):
+        error, state = self._validator.get_error()
 
-
-    def _check_validator(self):
-        if self._validator.thread_finished():
-            self.timer.cancel()  # stop the timer thread
-            error, state = self._validator.get_error()
-
-            self._valid = state
-            self._validation_error = error
+        self._valid = state
+        self._validation_error = error
 
 
 class LabeledPrimitive(Primitive):

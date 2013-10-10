@@ -203,18 +203,18 @@ class ValidationThread(threading.Thread):
         try:
             message = self.type_checker.run_checks(self.valid_dict)
             if message != '' and message != None:
-                status = 'error'
+                status = V_ERROR
             else:
-                status = None
+                status = V_PASS
         except AttributeError:
             # Thrown when self.type_checker == None, set both message and
             # status to None.
             message = None
-            status = None
+            status = V_PASS
         except Warning as warning:
             # Raised when an unexpected exception was raised by a validator.
             message = warning
-            status = 'warning'
+            status = V_ERROR
 
         self.set_error(message, status)
 

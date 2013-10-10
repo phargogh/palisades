@@ -137,6 +137,10 @@ class PrimitiveTest(unittest.TestCase):
         # check that validation completed by checking the validity of the input.
         self.assertEqual(self.primitive.is_valid(), validation.V_PASS)
 
+    def test_is_valid(self):
+        """Verify that element validity works and makes sense."""
+        pass
+
 class LabeledPrimitiveTest(unittest.TestCase):
     def setUp(self):
         self.primitive = elements.LabeledPrimitive({'label':'aaa'})
@@ -242,7 +246,38 @@ class GroupTest(unittest.TestCase):
 
 class FormTest(unittest.TestCase):
     def setUp(self):
-        self.form = elements.Form({})
+        self.timber_clean = os.path.join(PALISADES_CONFIG, 'timber_clean.json')
+        self.config = {
+            'targetScript': os.path.join(TEST_DIR, 'data', 'sample_scripts.py'),
+            'elements': [
+                {
+                    'type': 'folder',
+                    'validateAs': {'type': 'folder'},
+                    'args_id': 'workspace_dir',
+                    'defaultValue': os.path.join(TEST_DIR, 'sample_folder')
+                },
+                {
+                    'type': 'file',
+                    'validateAs': {'type': 'file', 'mustExist': True},
+                    'args_id': 'timber_shape_uri',
+                    'defaultValue': self.timber_clean
+                },
+                {
+                    'type': 'file',
+                    'validateAs': {'type': 'file', 'mustExist': True},
+                    'defaultValue': self.timber_clean,
+                    'args_id': 'attr_table_uri',
+                },
+                {
+                    'type': 'text',
+                    'defaultValue': '7',
+                    'args_id': 'market_disc_rate',
+                }
+            ]
+        }
 
     def test_form_creation(self):
-        pass
+        form = elements.Form(self.config)
+        form.submit()
+        form.runner.executor.join()
+

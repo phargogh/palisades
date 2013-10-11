@@ -201,22 +201,27 @@ class Primitive(Element):
 
     def validate(self):
         # if validation is already in progress, block until finished.
-        if not self._validator.thread_finished():
-            self._validator.thread.join()
+        while not self._validator.thread_finished():
+            pass
 
         validation_dict = self.config['validateAs']
         validation_dict['value'] = self.value()
         self._validator.validate(validation_dict)  # this starts the thread
 
-    def _get_validation_result(self):
-        error, state = self._validator.get_error()
+    def _get_validation_result(self, error):
+        """Utility class method to get the error result from the validator
+        object.  Sets self._valid according to whether validation passed or
+        failed, and sets the validation error to the error found (if any).
+
+        error - a tuple of (error_msg, error_state)."""
+        error_msg, state = error
 
         if state == validation.V_PASS:
             self._valid = True
         else:
             self._valid = False
 
-        self._validation_error = error
+        self._validation_error = error_msg
 
 
 class LabeledPrimitive(Primitive):

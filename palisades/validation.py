@@ -109,7 +109,7 @@ class Validator(Registrar):
         self.type_checker = self.init_type_checker(str(validator_type))
         self.validate_funcs = []
         self.thread = None
-        self.timer = elements.RepeatingTimer(0.01, self._check_thread)
+        self.timer = None
         self.finished = core.Communicator()
 
     def validate(self, valid_dict):
@@ -131,7 +131,12 @@ class Validator(Registrar):
             self.thread = ValidationThread(self.validate_funcs,
                 self.type_checker, valid_dict)
 
+            if self.timer != None and self.timer.is_alive:
+                self.timer.cancel()
+            self.timer = elements.RepeatingTimer(0.01, self._check_thread)
+
         self.thread.start()
+        self.timer.start()
 
     def _check_thread(self):
         """Private utility function to check on the state of the validation
@@ -139,7 +144,13 @@ class Validator(Registrar):
         signal.  Returns nothing."""
         if self.thread_finished():
             self.timer.cancel()
-            self.finished.emit()
+            self.finished.emit(self.get_error())
+
+    def join(self):
+        """Block until all worker threads managed by Validator have finished.
+            Returns nothing."""
+        self.thread.join()
+        self.timer.join()
 
     def thread_finished(self):
         """Check to see whether the validator has finished.  This is done by

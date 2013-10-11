@@ -160,13 +160,11 @@ class PrimitiveTest(unittest.TestCase):
 
         # TEST2:
         # When no validation is specified in the input dictionary, the default
-        # validation is "type: disabled".  Ensure setting the value still is
-        # valid.
+        # validation is "type: disabled".  Ensure setting the value validates.
         primitive.set_value(4)
         self.assertEqual(primitive.value(), 4)
         primitive._validator.join()
         self.assertEqual(primitive.is_valid(), True)
-        #TODO: Finish this test.
 
 
 class LabeledPrimitiveTest(unittest.TestCase):

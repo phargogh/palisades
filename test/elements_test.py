@@ -136,8 +136,9 @@ class PrimitiveTest(unittest.TestCase):
 
     def test_validate(self):
         # Verify that validation has not been performed.
+        # TODO: Should is_valid() be True?
         self.assertEqual(self.primitive._valid, None)
-        self.assertEqual(self.primitive.is_valid(), None)
+        self.assertEqual(self.primitive.is_valid(), True)
 
         # Start validation by setting the value.
         self.primitive.set_value('aaa')
@@ -155,8 +156,9 @@ class PrimitiveTest(unittest.TestCase):
         # TEST 1:
         # Ensure a new primitive has no value and not valid (due to default
         # validation of "type": "disabled").
+        # TODO: should is_valid() be True here?
         self.assertEqual(primitive.value(), None)
-        self.assertEqual(primitive.is_valid(), None)
+        self.assertEqual(primitive.is_valid(), True)
 
         # TEST2:
         # When no validation is specified in the input dictionary, the default

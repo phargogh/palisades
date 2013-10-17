@@ -10,6 +10,8 @@ from palisades import core
 from palisades import validation
 from palisades import executor
 from palisades import execution
+from palisades.gui import core as gui_core
+
 
 from PyQt4 import QtGui
 
@@ -58,6 +60,7 @@ class Application(object):
     def __init__(self, config_uri):
         configuration = fileio.read_config(config_uri)
         self._window = Form(configuration)
+        self.ui = gui.build(self._window)
 
 class Element():
     """Element contains the core logic and interactivity required by all

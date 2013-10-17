@@ -297,10 +297,14 @@ class FormWindow(Empty):
         self.buttonBox.addButton(self.resetButton, QtGui.QDialogButtonBox.ResetRole)
 
         #connect the buttons to their functions.
-#        self.runButton.clicked.connect(self.okPressed)
+        self.runButton.clicked.connect(self.ok_pressed)
 #        self.cancelButton.clicked.connect(self.closeWindow)
 #        self.resetButton.clicked.connect(self.resetParametersToDefaults)
 
         #add the buttonBox to the window.
         self.layout().addWidget(self.buttonBox, 1, 1,
             4, 1)
+        self.submit_pressed = palisades.core.Communicator()
+
+    def _ok_pressed(self, event=None):
+        self.submit_pressed.emit(True)

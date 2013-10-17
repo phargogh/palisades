@@ -1,8 +1,21 @@
 from palisades.gui import qt4 as toolkit
 
-class Text():
+class UIObject(self, core_element):
     def __init__(self, core_element):
         self.element = core_element
+
+class Group(UIObject):
+    def __init__(self, core_element):
+        UIObject.__init__(self, core_element)
+
+        # create the elements here.  Elements should probably only ever be
+        # created once, not dynamically (though they could be hidden/revealed
+        # dynamically), so no need for a separate function.
+
+
+class Text(UIObject):
+    def __init__(self, core_element):
+        UIObject.__init__(self, core_element)
 
         label_text = self.element.label()
         self._label = toolkit.Label(label_text)
@@ -36,3 +49,11 @@ class File(Text):
             self._file_button,
             self._help_button,
         ]
+
+class Form(UIObject):
+    def __init__(self, core_element):
+        UIObject.__init__(self, core_element)
+
+        self.window = toolkit.FormWindow()
+        self.window.submit_pressed.register(self.element.submit)
+        #TODO: Add more communicators here ... menu item actions?

@@ -12,4 +12,4 @@ def build(app_structure):
     # Create a new GUI Window object
     # Recurse through application structure and add elements accordingly
     # Return the new Window object
-
+    pass

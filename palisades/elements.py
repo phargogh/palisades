@@ -1,19 +1,13 @@
 import os
 import threading
 import logging
-import time
 
-import palisades
 from palisades import fileio
 from palisades import ui
 from palisades import core
 from palisades import validation
-from palisades import executor
 from palisades import execution
-from palisades.gui import core as gui_core
-
-
-from PyQt4 import QtGui
+import palisades.gui
 
 DISPLAYS = {
     'Qt': ui
@@ -25,6 +19,7 @@ LOGGER = logging.getLogger('elements')
 
 class InvalidData(ValueError):
     def __init__(self, problem_data):
+        ValueError.__init__(self)
         self.data = problem_data
 
     def __str__(self):
@@ -55,7 +50,7 @@ class RepeatingTimer(threading.Thread):
                 # If the thread has been cancelled, break out of the loop
                 break
 
-def get_elements_list(self, group_pointer):
+def get_elements_list(group_pointer):
     """Construct a data structure with pointers to the elements of the group.
 
         group_pointer - a reference to a Group instance.
@@ -82,10 +77,10 @@ class Application(object):
     def __init__(self, config_uri):
         configuration = fileio.read_config(config_uri)
         self._window = Form(configuration)
-        self.ui = gui.build(get_element_list(self._window))
+        self.ui = palisades.gui.build(get_elements_list(self._window))
 
 
-class Element():
+class Element(object):
     """Element contains the core logic and interactivity required by all
     palisades element.
 

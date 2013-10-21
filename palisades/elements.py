@@ -55,12 +55,34 @@ class RepeatingTimer(threading.Thread):
                 # If the thread has been cancelled, break out of the loop
                 break
 
+def get_elements_list(self, group_pointer):
+    """Construct a data structure with pointers to the elements of the group.
+
+        group_pointer - a reference to a Group instance.
+
+    Returns a list of elements and lists.  Example:
+        [element, element, element, [element, element]]
+    """
+    def _recurse_through_elements(elem_list):
+        new_elements = []
+
+        for elem in elem_list:
+            if isinstance(elem, Primitive):
+                new_elements.append(elem)
+            else:
+                new_elements.append(_recurse_through_elements,
+                    elem.elements)
+        return new_elements
+
+    return _recurse_through_elements(group_pointer.elements)
+
 # Assume this is a window for a moment.
 class Application(object):
     def __init__(self, config_uri):
         configuration = fileio.read_config(config_uri)
         self._window = Form(configuration)
         self.ui = gui.build(self._window)
+
 
 class Element():
     """Element contains the core logic and interactivity required by all

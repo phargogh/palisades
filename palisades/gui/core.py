@@ -1,6 +1,6 @@
 from palisades.gui import qt4 as toolkit
 
-class UIObject(self, core_element):
+class UIObject(object):
     def __init__(self, core_element):
         self.element = core_element
 

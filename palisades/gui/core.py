@@ -61,7 +61,7 @@ class TextGUI(UIObject):
 
     def _update_validation(self, error_state):
         # error_state is a tuple of (error_state, error_msg)
-        error, error_msg = error_state
+        error_msg, error = error_state
         self._validation_button.set_error(error_msg, error)
 
 

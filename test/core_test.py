@@ -1,16 +1,16 @@
 import unittest
 
-from palisades import core
+from palisades import utils
 from palisades import elements
 
 class CommunicatorTest(unittest.TestCase):
-    class SampleEmitter(core.Communicator):
+    class SampleEmitter(utils.Communicator):
         def print_something(self, event=None):
             print 'something printed'
 
 
     def setUp(self):
-        self.a = core.Communicator()
+        self.a = utils.Communicator()
         self.b = self.SampleEmitter()
 
     def test_register(self):

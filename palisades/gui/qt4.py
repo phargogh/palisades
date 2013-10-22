@@ -141,9 +141,10 @@ class ValidationButton(InformationButton):
     _warning_icon = os.path.join(ICONS, 'dialog-warning.png')
     _pass_icon = os.path.join(ICONS, 'validate-pass.png')
     _STATES = {
-        'error': _error_icon,
-        'warning': _warning_icon,
-        'pass': _pass_icon,
+        'error': QtGui.QIcon(_error_icon),
+        'warning': QtGui.QIcon(_warning_icon),
+        'pass': QtGui.QIcon(_pass_icon),
+        None: QtGui.QIcon(''),
     }
 
     def __init__(self, title, body_text=''):
@@ -156,7 +157,7 @@ class ValidationButton(InformationButton):
 
     def setEnabled(self, state):
         if state == False:
-            self.setIcon(QtGui.QIcon(''))
+            self.setIcon(self._STATES[None])
         else:
             self.set_error(self.error_text, self.error_state)
 
@@ -178,12 +179,12 @@ class ValidationButton(InformationButton):
             button_icon = self._STATES[state]
             print button_icon
         except KeyError:
-            button_icon = ''
+            button_icon = self._STATES[None]
 
         if state == 'pass' or state == None:
             button_is_flat = True
 
-        self.setIcon(QtGui.QIcon(button_icon))
+        self.setIcon(button_icon)
         self.setFlat(button_is_flat)
         QtGui.QWidget.setEnabled(self, True)  # enable the button; validation has completed
 

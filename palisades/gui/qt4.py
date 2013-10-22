@@ -215,7 +215,19 @@ class Label(QtGui.QLabel):
     pass
 
 class TextField(QtGui.QLineEdit):
-    pass
+    def __init__(self, starting_value):
+        QtGui.QLineEdit.__init__(self, starting_value)
+
+        # set up my communicator instances and connect them to the correct Qt
+        # signals.
+        self.value_changed = palisades.core.Communicator()
+        self.textChanged.connect(self._value_changed)
+
+    def _value_changed(self, qstring_value):
+        """Callback for the TextChanged signal.  Casts to a python string anc
+        emits the value_changed communicator signal."""
+        new_value = unicode(qstring_value, 'utf-8')
+        self.value_changed.emit(new_value)
 
 class FileButton(Button):
     _icon = os.path.join(ICONS, 'document-open.png')
@@ -290,6 +302,9 @@ class FormWindow(Empty):
         # may eventually need to be scrollable) and the buttonbox.
         self.setLayout(QtGui.QVBoxLayout())
 
+        # create communicators.
+        self.submit_pressed = palisades.core.Communicator()
+
         # Create the QWidget pane for the inputs and add it to the layout.
         self.input_pane = QtGui.QWidget()
         self.input_pane.setLayout(QtGui.QGridLayout())
@@ -324,18 +339,20 @@ class FormWindow(Empty):
 
     def add_widget(self, toolkit_widget):
         # do the logic of adding the widget to the Qt Widget.
-        for widget in toolkit_widget.elements:
+        for widget in toolkit_widget.widgets:
             # if we're dealing with a primitive, just add all the elements to
             # the grid.
             # right now, all primitives are subclasses of the Text class.
             layout = self.input_pane.layout()
             current_row = layout.rowCount()
             if isinstance(widget, Text):
+                print 'adding widget %s' % widget
                 for col_index, qt_widget in enumerate(widget.elements):
                     layout.addWidget(qt_widget, current_row, col_index)
             else:
                 # if we're dealing with a group which will eventually contain
                 # elements
+                print 'adding non-primitive %s from %s' % (widget,
+                        toolkit_widget)
                 num_cols = layout.columnCount()
-                layout.addWidget(qt_widget, current_row, 0, rowSpan=1,
-                        columnSpan=num_cols)
+                layout.addWidget(widget, current_row, 0, 1, num_cols)

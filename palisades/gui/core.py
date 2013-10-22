@@ -25,7 +25,7 @@ class Group(UIObject):
         # create the elements here.  Elements should probably only ever be
         # created once, not dynamically (though they could be hidden/revealed
         # dynamically), so no need for a separate function.
-        for contained_elem in core_element.elements:
+        for contained_item in core_element.elements:
             # Assume we're only adding a primitive element at the moment.
             # TODO: make sure this works for Groups as well.
             self.widget.add_element(contained_item)
@@ -89,7 +89,7 @@ class Form(UIObject):
         self.window.submit_pressed.register(self.element.submit)
         #TODO: Add more communicators here ... menu item actions?
 
-   def add_widget(self, new_widget)):
+    def add_widget(self, new_widget):
        # add the GUI widget here by calling down to the Form's function to do
        # the same.  This is a wrapper function in accordance with the Law of
        # Demeter (see Pragmatic Programmer)

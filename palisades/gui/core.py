@@ -5,7 +5,7 @@ class Application(object):
         object.__init__(self)
         self.app = toolkit.Application()
 
-    def add_window(self, form_ptr, element_structure):
+    def add_window(self, form_ptr):
         """Add a window with the appropriate structure of elements.  Assume it's
         a form for now."""
         form = Form(form_ptr)
@@ -64,7 +64,7 @@ class File(Text):
         ]
 
 class Form(UIObject):
-    def __init__(self, core_element, elements):
+    def __init__(self, core_element):
         UIObject.__init__(self, core_element)
 
         self.window = toolkit.FormWindow()
@@ -74,10 +74,18 @@ class Form(UIObject):
             'Text': Text,
         }
 
-        for element in elements:
+        # loop through all the elements in the form.
+        for element in core_element._elements:
             # get the correct element type for the new object using the new
             # element's object's string class name.
             new_element = registry[element.__class__.__name__](element)
+            self.add_widget(new_element)
 
         self.window.submit_pressed.register(self.element.submit)
         #TODO: Add more communicators here ... menu item actions?
+
+   def add_widget(self, new_widget)):
+       # add the GUI widget here by calling down to the Form's function to do
+       # the same.  This is a wrapper function in accordance with the Law of
+       # Demeter (see Pragmatic Programmer)
+       self.window.add_widget(new_widget)

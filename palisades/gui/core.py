@@ -20,11 +20,15 @@ class UIObject(object):
 class Group(UIObject):
     def __init__(self, core_element):
         UIObject.__init__(self, core_element)
+        self.widget = toolkit.Group()
 
         # create the elements here.  Elements should probably only ever be
         # created once, not dynamically (though they could be hidden/revealed
         # dynamically), so no need for a separate function.
-
+        for contained_elem in core_element.elements:
+            # Assume we're only adding a primitive element at the moment.
+            # TODO: make sure this works for Groups as well.
+            self.widget.add_element(contained_item)
 
 class Text(UIObject):
     def __init__(self, core_element):
@@ -72,6 +76,7 @@ class Form(UIObject):
         registry = {
             'File': File,
             'Text': Text,
+            'Group': Group,
         }
 
         # loop through all the elements in the form.

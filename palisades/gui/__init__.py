@@ -12,6 +12,6 @@ from palisades.gui import core
 def build(form_ptr):
     # Create a new GUI Window object
     # Return the new Window object
-    app = core.Application()
+    app = core.ApplicationGUI()
     app.add_window(form_ptr)
     return app

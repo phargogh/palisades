@@ -1,6 +1,6 @@
 from palisades.gui import qt4 as toolkit
 
-class Application(object):
+class ApplicationGUI(object):
     def __init__(self):
         object.__init__(self)
         self.app = toolkit.Application()
@@ -9,7 +9,7 @@ class Application(object):
     def add_window(self, form_ptr):
         """Add a window with the appropriate structure of elements.  Assume it's
         a form for now."""
-        self.windows.append(Form(form_ptr))
+        self.windows.append(FormGUI(form_ptr))
 
     def execute(self):
         self.app.execute()
@@ -18,7 +18,7 @@ class UIObject(object):
     def __init__(self, core_element):
         self.element = core_element
 
-class Group(UIObject):
+class GroupGUI(UIObject):
     def __init__(self, core_element):
         UIObject.__init__(self, core_element)
         self.widget = toolkit.Group()
@@ -31,7 +31,7 @@ class Group(UIObject):
             # TODO: make sure this works for Groups as well.
             self.widget.add_element(contained_item)
 
-class Text(UIObject):
+class TextGUI(UIObject):
     def __init__(self, core_element):
         UIObject.__init__(self, core_element)
 
@@ -55,9 +55,9 @@ class Text(UIObject):
         # I'm deliberately deciding to not care about when the core's value is
         # changed programmatically while a UI is active.
 
-class File(Text):
+class FileGUI(TextGUI):
     def __init__(self, core_element):
-        Text.__init__(self, core_element)
+        TextGUI.__init__(self, core_element)
 
         self._file_button = toolkit.FileButton()
         self.widgets = [
@@ -68,16 +68,16 @@ class File(Text):
             self._help_button,
         ]
 
-class Form(UIObject):
+class FormGUI(UIObject):
     def __init__(self, core_element):
         UIObject.__init__(self, core_element)
 
         self.window = toolkit.FormWindow()
         #TODO: add all the necessary elements here to the form.
         registry = {
-            'File': File,
-            'Text': Text,
-            'Group': Group,
+            'File': FileGUI,
+            'Text': TextGUI,
+            'Group': GroupGUI,
         }
 
         # loop through all the elements in the form.

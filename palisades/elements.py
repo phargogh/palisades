@@ -74,15 +74,10 @@ def get_elements_list(group_pointer):
 
 # Assume this is a window for a moment.
 class Application(object):
-    def __init__(self, config_uri, gui=None):
+    def __init__(self, config_uri):
         # if GUI is None, have to visual display.
         configuration = fileio.read_config(config_uri)
         self._window = Form(configuration)
-
-        if gui is not None:
-            self.ui = palisades.gui.build(get_elements_list(self._window))
-        else:
-            self.ui = None
 
 class Element(object):
     """Element contains the core logic and interactivity required by all

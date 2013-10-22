@@ -4,11 +4,12 @@ class Application(object):
     def __init__(self):
         object.__init__(self)
         self.app = toolkit.Application()
+        self.windows = []
 
     def add_window(self, form_ptr):
         """Add a window with the appropriate structure of elements.  Assume it's
         a form for now."""
-        form = Form(form_ptr)
+        self.windows.append(Form(form_ptr))
 
     def execute(self):
         self.app.execute()
@@ -50,7 +51,7 @@ class Text(UIObject):
 
         # when the text is modified in the textfield, call down to the element
         # to set the text
-        self._text_field.changed.register(self.element.set_value)
+        self._text_field.value_changed.register(self.element.set_value)
         # I'm deliberately deciding to not care about when the core's value is
         # changed programmatically while a UI is active.
 
@@ -80,7 +81,7 @@ class Form(UIObject):
         }
 
         # loop through all the elements in the form.
-        for element in core_element._elements:
+        for element in core_element.elements:
             # get the correct element type for the new object using the new
             # element's object's string class name.
             new_element = registry[element.__class__.__name__](element)

@@ -14,3 +14,4 @@ def build(form_ptr):
     # Return the new Window object
     app = core.Application()
     app.add_window(form_ptr)
+    return app

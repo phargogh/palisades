@@ -1,5 +1,18 @@
 from palisades.gui import qt4 as toolkit
 
+class Application(object):
+    def __init__(self):
+        object.__init__(self)
+        self.app = toolkit.Application()
+
+    def add_window(self, form_ptr, element_structure):
+        """Add a window with the appropriate structure of elements.  Assume it's
+        a form for now."""
+        form = Form(form_ptr)
+
+    def execute(self):
+        self.app.execute()
+
 class UIObject(object):
     def __init__(self, core_element):
         self.element = core_element
@@ -51,9 +64,20 @@ class File(Text):
         ]
 
 class Form(UIObject):
-    def __init__(self, core_element):
+    def __init__(self, core_element, elements):
         UIObject.__init__(self, core_element)
 
         self.window = toolkit.FormWindow()
+        #TODO: add all the necessary elements here to the form.
+        registry = {
+            'File': File,
+            'Text': Text,
+        }
+
+        for element in elements:
+            # get the correct element type for the new object using the new
+            # element's object's string class name.
+            new_element = registry[element.__class__.__name__](element)
+
         self.window.submit_pressed.register(self.element.submit)
         #TODO: Add more communicators here ... menu item actions?

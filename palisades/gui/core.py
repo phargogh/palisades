@@ -57,6 +57,14 @@ class TextGUI(UIObject):
         # I'm deliberately deciding to not care about when the core's value is
         # changed programmatically while a UI is active.
 
+        self.element.validation_completed.register(self._update_validation)
+
+    def _update_validation(self, error_state):
+        # error_state is a tuple of (error_state, error_msg)
+        error, error_msg = error_state
+        self._validation_button.set_error(error_msg, error)
+
+
 class FileGUI(TextGUI):
     def __init__(self, core_element):
         TextGUI.__init__(self, core_element)

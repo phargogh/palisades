@@ -246,6 +246,7 @@ class Primitive(Element):
 
         self._validation_error = error_msg
         print 'validation completed'
+        self.validation_completed.emit(error)
 
 
 class LabeledPrimitive(Primitive):

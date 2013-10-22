@@ -4,7 +4,8 @@ import logging
 
 from palisades import fileio
 from palisades import ui
-from palisades import core
+from palisades import utils
+from palisades.utils import Communicator
 from palisades import validation
 from palisades import execution
 import palisades.gui
@@ -107,11 +108,11 @@ class Element(object):
         self._default_config = {}
 
         # Set up the communicators
-        self.config_changed = core.Communicator()
-        self.interactivity_changed = core.Communicator()
+        self.config_changed = Communicator()
+        self.interactivity_changed = Communicator()
 
         # Render the configuration and save to self.config
-        self.config = core.apply_defaults(configuration, self._default_config)
+        self.config = utils.apply_defaults(configuration, self._default_config)
 
     def set_default_config(self, new_defaults):
         """Add default configuration options to this Element instance's default
@@ -128,7 +129,7 @@ class Element(object):
         Returns nothing."""
 
         self._default_config.update(new_defaults)
-        self.config = core.apply_defaults(self.config, self._default_config)
+        self.config = utils.apply_defaults(self.config, self._default_config)
         self.config_changed.emit(self.config)
 
     def is_enabled(self):
@@ -172,7 +173,8 @@ class Primitive(Element):
         self._validation_error = None
 
         # Set up our Communicator(s)
-        self.value_changed = core.Communicator()
+        self.value_changed = Communicator()
+        self.validation_completed = Communicator()
 
         # update the default configuration
         new_defaults = {
@@ -243,6 +245,7 @@ class Primitive(Element):
             self._valid = False
 
         self._validation_error = error_msg
+        print 'validation completed'
 
 
 class LabeledPrimitive(Primitive):

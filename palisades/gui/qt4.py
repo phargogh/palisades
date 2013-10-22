@@ -176,6 +176,7 @@ class ValidationButton(InformationButton):
 
         try:
             button_icon = self._STATES[state]
+            print button_icon
         except KeyError:
             button_icon = ''
 

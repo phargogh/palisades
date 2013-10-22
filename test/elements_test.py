@@ -2,6 +2,7 @@ import unittest
 import os
 import time
 
+import palisades
 from palisades import elements
 from palisades import validation
 
@@ -19,8 +20,8 @@ class ApplicationTest(unittest.TestCase):
 
     def test_build_application_qt_gui(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
-            'timber_clean.json'), True)
-        gui = palisades.gui.build(ui)
+            'timber_clean.json'))
+        gui = palisades.gui.build(ui._window)
 
 def assert_utf8(string):
     """Assert that the input string is unicode, formatted as UTF-8."""

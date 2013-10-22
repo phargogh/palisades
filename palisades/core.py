@@ -1,10 +1,5 @@
 """This file contains the core logic of the palisade package."""
 
-LAYOUT_VERTICAL_LIST = 1
-LAYOUT_HORIZONTAL_LIST = 2
-LAYOUT_GRID = 3
-
-
 class SignalNotFound(Exception):
     """A custom exception for when a signal was not found."""
     pass

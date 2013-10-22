@@ -5,15 +5,22 @@ import time
 from palisades import elements
 from palisades import validation
 
+from PyQt4.QtGui import QApplication
+
 TEST_DIR = os.path.dirname(__file__)
 IUI_CONFIG = os.path.join(TEST_DIR, 'data', 'iui_config')
 PALISADES_CONFIG = os.path.join(TEST_DIR, 'data', 'palisades_config')
 
 class ApplicationTest(unittest.TestCase):
-    def test_build_application(self):
+    def test_build_application_no_gui(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
             'timber_clean.json'))
         ui._window.submit()
+
+    def test_build_application_qt_gui(self):
+        ui = elements.Application(os.path.join(PALISADES_CONFIG,
+            'timber_clean.json'), True)
+        
 
 def assert_utf8(string):
     """Assert that the input string is unicode, formatted as UTF-8."""

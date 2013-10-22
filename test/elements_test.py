@@ -22,6 +22,7 @@ class ApplicationTest(unittest.TestCase):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
             'timber_clean.json'))
         gui = palisades.gui.build(ui._window)
+        gui.execute()
 
 def assert_utf8(string):
     """Assert that the input string is unicode, formatted as UTF-8."""

@@ -337,22 +337,15 @@ class FormWindow(Empty):
         #add the buttonBox to the window.
         self.layout().addWidget(self.button_box)
 
-    def add_widget(self, toolkit_widget):
-        # do the logic of adding the widget to the Qt Widget.
-        for widget in toolkit_widget.widgets:
-            # if we're dealing with a primitive, just add all the elements to
-            # the grid.
-            # right now, all primitives are subclasses of the Text class.
-            layout = self.input_pane.layout()
-            current_row = layout.rowCount()
-            if isinstance(widget, Text):
-                print 'adding widget %s' % widget
-                for col_index, qt_widget in enumerate(widget.elements):
-                    layout.addWidget(qt_widget, current_row, col_index)
-            else:
-                # if we're dealing with a group which will eventually contain
-                # elements
-                print 'adding non-primitive %s from %s' % (widget,
-                        toolkit_widget)
-                num_cols = layout.columnCount()
-                layout.addWidget(widget, current_row, 0, 1, num_cols)
+    def add_widget(self, gui_object):
+        # do the logic of adding the widgets of the gui_object to the Qt Widget.
+        layout = self.input_pane.layout()
+        current_row = layout.rowCount()
+
+        if isinstance(gui_object, palisades.gui.core.TextGUI):
+            for col_index, qt_widget in enumerate(gui_object.widgets):
+                layout.addWidget(qt_widget, current_row, col_index)
+        else:
+            num_cols = layout.columnCount()
+            layout.addWidget(gui_object.widget, current_row, 0, 1, num_cols)
+

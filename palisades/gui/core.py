@@ -12,6 +12,8 @@ class ApplicationGUI(object):
         self.windows.append(FormGUI(form_ptr))
 
     def execute(self):
+        for window in self.windows:
+            window.show()
         self.app.execute()
 
 class UIObject(object):
@@ -84,11 +86,15 @@ class FormGUI(UIObject):
         for element in core_element.elements:
             # get the correct element type for the new object using the new
             # element's object's string class name.
+            # TODO: if element is a Group, it must create its contained widgets
             new_element = registry[element.__class__.__name__](element)
             self.add_widget(new_element)
 
         self.window.submit_pressed.register(self.element.submit)
         #TODO: Add more communicators here ... menu item actions?
+
+    def show(self):
+        self.window.show()
 
     def add_widget(self, new_widget):
        # add the GUI widget here by calling down to the Form's function to do

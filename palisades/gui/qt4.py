@@ -57,6 +57,10 @@ class Empty(QtGui.QWidget):
             print self.layout()
             print 'not yet implemented'
 
+# currently just a wrapper for the Empty class that has a more appropriate name.
+class Group(Empty):
+    pass
+
 class Button(QtGui.QPushButton):
     _icon = None
     def __init__(self):

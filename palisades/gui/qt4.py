@@ -288,6 +288,7 @@ class FormWindow(Empty):
 
         # Create the QWidget pane for the inputs and add it to the layout.
         self.input_pane = QtGui.QWidget()
+        self.input_pane.setLayout(QtGui.QGridLayout())
         self.layout().addWidget(self.input_pane)
 
         # Create the buttonBox and add it to the layout.
@@ -316,3 +317,21 @@ class FormWindow(Empty):
 
         #add the buttonBox to the window.
         self.layout().addWidget(self.button_box)
+
+    def add_widget(self, toolkit_widget):
+        # do the logic of adding the widget to the Qt Widget.
+        for widget in toolkit_widget.elements:
+            # if we're dealing with a primitive, just add all the elements to
+            # the grid.
+            # right now, all primitives are subclasses of the Text class.
+            layout = self.input_pane.layout()
+            current_row = layout.rowCount()
+            if isinstance(widget, Text):
+                for col_index, qt_widget in enumerate(widget.elements):
+                    layout.addWidget(qt_widget, current_row, col_index)
+            else:
+                # if we're dealing with a group which will eventually contain
+                # elements
+                num_cols = layout.columnCount()
+                layout.addWidget(qt_widget, current_row, 0, rowSpan=1,
+                        columnSpan=num_cols)

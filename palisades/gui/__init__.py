@@ -7,8 +7,10 @@ from palisades.gui import core
 #    elements.Group: core.Group,
 #}
 
-def build(app_structure):
+# app_structure is a list of pointers, or an element in the list can be a nested
+# list of pointers.
+def build(form_ptr, app_structure):
     # Create a new GUI Window object
-    # Recurse through application structure and add elements accordingly
     # Return the new Window object
-    pass
+    app = core.Application()
+    app.add_window(form_ptr, app_structure)

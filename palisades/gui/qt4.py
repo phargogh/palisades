@@ -12,6 +12,14 @@ LAYOUTS = {
 }
 ICONS = os.path.join(os.path.dirname(__file__), 'icons')
 
+class Application(object):
+    def __init__(self):
+        object.__init__(self)
+        self.app = QtGui.QApplication([''])
+
+    def execute(self):
+        self.app.exec_()
+
 class Timer(QtCore.QTimer):
     """This is a wrapper class for the QtCore.QTimer class to allow for a python
     threading.Timer instance and functionality."""
@@ -24,9 +32,6 @@ class Timer(QtCore.QTimer):
 
     def cancel(self):
         self.stop()
-
-class Application():
-    app = QtGui.QApplication([''])
 
 class Empty(QtGui.QWidget):
     def __init__(self, configuration={}, layout=None):

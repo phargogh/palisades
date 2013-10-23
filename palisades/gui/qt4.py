@@ -95,6 +95,8 @@ class InformationButton(Button):
         self.pressed.connect(self.show_info_popup)
         self.setFlat(True)
 
+        self._disabled_icon = QtGui.QIcon('')
+
         # If the user has set "helpText": null in JSON, deactivate.
         if body_text == None:
             self.deactivate()
@@ -114,7 +116,7 @@ class InformationButton(Button):
             its icon."""
         self.setFlat(True)
         self.setEnabled(False)
-        self.setIcon(QtGui.QIcon(''))
+        self.setIcon(self._disabled_icon)
 
     def set_title(self, title_text):
         """Set the title of the InformationPopup text.  title_text is a python
@@ -220,6 +222,11 @@ class Label(QtGui.QLabel):
             is_error - True if there is an error with the associated input, False if not.
 
         Returns nothing."""
+
+        # For some reason, usin this sometimes prints an error message saying 
+        # "QPixmap: It is not safe to use pixmaps outside the GUI thread"
+        # I'm leaving it alone for now, since the application seems to work ok
+        # without it.
         if is_error:
             self.setStyleSheet("QWidget { color: red }")
         else:

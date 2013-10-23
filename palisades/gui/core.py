@@ -1,5 +1,7 @@
 from palisades.gui import qt4 as toolkit
 
+from palisades.validation import V_ERROR
+
 class ApplicationGUI(object):
     def __init__(self):
         object.__init__(self)
@@ -63,7 +65,8 @@ class TextGUI(UIObject):
         # error_state is a tuple of (error_state, error_msg)
         error_msg, error = error_state
         self._validation_button.set_error(error_msg, error)
-
+        self._text_field.set_error(error == V_ERROR)
+        self._label.set_error(error == V_ERROR)
 
 class FileGUI(TextGUI):
     def __init__(self, core_element):

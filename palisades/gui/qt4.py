@@ -214,7 +214,16 @@ class ValidationButton(InformationButton):
         return str(title + message + body + width_table)
 
 class Label(QtGui.QLabel):
-    pass
+    def set_error(self, is_error):
+        """Change the styling of this label according to is_error.
+
+            is_error - True if there is an error with the associated input, False if not.
+
+        Returns nothing."""
+        if is_error:
+            self.setStyleSheet("QWidget { color: red }")
+        else:
+            self.setStyleSheet("QWidget {}")
 
 class TextField(QtGui.QLineEdit):
     def __init__(self, starting_value):
@@ -230,6 +239,17 @@ class TextField(QtGui.QLineEdit):
         emits the value_changed communicator signal."""
         new_value = unicode(qstring_value, 'utf-8')
         self.value_changed.emit(new_value)
+
+    def set_error(self, is_error):
+        """Change the styling of this textfield according to is_error.
+
+            is_error - True if there is an error with the input, False if not.
+
+        Returns nothing."""
+        if is_error:
+            self.setStyleSheet("QWidget { border: 1px solid red }")
+        else:
+            self.setStyleSheet("QWidget {}")
 
 class FileButton(Button):
     _icon = os.path.join(ICONS, 'document-open.png')

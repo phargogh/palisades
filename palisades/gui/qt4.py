@@ -1,4 +1,5 @@
 import os
+import threading
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -18,7 +19,7 @@ class Application(object):
         self.app = QtGui.QApplication([''])
 
     def execute(self):
-        self.app.exec_()
+        return self.app.exec_()
 
 class Timer(QtCore.QTimer):
     """This is a wrapper class for the QtCore.QTimer class to allow for a python
@@ -179,7 +180,6 @@ class ValidationButton(InformationButton):
 
         try:
             button_icon = self._STATES[state]
-            print button_icon
         except KeyError:
             button_icon = self._STATES[None]
 
@@ -216,6 +216,12 @@ class ValidationButton(InformationButton):
         return str(title + message + body + width_table)
 
 class Label(QtGui.QLabel):
+    error_changed = QtCore.pyqtSignal(bool)
+
+    def __init__(self, label_text):
+        QtGui.QLabel.__init__(self, label_text)
+        self.error_changed.connect(self._set_error)
+
     def set_error(self, is_error):
         """Change the styling of this label according to is_error.
 
@@ -227,12 +233,18 @@ class Label(QtGui.QLabel):
         # "QPixmap: It is not safe to use pixmaps outside the GUI thread"
         # I'm leaving it alone for now, since the application seems to work ok
         # without it.
+        self.error_changed.emit(is_error)
+
+
+    def _set_error(self, is_error):
+        print 'current thread: %s' % threading.current_thread()
         if is_error:
             self.setStyleSheet("QWidget { color: red }")
         else:
             self.setStyleSheet("QWidget {}")
 
 class TextField(QtGui.QLineEdit):
+    error_changed = QtCore.pyqtSignal(bool)
     def __init__(self, starting_value):
         QtGui.QLineEdit.__init__(self, starting_value)
 
@@ -240,6 +252,7 @@ class TextField(QtGui.QLineEdit):
         # signals.
         self.value_changed = palisades.core.Communicator()
         self.textChanged.connect(self._value_changed)
+        self.error_changed.connect(self._set_error)
 
     def _value_changed(self, qstring_value):
         """Callback for the TextChanged signal.  Casts to a python string anc
@@ -253,6 +266,10 @@ class TextField(QtGui.QLineEdit):
             is_error - True if there is an error with the input, False if not.
 
         Returns nothing."""
+        self.error_changed.emit(is_error)
+
+    def _set_error(self, is_error):
+        print 'current thread: %s' % threading.current_thread()
         if is_error:
             self.setStyleSheet("QWidget { border: 1px solid red }")
         else:
@@ -261,62 +278,6 @@ class TextField(QtGui.QLineEdit):
 class FileButton(Button):
     _icon = os.path.join(ICONS, 'document-open.png')
 
-
-class Text():
-    elements = []
-
-    def __init__(self, configuration):
-        label_text = configuration['label']
-        self._label = Label(label_text)
-        self._validation_button = ValidationButton(label_text)
-        self._text_field = TextField()
-        self._help_button = InformationButton(label_text)
-
-        self._text_field.setMaximumWidth(configuration['width'])
-
-        self.elements = [
-            self._validation_button,
-            self._label,
-            self._text_field,
-            Empty(),
-            self._help_button
-        ]
-
-    def set_value(self, value):
-        self._text_field.setText(value)
-
-    def set_label(self, value):
-        self._label.setText(value)
-
-    def set_callback(self, callback):
-        self._text_field.textChanged.connect(callback)
-
-    def value(self):
-        return unicode(self._text_field.text(), 'utf-8')
-
-    def set_error(self, error, state):
-        # set the error message in the Qt-style validation button.
-        self._validation_button.set_error(error, state)
-        if self._validation_button.error_state == 'error':
-            self._label.setStyleSheet('color: red')
-            self._text_field.setStyleSheet('border: 1px solid red')
-        else:
-            self._label.setStyleSheet('')
-            self._text_field.setStyleSheet('')
-
-class File(Text):
-
-    def __init__(self, configuration):
-        Text.__init__(self, configuration)
-        self._file_button = FileButton()
-
-        self.elements = [
-            self._validation_button,
-            self._label,
-            self._text_field,
-            self._file_button,
-            self._help_button
-        ]
 
 # TODO: make this a QWidget, and a widget inside this widget's layout be the
 # form with all its element.  This will mean creating wrapper functions for most
@@ -330,6 +291,7 @@ class FormWindow(Empty):
         # The form has two elements arranged vertically: the form window (which
         # may eventually need to be scrollable) and the buttonbox.
         self.setLayout(QtGui.QVBoxLayout())
+        print 'Form layout: %s' % self.layout()
 
         # create communicators.
         self.submit_pressed = palisades.core.Communicator()
@@ -366,15 +328,31 @@ class FormWindow(Empty):
         #add the buttonBox to the window.
         self.layout().addWidget(self.button_box)
 
+    def show(self):
+        print 'showing window'
+        self.setVisible(True)
+        self.input_pane.show()
+        Empty.show(self)
+
     def add_widget(self, gui_object):
         # do the logic of adding the widgets of the gui_object to the Qt Widget.
         layout = self.input_pane.layout()
         current_row = layout.rowCount()
 
+        print 'current thread: %s' % threading.current_thread()
+        print 'adding gui_object %s' % gui_object
         if isinstance(gui_object, palisades.gui.core.TextGUI):
+            print 'item is TextGUI or subclass'
             for col_index, qt_widget in enumerate(gui_object.widgets):
-                layout.addWidget(qt_widget, current_row, col_index)
+                if qt_widget is None:
+                    qt_widget = Empty()
+                qt_widget.setVisible(True)
+                print (qt_widget, current_row, col_index, qt_widget.isVisible())
+                self.input_pane.layout().addWidget(qt_widget, current_row, col_index)
+                qt_widget.show()
         else:
             num_cols = layout.columnCount()
-            layout.addWidget(gui_object.widget, current_row, 0, 1, num_cols)
+            print 'item is group'
+            self.input_pane.layout().addWidget(gui_object.widget, current_row, 0, 1, num_cols)
+            gui_object.widget.show()
 

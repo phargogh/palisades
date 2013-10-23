@@ -2,19 +2,24 @@ from palisades.gui import qt4 as toolkit
 
 from palisades.validation import V_ERROR
 
+import pdb
+
 class ApplicationGUI(object):
     def __init__(self):
         object.__init__(self)
         self.app = toolkit.Application()
         self.windows = []
+        self.window = None
 
     def add_window(self, form_ptr):
         """Add a window with the appropriate structure of elements.  Assume it's
         a form for now."""
-        self.windows.append(FormGUI(form_ptr))
+        self.window = FormGUI(form_ptr)
+        self.windows.append(self.window)
 
     def execute(self):
         for window in self.windows:
+            print window
             window.show()
         self.app.execute()
 
@@ -99,7 +104,7 @@ class FormGUI(UIObject):
             # element's object's string class name.
             # TODO: if element is a Group, it must create its contained widgets
             new_element = registry[element.__class__.__name__](element)
-            self.add_widget(new_element)
+            self.window.add_widget(new_element)
 
         self.window.submit_pressed.register(self.element.submit)
         #TODO: Add more communicators here ... menu item actions?
@@ -107,8 +112,8 @@ class FormGUI(UIObject):
     def show(self):
         self.window.show()
 
-    def add_widget(self, new_widget):
-       # add the GUI widget here by calling down to the Form's function to do
-       # the same.  This is a wrapper function in accordance with the Law of
-       # Demeter (see Pragmatic Programmer)
-       self.window.add_widget(new_widget)
+#    def add_widget(self, new_widget):
+#       # add the GUI widget here by calling down to the Form's function to do
+#       # the same.  This is a wrapper function in accordance with the Law of
+#       # Demeter (see Pragmatic Programmer)
+#       self.window.add_widget(new_widget)

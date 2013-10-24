@@ -16,23 +16,15 @@ LAYOUTS = {
 }
 ICONS = os.path.join(os.path.dirname(__file__), 'icons')
 
-#class Application(object):
-#    def __init__(self):
-#        object.__init__(self)
-#        self.app = QtGui.QApplication([''])
-#
-#    def execute(self):
-#        return self.app.exec_()
-
-class _Application(QtGui.QApplication):
+class Application(object):
     def __init__(self, args=None):
-        QtGui.QApplication.__init__(self, [''])
+        app = QtGui.QApplication.instance()
+        if app is None:
+            app = QtGui.QApplication.__init__(self, [''])
+        self.app = app
 
     def execute(self):
-        self.exec_()
-
-def init_application():
-    return _Application()
+        self.app.exec_()
 
 class Timer(QtCore.QTimer):
     """This is a wrapper class for the QtCore.QTimer class to allow for a python

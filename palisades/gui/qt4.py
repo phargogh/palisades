@@ -478,8 +478,8 @@ class FormWindow(QtGui.QWidget):
 
     def closeEvent(self, event=None):
         print 'closing!'
-        self.deleteLater()
-        event.accept()
+        print 'actually, simulating a Quit press'
+        self._quit_pressed()
 
     def add_widget(self, gui_object):
         # do the logic of adding the widgets of the gui_object to the Qt Widget.

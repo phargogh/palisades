@@ -20,7 +20,7 @@ class Application(object):
     def __init__(self, args=None):
         app = QtGui.QApplication.instance()
         if app is None:
-            app = QtGui.QApplication.__init__(self, [''])
+            app = QtGui.QApplication([''])
         self.app = app
 
     def execute(self):

@@ -199,11 +199,11 @@ class Primitive(Element):
         # If the value of this element has changed, we want to trigger all the
         # elements that requested notification.
         old_value = self.value()
-        if old_value != new_value:
-            self._value = new_value
-            self._valid = None
-            self.value_changed.emit(new_value)
-            self.validate()
+#        if old_value != new_value:
+        self._value = new_value
+        self._valid = None
+        self.value_changed.emit(new_value)
+        self.validate()
 
     def value(self):
         """Get the value of this element."""

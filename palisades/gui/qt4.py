@@ -279,6 +279,7 @@ class TextField(QtGui.QLineEdit):
     def _value_changed(self, qstring_value):
         """Callback for the TextChanged signal.  Casts to a python string anc
         emits the value_changed communicator signal."""
+        qstring_value = self.text()
         new_value = unicode(qstring_value, 'utf-8')
         self.value_changed.emit(new_value)
 
@@ -299,6 +300,20 @@ class TextField(QtGui.QLineEdit):
 
     def set_text(self, new_value):
         self.setText(new_value)
+
+    def contextMenuEvent(self, event=None):
+        """Reimplemented from QtGui.QLineEdit.contextMenuEvent.
+
+        This function allows me to make changes to the context menu when one
+        is requested before I show the menu."""
+        menu = self.createStandardContextMenu()
+        refresh_action = QtGui.QAction('Refresh', menu)
+        refresh_action.setIcon(QtGui.QIcon(os.path.join(ICONS,
+            'refresh.png')))
+        refresh_action.triggered.connect(self._value_changed)
+        menu.addAction(refresh_action)
+        menu.exec_(event.globalPos())
+
 
 class FileButton(Button):
     _icon = os.path.join(ICONS, 'document-open.png')

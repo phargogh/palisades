@@ -8,6 +8,18 @@ from PyQt4 import QtCore
 #from PySide import QtCore
 
 import palisades
+from palisades.gui import ICON_BULB_BIG
+from palisades.gui import ICON_CHECKMARK
+from palisades.gui import ICON_CLOSE
+from palisades.gui import ICON_ENTER
+from palisades.gui import ICON_ERROR
+from palisades.gui import ICON_ERROR_BIG
+from palisades.gui import ICON_FOLDER
+from palisades.gui import ICON_INFO
+from palisades.gui import ICON_REFRESH
+from palisades.gui import ICON_UNDO
+from palisades.gui import ICON_WARN
+from palisades.gui import ICON_WARN_BIG
 from palisades.utils import Communicator
 
 LAYOUTS = {
@@ -99,7 +111,7 @@ class InformationButton(Button):
         the creation of the InformationPopup instance by calling
         self.set_error().
         """
-    _icon = os.path.join(ICONS, 'info.png')
+    _icon = ICON_INFO
 
     def __init__(self, title, body_text=''):
         """This function initializes the InformationPopup class.
@@ -158,9 +170,9 @@ class InformationButton(Button):
         return str(title + body + width_table)
 
 class ValidationButton(InformationButton):
-    _error_icon = os.path.join(ICONS, 'validate-fail.png')
-    _warning_icon = os.path.join(ICONS, 'dialog-warning.png')
-    _pass_icon = os.path.join(ICONS, 'validate-pass.png')
+    _error_icon = ICON_ERROR
+    _warning_icon = ICON_WARN
+    _pass_icon = ICON_CHECKMARK
     _STATES = {
         'error': QtGui.QIcon(_error_icon),
         'warning': QtGui.QIcon(_warning_icon),
@@ -308,15 +320,14 @@ class TextField(QtGui.QLineEdit):
         is requested before I show the menu."""
         menu = self.createStandardContextMenu()
         refresh_action = QtGui.QAction('Refresh', menu)
-        refresh_action.setIcon(QtGui.QIcon(os.path.join(ICONS,
-            'refresh.png')))
+        refresh_action.setIcon(QtGui.QIcon(ICON_REFRESH))
         refresh_action.triggered.connect(self._value_changed)
         menu.addAction(refresh_action)
         menu.exec_(event.globalPos())
 
 
 class FileButton(Button):
-    _icon = os.path.join(ICONS, 'document-open.png')
+    _icon = ICON_FOLDER
 
     def __init__(self):
         Button.__init__(self)
@@ -364,7 +375,7 @@ class InfoDialog(QtGui.QDialog):
         self.setLayout(QtGui.QVBoxLayout())
         self.icon = QtGui.QLabel()
         self.icon.setStyleSheet('QLabel { padding: 10px }')
-        self.set_icon('dialog-error.png')
+        self.set_icon(ICON_ERROR_BIG)
         self.icon.setSizePolicy(QtGui.QSizePolicy.Fixed,
             QtGui.QSizePolicy.Fixed)
         self.title = QtGui.QLabel()
@@ -414,7 +425,7 @@ class WarningDialog(InfoDialog):
     def __init__(self):
         InfoDialog.__init__(self)
         self.set_title('Warning...')
-        self.set_icon('dialog-warning-big.png')
+        self.set_icon(ICON_WARN_BIG)
         self.body.setText('Some inputs cannot be validated and may cause ' +
            'this program to fail.  Continue anyways?')
         self.no_button = QtGui.QPushButton('Back')
@@ -426,7 +437,7 @@ class ConfirmQuitDialog(WarningDialog):
         WarningDialog.__init__(self)
         self.setWindowTitle('Are you sure you want to quit?')
         self.set_title('Really quit?')
-        self.set_icon('dialog-information-2.png')
+        self.set_icon(ICON_BULB_BIG)
         self.body.setText('You will lose any changes to your parameter fields.')
         self.ok_button.setText('Quit')
 
@@ -477,16 +488,13 @@ class FormWindow(QtGui.QWidget):
 
         # Create the buttonBox and add it to the layout.
         self.run_button = QtGui.QPushButton(' Run')
-        self.run_button.setIcon(QtGui.QIcon(os.path.join(ICONS,
-            'dialog-ok.png')))
+        self.run_button.setIcon(QtGui.QIcon(os.path.join(ICON_ENTER)))
 
         self.quit_button = QtGui.QPushButton(' Quit')
-        self.quit_button.setIcon(QtGui.QIcon(os.path.join(ICONS,
-            'dialog-close.png')))
+        self.quit_button.setIcon(QtGui.QIcon(os.path.join(ICON_CLOSE)))
 
         self.reset_button = QtGui.QPushButton(' Reset')
-        self.reset_button.setIcon(QtGui.QIcon(os.path.join(ICONS,
-            'edit-undo.png')))
+        self.reset_button.setIcon(QtGui.QIcon(os.path.join(ICON_UNDO)))
 
         #create the buttonBox (a container for buttons)
         self.button_box = QtGui.QDialogButtonBox()

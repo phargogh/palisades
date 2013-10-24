@@ -101,6 +101,8 @@ class FormGUI(UIObject):
         UIObject.__init__(self, core_element)
 
         self.window = toolkit.FormWindow()
+        self.quit_confirm = toolkit.ConfirmQuitDialog()
+
         #TODO: add all the necessary elements here to the form.
         registry = {
             'File': FileGUI,
@@ -117,10 +119,17 @@ class FormGUI(UIObject):
             self.window.add_widget(new_element)
 
         self.window.submit_pressed.register(self.element.submit)
+        self.window.quit_requested.register(self.close)
         #TODO: Add more communicators here ... menu item actions?
 
     def show(self):
         self.window.show()
+
+    def close(self, data=None):
+        print 'user requested quit'
+        print 'showing dialog'
+        if self.quit_confirm.confirm():
+            self.window.close()
 
 #    def add_widget(self, new_widget):
 #       # add the GUI widget here by calling down to the Form's function to do

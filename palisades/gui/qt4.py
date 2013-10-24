@@ -327,6 +327,96 @@ class FileDialog(QtGui.QFileDialog):
 
         return unicode(filename, 'utf-8')
 
+class InfoDialog(QtGui.QDialog):
+    def __init__(self):
+        QtGui.QDialog.__init__(self)
+        self.messages = []
+        self.resize(400, 200)
+        self.setWindowTitle('Errors exist!')
+        self.setLayout(QtGui.QVBoxLayout())
+        self.icon = QtGui.QLabel()
+        self.icon.setStyleSheet('QLabel { padding: 10px }')
+        self.set_icon('dialog-error.png')
+        self.icon.setSizePolicy(QtGui.QSizePolicy.Fixed,
+            QtGui.QSizePolicy.Fixed)
+        self.title = QtGui.QLabel()
+        self.set_title('Whoops!')
+        self.title.setStyleSheet('QLabel { font: bold 18px }')
+        self.body = QtGui.QLabel()
+        self.body.setWordWrap(True)
+        self.ok_button = QtGui.QPushButton('OK')
+        self.ok_button.clicked.connect(self.accept)
+
+        error_widget = QtGui.QWidget()
+        error_widget.setLayout(QtGui.QHBoxLayout())
+        error_widget.layout().addWidget(self.icon)
+        self.layout().addWidget(error_widget)
+
+        body_widget = QtGui.QWidget()
+        error_widget.layout().addWidget(body_widget)
+        body_widget.setLayout(QtGui.QVBoxLayout())
+        body_widget.layout().addWidget(self.title)
+        body_widget.layout().addWidget(self.body)
+
+        self.button_box = QtGui.QDialogButtonBox()
+        self.button_box.addButton(self.ok_button, QtGui.QDialogButtonBox.AcceptRole)
+        self.layout().addWidget(self.button_box)
+
+    def set_icon(self, uri):
+        self.icon.setPixmap(QtGui.QPixmap(uri))
+
+    def set_title(self, title):
+        self.title.setText(title)
+
+    def set_messages(self, message_list):
+        self.messages = message_list
+
+    def confirm(self):
+        exit_code = self.exec_()
+        if exit_code != 0:
+            return True
+        return False
+
+class WarningDialog(InfoDialog):
+    def __init__(self):
+        InfoDialog.__init__(self)
+        self.set_title('Warning...')
+        self.set_icon('dialog-warning-big.png')
+        self.body.setText('Some inputs cannot be validated and may cause ' +
+           'this program to fail.  Continue anyways?')
+        self.no_button = QtGui.QPushButton('Back')
+        self.no_button.clicked.connect(self.reject)
+        self.button_box.addButton(self.no_button, QtGui.QDialogButtonBox.RejectRole)
+
+class ConfirmQuitDialog(WarningDialog):
+    def __init__(self):
+        WarningDialog.__init__(self)
+        self.setWindowTitle('Are you sure you want to quit?')
+        self.set_title('Really quit?')
+        self.set_icon('dialog-information-2.png')
+        self.body.setText('You will lose any changes to your parameter fields.')
+        self.ok_button.setText('Quit')
+
+class ErrorDialog(InfoDialog):
+    def __init__(self):
+        InfoDialog.__init__(self)
+        self.set_title('Whoops!')
+
+    def showEvent(self, event=None):
+        label_string = '<ul>'
+        for element_tuple in self.messages:
+            label_string += '<li>%s: %s</li>' % element_tuple
+        label_string += '</ul>'
+
+        num_messages = len(self.messages)
+        if num_messages == 1:
+            num_error_string = 'is 1 error'
+        else:
+            num_error_string = 'are %s errors' % num_messages
+
+        self.body.setText(str("There %s that must be resolved" +
+            " before this tool can be run:%s") % (num_error_string, label_string))
+        self.body.setMinimumSize(self.body.sizeHint())
 
 # TODO: make this a QWidget, and a widget inside this widget's layout be the
 # form with all its element.  This will mean creating wrapper functions for most
@@ -344,6 +434,7 @@ class FormWindow(QtGui.QWidget):
 
         # create communicators.
         self.submit_pressed = palisades.core.Communicator()
+        self.quit_requested = Communicator()
 
         # Create the QWidget pane for the inputs and add it to the layout.
         self.input_pane = QtGui.QWidget()
@@ -355,8 +446,8 @@ class FormWindow(QtGui.QWidget):
         self.run_button.setIcon(QtGui.QIcon(os.path.join(ICONS,
             'dialog-ok.png')))
 
-        self.cancel_button = QtGui.QPushButton(' Quit')
-        self.cancel_button.setIcon(QtGui.QIcon(os.path.join(ICONS,
+        self.quit_button = QtGui.QPushButton(' Quit')
+        self.quit_button.setIcon(QtGui.QIcon(os.path.join(ICONS,
             'dialog-close.png')))
 
         self.reset_button = QtGui.QPushButton(' Reset')
@@ -366,16 +457,23 @@ class FormWindow(QtGui.QWidget):
         #create the buttonBox (a container for buttons)
         self.button_box = QtGui.QDialogButtonBox()
         self.button_box.addButton(self.run_button, QtGui.QDialogButtonBox.AcceptRole)
-        self.button_box.addButton(self.cancel_button, QtGui.QDialogButtonBox.RejectRole)
+        self.button_box.addButton(self.quit_button, QtGui.QDialogButtonBox.RejectRole)
         self.button_box.addButton(self.reset_button, QtGui.QDialogButtonBox.ResetRole)
 
         #connect the buttons to their functions.
 #        self.run_button.clicked.connect(self.okPressed)
-#        self.cancel_button.clicked.connect(self.closeWindow)
+        self.quit_button.clicked.connect(self._quit_pressed)
 #        self.reset_button.clicked.connect(self.resetParametersToDefaults)
 
         #add the buttonBox to the window.
         self.layout().addWidget(self.button_box)
+
+    def _quit_pressed(self):
+        print 'quit pressed, emitting'
+        self.quit_requested.emit(True)
+
+    def close(self):
+        QtGui.QWidget.close(self)
 
     def closeEvent(self, event=None):
         print 'closing!'

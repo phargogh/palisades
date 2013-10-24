@@ -8,6 +8,7 @@ from PyQt4 import QtCore
 #from PySide import QtCore
 
 import palisades
+from palisades.utils import Communicator
 
 LAYOUTS = {
     palisades.LAYOUT_VERTICAL: QtGui.QVBoxLayout,
@@ -283,8 +284,48 @@ class TextField(QtGui.QLineEdit):
         else:
             self.setStyleSheet("QWidget {}")
 
+    def set_text(self, new_value):
+        self.setText(new_value)
+
 class FileButton(Button):
     _icon = os.path.join(ICONS, 'document-open.png')
+
+    def __init__(self):
+        Button.__init__(self)
+        self.file_dialog = FileDialog()
+        self.clicked.connect(self._get_file)
+
+        self.file_selected = Communicator()
+
+    def _get_file(self):
+        filename = self.file_dialog.get_file('file')
+        self.file_selected.emit(filename)
+
+class FileDialog(QtGui.QFileDialog):
+    filters = {
+        "all": ["All files (* *.*)"],
+        "EXISTS": ["All files (* *.*)"],
+        "CSV": ["Comma separated value file (*.csv *.CSV)"],
+        "GDAL": ["[GDAL] Arc/Info Binary Grid (hdr.adf HDR.ADF hdr.ADF)",
+                 "[GDAL] Arc/Info ASCII Grid (*.asc *.ASC)",
+                 "[GDAL] GeoTiff (*.tif *.tiff *.TIF *.TIFF)"],
+        "OGR": ["[OGR] ESRI Shapefiles (*.shp *.SHP)"],
+        "DBF": ["[DBF] dBase legacy file (*dbf *.DBF)"],
+    }
+
+    def __init__(self):
+        QtGui.QFileDialog.__init__(self)
+        self.last_filter = QtCore.QString()
+
+    def get_file(self, title, default_folder='~'):
+        default_folder = os.path.expanduser(default_folder)
+        dialog_title = 'Select ' + title
+
+        filename, filter = self.getOpenFileNameAndFilter(
+            self, dialog_title, default_folder, initialFilter=self.last_filter)
+        self.last_filter = filter
+
+        return unicode(filename, 'utf-8')
 
 
 # TODO: make this a QWidget, and a widget inside this widget's layout be the

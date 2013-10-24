@@ -78,6 +78,8 @@ class FileGUI(TextGUI):
         TextGUI.__init__(self, core_element)
 
         self._file_button = toolkit.FileButton()
+        self._file_button.file_selected.register(self._file_selected)
+
         self.widgets = [
             self._validation_button,
             self._label,
@@ -85,6 +87,14 @@ class FileGUI(TextGUI):
             self._file_button,
             self._help_button,
         ]
+
+    def _file_selected(self, new_value):
+        # set the textfield's value
+        self._text_field.set_text(new_value)
+
+        # set the core element's value
+        self.element.set_value(new_value)
+
 
 class FormGUI(UIObject):
     def __init__(self, core_element):

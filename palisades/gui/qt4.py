@@ -302,7 +302,7 @@ class FormWindow(QtGui.QWidget):
         print 'Form layout: %s' % self.layout()
 
         # create communicators.
-#        self.submit_pressed = palisades.core.Communicator()
+        self.submit_pressed = palisades.core.Communicator()
 
         # Create the QWidget pane for the inputs and add it to the layout.
         self.input_pane = QtGui.QWidget()

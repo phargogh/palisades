@@ -17,6 +17,18 @@ LAYOUTS = {
 }
 ICONS = os.path.join(os.path.dirname(__file__), 'icons')
 
+def center_window(window_ptr):
+    """Center a window on whatever screen it appears.
+
+            window_ptr - a pointer to a Qt window, whether an application or a
+                QDialog.
+
+        returns nothing."""
+    geometry = window_ptr.frameGeometry()
+    center = QtGui.QDesktopWidget().availableGeometry().center()
+    geometry.moveCenter(center)
+    window_ptr.move(geometry.topLeft())
+
 class Application(object):
     def __init__(self, args=None):
         app = QtGui.QApplication.instance()
@@ -363,6 +375,11 @@ class InfoDialog(QtGui.QDialog):
         self.button_box.addButton(self.ok_button, QtGui.QDialogButtonBox.AcceptRole)
         self.layout().addWidget(self.button_box)
 
+    def showEvent(self, event=None):
+        center_window(self)
+        print 'showing dialog!'
+        QtGui.QDialog.showEvent(self, event)
+
     def set_icon(self, uri):
         self.icon.setPixmap(QtGui.QPixmap(uri))
 
@@ -418,6 +435,7 @@ class ErrorDialog(InfoDialog):
         self.body.setText(str("There %s that must be resolved" +
             " before this tool can be run:%s") % (num_error_string, label_string))
         self.body.setMinimumSize(self.body.sizeHint())
+        InfoDialog.showEvent(self)
 
 # TODO: make this a QWidget, and a widget inside this widget's layout be the
 # form with all its element.  This will mean creating wrapper functions for most
@@ -468,12 +486,22 @@ class FormWindow(QtGui.QWidget):
 
         #add the buttonBox to the window.
         self.layout().addWidget(self.button_box)
+        self.close_confirmed = False
+
+    def showEvent(self, event):
+        center_window(self)
+        QtGui.QWidget.showEvent(self, event)
 
     def _quit_pressed(self):
         print 'quit pressed, emitting'
-        self.quit_requested.emit(True)
+        if not self.close_confirmed:
+            self.quit_requested.emit(True)
+
 
     def close(self):
+        # If close() is called, we know for sure that we want to close thw
+        # window, no questions asked.
+        self.close_confirmed = True
         QtGui.QWidget.close(self)
 
     def closeEvent(self, event=None):

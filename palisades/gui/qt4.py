@@ -256,6 +256,7 @@ class TextField(QtGui.QLineEdit):
 
     def __init__(self, starting_value):
         QtGui.QLineEdit.__init__(self, starting_value)
+        self.setMinimumWidth(400)
 
         # set up my communicator instances and connect them to the correct Qt
         # signals.

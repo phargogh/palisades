@@ -4,6 +4,9 @@ import threading
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
+#from PySide import QtGui
+#from PySide import QtCore
+
 import palisades
 
 LAYOUTS = {
@@ -13,13 +16,23 @@ LAYOUTS = {
 }
 ICONS = os.path.join(os.path.dirname(__file__), 'icons')
 
-class Application(object):
-    def __init__(self):
-        object.__init__(self)
-        self.app = QtGui.QApplication([''])
+#class Application(object):
+#    def __init__(self):
+#        object.__init__(self)
+#        self.app = QtGui.QApplication([''])
+#
+#    def execute(self):
+#        return self.app.exec_()
+
+class _Application(QtGui.QApplication):
+    def __init__(self, args=None):
+        QtGui.QApplication.__init__(self, [''])
 
     def execute(self):
-        return self.app.exec_()
+        self.exec_()
+
+def init_application():
+    return _Application()
 
 class Timer(QtCore.QTimer):
     """This is a wrapper class for the QtCore.QTimer class to allow for a python
@@ -37,26 +50,26 @@ class Timer(QtCore.QTimer):
 class Empty(QtGui.QWidget):
     def __init__(self, configuration={}, layout=None):
         QtGui.QWidget.__init__(self)
-        if layout is not None:
-            self.set_layout(layout)
+#        if layout is not None:
+#            self.set_layout(layout)
 
-    def set_layout(self, layout):
-        self.setLayout(LAYOUTS[layout]())
+#    def set_layout(self, layout):
+#        self.setLayout(LAYOUTS[layout]())
 
-    def add_element(self, element_ptr, row_index=None):
-        layout = self.layout()
-        if isinstance(layout, QtGui.QGridLayout):
-            if row_index is None:
-                row = layout.rowCount()
-            else:
-                row = row_index
-            for column, sub_element in enumerate(element_ptr.elements):
-                if sub_element.sizeHint().isValid():
-                    sub_element.setMinimumSize(sub_element.sizeHint())
-                layout.addWidget(sub_element, row, column)
-        else:
-            print self.layout()
-            print 'not yet implemented'
+#    def add_element(self, element_ptr, row_index=None):
+#        layout = self.layout()
+#        if isinstance(layout, QtGui.QGridLayout):
+#            if row_index is None:
+#                row = layout.rowCount()
+#            else:
+#                row = row_index
+#            for column, sub_element in enumerate(element_ptr.elements):
+#                if sub_element.sizeHint().isValid():
+#                    sub_element.setMinimumSize(sub_element.sizeHint())
+#                layout.addWidget(sub_element, row, column)
+#        else:
+#            print self.layout()
+#            print 'not yet implemented'
 
 # currently just a wrapper for the Empty class that has a more appropriate name.
 class Group(Empty):
@@ -216,6 +229,7 @@ class ValidationButton(InformationButton):
         return str(title + message + body + width_table)
 
 class Label(QtGui.QLabel):
+    #error_changed = QtCore.Signal(bool)
     error_changed = QtCore.pyqtSignal(bool)
 
     def __init__(self, label_text):
@@ -237,14 +251,16 @@ class Label(QtGui.QLabel):
 
 
     def _set_error(self, is_error):
-        print 'current thread: %s' % threading.current_thread()
+        print 'Label - current thread: %s' % threading.current_thread()
         if is_error:
             self.setStyleSheet("QWidget { color: red }")
         else:
             self.setStyleSheet("QWidget {}")
 
 class TextField(QtGui.QLineEdit):
+    #error_changed = QtCore.Signal(bool)
     error_changed = QtCore.pyqtSignal(bool)
+
     def __init__(self, starting_value):
         QtGui.QLineEdit.__init__(self, starting_value)
 
@@ -269,7 +285,7 @@ class TextField(QtGui.QLineEdit):
         self.error_changed.emit(is_error)
 
     def _set_error(self, is_error):
-        print 'current thread: %s' % threading.current_thread()
+        print 'Textfield - current thread: %s' % threading.current_thread()
         if is_error:
             self.setStyleSheet("QWidget { border: 1px solid red }")
         else:
@@ -282,11 +298,11 @@ class FileButton(Button):
 # TODO: make this a QWidget, and a widget inside this widget's layout be the
 # form with all its element.  This will mean creating wrapper functions for most
 # of the calls to the UI embedded herein.
-class FormWindow(Empty):
+class FormWindow(QtGui.QWidget):
     """A Form is a window where you have a set of inputs that the user fills in
     or configures and then presses 'submit'."""
-    def __init__(self, configuration={}, layout=None):
-        Empty.__init__(self, configuration, layout)
+    def __init__(self):
+        QtGui.QWidget.__init__(self)
 
         # The form has two elements arranged vertically: the form window (which
         # may eventually need to be scrollable) and the buttonbox.
@@ -294,7 +310,7 @@ class FormWindow(Empty):
         print 'Form layout: %s' % self.layout()
 
         # create communicators.
-        self.submit_pressed = palisades.core.Communicator()
+#        self.submit_pressed = palisades.core.Communicator()
 
         # Create the QWidget pane for the inputs and add it to the layout.
         self.input_pane = QtGui.QWidget()
@@ -328,18 +344,17 @@ class FormWindow(Empty):
         #add the buttonBox to the window.
         self.layout().addWidget(self.button_box)
 
-    def show(self):
-        print 'showing window'
-        self.setVisible(True)
-        self.input_pane.show()
-        Empty.show(self)
+    def closeEvent(self, event=None):
+        print 'closing!'
+        self.deleteLater()
+        event.accept()
 
     def add_widget(self, gui_object):
         # do the logic of adding the widgets of the gui_object to the Qt Widget.
         layout = self.input_pane.layout()
         current_row = layout.rowCount()
 
-        print 'current thread: %s' % threading.current_thread()
+        print 'Form - current thread: %s' % threading.current_thread()
         print 'adding gui_object %s' % gui_object
         if isinstance(gui_object, palisades.gui.core.TextGUI):
             print 'item is TextGUI or subclass'

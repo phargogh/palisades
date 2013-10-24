@@ -60,7 +60,7 @@ class TextGUI(UIObject):
 
         # when the text is modified in the textfield, call down to the element
         # to set the text
-        self._text_field.value_changed.register(self.element.set_value)
+#        self._text_field.value_changed.register(self.element.set_value)
         # I'm deliberately deciding to not care about when the core's value is
         # changed programmatically while a UI is active.
 
@@ -106,7 +106,7 @@ class FormGUI(UIObject):
             new_element = registry[element.__class__.__name__](element)
             self.window.add_widget(new_element)
 
-        self.window.submit_pressed.register(self.element.submit)
+        #self.window.submit_pressed.register(self.element.submit)
         #TODO: Add more communicators here ... menu item actions?
 
     def show(self):

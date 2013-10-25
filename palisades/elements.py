@@ -3,19 +3,13 @@ import threading
 import logging
 
 from palisades import fileio
-from palisades import ui
 from palisades import utils
 from palisades.utils import Communicator
 from palisades import validation
 from palisades import execution
 import palisades.gui
 
-DISPLAYS = {
-    'Qt': ui
-}
 
-
-UI_LIB = ui
 LOGGER = logging.getLogger('elements')
 
 class InvalidData(ValueError):

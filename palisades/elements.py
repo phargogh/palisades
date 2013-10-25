@@ -22,29 +22,6 @@ class InvalidData(ValueError):
 
 class ValidationStarted(RuntimeError): pass
 
-class RepeatingTimer(threading.Thread):
-    """A timer thread that calls a function after n seconds until the cancel()
-    function is called."""
-    def __init__(self, interval, function):
-        threading.Thread.__init__(self)
-        self.interval = interval
-        self.function = function
-        self.finished = threading.Event()
-
-    def cancel(self):
-        """Cancel this timer thread at the next available opportunity.  Returns
-        nothing."""
-        self.finished.set()
-
-    def run(self):
-        while True:
-            self.finished.wait(self.interval)
-            if not self.finished.is_set():
-                self.function()
-            else:
-                # If the thread has been cancelled, break out of the loop
-                break
-
 def get_elements_list(group_pointer):
     """Construct a data structure with pointers to the elements of the group.
 

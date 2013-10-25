@@ -94,3 +94,6 @@ class FreeSpaceTest(unittest.TestCase):
         self.assertEqual(py_available, df_available,
             ('df and python disagree on available disk space. '
             'df:%s vs. py:%s' % (df_available, py_available)))
+
+    def test_free_space_auto_units_smoke(self):
+        fileio.get_free_space(".")

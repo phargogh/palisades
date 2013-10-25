@@ -6,7 +6,7 @@ import datetime
 import sys
 import traceback
 
-from palisades import core
+from palisades.utils import Communicator
 
 logging.basicConfig(format='%(asctime)s %(name)-18s %(threadName)-10s %(levelname)-8s \
      %(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %H:%M:%S ')
@@ -128,8 +128,8 @@ class PythonRunner():
         self.executor = Executor(module, args, func_name, log_file_uri)
         self._checker = threading.Timer(0.1, self._check_executor)
 
-        self.started = core.Communicator()
-        self.finished = core.Communicator()
+        self.started = Communicator()
+        self.finished = Communicator()
 
     def start(self):
         """Start the execution of the thread and the internal status checker.

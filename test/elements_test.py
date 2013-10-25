@@ -39,7 +39,7 @@ class RepeatingTimerTest(unittest.TestCase):
         def new_func():
             return None
 
-        timer = elements.RepeatingTimer(0.1, new_func)
+        timer = palisades.utils.RepeatingTimer(0.1, new_func)
         timer.start()
         time.sleep(0.5)
         timer.cancel()

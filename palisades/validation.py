@@ -2,9 +2,10 @@
 nutshell, this module will validate a value if given a dictionary that
 specifies how the value should be validated."""
 
+import csv
 import os
 import re
-import csv
+import sys
 import threading
 import traceback
 
@@ -20,10 +21,8 @@ except ImportError:
 
 from dbfpy import dbf
 
-import palisades
-import elements
-import core
-
+import palisades.elements
+from palisades.utils import Communicator
 
 # TODO: make these constants used instead of string conventions
 V_PASS = None
@@ -110,7 +109,7 @@ class Validator(Registrar):
         self.validate_funcs = []
         self.thread = None
         self.timer = None
-        self.finished = core.Communicator()
+        self.finished = Communicator()
 
     def validate(self, valid_dict):
         """Validate the element.  This is a two step process: first, all
@@ -133,7 +132,7 @@ class Validator(Registrar):
 
             if self.timer != None and self.timer.is_alive:
                 self.timer.cancel()
-            self.timer = elements.RepeatingTimer(0.01, self._check_thread)
+            self.timer = palisades.elements.RepeatingTimer(0.01, self._check_thread)
 
         self.thread.start()
         self.timer.start()

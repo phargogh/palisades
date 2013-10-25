@@ -21,8 +21,8 @@ except ImportError:
 
 from dbfpy import dbf
 
-import palisades.elements
 from palisades.utils import Communicator
+from palisades.utils import RepeatingTimer
 
 # TODO: make these constants used instead of string conventions
 V_PASS = None
@@ -31,10 +31,10 @@ V_ERROR = 'error'
 
 def get_fields(feature):
     """Return a dict with all fields in the given feature.
-        
+
         feature - an OGR feature.
-        
-        Returns an assembled python dict with a mapping of 
+
+        Returns an assembled python dict with a mapping of
         fieldname -> fieldvalue"""
 
     fields = {}
@@ -132,7 +132,7 @@ class Validator(Registrar):
 
             if self.timer != None and self.timer.is_alive:
                 self.timer.cancel()
-            self.timer = palisades.elements.RepeatingTimer(0.01, self._check_thread)
+            self.timer = RepeatingTimer(0.01, self._check_thread)
 
         self.thread.start()
         self.timer.start()

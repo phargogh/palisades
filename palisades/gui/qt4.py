@@ -284,7 +284,7 @@ class TextField(QtGui.QLineEdit):
 
         # set up my communicator instances and connect them to the correct Qt
         # signals.
-        self.value_changed = palisades.core.Communicator()
+        self.value_changed = Communicator()
         self.textChanged.connect(self._value_changed)
         self.error_changed.connect(self._set_error)
 
@@ -478,7 +478,7 @@ class FormWindow(QtGui.QWidget):
         print 'Form layout: %s' % self.layout()
 
         # create communicators.
-        self.submit_pressed = palisades.core.Communicator()
+        self.submit_pressed = Communicator()
         self.quit_requested = Communicator()
 
         # Create the QWidget pane for the inputs and add it to the layout.

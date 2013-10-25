@@ -1,11 +1,10 @@
-import subprocess
-import logging
-import platform
-import collections
-import shutil
-import os
-import tempfile
 import atexit
+import logging
+import os
+import platform
+import shutil
+import subprocess
+import tempfile
 
 HG_CALL = 'hg log -r . --config ui.report_untrusted=False'
 

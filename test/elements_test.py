@@ -241,14 +241,14 @@ class FileTest(unittest.TestCase):
         # verify that if we set the value with a unicode string,
         # we get a unicode string out
         self.element.set_value(u'aaa')
-        returned_string = self.element.get_value()
+        returned_string = self.element.value()
         self.assertEqual(type(returned_string), unicode)
 
     def test_set_value_ascii(self):
         #Verify that if we set the value with an ascii string,
         # we get a unicode string out
         self.element.set_value('aaa')
-        returned_string = self.element.get_value()
+        returned_string = self.element.value()
         self.assertEqual(type(returned_string), unicode)
 
 class GroupTest(unittest.TestCase):

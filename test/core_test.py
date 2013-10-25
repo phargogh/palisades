@@ -1,5 +1,7 @@
+import time
 import unittest
 
+import palisades
 from palisades import utils
 from palisades import elements
 
@@ -24,44 +26,21 @@ class CommunicatorTest(unittest.TestCase):
     def test_remove_fails(self):
         self.a.register(self.b.print_something)
         self.a.remove(self.b.print_something)
-        self.assertRaises(core.SignalNotFound, self.a.remove, self.b.print_something)
+        self.assertRaises(utils.SignalNotFound, self.a.remove, self.b.print_something)
 
-class ElementTest(unittest.TestCase):
-    class Incrementer(object):
-        counter = 0
-        def increment(self):
-            self.counter += 1
+class RepeatingTimerTest(unittest.TestCase):
+    def test_timer_smoke(self):
+        """Run the timer and cancel it after a little while."""
 
-    def setUp(self):
-        self.counter = self.Incrementer()
-        self.element = elements.Primitive({})
+        def new_func():
+            return None
 
-    def test_set_value(self):
-        self.element.register(self.counter.increment)
-        self.element.set_value('aaa') # increment
-        self.assertEqual(self.counter.counter, 1)
-
-        self.element.set_value('aaa')  # no increment
-        self.assertEqual(self.counter.counter, 1)
-
-        self.element.set_value('b')  # increment
-        self.assertEqual(self.counter.counter, 2)
-
-    def test_is_enabled(self):
-        self.assertEqual(self.element.is_enabled(), True)
-        self.element.disable()
-        self.assertEqual(self.element.is_enabled(), False)
-        self.element.enable()
-        self.assertEqual(self.element.is_enabled(), True)
-
-    def test_set_value_when_disabled(self):
-        self.assertEqual(self.element.is_enabled(), True)
-        self.element.set_value('aaa')
-        self.assertEqual(self.element.value(), 'aaa')
-        self.element.disable()
-        self.element.set_value('bbb')
-        self.assertEqual(self.element.value(), 'aaa')
-
+        timer = palisades.utils.RepeatingTimer(0.1, new_func)
+        timer.start()
+        time.sleep(0.5)
+        timer.cancel()
+        time.sleep(0.2)
+        self.assertEqual(timer.is_alive(), False)
 
 class CoreTest(unittest.TestCase):
     """A test class for functions found in palisades.core."""
@@ -81,7 +60,7 @@ class CoreTest(unittest.TestCase):
             'a': 'custom_value',
             'b': 'another'
         }
-        self.assertEqual(core.apply_defaults(test_configuration, defaults),
+        self.assertEqual(utils.apply_defaults(test_configuration, defaults),
             expected_result)
 
         duplicates_replaced_result = {
@@ -89,24 +68,7 @@ class CoreTest(unittest.TestCase):
             'a': 'test_value',
             'b': 'another',
         }
-        self.assertEqual(core.apply_defaults(test_configuration, defaults,
+        self.assertEqual(utils.apply_defaults(test_configuration, defaults,
             False), duplicates_replaced_result)
 
-class FileTest(unittest.TestCase):
-    def setUp(self):
-        self.element = core.File()
-
-    def test_set_value_utf8(self):
-        # verify that if we set the value with a unicode string,
-        # we get a unicode string out
-        self.element.set_value(u'aaa')
-        returned_string = self.element.get_value()
-        self.assertEqual(type(returned_string), unicode)
-
-    def test_set_value_ascii(self):
-        #Verify that if we set the value with an ascii string,
-        # we get a unicode string out
-        self.element.set_value('aaa')
-        returned_string = self.element.get_value()
-        self.assertEqual(type(returned_string), unicode)
 

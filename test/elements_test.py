@@ -33,19 +33,6 @@ def assert_utf8(string):
     except UnicodeError:
         raise AssertionError('String is not UTF-8')
 
-class RepeatingTimerTest(unittest.TestCase):
-    def test_timer_smoke(self):
-        """Run the timer and cancel it after a little while."""
-        def new_func():
-            return None
-
-        timer = palisades.utils.RepeatingTimer(0.1, new_func)
-        timer.start()
-        time.sleep(0.5)
-        timer.cancel()
-        time.sleep(0.2)
-        self.assertEqual(timer.is_alive(), False)
-
 class ElementTest(unittest.TestCase):
     """This is a base class for the simplest possible element object."""
     def setUp(self):
@@ -249,6 +236,20 @@ class FileTest(unittest.TestCase):
 
         self.element.set_value('~/%s' % new_file)
         self.assertEqual(self.element.value(), os.path.join(home_dir, new_file))
+
+    def test_set_value_utf8(self):
+        # verify that if we set the value with a unicode string,
+        # we get a unicode string out
+        self.element.set_value(u'aaa')
+        returned_string = self.element.get_value()
+        self.assertEqual(type(returned_string), unicode)
+
+    def test_set_value_ascii(self):
+        #Verify that if we set the value with an ascii string,
+        # we get a unicode string out
+        self.element.set_value('aaa')
+        returned_string = self.element.get_value()
+        self.assertEqual(type(returned_string), unicode)
 
 class GroupTest(unittest.TestCase):
     def setUp(self):

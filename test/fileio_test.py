@@ -1,5 +1,7 @@
+import subprocess
 import unittest
 import os
+import platform
 
 from palisades import fileio
 
@@ -46,3 +48,22 @@ class PythonSavingTest(unittest.TestCase):
                 pass
             else:
                 self.assertEqual(out_msg, reg_msg)
+
+class FreeSpaceTest(unittest.TestCase):
+    @unittest.skipUnless(platform.system() == 'Linux', 'Test requires Linux')
+    def test_free_space(self):
+        # get the fileio estimate of available disk space and strip off the
+        # units returned.
+        space_string = fileio.get_free_space(".", unit='B')
+        py_available = int(float(space_string.split(' ')[0]))
+
+        df = subprocess.Popen(["df", "."], stdout=subprocess.PIPE)
+        df_output = df.communicate()[0]
+        device, size, used, df_available, percent, mountpoint = \
+            df_output.split("\n")[1].split()
+
+        df_available = int(df_available)
+
+        self.assertEqual(py_available, df_available,
+            ('df and python disagree on available disk space.'
+            'df:%s vs. py:%s' % (df_available, py_available)))

@@ -65,5 +65,32 @@ class FreeSpaceTest(unittest.TestCase):
         df_available = int(df_available)
 
         self.assertEqual(py_available, df_available,
-            ('df and python disagree on available disk space.'
+            ('df and python disagree on available disk space. '
+            'df:%s vs. py:%s' % (df_available, py_available)))
+
+    @unittest.skipUnless(platform.system() == 'Linux', 'Test requires Linux')
+    def test_free_space_new_folder(self):
+        new_folder = os.path.join(os.path.dirname(__file__), 'new_folder')
+
+        # verify the new folder does not yet exist
+        self.assertEqual(os.path.exists(new_folder), False)
+
+        folder = os.path.abspath(new_folder)
+        while not os.path.ismount(folder):
+            folder = os.path.dirname(folder)
+
+        # get the disk space available in the current directory.
+        df = subprocess.Popen(["df", folder], stdout=subprocess.PIPE)
+        df_output = df.communicate()[0]
+        device, size, used, df_available, percent, mountpoint = \
+            df_output.split("\n")[1].split()
+
+        df_available = int(df_available)
+
+        # get the disk space from python
+        available = fileio.get_free_space(new_folder, unit='B')
+        py_available = int(float(available.split(' ')[0]))
+
+        self.assertEqual(py_available, df_available,
+            ('df and python disagree on available disk space. '
             'df:%s vs. py:%s' % (df_available, py_available)))

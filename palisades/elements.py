@@ -275,10 +275,27 @@ class File(Text):
         absolute_path = os.path.abspath(os.path.expanduser(new_value))
         Text.set_value(self, absolute_path)
 
+class Static(Element):
+    def _init__(self, configuration):
+        Element.__init__(self, configuration)
+        new_defaults = {
+            'returns': None
+        }
+
+        # TODO: why is this not setting the defualt dictionary?
+        self.set_default_config(new_defaults)
+
+    def value(self):
+        try:
+            return self.config['returns']
+        except KeyError:
+            return
+
 ELEMENTS = {
     'file': File,
     'folder': File,
-    'text': Text
+    'text': Text,
+    'hidden': Static,
 }
 
 class Group(Element):

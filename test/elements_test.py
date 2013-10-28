@@ -282,6 +282,21 @@ class GroupTest(unittest.TestCase):
         self.assertEqual(group._elements[0].__class__, elements.File)
         self.assertEqual(group._elements[1].__class__, elements.Text)
 
+class StaticTest(unittest.TestCase):
+    def test_static_defaults(self):
+        element = elements.Static({})
+        self.assertEqual(element.value(), None)
+
+    def test_returns_string(self):
+        value = "hello world!"
+        element = elements.Static({'returns': value})
+        self.assertEqual(element.value(), value)
+
+    def test_returns_dict(self):
+        value = {"a":1}
+        element = elements.Static({'returns': value})
+        self.assertEqual(element.value(), value)
+
 class FormTest(unittest.TestCase):
     def setUp(self):
         self.timber_clean = os.path.join(PALISADES_CONFIG, 'timber_clean.json')

@@ -291,6 +291,13 @@ class Static(Element):
         except KeyError:
             return
 
+class Label(Static):
+    def __init__(self, configuration):
+        new_defaults = {
+            'label': ''
+        }
+        self.set_default_config(new_defaults)
+
 ELEMENTS = {
     'file': File,
     'folder': File,

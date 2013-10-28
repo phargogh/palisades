@@ -173,16 +173,16 @@ class ValidationButton(InformationButton):
     _error_icon = ICON_ERROR
     _warning_icon = ICON_WARN
     _pass_icon = ICON_CHECKMARK
-    _STATES = {
-        'error': QtGui.QIcon(_error_icon),
-        'warning': QtGui.QIcon(_warning_icon),
-        'pass': QtGui.QIcon(_pass_icon),
-        None: QtGui.QIcon(''),
-    }
 
     def __init__(self, title, body_text=''):
         """Initialize the ErrorPopup object.  Adding the self.error_text
         attribute.  Title and body_text are python strings."""
+        self._STATES = {
+            'error': QtGui.QIcon(self._error_icon),
+            'warning': QtGui.QIcon(self._warning_icon),
+            'pass': QtGui.QIcon(self._pass_icon),
+            None: QtGui.QIcon(''),
+        }
         InformationButton.__init__(self, title, body_text)
         self.error_text = ''
         self.error_state = None

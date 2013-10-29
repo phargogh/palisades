@@ -320,6 +320,34 @@ class LabelTest(unittest.TestCase):
         element = elements.Label({'returns': value})
         self.assertEqual(element.value(), value)
 
+    def test_label_func(self):
+        label_string = 'hello world!'
+        config = {
+            'label': label_string,
+        }
+        label_obj = elements.Label(config)
+
+        # assert that the label function gets the correct label string.
+        self.assertEqual(label_obj.label(), label_string)
+
+        # assert that there's a default return value as well.
+        self.assertEqual(label_obj.value(), None)
+
+    def test_label_and_returns(self):
+        label_string = 'hallo Weld!'
+        return_value = 'some_value'
+        config = {
+            'label': label_string,
+            'returns': return_value,
+        }
+        label_obj = elements.Label(config)
+
+        # assert that the label function gets the correct label string
+        self.assertEqual(label_obj.label(), label_string)
+
+        # assert that thtere's the correct return value as well
+        self.assertEqual(label_obj.value(), return_value)
+
 class FormTest(unittest.TestCase):
     def setUp(self):
         self.timber_clean = os.path.join(PALISADES_CONFIG, 'timber_clean.json')

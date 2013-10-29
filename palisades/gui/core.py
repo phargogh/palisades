@@ -45,7 +45,7 @@ class TextGUI(UIObject):
         UIObject.__init__(self, core_element)
 
         label_text = self.element.label()
-        self._label = toolkit.Label(label_text)
+        self._label = toolkit.ElementLabel(label_text)
         self._validation_button = toolkit.ValidationButton(label_text)
         self._text_field = toolkit.TextField(self.element.value())
         self._help_button = toolkit.InformationButton(label_text)

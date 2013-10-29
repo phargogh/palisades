@@ -248,12 +248,19 @@ class ValidationButton(InformationButton):
         return str(title + message + body + width_table)
 
 class Label(QtGui.QLabel):
+    def __init__(self, label_text):
+        QtGui.QLabel.__init__(self, label_text)
+        self.setTextFormat(QtCore.Qt.RichText)
+        self.setWordWrap(True)
+
+class ElementLabel(QtGui.QLabel):
     #error_changed = QtCore.Signal(bool)
     error_changed = QtCore.pyqtSignal(bool)
 
     def __init__(self, label_text):
         QtGui.QLabel.__init__(self, label_text)
         self.error_changed.connect(self._set_error)
+        self.setWordWrap(False)
 
     def set_error(self, is_error):
         """Change the styling of this label according to is_error.

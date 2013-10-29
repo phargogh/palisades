@@ -276,23 +276,20 @@ class File(Text):
         Text.set_value(self, absolute_path)
 
 class Static(Element):
-    def _init__(self, configuration):
+    def __init__(self, configuration):
         Element.__init__(self, configuration)
         new_defaults = {
             'returns': None
         }
 
-        # TODO: why is this not setting the defualt dictionary?
         self.set_default_config(new_defaults)
 
     def value(self):
-        try:
-            return self.config['returns']
-        except KeyError:
-            return
+        return self.config['returns']
 
 class Label(Static):
     def __init__(self, configuration):
+        Static.__init__(self, configuration)
         new_defaults = {
             'label': ''
         }

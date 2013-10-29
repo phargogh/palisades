@@ -8,6 +8,7 @@ from PyQt4 import QtCore
 #from PySide import QtCore
 
 import palisades
+import palisades.gui
 from palisades.gui import ICON_BULB_BIG
 from palisades.gui import ICON_CHECKMARK
 from palisades.gui import ICON_CLOSE
@@ -540,7 +541,9 @@ class FormWindow(QtGui.QWidget):
 
         print 'Form - current thread: %s' % threading.current_thread()
         print 'adding gui_object %s' % gui_object
-        if isinstance(gui_object, palisades.gui.core.TextGUI):
+        # If the item has a widgets attribute that is a list, we assume that we
+        # want to add widgets to the UI in that order.
+        if isinstance(gui_object.widgets, list):
             print 'item is TextGUI or subclass'
             for col_index, qt_widget in enumerate(gui_object.widgets):
                 if qt_widget is None:
@@ -549,9 +552,13 @@ class FormWindow(QtGui.QWidget):
                 print (qt_widget, current_row, col_index, qt_widget.isVisible())
                 self.input_pane.layout().addWidget(qt_widget, current_row, col_index)
                 qt_widget.show()
+        # If the item's widgets attribute is not a list (it's assumed to be a
+        # toolkit widget), then we want to add that widget to span the whole of a
+        # single row.
         else:
+            widget = gui_object.widgets  # renaming var to clarify.
             num_cols = layout.columnCount()
-            print 'item is group'
-            self.input_pane.layout().addWidget(gui_object.widget, current_row, 0, 1, num_cols)
-            gui_object.widget.show()
+            print 'item spans the whole row.'
+            self.input_pane.layout().addWidget(widget, current_row, 0, 1, num_cols)
+            widget.show()
 

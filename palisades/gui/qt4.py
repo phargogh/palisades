@@ -375,6 +375,18 @@ class FileDialog(QtGui.QFileDialog):
 
         return unicode(filename, 'utf-8')
 
+class Dropdown(QtGui.QComboBox):
+    def __init__(self, options):
+        QtGui.QComboBox.__init__(self)
+        for option in options:
+            self.addItem(option)
+
+        # create the value_changed communicator and connect the
+        # current_index_changed slot.  the slot passes the int index of the new
+        # current index, so that should just work as expected.
+        self.value_changed = Communicator()
+        self.currentIndexChanged.connect(self.value_changed.emit)
+
 class InfoDialog(QtGui.QDialog):
     def __init__(self):
         QtGui.QDialog.__init__(self)

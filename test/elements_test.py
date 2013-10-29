@@ -297,6 +297,23 @@ class StaticTest(unittest.TestCase):
         element = elements.Static({'returns': value})
         self.assertEqual(element.value(), value)
 
+class LabelTest(unittest.TestCase):
+    def test_static_defaults(self):
+        element = elements.Label({})
+        self.assertEqual(element.value(), None)
+
+        self.assertEqual(element.config, {'label': '', 'returns': None})
+
+    def test_returns_string(self):
+        value = "hello world!"
+        element = elements.Label({'returns': value})
+        self.assertEqual(element.value(), value)
+
+    def test_returns_dict(self):
+        value = {"a":1}
+        element = elements.Label({'returns': value})
+        self.assertEqual(element.value(), value)
+
 class FormTest(unittest.TestCase):
     def setUp(self):
         self.timber_clean = os.path.join(PALISADES_CONFIG, 'timber_clean.json')

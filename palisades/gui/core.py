@@ -113,6 +113,7 @@ class FormGUI(UIObject):
             'Text': TextGUI,
             'Group': GroupGUI,
             'Label': LabelGUI,
+            'Static': None,  # None means no GUI display.
         }
 
         # loop through all the elements in the form.
@@ -120,8 +121,17 @@ class FormGUI(UIObject):
             # get the correct element type for the new object using the new
             # element's object's string class name.
             # TODO: if element is a Group, it must create its contained widgets
-            new_element = registry[element.__class__.__name__](element)
-            self.window.add_widget(new_element)
+            try:
+                element_classname = element.__class__.__name__
+                new_element = registry[element_classname](element)
+            except TypeError:
+                # Happens when the element's GUI representation in registry is
+                # None, meaning that there should not be a GUI display.
+                new_element = None
+
+            # If the new element is None, there's no visualization.  Skip.
+            if new_element is not None:
+                self.window.add_widget(new_element)
 
         self.window.submit_pressed.register(self.element.submit)
         self.window.quit_requested.register(self.close)

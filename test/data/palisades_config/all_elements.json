@@ -86,6 +86,12 @@
             "helpText" : "The market discount rate reflects societys preference for immediate benefits over future benefits (e.g., would you rather receive $10 today or $10 five years from now?)."
         },
         {
+            "id": "sample_hidden",
+            "args_id": "hidden_value",
+            "type": "hidden",
+            "returns": "returned a value!"
+        },
+        {
             "id": "sample_label",
             "args_id": "sample_label",
             "type": "label",

@@ -95,6 +95,25 @@ class FileGUI(TextGUI):
         # set the core element's value
         self.element.set_value(new_value)
 
+class DropdownGUI(UIObject):
+    def __init__(self, core_element):
+        UIObject.__init__(self, core_element)
+
+        label_text = self.element.label()
+        self._label = toolkit.ElementLabel(label_text)
+        self._dropdown = toolkit.Dropdown(self.element.options)
+        self._help_button = toolkit.InformationButton(label_text)
+
+        self.widgets = [
+            None,
+            self._label,
+            self._dropdown,
+            None,
+            self._help_button
+        ]
+
+        self._dropdown.value_changed.register(self.element.set_value)
+
 class LabelGUI(UIObject):
     def __init__(self, core_element):
         UIObject.__init__(self, core_element)
@@ -114,6 +133,7 @@ class FormGUI(UIObject):
             'Group': GroupGUI,
             'Label': LabelGUI,
             'Static': None,  # None means no GUI display.
+            'Dropdown': DropdownGUI,
         }
 
         # loop through all the elements in the form.

@@ -95,6 +95,10 @@ class FileGUI(TextGUI):
         # set the core element's value
         self.element.set_value(new_value)
 
+class LabelGUI(UIObject):
+    def __init__(self, core_element):
+        UIObject.__init__(self, core_element)
+        self.widgets = toolkit.Label(self.element.label())
 
 class FormGUI(UIObject):
     def __init__(self, core_element):
@@ -108,6 +112,7 @@ class FormGUI(UIObject):
             'File': FileGUI,
             'Text': TextGUI,
             'Group': GroupGUI,
+            'Label': LabelGUI,
         }
 
         # loop through all the elements in the form.

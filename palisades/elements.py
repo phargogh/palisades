@@ -295,11 +295,15 @@ class Label(Static):
         }
         self.set_default_config(new_defaults)
 
+    def label(self):
+        return self.config['label']
+
 ELEMENTS = {
     'file': File,
     'folder': File,
     'text': Text,
     'hidden': Static,
+    'label': Label,
 }
 
 class Group(Element):

@@ -1,7 +1,5 @@
 import os
 
-#from palisades.gui import core
-
 # A mapping of which UI Elements are configured to work with which GUI classes
 #REPRESENTATIONS = {
 #    elements.Text: core.Text,
@@ -27,9 +25,11 @@ ICON_CHECKMARK = _path('validate-pass.png')
 
 # app_structure is a list of pointers, or an element in the list can be a nested
 # list of pointers.
-#def build(form_ptr):
-#    # Create a new GUI Window object
-#    # Return the new Window object
-#    app = core.ApplicationGUI()
-#    app.add_window(form_ptr)
-#    return app
+def build(form_ptr):
+    from palisades.gui import core
+
+    # Create a new GUI Window object
+    # Return the new Window object
+    app = core.ApplicationGUI()
+    app.add_window(form_ptr)
+    return app

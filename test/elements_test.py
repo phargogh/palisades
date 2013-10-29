@@ -348,6 +348,79 @@ class LabelTest(unittest.TestCase):
         # assert that thtere's the correct return value as well
         self.assertEqual(label_obj.value(), return_value)
 
+class DropdownTest(unittest.TestCase):
+    def test_defaults(self):
+        options = {}
+        dropdown = elements.Dropdown(options)
+        default_options = {
+            'label': u'',
+            'options': [],
+            'returns': 'strings',
+            'validateAs': {'type': 'disabled'},
+        }
+        self.assertEqual(dropdown._default_config, default_options)
+        self.assertEqual(dropdown.options, [])
+        self.assertEqual(dropdown._value, -1)
+        self.assertEqual(dropdown.value(), None)
+
+    def test_set_value(self):
+        """Assert that the correct restrictions are in place on inputs."""
+        config = {
+            'options': ['a', 'b', 'c'],
+        }
+        dropdown = elements.Dropdown(config)
+
+        # verify that no selection has yet been made.
+        self.assertEqual(dropdown.value(), None)
+
+        # set the value to a legitimate index.
+        dropdown.set_value(1)  # 'b', since options is zero-based
+        self.assertEqual(dropdown._value, 1)
+        self.assertEqual(dropdown.value(), 'b')
+
+        # Try to set the value to an illegitimate index
+        self.assertRaises(AssertionError, dropdown.set_value, 'a')
+        self.assertRaises(AssertionError, dropdown.set_value, {})
+        self.assertRaises(AssertionError, dropdown.set_value,
+            len(dropdown.options) + 2)
+        self.assertRaises(AssertionError, dropdown.set_value, [])
+        self.assertRaises(AssertionError, dropdown.set_value, -1)
+        self.assertRaises(AssertionError, dropdown.set_value, -10)
+
+    def test_get_value(self):
+        """Assert the correct output value of a Dropdown (strings)"""
+        config = {
+            'options': ['a', 'b', 'c'],
+            'returns': 'strings',
+        }
+        dropdown = elements.Dropdown(config)
+
+        # verify no selection has yet been made
+        self.assertEqual(dropdown.value(), None)
+
+        # when we set the value, get the correct string.
+        dropdown.set_value(2)
+        self.assertEqual(dropdown.value(), 'c')
+        dropdown.set_value(1)
+        self.assertEqual(dropdown.value(), 'b')
+
+    def test_get_value_ordinals(self):
+        """Assert the correct output value of a Dropdown (ordinals)"""
+        config = {
+            'options': ['a', 'b', 'c'],
+            'returns': 'ordinals',
+        }
+        dropdown = elements.Dropdown(config)
+
+        # verify no selection has yet been made
+        self.assertEqual(dropdown.value(), None)
+
+        # when we set the value, get the correct string.
+        dropdown.set_value(2)
+        self.assertEqual(dropdown.value(), 2)
+        dropdown.set_value(1)
+        self.assertEqual(dropdown.value(), 1)
+
 class FormTest(unittest.TestCase):
     def setUp(self):
         self.timber_clean = os.path.join(PALISADES_CONFIG, 'timber_clean.json')

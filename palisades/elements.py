@@ -1,6 +1,7 @@
 import os
 import threading
 import logging
+from types import *
 
 from palisades import fileio
 from palisades import utils
@@ -237,6 +238,40 @@ class LabeledPrimitive(Primitive):
     def label(self):
         return self._label
 
+class Dropdown(LabeledPrimitive):
+    def __init__(self, configuration):
+        LabeledPrimitive.__init__(self, configuration)
+        new_defaults = {
+            'options': [],
+            'returns': 'strings',
+        }
+        self.set_default_config(new_defaults)
+        assert self.config['returns'] in ['strings', 'ordinals'], (
+            'the "returns" key must be either "strings" or "ordinals", '
+            'not %s' % self.config['returns'])
+
+        self.options = self.config['options']
+        self._value = -1  # the default value, indicating no selection.
+
+    def set_value(self, new_value):
+        assert type(new_value) is IntType, 'Dropdown index must be an int'
+        assert new_value >= 0, 'Dropdown index must be >= 0'
+        assert new_value < len(self.options), 'Dropdown index must exist'
+        LabeledPrimitive.set_value(self, new_value)
+
+    def value(self):
+        # if there are no options to select or the user has not selected an
+        # option, return None.
+        if len(self.options) is 0 or self._value is -1:
+            return None
+
+        # get the value of the currently selected option.
+        return_option = self.config['returns']
+        if return_option is 'strings':
+            return self.options[self._value]
+        else:  # return option is 'ordinals'
+            return self._value
+
 class Text(LabeledPrimitive):
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
@@ -298,12 +333,14 @@ class Label(Static):
     def label(self):
         return self.config['label']
 
+
 ELEMENTS = {
     'file': File,
     'folder': File,
     'text': Text,
     'hidden': Static,
     'label': Label,
+    'dropdown': Dropdown,
 }
 
 class Group(Element):

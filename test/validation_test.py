@@ -145,6 +145,8 @@ class FolderCheckerTester(CheckerTester):
             self.validate_as['value'] = '/etc'
         elif platform.system() == 'Windows':
             self.validate_as['value'] = 'C:\Program Files'
+        elif platform.system() == 'Darwin':
+            self.validate_as['value'] = '/etc'
         else:
             raise Exception('Don\'t know what folder to use as restricted')
 

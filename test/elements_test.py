@@ -353,15 +353,16 @@ class DropdownTest(unittest.TestCase):
         options = {}
         dropdown = elements.Dropdown(options)
         default_options = {
+            'defaultValue': 0,
             'label': u'',
-            'options': [],
+            'options': ['No options specified'],
             'returns': 'strings',
             'validateAs': {'type': 'disabled'},
         }
         self.assertEqual(dropdown._default_config, default_options)
-        self.assertEqual(dropdown.options, [])
-        self.assertEqual(dropdown._value, -1)
-        self.assertEqual(dropdown.value(), 0)
+        self.assertEqual(dropdown.options, default_options['options'])
+        self.assertEqual(dropdown._value, 0)
+        self.assertEqual(dropdown.value(), default_options['options'][0])
 
     def test_set_value(self):
         """Assert that the correct restrictions are in place on inputs."""
@@ -371,7 +372,7 @@ class DropdownTest(unittest.TestCase):
         dropdown = elements.Dropdown(config)
 
         # verify that no selection has yet been made.
-        self.assertEqual(dropdown.value(), None)
+        self.assertEqual(dropdown.current_index(), 0)
 
         # set the value to a legitimate index.
         dropdown.set_value(1)  # 'b', since options is zero-based
@@ -396,7 +397,7 @@ class DropdownTest(unittest.TestCase):
         dropdown = elements.Dropdown(config)
 
         # verify no selection has yet been made
-        self.assertEqual(dropdown.value(), None)
+        self.assertEqual(dropdown.current_index(), 0)
 
         # when we set the value, get the correct string.
         dropdown.set_value(2)
@@ -413,7 +414,7 @@ class DropdownTest(unittest.TestCase):
         dropdown = elements.Dropdown(config)
 
         # verify no selection has yet been made
-        self.assertEqual(dropdown.value(), None)
+        self.assertEqual(dropdown.current_index(), 0)
 
         # when we set the value, get the correct string.
         dropdown.set_value(2)

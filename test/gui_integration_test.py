@@ -130,3 +130,39 @@ class QtFileIntegrationTest(unittest.TestCase):
         QTest.qWait(100)
         self.assertEqual(str(self.gui._text_field.text()), new_path)
         self.assertEqual(self.element.value(), new_path)
+
+class QtDropdownIntegrationTest(unittest.TestCase):
+    def setUp(self):
+        config = {
+            'label': 'A Dropdown',
+            'options': ['a', 'b', 'c'],
+            'defaultValue': 1,
+            'returns': 'strings'
+        }
+        self.element = elements.Dropdown(config)
+        self.gui = core.DropdownGUI(self.element)
+
+    def test_setup(self):
+        """Assert that the options in the dropdown are correct"""
+        # build up a list of entries from the Qt widget.
+        qt_options = [str(self.gui._dropdown.itemText(i)) for i in
+            range(self.gui._dropdown.count())]
+
+        # assert that the options in the Qt widget are the same as the options
+        # specified in the dropdown.
+        self.assertEqual(qt_options, ['a', 'b', 'c'])
+
+        # assert the default index
+        self.assertEqual(self.element.value(), 1, 'default index is not set')
+        self.assertEqual(self.gui._dropdown.currentIndex(), 1)
+
+    def test_select_option(self):
+        """Assert behavior when user selects an option"""
+        # assert the default index is set correctly
+        self.assertEqual(self.element.value(), 1, 'default index is not set')
+
+        # change the index of the GUI widget and check the element value
+        self.gui._dropdown.setCurrentIndex(0)
+        QTest.qWait(50)
+        self.assertEqual(self.element.value(), 0)
+

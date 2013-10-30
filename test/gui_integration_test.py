@@ -153,16 +153,16 @@ class QtDropdownIntegrationTest(unittest.TestCase):
         self.assertEqual(qt_options, ['a', 'b', 'c'])
 
         # assert the default index
-        self.assertEqual(self.element.value(), 1, 'default index is not set')
+        self.assertEqual(self.element.current_index(), 1, 'default index is not set')
         self.assertEqual(self.gui._dropdown.currentIndex(), 1)
 
     def test_select_option(self):
         """Assert behavior when user selects an option"""
         # assert the default index is set correctly
-        self.assertEqual(self.element.value(), 1, 'default index is not set')
+        self.assertEqual(self.element.current_index(), 1, 'default index is not set')
 
         # change the index of the GUI widget and check the element value
         self.gui._dropdown.setCurrentIndex(0)
         QTest.qWait(50)
-        self.assertEqual(self.element.value(), 0)
+        self.assertEqual(self.element.current_index(), 0)
 

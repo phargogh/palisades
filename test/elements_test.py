@@ -361,7 +361,7 @@ class DropdownTest(unittest.TestCase):
         self.assertEqual(dropdown._default_config, default_options)
         self.assertEqual(dropdown.options, [])
         self.assertEqual(dropdown._value, -1)
-        self.assertEqual(dropdown.value(), None)
+        self.assertEqual(dropdown.value(), 0)
 
     def test_set_value(self):
         """Assert that the correct restrictions are in place on inputs."""

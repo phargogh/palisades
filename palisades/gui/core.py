@@ -101,7 +101,8 @@ class DropdownGUI(UIObject):
 
         label_text = self.element.label()
         self._label = toolkit.ElementLabel(label_text)
-        self._dropdown = toolkit.Dropdown(self.element.options)
+        self._dropdown = toolkit.Dropdown(self.element.options,
+            self.element.current_index())
         self._help_button = toolkit.InformationButton(label_text)
 
         self.widgets = [

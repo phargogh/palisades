@@ -376,7 +376,7 @@ class FileDialog(QtGui.QFileDialog):
         return unicode(filename, 'utf-8')
 
 class Dropdown(QtGui.QComboBox):
-    def __init__(self, options):
+    def __init__(self, options, default_value):
         QtGui.QComboBox.__init__(self)
         for option in options:
             self.addItem(option)
@@ -386,6 +386,9 @@ class Dropdown(QtGui.QComboBox):
         # current index, so that should just work as expected.
         self.value_changed = Communicator()
         self.currentIndexChanged.connect(self.value_changed.emit)
+
+        # set the default index
+        self.setCurrentIndex(default_value)
 
 class InfoDialog(QtGui.QDialog):
     def __init__(self):

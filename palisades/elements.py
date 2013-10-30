@@ -242,7 +242,8 @@ class Dropdown(LabeledPrimitive):
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
         new_defaults = {
-            'options': [],
+            'options': ['No options specified'],
+            'defaultValue': 0,
             'returns': 'strings',
         }
         self.set_default_config(new_defaults)
@@ -251,13 +252,17 @@ class Dropdown(LabeledPrimitive):
             'not %s' % self.config['returns'])
 
         self.options = self.config['options']
-        self._value = -1  # the default value, indicating no selection.
+        self._value = self.config['defaultValue']
 
     def set_value(self, new_value):
         assert type(new_value) is IntType, 'Dropdown index must be an int'
         assert new_value >= 0, 'Dropdown index must be >= 0'
         assert new_value < len(self.options), 'Dropdown index must exist'
         LabeledPrimitive.set_value(self, new_value)
+
+    def current_index(self):
+        """Return the current index (an int) of the dropdown."""
+        return self._value
 
     def value(self):
         # if there are no options to select or the user has not selected an

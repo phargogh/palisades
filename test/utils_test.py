@@ -34,13 +34,16 @@ class RepeatingTimerTest(unittest.TestCase):
 
         def new_func():
             return None
-
-        timer = palisades.utils.RepeatingTimer(0.1, new_func)
-        timer.start()
-        time.sleep(0.5)
-        timer.cancel()
-        time.sleep(0.2)
-        self.assertEqual(timer.is_alive(), False)
+        try:
+            timer = palisades.utils.RepeatingTimer(0.1, new_func)
+            timer.start()
+            time.sleep(0.5)
+            timer.cancel()
+            time.sleep(0.2)
+            self.assertEqual(timer.is_alive(), False)
+        except Exception as error:
+            timer.cancel()
+            raise error
 
 class CoreTest(unittest.TestCase):
     """A test class for functions found in palisades.core."""

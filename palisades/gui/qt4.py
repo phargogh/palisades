@@ -98,33 +98,29 @@ class Group(QtGui.QGroupBox):
         self.setLayout(QtGui.QGridLayout())
 
     def add_widget(self, gui_object):
-        print 'ADDING WIDGET %s' % gui_object
         # do the logic of adding the widgets of the gui_object to the Qt Widget.
         layout = self.layout()
         current_row = layout.rowCount()
 
-#        print 'Form - current thread: %s' % threading.current_thread()
-        print 'adding gui_object %s' % gui_object
         # If the item has a widgets attribute that is a list, we assume that we
         # want to add widgets to the UI in that order.
         if isinstance(gui_object.widgets, list):
-            print 'item is TextGUI or subclass'
             for col_index, qt_widget in enumerate(gui_object.widgets):
                 if qt_widget is None:
                     qt_widget = Empty()
                 qt_widget.setVisible(True)
-                print (qt_widget, current_row, col_index, qt_widget.isVisible())
                 self.layout().addWidget(qt_widget, current_row, col_index)
                 qt_widget.show()
         # If the item's widgets attribute is not a list (it's assumed to be a
         # toolkit widget), then we want to add that widget to span the whole of a
         # single row.
         else:
-            widget = gui_object.widgets  # renaming var to clarify.
-            num_cols = layout.columnCount()
-            print 'item spans the whole row.'
-            self.layout().addWidget(widget, current_row, 0, 1, num_cols)
-            widget.show()
+            # need this just in case a label object is the first in a Group.  If
+            # it is, then there would not be any columns, which throws off the
+            # rest of the layout.
+            num_cols = max(5, layout.columnCount())
+            self.layout().addWidget(gui_object.widgets, current_row, 0, 1, num_cols)
+            gui_object.widgets.show()
 
 class Button(QtGui.QPushButton):
     _icon = None

@@ -188,3 +188,7 @@ class QtContainerIntegrationTest(unittest.TestCase):
         """Assert that the container builds correctly."""
         # assert the correct number of elements in the core container
         self.assertEqual(len(self.element._elements), 2)
+
+        # assert the correct number of rows in the group's layout
+        # Qt thinks there's always one extra row, hence the -1.
+        self.assertEqual(self.gui.widgets.layout().rowCount() - 1, 2)

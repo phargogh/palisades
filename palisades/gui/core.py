@@ -1,8 +1,7 @@
+from types import *
+
 from palisades.gui import qt4 as toolkit
-
 from palisades.validation import V_ERROR
-
-import pdb
 
 class ApplicationGUI(object):
     def __init__(self):

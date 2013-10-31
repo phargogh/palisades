@@ -289,6 +289,24 @@ class GroupTest(unittest.TestCase):
         self.assertEqual(group._elements[0].__class__, elements.File)
         self.assertEqual(group._elements[1].__class__, elements.Text)
 
+    def test_new_registrar(self):
+        class ExampleClass(object):
+            def __init__(self, config):
+                pass
+
+        new_registry = {
+            'file': ExampleClass
+        }
+        group = elements.Group({'elements': self.elements}, new_registry)
+
+        # Check out the first element in the Group.  It should be an instance of
+        # ExampleClass instead of File, which it was pointing to before.
+        self.assertEqual(group._elements[0].__class__.__name__, 'ExampleClass')
+
+        # the other element in this Group should still be the same as it always
+        # was
+        self.assertEqual(group._elements[1].__class__.__name__, 'Text')
+
 class StaticTest(unittest.TestCase):
     def test_static_defaults(self):
         element = elements.Static({})

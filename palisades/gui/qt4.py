@@ -91,8 +91,40 @@ class Empty(QtGui.QWidget):
 #            print 'not yet implemented'
 
 # currently just a wrapper for the Empty class that has a more appropriate name.
-class Group(Empty):
-    pass
+class Group(QtGui.QGroupBox):
+    def __init__(self):
+        QtGui.QGroupBox.__init__(self)
+        self.setTitle('Group!')
+        self.setLayout(QtGui.QGridLayout())
+
+    def add_widget(self, gui_object):
+        print 'ADDING WIDGET %s' % gui_object
+        # do the logic of adding the widgets of the gui_object to the Qt Widget.
+        layout = self.layout()
+        current_row = layout.rowCount()
+
+#        print 'Form - current thread: %s' % threading.current_thread()
+        print 'adding gui_object %s' % gui_object
+        # If the item has a widgets attribute that is a list, we assume that we
+        # want to add widgets to the UI in that order.
+        if isinstance(gui_object.widgets, list):
+            print 'item is TextGUI or subclass'
+            for col_index, qt_widget in enumerate(gui_object.widgets):
+                if qt_widget is None:
+                    qt_widget = Empty()
+                qt_widget.setVisible(True)
+                print (qt_widget, current_row, col_index, qt_widget.isVisible())
+                self.layout().addWidget(qt_widget, current_row, col_index)
+                qt_widget.show()
+        # If the item's widgets attribute is not a list (it's assumed to be a
+        # toolkit widget), then we want to add that widget to span the whole of a
+        # single row.
+        else:
+            widget = gui_object.widgets  # renaming var to clarify.
+            num_cols = layout.columnCount()
+            print 'item spans the whole row.'
+            self.layout().addWidget(widget, current_row, 0, 1, num_cols)
+            widget.show()
 
 class Button(QtGui.QPushButton):
     _icon = None
@@ -493,7 +525,7 @@ class ErrorDialog(InfoDialog):
 class FormWindow(QtGui.QWidget):
     """A Form is a window where you have a set of inputs that the user fills in
     or configures and then presses 'submit'."""
-    def __init__(self):
+    def __init__(self, input_pane):
         QtGui.QWidget.__init__(self)
 
         # The form has two elements arranged vertically: the form window (which
@@ -506,8 +538,8 @@ class FormWindow(QtGui.QWidget):
         self.quit_requested = Communicator()
 
         # Create the QWidget pane for the inputs and add it to the layout.
-        self.input_pane = QtGui.QWidget()
-        self.input_pane.setLayout(QtGui.QGridLayout())
+        self.input_pane = input_pane
+        #self.input_pane.setLayout(QtGui.QGridLayout())
         self.layout().addWidget(self.input_pane)
 
         # Create the buttonBox and add it to the layout.
@@ -557,30 +589,5 @@ class FormWindow(QtGui.QWidget):
         self._quit_pressed()
 
     def add_widget(self, gui_object):
-        # do the logic of adding the widgets of the gui_object to the Qt Widget.
-        layout = self.input_pane.layout()
-        current_row = layout.rowCount()
-
-        print 'Form - current thread: %s' % threading.current_thread()
-        print 'adding gui_object %s' % gui_object
-        # If the item has a widgets attribute that is a list, we assume that we
-        # want to add widgets to the UI in that order.
-        if isinstance(gui_object.widgets, list):
-            print 'item is TextGUI or subclass'
-            for col_index, qt_widget in enumerate(gui_object.widgets):
-                if qt_widget is None:
-                    qt_widget = Empty()
-                qt_widget.setVisible(True)
-                print (qt_widget, current_row, col_index, qt_widget.isVisible())
-                self.input_pane.layout().addWidget(qt_widget, current_row, col_index)
-                qt_widget.show()
-        # If the item's widgets attribute is not a list (it's assumed to be a
-        # toolkit widget), then we want to add that widget to span the whole of a
-        # single row.
-        else:
-            widget = gui_object.widgets  # renaming var to clarify.
-            num_cols = layout.columnCount()
-            print 'item spans the whole row.'
-            self.input_pane.layout().addWidget(widget, current_row, 0, 1, num_cols)
-            widget.show()
+        self.input_pane.add_widget(gui_object)
 

@@ -360,11 +360,22 @@ class Group(Element):
         self._registrar = element_registry
         self._elements = []
         new_defaults = {
-            'elements': []
+            'elements': [],
+            'label': 'Container',
         }
         self.set_default_config(new_defaults)
 
         self.create_elements(self.config['elements'])
+        self._display_label = True
+
+    def set_display_label(self, display):
+        assert type(display) is BooleanType, 'display must be True or False'
+        self._display_label = display
+
+    def label(self):
+        if self._display_label:
+            return self.config['label']
+        return ''
 
     def _add_element(self, element):
         """Add the element to this group.
@@ -402,6 +413,8 @@ class Container(Group):
 class Form():
     def __init__(self, configuration):
         self._ui = Group(configuration)
+        self._ui.set_display_label(False)
+
         self.elements = self.find_elements()
         self.runner = None
 

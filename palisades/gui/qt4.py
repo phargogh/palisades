@@ -92,9 +92,9 @@ class Empty(QtGui.QWidget):
 
 # currently just a wrapper for the Empty class that has a more appropriate name.
 class Group(QtGui.QGroupBox):
-    def __init__(self):
+    def __init__(self, label_text):
         QtGui.QGroupBox.__init__(self)
-        self.setTitle('Group!')
+        self.setTitle(label_text)
         self.setLayout(QtGui.QGridLayout())
 
     def add_widget(self, gui_object):

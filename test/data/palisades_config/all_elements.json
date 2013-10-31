@@ -107,6 +107,7 @@
         {
             "id": "sample_container",
             "type": "container",
+            "label": "It's a Container!",
             "elements": [
                 {
                     "id": "sample_label",

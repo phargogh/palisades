@@ -32,7 +32,7 @@ class GroupGUI(UIObject):
         UIObject.__init__(self, core_element)
 
         self.registrar = registrar
-        self.widgets = toolkit.Group()
+        self.widgets = toolkit.Group(core_element.label())
         self.elements = []
 
         # create the elements here.  Elements should probably only ever be

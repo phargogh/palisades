@@ -369,6 +369,9 @@ class Group(Element):
         self.create_elements(self.config['elements'])
         self._display_label = True
         self._collapsible = self.config['collapsible']
+        self._collapsed = False
+
+        self.toggled = Communicator()
 
     def set_display_label(self, display):
         assert type(display) is BooleanType, 'display must be True or False'
@@ -382,6 +385,12 @@ class Group(Element):
     def set_collapsible(self, is_collapsible):
         assert type(is_collapsible) is BooleanType
         self._collapsible = is_collapsible
+
+    def set_collapsed(self, is_collapsed):
+        # can only set as collapsed if container is collapsible
+        assert self._collapsible == True, 'Container cannot be collapsed'
+        self._collapsed = is_collapsed
+        self.toggled.emit(is_collapsed)
 
     def is_collapsible(self):
         return self._collapsible

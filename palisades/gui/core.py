@@ -38,10 +38,6 @@ class GroupGUI(UIObject):
         # create the elements here.  Elements should probably only ever be
         # created once, not dynamically (though they could be hidden/revealed
         # dynamically), so no need for a separate function.
-#        for element in core_element.elements:
-#            # Assume we're only adding a primitive element at the moment.
-#            # TODO: make sure this works for Groups as well.
-#            self.widget.add_element(element)
         for element in core_element._elements:
             print 'GROUP', element
             # get the correct element type for the new object using the new
@@ -168,27 +164,6 @@ class FormGUI(UIObject):
         self.window = toolkit.FormWindow(self.group.widgets)
         self.quit_confirm = toolkit.ConfirmQuitDialog()
 
-#        # loop through all the elements in the form.
-#        for element in core_element.elements:
-#            print element
-#            # get the correct element type for the new object using the new
-#            # element's object's string class name.
-#            # TODO: if element is a Group, it must create its contained widgets
-#            try:
-#                element_classname = element.__class__.__name__
-#                new_element = registry[element_classname](element)
-#            except TypeError:
-#                # Happens when the element's GUI representation in registry is
-#                # None, meaning that there should not be a GUI display.
-#                new_element = None
-#
-#            # If the new element is None, there's no visualization.  Skip.
-#            if new_element is not None:
-#                if isinstance(new_element, GroupGUI):
-#                    self.window.add_widget(new_element, self.registrar)
-#                else:
-#                    self.window.add_widget(new_element)
-
         self.window.submit_pressed.register(self.element.submit)
         self.window.quit_requested.register(self.close)
         #TODO: Add more communicators here ... menu item actions?
@@ -202,8 +177,3 @@ class FormGUI(UIObject):
         if self.quit_confirm.confirm():
             self.window.close()
 
-#    def add_widget(self, new_widget):
-#       # add the GUI widget here by calling down to the Form's function to do
-#       # the same.  This is a wrapper function in accordance with the Law of
-#       # Demeter (see Pragmatic Programmer)
-#       self.window.add_widget(new_widget)

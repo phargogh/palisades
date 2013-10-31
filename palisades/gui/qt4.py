@@ -69,28 +69,7 @@ class Timer(QtCore.QTimer):
 class Empty(QtGui.QWidget):
     def __init__(self, configuration={}, layout=None):
         QtGui.QWidget.__init__(self)
-#        if layout is not None:
-#            self.set_layout(layout)
 
-#    def set_layout(self, layout):
-#        self.setLayout(LAYOUTS[layout]())
-
-#    def add_element(self, element_ptr, row_index=None):
-#        layout = self.layout()
-#        if isinstance(layout, QtGui.QGridLayout):
-#            if row_index is None:
-#                row = layout.rowCount()
-#            else:
-#                row = row_index
-#            for column, sub_element in enumerate(element_ptr.elements):
-#                if sub_element.sizeHint().isValid():
-#                    sub_element.setMinimumSize(sub_element.sizeHint())
-#                layout.addWidget(sub_element, row, column)
-#        else:
-#            print self.layout()
-#            print 'not yet implemented'
-
-# currently just a wrapper for the Empty class that has a more appropriate name.
 class Group(QtGui.QGroupBox):
     def __init__(self, label_text):
         QtGui.QGroupBox.__init__(self)

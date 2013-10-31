@@ -53,7 +53,7 @@ class Application(object):
         self.app.exec_()
 
 class Empty(QtGui.QWidget):
-    def __init__(self, configuration={}, layout=None):
+    def __init__(self):
         QtGui.QWidget.__init__(self)
 
 class Group(QtGui.QGroupBox):
@@ -77,8 +77,8 @@ class Group(QtGui.QGroupBox):
                 self.layout().addWidget(qt_widget, current_row, col_index)
                 qt_widget.show()
         # If the item's widgets attribute is not a list (it's assumed to be a
-        # toolkit widget), then we want to add that widget to span the whole of a
-        # single row.
+        # toolkit widget), then we want to add that widget to span the whole of
+        # a single row.
         else:
             # need this just in case a label object is the first in a Group.  If
             # it is, then there would not be any columns, which throws off the
@@ -172,7 +172,7 @@ class ValidationButton(InformationButton):
     def __init__(self, title, body_text=''):
         """Initialize the ErrorPopup object.  Adding the self.error_text
         attribute.  Title and body_text are python strings."""
-        self._STATES = {
+        self._states = {
             'error': QtGui.QIcon(self._error_icon),
             'warning': QtGui.QIcon(self._warning_icon),
             'pass': QtGui.QIcon(self._pass_icon),
@@ -185,7 +185,7 @@ class ValidationButton(InformationButton):
 
     def setEnabled(self, state):
         if state == False:
-            self.setIcon(self._STATES[None])
+            self.setIcon(self._states[None])
         else:
             self.set_error(self.error_text, self.error_state)
 
@@ -204,9 +204,9 @@ class ValidationButton(InformationButton):
         button_is_flat = False
 
         try:
-            button_icon = self._STATES[state]
+            button_icon = self._states[state]
         except KeyError:
-            button_icon = self._STATES[None]
+            button_icon = self._states[None]
 
         if state == 'pass' or state == None:
             button_is_flat = True
@@ -480,9 +480,6 @@ class ErrorDialog(InfoDialog):
         self.body.setMinimumSize(self.body.sizeHint())
         InfoDialog.showEvent(self)
 
-# TODO: make this a QWidget, and a widget inside this widget's layout be the
-# form with all its element.  This will mean creating wrapper functions for most
-# of the calls to the UI embedded herein.
 class FormWindow(QtGui.QWidget):
     """A Form is a window where you have a set of inputs that the user fills in
     or configures and then presses 'submit'."""

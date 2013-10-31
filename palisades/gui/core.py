@@ -28,10 +28,25 @@ class UIObject(object):
         self.element = core_element
 
 class GroupGUI(UIObject):
-    def __init__(self, core_element, registrar):
+    def __init__(self, core_element, registrar=None):
         UIObject.__init__(self, core_element)
 
-        self.registrar = registrar
+        #TODO: add all the necessary elements here to the form.
+        registry = {
+            'File': FileGUI,
+            'Text': TextGUI,
+            'Group': GroupGUI,
+            'Label': LabelGUI,
+            'Static': None,  # None means no GUI display.
+            'Dropdown': DropdownGUI,
+            'Container': ContainerGUI,
+        }
+
+        if registrar != None:
+            assert type(registrar) is DictType
+            registry.update(registrar)
+
+        self.registrar = registry
         self.widgets = toolkit.Group(core_element.label())
         self.elements = []
 
@@ -149,18 +164,7 @@ class FormGUI(UIObject):
     def __init__(self, core_element):
         UIObject.__init__(self, core_element)
 
-        #TODO: add all the necessary elements here to the form.
-        registry = {
-            'File': FileGUI,
-            'Text': TextGUI,
-            'Group': GroupGUI,
-            'Label': LabelGUI,
-            'Static': None,  # None means no GUI display.
-            'Dropdown': DropdownGUI,
-            'Container': ContainerGUI,
-        }
-
-        self.group = GroupGUI(self.element._ui, registry)
+        self.group = GroupGUI(self.element._ui)
         self.window = toolkit.FormWindow(self.group.widgets)
         self.quit_confirm = toolkit.ConfirmQuitDialog()
 

@@ -28,17 +28,46 @@ class UIObject(object):
         self.element = core_element
 
 class GroupGUI(UIObject):
-    def __init__(self, core_element):
+    def __init__(self, core_element, registrar):
         UIObject.__init__(self, core_element)
-        self.widget = toolkit.Group()
+
+        self.registrar = registrar
+        self.widgets = toolkit.Group()
+        self.elements = []
 
         # create the elements here.  Elements should probably only ever be
         # created once, not dynamically (though they could be hidden/revealed
         # dynamically), so no need for a separate function.
-        for contained_item in core_element.elements:
-            # Assume we're only adding a primitive element at the moment.
-            # TODO: make sure this works for Groups as well.
-            self.widget.add_element(contained_item)
+#        for element in core_element.elements:
+#            # Assume we're only adding a primitive element at the moment.
+#            # TODO: make sure this works for Groups as well.
+#            self.widget.add_element(element)
+        for element in core_element._elements:
+            print 'GROUP', element
+            # get the correct element type for the new object using the new
+            # element's object's string class name.
+            # TODO: if element is a Group, it must create its contained widgets
+            try:
+                element_classname = element.__class__.__name__
+                cls = self.registrar[element_classname]
+                if element_classname in ['Group', 'Container']:
+                    print 'MAKING NEW GROUP: %s' % element_classname
+                    new_element = cls(element, self.registrar)
+                else:
+                    new_element = cls(element)
+            except TypeError as error:
+                # Happens when the element's GUI representation in registry is
+                # None, meaning that there should not be a GUI display.
+                new_element = None
+                print 'ERROR ERROR: %s in %s' % (error, element_classname)
+
+            # If the new element is None, there's no visualization.  Skip.
+            if new_element is not None:
+                self.widgets.add_widget(new_element)
+                self.elements.append(new_element)
+
+class ContainerGUI(GroupGUI):
+    pass
 
 class TextGUI(UIObject):
     def __init__(self, core_element):
@@ -124,9 +153,6 @@ class FormGUI(UIObject):
     def __init__(self, core_element):
         UIObject.__init__(self, core_element)
 
-        self.window = toolkit.FormWindow()
-        self.quit_confirm = toolkit.ConfirmQuitDialog()
-
         #TODO: add all the necessary elements here to the form.
         registry = {
             'File': FileGUI,
@@ -135,24 +161,33 @@ class FormGUI(UIObject):
             'Label': LabelGUI,
             'Static': None,  # None means no GUI display.
             'Dropdown': DropdownGUI,
+            'Container': ContainerGUI,
         }
 
-        # loop through all the elements in the form.
-        for element in core_element.elements:
-            # get the correct element type for the new object using the new
-            # element's object's string class name.
-            # TODO: if element is a Group, it must create its contained widgets
-            try:
-                element_classname = element.__class__.__name__
-                new_element = registry[element_classname](element)
-            except TypeError:
-                # Happens when the element's GUI representation in registry is
-                # None, meaning that there should not be a GUI display.
-                new_element = None
+        self.group = GroupGUI(self.element._ui, registry)
+        self.window = toolkit.FormWindow(self.group.widgets)
+        self.quit_confirm = toolkit.ConfirmQuitDialog()
 
-            # If the new element is None, there's no visualization.  Skip.
-            if new_element is not None:
-                self.window.add_widget(new_element)
+#        # loop through all the elements in the form.
+#        for element in core_element.elements:
+#            print element
+#            # get the correct element type for the new object using the new
+#            # element's object's string class name.
+#            # TODO: if element is a Group, it must create its contained widgets
+#            try:
+#                element_classname = element.__class__.__name__
+#                new_element = registry[element_classname](element)
+#            except TypeError:
+#                # Happens when the element's GUI representation in registry is
+#                # None, meaning that there should not be a GUI display.
+#                new_element = None
+#
+#            # If the new element is None, there's no visualization.  Skip.
+#            if new_element is not None:
+#                if isinstance(new_element, GroupGUI):
+#                    self.window.add_widget(new_element, self.registrar)
+#                else:
+#                    self.window.add_widget(new_element)
 
         self.window.submit_pressed.register(self.element.submit)
         self.window.quit_requested.register(self.close)

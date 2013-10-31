@@ -339,19 +339,25 @@ class Label(Static):
         return self.config['label']
 
 
-ELEMENTS = {
-    'file': File,
-    'folder': File,
-    'text': Text,
-    'hidden': Static,
-    'label': Label,
-    'dropdown': Dropdown,
-}
 
 class Group(Element):
-    def __init__(self, configuration, registrar=ELEMENTS):
+    def __init__(self, configuration, new_elements=None):
         Element.__init__(self, configuration)
-        self._registrar = registrar
+
+        element_registry = {
+            'file': File,
+            'folder': File,
+            'text': Text,
+            'hidden': Static,
+            'label': Label,
+            'dropdown': Dropdown,
+            'container': Container,
+        }
+
+        if new_elements is not None:
+            element_registry.update(new_elements)
+
+        self._registrar = element_registry
         self._elements = []
         new_defaults = {
             'elements': []
@@ -380,6 +386,11 @@ class Group(Element):
             LOGGER.debug('Creating new element %s', new_element)
 
             self._add_element(new_element)
+
+class Container(Group):
+    """A very thin wrapper for the Group class.  No new functionality
+    implemented here."""
+    pass
 
 # The form class represents a single-window form where the user enters various
 # inputs and then does something with them.  The IUI ModelUI would be an example

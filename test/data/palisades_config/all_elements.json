@@ -108,6 +108,7 @@
             "id": "sample_container",
             "type": "container",
             "label": "It's a Container!",
+            "collapsible": true,
             "elements": [
                 {
                     "id": "sample_label",

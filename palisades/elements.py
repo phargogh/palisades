@@ -362,11 +362,13 @@ class Group(Element):
         new_defaults = {
             'elements': [],
             'label': 'Container',
+            'collapsible': False,
         }
         self.set_default_config(new_defaults)
 
         self.create_elements(self.config['elements'])
         self._display_label = True
+        self._collapsible = self.config['collapsible']
 
     def set_display_label(self, display):
         assert type(display) is BooleanType, 'display must be True or False'
@@ -376,6 +378,13 @@ class Group(Element):
         if self._display_label:
             return self.config['label']
         return ''
+
+    def set_collapsible(self, is_collapsible):
+        assert type(is_collapsible) is BooleanType
+        self._collapsible = is_collapsible
+
+    def is_collapsible(self):
+        return self._collapsible
 
     def _add_element(self, element):
         """Add the element to this group.

@@ -87,6 +87,9 @@ class Group(QtGui.QGroupBox):
             self.layout().addWidget(gui_object.widgets, current_row, 0, 1, num_cols)
             gui_object.widgets.show()
 
+    def set_collapsible(self, is_collapsible):
+        self.setCheckable(is_collapsible)
+
 class Button(QtGui.QPushButton):
     _icon = None
     def __init__(self):

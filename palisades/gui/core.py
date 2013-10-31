@@ -47,6 +47,8 @@ class GroupGUI(UIObject):
 
         self.registrar = registry
         self.widgets = toolkit.Group(core_element.label())
+        self.widgets.set_collapsible(self.element.is_collapsible())
+
         self.elements = []
 
         # create the elements here.  Elements should probably only ever be

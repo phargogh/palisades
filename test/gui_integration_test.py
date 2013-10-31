@@ -166,3 +166,25 @@ class QtDropdownIntegrationTest(unittest.TestCase):
         QTest.qWait(50)
         self.assertEqual(self.element.current_index(), 0)
 
+class QtContainerIntegrationTest(unittest.TestCase):
+    def setUp(self):
+        config = {
+            'label': 'Container!',
+            'elements': [
+                {
+                    'type': 'label',
+                    'label': 'hello there!',
+                },
+                {
+                    'type': 'file',
+                    'label': 'Select a file',
+                },
+            ]
+        }
+        self.element = elements.Container(config)
+        self.gui = core.ContainerGUI(self.element)
+
+    def test_setup(self):
+        """Assert that the container builds correctly."""
+        # assert the correct number of elements in the core container
+        self.assertEqual(len(self.element._elements), 2)

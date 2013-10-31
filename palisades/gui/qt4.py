@@ -52,20 +52,6 @@ class Application(object):
     def execute(self):
         self.app.exec_()
 
-# TODO: remove this object.  No longer used.
-class Timer(QtCore.QTimer):
-    """This is a wrapper class for the QtCore.QTimer class to allow for a python
-    threading.Timer instance and functionality."""
-    def __init__(self, timeout, callback):
-        QtCore.QTimer.__init__(self)
-        self.timeout.connect(callback)
-
-    def start(self):
-        QtCore.QTimer.start(self)
-
-    def cancel(self):
-        self.stop()
-
 class Empty(QtGui.QWidget):
     def __init__(self, configuration={}, layout=None):
         QtGui.QWidget.__init__(self)

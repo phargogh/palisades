@@ -307,6 +307,26 @@ class GroupTest(unittest.TestCase):
         # was
         self.assertEqual(group._elements[1].__class__.__name__, 'Text')
 
+    def test_enable_disable(self):
+        config = {
+            'elements': self.elements,
+        }
+        group = elements.Group(config)
+
+        # verify that the Group is enabled by default.
+        self.assertEqual(group.is_enabled(), True)
+
+        # verify elements inside the container are all disabled.
+        for element in group.elements():
+            self.assertEqual(element.is_enabled(), True)
+
+        # now, if we disable the container, it must disable contained elements.
+        group.set_enabled(False)
+        self.assertEqual(group.is_enabled(), False)
+        for element in group.elements():
+            self.assertEqual(element.is_enabled(), False,
+                "Element %s was not disabled." % element)
+
 class ContainerTest(GroupTest):
     def test_display_label(self):
         container_label = "Look!  It's a container!"
@@ -332,9 +352,9 @@ class ContainerTest(GroupTest):
         self.assertEqual(container.is_collapsed(), False)
 
         # verify the container cannot be collapsed because it's not collapsible
-        self.assertRaises(AssertionError, container.set_collapsed, True)
+        self.assertRaises(elements.InteractionError, container.set_collapsed, True)
 
-    def test_enable_disable(self):
+    def test_collapsability(self):
         config = {
             'elements': self.elements,
             'collapsible': True,
@@ -344,7 +364,58 @@ class ContainerTest(GroupTest):
         # verify container is collapsible
         self.assertEqual(container.is_collapsible(), True)
 
-        # verify elements inside the container are all disabled.
+        # verify container is enabled and not collapsed
+        self.assertEqual(container.is_enabled(), True)
+        self.assertEqual(container.is_collapsed(), False)
+
+        # collapse the conainer and verify all contained elements are disabled
+        # Container should still be enabled, but all container elements should
+        # not.
+        container.set_collapsed(True)
+        self.assertEqual(container.is_collapsed(), True)
+        self.assertEqual(container.is_enabled(), True)
+        for element in container.elements():
+            self.assertEqual(element.is_enabled(), False,
+                "Element %s was not disabled" % element)
+
+        # re-enable the container and verify all contained elements are
+        # re-enabled.
+        container.set_collapsed(False)
+        self.assertEqual(container.is_collapsed(), False)
+        self.assertEqual(container.is_enabled(), True)
+        for element in container.elements():
+            self.assertEqual(element.is_enabled(), True,
+                "Element %s was not re-enabled" % element)
+
+    def test_set_collapsed(self):
+        config = {
+            "elements": self.elements,
+            "collapsible": True,
+        }
+        container = elements.Container(config)
+
+        self.assertEqual(container.is_collapsed(), False)
+
+        # collapse the container
+        container.set_collapsed(True)
+        self.assertEqual(container.is_collapsed(), True)
+
+        # re-expand the container
+        container.set_collapsed(False)
+        self.assertEqual(container.is_collapsed(), False)
+
+    def test_set_collapsed_uncollapsible(self):
+        config = {
+            "elements": self.elements,
+            "collapsible": False,
+        }
+        container = elements.Container(config)
+
+        self.assertEqual(container.is_collapsed(), False)
+
+        # Verify that we can't collapse the container.
+        self.assertRaises(elements.InteractionError, container.set_collapsed,
+            True)
 
 
 class StaticTest(unittest.TestCase):

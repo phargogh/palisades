@@ -22,6 +22,8 @@ class InvalidData(ValueError):
         return 'Inputs have errors: %s' % repr(self.data)
 
 class ValidationStarted(RuntimeError): pass
+class ElementDisabled(RuntimeError): pass
+class InteractionError(RuntimeError): pass
 
 def get_elements_list(group_pointer):
     """Construct a data structure with pointers to the elements of the group.
@@ -391,6 +393,26 @@ class Group(Element):
     def elements(self):
         return self._elements
 
+    def set_enabled(self, new_state):
+        """Enable or disable this Group.  Disables all elements in the group
+        as well as the Group itself.
+
+        new_state - A boolean.  If True, enable this element.  If False, disable
+            this element.
+
+        If the enabled state of this element changes, the interactivity_changed
+        signal is emitted with the new state.
+
+        Returns nothing."""
+
+        assert type(new_state) is BooleanType, ('New state must be a boolean, '
+            '%s found instead.' % new_state.__type__.__name__)
+
+        for element in self.elements():
+            element.set_enabled(new_state)
+
+        Element.set_enabled(self, new_state)
+
 class Container(Group):
     """A Container is a special kind of Group that can enable or disable all its
     sub-elements."""
@@ -417,10 +439,17 @@ class Container(Group):
         return ''
 
     def set_collapsed(self, is_collapsed):
+        assert type(is_collapsed) is BooleanType
+
         # can only set as collapsed if container is collapsible
-        assert self._collapsible == True, 'Container cannot be collapsed'
+        if not self.is_collapsible():
+            raise InteractionError("Container is not collapsible")
+
         self._collapsed = is_collapsed
         self.toggled.emit(is_collapsed)
+
+        for element in self.elements():
+            element.set_enabled(not is_collapsed)
 
     def is_collapsible(self):
         return self._collapsible

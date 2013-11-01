@@ -388,6 +388,9 @@ class Group(Element):
 
             self._add_element(new_element)
 
+    def elements(self):
+        return self._elements
+
 class Container(Group):
     """A Container is a special kind of Group that can enable or disable all its
     sub-elements."""

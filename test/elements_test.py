@@ -307,6 +307,46 @@ class GroupTest(unittest.TestCase):
         # was
         self.assertEqual(group._elements[1].__class__.__name__, 'Text')
 
+class ContainerTest(GroupTest):
+    def test_display_label(self):
+        container_label = "Look!  It's a container!"
+        config = {
+            'elements': self.elements,
+            'label': container_label,
+        }
+        container = elements.Container(config)
+
+        # check the container's label
+        self.assertEqual(container.label(), container_label)
+
+    def test_enabled_defaults(self):
+        config = {
+            'elements': self.elements,
+        }
+        container = elements.Container(config)
+
+        # Container should not collapsible by default.
+        self.assertEqual(container.is_collapsible(), False)
+
+        # verify the container is not collapsed by default
+        self.assertEqual(container.is_collapsed(), False)
+
+        # verify the container cannot be collapsed because it's not collapsible
+        self.assertRaises(AssertionError, container.set_collapsed, True)
+
+    def test_enable_disable(self):
+        config = {
+            'elements': self.elements,
+            'collapsible': True,
+        }
+        container = elements.Container(config)
+
+        # verify container is collapsible
+        self.assertEqual(container.is_collapsible(), True)
+
+        # verify elements inside the container are all disabled.
+
+
 class StaticTest(unittest.TestCase):
     def test_static_defaults(self):
         element = elements.Static({})

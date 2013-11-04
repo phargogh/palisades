@@ -189,10 +189,20 @@ class LabeledPrimitiveTest(PrimitiveTest):
 
 class TextTest(LabeledPrimitiveTest):
     def setUp(self):
-        self.element = elements.Text({'label':'aaa'})
+        self.element = elements.Text({})
+
+    def test_default_config(self):
+        expected_defaults = {
+            'width': 60,
+            'defaultValue': '',
+            'validateAs': {'type': 'string'},
+            'label': u'',
+        }
+        self.assertEqual(self.element.config, expected_defaults)
 
     def test_set_label(self):
         # check that the configuration-defined label is set.
+        self.element = elements.Text({'label': 'aaa'})
         self.assertEqual(self.element.label(), 'aaa')
 
         # Set the label and check that it was set correctly.

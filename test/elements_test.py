@@ -112,7 +112,7 @@ class ElementTest(unittest.TestCase):
         self.assertEqual(self.element._default_config, {'a': 'ccc', 'b': 'bbb'})
         self.assertEqual(self.element.config, {'a': 'aaa', 'b': 'bbb'})
 
-class PrimitiveTest(unittest.TestCase):
+class PrimitiveTest(ElementTest):
     def setUp(self):
         self.primitive = elements.Primitive({})
 
@@ -172,7 +172,7 @@ class PrimitiveTest(unittest.TestCase):
         self.assertEqual(primitive.is_valid(), True)
 
 
-class LabeledPrimitiveTest(unittest.TestCase):
+class LabeledPrimitiveTest(PrimitiveTest):
     def setUp(self):
         self.primitive = elements.LabeledPrimitive({'label':'aaa'})
 
@@ -188,7 +188,7 @@ class LabeledPrimitiveTest(unittest.TestCase):
         label = self.primitive.label()
         assert_utf8(label)
 
-class TextTest(unittest.TestCase):
+class TextTest(LabeledPrimitiveTest):
     def setUp(self):
         self.primitive = elements.Text({'label':'aaa'})
 
@@ -223,7 +223,7 @@ class TextTest(unittest.TestCase):
         self.assertEqual(self.primitive.value(), '8')
         assert_utf8(self.primitive.value())
 
-class FileTest(unittest.TestCase):
+class FileTest(LabeledPrimitiveTest):
     def setUp(self):
         self.element = elements.File({})
 
@@ -258,7 +258,7 @@ class FileTest(unittest.TestCase):
         returned_string = self.element.value()
         self.assertEqual(type(returned_string), unicode)
 
-class GroupTest(unittest.TestCase):
+class GroupTest(ElementTest):
     def setUp(self):
         self.elements = [
             {
@@ -328,6 +328,28 @@ class GroupTest(unittest.TestCase):
                 "Element %s was not disabled." % element)
 
 class ContainerTest(GroupTest):
+    def setUp(self):
+        self.default_config = {}
+        self.element = elements.Container(self.default_config)
+
+        self.elements = [
+            {
+                'type': 'file',
+            },
+            {
+                'type': 'text',
+            },
+        ]
+
+    def test_default_config(self):
+        # Override from ElementTest.test_default_config
+        expected_defaults = {
+            'elements': [],
+            'collapsible': False,
+            'label': 'Container',
+        }
+        self.assertEqual(self.element.config, expected_defaults)
+
     def test_display_label(self):
         container_label = "Look!  It's a container!"
         config = {
@@ -418,7 +440,7 @@ class ContainerTest(GroupTest):
             True)
 
 
-class StaticTest(unittest.TestCase):
+class StaticTest(ElementTest):
     def test_static_defaults(self):
         element = elements.Static({})
         self.assertEqual(element.value(), None)
@@ -433,7 +455,7 @@ class StaticTest(unittest.TestCase):
         element = elements.Static({'returns': value})
         self.assertEqual(element.value(), value)
 
-class LabelTest(unittest.TestCase):
+class LabelTest(ElementTest):
     def test_static_defaults(self):
         element = elements.Label({})
         self.assertEqual(element.value(), None)
@@ -478,7 +500,7 @@ class LabelTest(unittest.TestCase):
         # assert that thtere's the correct return value as well
         self.assertEqual(label_obj.value(), return_value)
 
-class DropdownTest(unittest.TestCase):
+class DropdownTest(ElementTest):
     def test_defaults(self):
         options = {}
         dropdown = elements.Dropdown(options)

@@ -190,18 +190,18 @@ class LabeledPrimitiveTest(PrimitiveTest):
 
 class TextTest(LabeledPrimitiveTest):
     def setUp(self):
-        self.primitive = elements.Text({'label':'aaa'})
+        self.element = elements.Text({'label':'aaa'})
 
     def test_set_label(self):
         # check that the configuration-defined label is set.
-        self.assertEqual(self.primitive.label(), 'aaa')
+        self.assertEqual(self.element.label(), 'aaa')
 
         # Set the label and check that it was set correctly.
         self.primitive.set_label('abc')
-        self.assertEqual(self.primitive.label(), 'abc')
+        self.assertEqual(self.element.label(), 'abc')
 
         # verify that the set label is unicode, UTF-8
-        label = self.primitive.label()
+        label = self.element.label()
         assert_utf8(label)
 
     def test_default_value(self):
@@ -214,18 +214,28 @@ class TextTest(LabeledPrimitiveTest):
         assert_utf8(element.value())
 
     def test_set_value(self):
-        self.primitive.set_value('new_value')
-        self.assertEqual(self.primitive.value(), 'new_value')
-        assert_utf8(self.primitive.value())
+        self.element.set_value('new_value')
+        self.assertEqual(self.element.value(), 'new_value')
+        assert_utf8(self.element.value())
 
         # verify that even a non-string value is cast to a UTF-8 object.
-        self.primitive.set_value(8)
-        self.assertEqual(self.primitive.value(), '8')
-        assert_utf8(self.primitive.value())
+        self.element.set_value(8)
+        self.assertEqual(self.element.value(), '8')
+        assert_utf8(self.element.value())
 
 class FileTest(LabeledPrimitiveTest):
     def setUp(self):
         self.element = elements.File({})
+
+    def test_default_config(self):
+        # override from ElementTest
+        expected_defaults = {
+            'width': 60,
+            'defaultValue': '',
+            'validateAs': {'type': 'file'},
+            'label': u'',
+        }
+        self.assertEqual(self.element.config, expected_defaults)
 
     def test_set_value(self):
         # verify that the path set is absolute.

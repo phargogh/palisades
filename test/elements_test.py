@@ -16,7 +16,7 @@ class ApplicationTest(unittest.TestCase):
     def test_build_application_no_gui(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
             'timber_clean.json'))
-        ui._window.submit()
+        self.assertRaises(elements.InvalidData, ui._window.submit)
 
 #    def test_build_application_qt_gui(self):
 #        ui = elements.Application(os.path.join(PALISADES_CONFIG,

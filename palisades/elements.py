@@ -314,7 +314,37 @@ class File(Text):
         self.set_default_config(new_defaults)
 
     def set_value(self, new_value):
-        absolute_path = os.path.abspath(os.path.expanduser(new_value))
+        """Set the value of the File element.  All input values will be cast to
+        UTF-8.
+
+        new_value = a string, either a bytestring or unicode string.
+
+        If new_value is relative to '~' (representing the user's home folder),
+        the path will be expanded to be the absolute path of the value.
+        Example: '~/some_file.txt' on linux might become
+        '/home/username/some_file.txt'.  See the documentation for
+        os.path.expanduser() for details about how this path is expanded.
+
+        If the new value is a relative path (such as '../some_file.txt' or even
+        just '.', indicating the current working directory), it will be expanded
+        to be an absolute path based on the current working directory.
+
+        NOTE: If you would like to clear the value of the field, use
+        new_value=''.
+
+        Returns nothing."""
+
+        assert type(new_value) in [StringType, UnicodeType], ('New value must'
+            'be either a bytestring or a unicode string, '
+            '%s found.' % type(new_value))
+
+        if new_value == '':
+            # os.path.abspath('') is the same as os.getcwd(),
+            # so I need to have a special case here.  If the user enters '.',
+            # then the current dir will be used.
+            absolute_path = ''
+        else:
+            absolute_path = os.path.abspath(os.path.expanduser(new_value))
         Text.set_value(self, absolute_path)
 
 class Static(Element):

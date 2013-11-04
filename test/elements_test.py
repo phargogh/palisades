@@ -312,7 +312,7 @@ class FileTest(TextTest):
     def test_is_valid(self):
         # default validation is for a file, so if we provide a folder, it should
         # fail.
-        self.assertEqual(self.element.value(), os.getcwd())
+        self.assertEqual(self.element.value(), u'')
         self.assertEqual(self.element.is_valid(), False)
 
 class GroupTest(ElementTest):

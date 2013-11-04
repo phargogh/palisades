@@ -116,6 +116,12 @@ class PrimitiveTest(ElementTest):
     def setUp(self):
         self.element = elements.Primitive({})
 
+    def test_default_config(self):
+        expected_defaults = {
+            'validateAs': {'type': 'disabled'},
+        }
+        self.assertEqual(self.element.config, expected_defaults)
+
     def test_set_value(self):
         # check that there is no value.
         self.assertEqual(self.element.value(), None)
@@ -206,7 +212,7 @@ class TextTest(LabeledPrimitiveTest):
         self.assertEqual(self.element.label(), 'aaa')
 
         # Set the label and check that it was set correctly.
-        self.primitive.set_label('abc')
+        self.element.set_label('abc')
         self.assertEqual(self.element.label(), 'abc')
 
         # verify that the set label is unicode, UTF-8

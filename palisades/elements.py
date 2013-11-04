@@ -202,7 +202,7 @@ class Primitive(Element):
         while not self._validator.thread_finished():
             pass
 
-        validation_dict = self.config['validateAs']
+        validation_dict = self.config['validateAs'].copy()
         validation_dict['value'] = self.value()
         self._validator.validate(validation_dict)  # this starts the thread
 
@@ -313,6 +313,7 @@ class File(Text):
             'validateAs': {'type': 'file'},
         }
         self.set_default_config(new_defaults)
+        self.set_value(self.config['defaultValue'])
 
     def set_value(self, new_value):
         """Set the value of the File element.  All input values will be cast to

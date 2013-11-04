@@ -467,7 +467,6 @@ class Container(Group):
 class Form():
     def __init__(self, configuration):
         self._ui = Group(configuration)
-        self._ui.set_display_label(False)
 
         self.elements = self.find_elements()
         self.runner = None

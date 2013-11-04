@@ -75,6 +75,8 @@ class Element(object):
         self._default_config - a dictionary containing default configuration
             options.
     """
+    defaults = {}
+
     def __init__(self, configuration, parent=None):
         object.__init__(self)
         self._enabled = True
@@ -86,7 +88,7 @@ class Element(object):
         self.interactivity_changed = Communicator()
 
         # Render the configuration and save to self.config
-        self.config = utils.apply_defaults(configuration, self._default_config)
+        self.config = utils.apply_defaults(configuration, self.defaults)
 
     def set_default_config(self, new_defaults):
         """Add default configuration options to this Element instance's default
@@ -103,8 +105,7 @@ class Element(object):
         Returns nothing."""
 
         self._default_config.update(new_defaults)
-        self.config = utils.apply_defaults(self.config, self._default_config,
-            False)
+        self.config = utils.apply_defaults(self.config, self._default_config)
         self.config_changed.emit(self.config)
 
     def is_enabled(self):
@@ -134,6 +135,10 @@ class Element(object):
 
 class Primitive(Element):
     """Primitive represents the simplest input element."""
+    defaults = {
+        'validateAs': {'type': 'disabled'},
+    }
+
     def __init__(self, configuration):
         Element.__init__(self, configuration)
         self._value = None
@@ -152,10 +157,7 @@ class Primitive(Element):
         self.validation_completed = Communicator()
 
         # update the default configuration
-        new_defaults = {
-            'validateAs': {'type': 'disabled'}
-        }
-        self.set_default_config(new_defaults)
+        self.set_default_config(self.defaults)
 
         # Set up our validator
         self._validator = validation.Validator(
@@ -225,13 +227,15 @@ class Primitive(Element):
 
 
 class LabeledPrimitive(Primitive):
+    defaults = {
+        'label': u'',
+        'validateAs': {'type': 'disabled'},
+    }
+
     def __init__(self, configuration):
         Primitive.__init__(self, configuration)
 
-        new_defaults = {
-            'label': u""
-        }
-        self.set_default_config(new_defaults)
+        self.set_default_config(self.defaults)
         self._label = self.config['label']
 
     def set_label(self, new_label):
@@ -242,14 +246,18 @@ class LabeledPrimitive(Primitive):
         return self._label
 
 class Dropdown(LabeledPrimitive):
+    defaults = {
+        'options': ['No options specified'],
+        'defaultValue': 0,
+        'returns': 'strings',
+        'validateAs': {'type': 'disabled'},
+        'label': u'',
+    }
+
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
-        new_defaults = {
-            'options': ['No options specified'],
-            'defaultValue': 0,
-            'returns': 'strings',
-        }
-        self.set_default_config(new_defaults)
+
+        self.set_default_config(self.defaults)
         assert self.config['returns'] in ['strings', 'ordinals'], (
             'the "returns" key must be either "strings" or "ordinals", '
             'not %s' % self.config['returns'])
@@ -281,16 +289,17 @@ class Dropdown(LabeledPrimitive):
             return self._value
 
 class Text(LabeledPrimitive):
+    defaults = {
+        'width': 60,
+        'defaultValue': '',
+        'validateAs': {'type': 'string'},
+        'label': u'',
+    }
+
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
         self._value = u""
-
-        new_defaults = {
-            'width': 60,
-            'defaultValue': '',
-            'validateAs': {'type': 'string'},
-        }
-        self.set_default_config(new_defaults)
+        self.set_default_config(self.defaults)
 
         # Set the value of the element from the config's defaultValue.
         self.set_value(self.config['defaultValue'])
@@ -307,12 +316,17 @@ class Text(LabeledPrimitive):
         LabeledPrimitive.set_value(self, cast_value)
 
 class File(Text):
+    defaults = {
+        'validateAs': {'type': 'file'},
+        'defaultValue': u'',
+        'width': 60,
+        'label': u'',
+    }
+
     def __init__(self, configuration):
         Text.__init__(self, configuration)
-        new_defaults = {
-            'validateAs': {'type': 'file'},
-        }
-        self.set_default_config(new_defaults)
+
+        self.set_default_config(self.defaults)
         self.set_value(self.config['defaultValue'])
 
     def set_value(self, new_value):

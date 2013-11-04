@@ -287,7 +287,8 @@ class FileTest(TextTest):
             'defaultValue': 'text_value',
         }
         test_element = elements.File(new_defaults)
-        self.assertEqual(test_element.value(), new_defaults['defaultValue'])
+        expected_value = os.path.join(os.getcwd(), new_defaults['defaultValue'])
+        self.assertEqual(test_element.value(), expected_value)
 
     def test_set_value(self):
         # verify that the path set is absolute.

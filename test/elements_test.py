@@ -264,7 +264,7 @@ class TextTest(LabeledPrimitiveTest):
         self.element._validator.join()
         self.assertEqual(self.element.is_valid(), True)
 
-class FileTest(LabeledPrimitiveTest):
+class FileTest(TextTest):
     def setUp(self):
         self.element = elements.File({})
 
@@ -308,6 +308,12 @@ class FileTest(LabeledPrimitiveTest):
         self.element.set_value('aaa')
         returned_string = self.element.value()
         self.assertEqual(type(returned_string), unicode)
+
+    def test_is_valid(self):
+        # default validation is for a file, so if we provide a folder, it should
+        # fail.
+        self.assertEqual(self.element.value(), os.getcwd())
+        self.assertEqual(self.element.is_valid(), False)
 
 class GroupTest(ElementTest):
     def setUp(self):

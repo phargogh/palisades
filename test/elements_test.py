@@ -114,24 +114,24 @@ class ElementTest(unittest.TestCase):
 
 class PrimitiveTest(ElementTest):
     def setUp(self):
-        self.primitive = elements.Primitive({})
+        self.element = elements.Primitive({})
 
     def test_set_value(self):
         # check that there is no value.
-        self.assertEqual(self.primitive.value(), None)
+        self.assertEqual(self.element.value(), None)
 
         # Change the value and check that the value has been set
-        self.primitive.set_value('aaa')
-        self.assertEqual(self.primitive.value(), 'aaa')
+        self.element.set_value('aaa')
+        self.assertEqual(self.element.value(), 'aaa')
 
         # register a callback
         def sample_callback(event=None):
             raise ValueError
-        self.primitive.value_changed.register(sample_callback)
+        self.element.value_changed.register(sample_callback)
 
         # change the value and check that the callback was called.
         try:
-            self.primitive.set_value('bbb')
+            self.element.set_value('bbb')
             raise AssertionError('Callback was not called')
         except ValueError:
             # The valueError was raised correctly, so we pass.
@@ -140,36 +140,35 @@ class PrimitiveTest(ElementTest):
     def test_validate(self):
         # Verify that validation has not been performed.
         # TODO: Should is_valid() be True?
-        self.assertEqual(self.primitive._valid, None)
-        self.assertEqual(self.primitive.is_valid(), True)
+        self.assertEqual(self.element._valid, None)
+        self.assertEqual(self.element.is_valid(), True)
 
         # Start validation by setting the value.
-        self.primitive.set_value('aaa')
+        self.element.set_value('aaa')
 
         # wait until validation thread finishes (using join())
-        self.primitive._validator.join()
+        self.element._validator.join()
 
         # check that validation completed by checking the validity of the input.
-        self.assertEqual(self.primitive.is_valid(), True)
+        self.assertEqual(self.element.is_valid(), True)
 
     def test_is_valid(self):
-        """Verify that element validity works and makes sense."""
-        primitive = elements.Primitive({})
+        #Verify that element validity works and makes sense.
 
         # TEST 1:
         # Ensure a new primitive has no value and not valid (due to default
         # validation of "type": "disabled").
         # TODO: should is_valid() be True here?
-        self.assertEqual(primitive.value(), None)
-        self.assertEqual(primitive.is_valid(), True)
+        self.assertEqual(self.element.value(), None)
+        self.assertEqual(self.element.is_valid(), True)
 
         # TEST2:
         # When no validation is specified in the input dictionary, the default
         # validation is "type: disabled".  Ensure setting the value validates.
-        primitive.set_value(4)
-        self.assertEqual(primitive.value(), 4)
-        primitive._validator.join()
-        self.assertEqual(primitive.is_valid(), True)
+        self.element.set_value(4)
+        self.assertEqual(self.element.value(), 4)
+        self.element._validator.join()
+        self.assertEqual(self.element.is_valid(), True)
 
 
 class LabeledPrimitiveTest(PrimitiveTest):
@@ -222,6 +221,24 @@ class TextTest(LabeledPrimitiveTest):
         self.element.set_value(8)
         self.assertEqual(self.element.value(), '8')
         assert_utf8(self.element.value())
+
+    def test_is_valid(self):
+        #Verify that element validity works and makes sense.
+
+        # TEST 1:
+        # Ensure a new primitive has no value and not valid (due to default
+        # validation of "type": "disabled").
+        # TODO: should is_valid() be True here?
+        self.assertEqual(self.element.value(), u'')
+        self.assertEqual(self.element.is_valid(), True)
+
+        # TEST2:
+        # When no validation is specified in the input dictionary, the default
+        # validation is "type: disabled".  Ensure setting the value validates.
+        self.element.set_value(4)
+        self.assertEqual(self.element.value(), unicode(4))
+        self.element._validator.join()
+        self.assertEqual(self.element.is_valid(), True)
 
 class FileTest(LabeledPrimitiveTest):
     def setUp(self):

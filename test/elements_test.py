@@ -297,6 +297,7 @@ class FileTest(LabeledPrimitiveTest):
 
 class GroupTest(ElementTest):
     def setUp(self):
+        self.element = elements.Group({})
         self.elements = [
             {
                 'type': 'file',
@@ -305,6 +306,12 @@ class GroupTest(ElementTest):
                 'type': 'text',
             },
         ]
+
+    def test_default_config(self):
+        expected_defaults = {
+            'elements': [],
+        }
+        self.assertEqual(self.element.config, expected_defaults)
 
     def test_object_creation(self):
         # check that the object has all the correct elements

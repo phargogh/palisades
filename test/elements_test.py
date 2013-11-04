@@ -174,18 +174,18 @@ class PrimitiveTest(ElementTest):
 
 class LabeledPrimitiveTest(PrimitiveTest):
     def setUp(self):
-        self.primitive = elements.LabeledPrimitive({'label':'aaa'})
+        self.element = elements.LabeledPrimitive({'label':'aaa'})
 
     def test_set_label(self):
         # check that the configuration-defined label is set.
-        self.assertEqual(self.primitive.label(), 'aaa')
+        self.assertEqual(self.element.label(), 'aaa')
 
         # Set the label and check that it was set correctly.
-        self.primitive.set_label('abc')
-        self.assertEqual(self.primitive.label(), 'abc')
+        self.element.set_label('abc')
+        self.assertEqual(self.element.label(), 'abc')
 
         # verify that the set label is unicode, UTF-8
-        label = self.primitive.label()
+        label = self.element.label()
         assert_utf8(label)
 
 class TextTest(LabeledPrimitiveTest):

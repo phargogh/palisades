@@ -278,6 +278,17 @@ class FileTest(TextTest):
         }
         self.assertEqual(self.element.config, expected_defaults)
 
+    def test_default_value(self):
+        # verify the default value is set correctly
+        self.assertEqual(self.element.value(), '')
+
+        # now, create a new element and verify its value is set instead.
+        new_defaults = {
+            'defaultValue': 'text_value',
+        }
+        test_element = elements.File(new_defaults)
+        self.assertEqual(test_element.value(), new_defaults['defaultValue'])
+
     def test_set_value(self):
         # verify that the path set is absolute.
         path = 'a.txt.'

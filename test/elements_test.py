@@ -179,9 +179,17 @@ class PrimitiveTest(ElementTest):
 
 class LabeledPrimitiveTest(PrimitiveTest):
     def setUp(self):
-        self.element = elements.LabeledPrimitive({'label':'aaa'})
+        self.element = elements.LabeledPrimitive({})
+
+    def test_default_config(self):
+        expected_defaults = {
+            'label': '',
+            'validateAs': {'type': 'disabled'},
+        }
+        self.assertEqual(self.element.config, expected_defaults)
 
     def test_set_label(self):
+        self.element = elements.LabeledPrimitive({'label': 'aaa'})
         # check that the configuration-defined label is set.
         self.assertEqual(self.element.label(), 'aaa')
 

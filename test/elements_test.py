@@ -278,6 +278,24 @@ class FileTest(TextTest):
         }
         self.assertEqual(self.element.config, expected_defaults)
 
+    def test_validate(self):
+        # Verify that validation has not been performed.
+        # TODO: Should is_valid() be True?
+        self.assertEqual(self.element._valid, None)
+        self.assertEqual(self.element.is_valid(), False)
+
+        # Start validation by setting the value.
+        # wait until validation thread finishes (using join())
+        # check that validation completed by checking the validity of the input.
+        self.element.set_value('aaa')
+        self.element._validator.join()
+        self.assertEqual(self.element.is_valid(), False)
+
+        new_value = os.path.join(os.getcwd(), 'palisades', '__init__.py')
+        self.element.set_value(new_value)
+        self.element._validator.join()
+        self.assertEqual(self.element.is_valid(), True)
+
     def test_default_value(self):
         # verify the default value is set correctly
         self.assertEqual(self.element.value(), '')

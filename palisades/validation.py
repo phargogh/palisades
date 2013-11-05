@@ -6,6 +6,7 @@ import csv
 import os
 import re
 import sys
+import time
 import threading
 import traceback
 
@@ -150,6 +151,7 @@ class Validator(Registrar):
             Returns nothing."""
         self.thread.join()
         self.timer.join()
+        time.sleep(0.01)  # sleep so timer definitely finishes executing.
 
     def thread_finished(self):
         """Check to see whether the validator has finished.  This is done by

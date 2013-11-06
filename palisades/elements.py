@@ -115,9 +115,13 @@ class Element(object):
         """Query whether this element is enabled, indicating whether this
         element can be interacted with by the user.
 
+        If this element is currently invisible, False will always be returned.
+
         Returns a boolean."""
 
-        return self._enabled
+        if self.is_visible():
+            return self._enabled
+        return False
 
     def set_enabled(self, new_state):
         """Enable or disable this element.

@@ -80,12 +80,15 @@ class Element(object):
     def __init__(self, configuration, parent=None):
         object.__init__(self)
         self._enabled = True
+        self._visible = True
+
         self._parent_ui = parent
         self._default_config = {}
 
         # Set up the communicators
         self.config_changed = Communicator()
         self.interactivity_changed = Communicator()
+        self.visibility_changed = Communicator()
 
         # Render the configuration and save to self.config
         self.config = utils.apply_defaults(configuration, self.defaults)
@@ -132,6 +135,37 @@ class Element(object):
         if new_state != self._enabled:
             self._enabled = new_state
             self.interactivity_changed.emit(new_state)
+
+    def is_visible(self):
+        """Query whether this element is visible and return the visibility
+        state.
+
+        Returns a boolean."""
+
+        return self._visible
+
+    def set_visible(self, new_visibility):
+        """Show or hide this element to the user.
+
+        new_visibility - a Boolean.  If True, show this element.  If False, hide
+            this element.
+
+        If the visibility of this element changes, the visibility_changed signal
+        is emitted with the new visibility status.
+
+        Note that making an element visible does not necessarily mean that it's
+        interactive.  An element could be visible and noninteractive.  When an
+        element is invisible, it is not interactive.
+
+        Returns Nothing."""
+
+        assert type(new_visibility) is BooleanType, 'Visibility must be True or False'
+
+        # If visibility is changing, set the new visibility state and emit the
+        # visibility_changed signal.
+        if new_visibility != self.is_visible():
+            self._visible = new_visibility
+            self.visibility_changed.emit(self._visible)
 
 class Primitive(Element):
     """Primitive represents the simplest input element."""

@@ -2,6 +2,8 @@ import unittest
 import os
 import time
 
+import mock
+
 import palisades
 from palisades import elements
 from palisades import validation
@@ -12,6 +14,7 @@ TEST_DIR = os.path.dirname(__file__)
 IUI_CONFIG = os.path.join(TEST_DIR, 'data', 'iui_config')
 PALISADES_CONFIG = os.path.join(TEST_DIR, 'data', 'palisades_config')
 
+@unittest.skip('no X')
 class ApplicationTest(unittest.TestCase):
     def test_build_application_no_gui(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
@@ -111,6 +114,47 @@ class ElementTest(unittest.TestCase):
             pass
         self.assertEqual(self.element._default_config, {'a': 'ccc', 'b': 'bbb'})
         self.assertEqual(self.element.config, {'a': 'aaa', 'b': 'bbb'})
+
+    def test_visibility(self):
+        # verify that this element is visible and enabled by default.
+        self.assertEqual(self.element.is_visible(), True)
+        self.assertEqual(self.element.is_enabled(), True)
+
+        # now, disable the element and check visibility.
+        self.element.set_enabled(False)
+        self.assertEqual(self.element.is_enabled(), False)
+        self.assertEqual(self.element.is_visible(), True)
+
+        # re-enable the element and verify it's correct.
+        self.element.set_enabled(True)
+        self.assertEqual(self.element.is_enabled(), True)
+        self.assertEqual(self.element.is_visible(), True)
+
+        # make the element invisible
+        self.element.set_visible(False)
+        self.assertEqual(self.element.is_enabled(), False)
+        self.assertEqual(self.element.is_visible(), False)
+
+        # set the element's enabled state, verify nothing has changed.
+        self.element.set_enabled(True)
+        self.assertEqual(self.element.is_enabled(), False)
+        self.assertEqual(self.element.is_visible(), False)
+
+        self.element.set_enabled(False)
+        self.assertEqual(self.element.is_enabled(), False)
+        self.assertEqual(self.element.is_visible(), False)
+
+        # make the element visible again, check states
+        self.element.set_visible(True)
+        self.assertEqual(self.element.is_enabled(), False)
+        self.assertEqual(self.element.is_visible(), True)
+
+        # now, create a function and verify it's called when the visibility
+        # changes.
+        function = mock.MagicMock(name='function')
+        self.element.visibility_changed.register(function)
+        self.element.set_visible(not self.element.is_visible())
+        self.assertEqual(function.called, True)
 
 class PrimitiveTest(ElementTest):
     def setUp(self):

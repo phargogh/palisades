@@ -497,6 +497,22 @@ class Group(Element):
 
         Element.set_enabled(self, new_state)
 
+    def set_visible(self, new_visibility):
+        """Set the visibility of this Group and all its sub_elements.
+
+        new_visibility - a boolean.  If True, mark this element as visible.  If
+            False, mark as invisible.  Applies to all sub-elements.
+
+        Returns nothing."""
+
+        assert type(new_visibility) is BooleanType, ('Visibility must be True'
+            'or False, %s found' % type(new_visibility))
+
+        for element in self.elements():
+            element.set_visible(new_visibility)
+
+        Element.set_visible(self, new_visibility)
+
 class Container(Group):
     """A Container is a special kind of Group that can enable or disable all its
     sub-elements."""

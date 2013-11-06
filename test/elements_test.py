@@ -465,6 +465,35 @@ class GroupTest(ElementTest):
             self.assertEqual(element.is_enabled(), False,
                 "Element %s was not disabled." % element)
 
+    def test_visibility(self):
+        # overridden from ElementTest.  Make sure that all tests for Element
+        # apply to Group as well.
+        ElementTest.test_visibility(self)
+
+        # make sure that I have a Group that has some elements in it.
+        self.element = elements.Group({'elements': self.elements})
+        self.assertEqual(len(self.element.elements()), 2)
+        self.assertEqual(self.element.is_visible(), True)
+        self.assertEqual(self.element.is_enabled(), True)
+
+        # verify that when I make the Group invisible, all the contained elements are
+        # also made invisible.
+        self.element.set_visible(False)
+        self.assertEqual(self.element.is_visible(), False)
+        self.assertEqual(self.element.is_enabled(), False)
+        for element in self.element.elements():
+            self.assertEqual(element.is_visible(), False)
+            self.assertEqual(element.is_enabled(), False)
+
+        # Make the element visible again and verify it applied to all contained
+        # elements.
+        self.element.set_visible(True)
+        self.assertEqual(self.element.is_visible(), True)
+        self.assertEqual(self.element.is_enabled(), True)
+        for element in self.element.elements():
+            self.assertEqual(element.is_visible(), True)
+            self.assertEqual(element.is_enabled(), True)
+
 class ContainerTest(GroupTest):
     def setUp(self):
         self.default_config = {}

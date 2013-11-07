@@ -28,9 +28,9 @@ class UIObject(object):
     def __init__(self, core_element):
         self.element = core_element
 
-        self.element.visibility_changed.register(self.set_visibility)
+        self.element.visibility_changed.register(self.set_visible)
 
-    def set_visibility(self, is_visible):
+    def set_visible(self, is_visible):
         """Update the element's visibility in the toolkit."""
         raise NotYetImplemented
 
@@ -90,7 +90,7 @@ class GroupGUI(UIObject):
                 self.widgets.add_widget(new_element)
                 self.elements.append(new_element)
 
-    def set_visibility(self, is_visible):
+    def set_visible(self, is_visible):
         """Set the visibility of this element."""
         self.widgets.set_visible(is_visible)
 
@@ -104,9 +104,18 @@ class ContainerGUI(GroupGUI):
         # element to be collapsed
         self.widgets.checkbox_toggled.register(self.element.set_collapsed)
 
-class TextGUI(UIObject):
+class PrimitiveGUI(UIObject):
     def __init__(self, core_element):
         UIObject.__init__(self, core_element)
+        self.widgets = []
+
+    def set_visible(self, is_visible):
+        for widget in self.widgets:
+            widget.set_visible(is_visible)
+
+class TextGUI(PrimitiveGUI):
+    def __init__(self, core_element):
+        PrimitiveGUI.__init__(self, core_element)
 
         label_text = self.element.label()
         self._label = toolkit.ElementLabel(label_text)
@@ -118,7 +127,7 @@ class TextGUI(UIObject):
             self._validation_button,
             self._label,
             self._text_field,
-            None,
+            toolkit.Empty(),
             self._help_button,
         ]
 
@@ -159,9 +168,9 @@ class FileGUI(TextGUI):
         # set the core element's value
         self.element.set_value(new_value)
 
-class DropdownGUI(UIObject):
+class DropdownGUI(PrimitiveGUI):
     def __init__(self, core_element):
-        UIObject.__init__(self, core_element)
+        PrimitiveGUI.__init__(self, core_element)
 
         label_text = self.element.label()
         self._label = toolkit.ElementLabel(label_text)
@@ -170,10 +179,10 @@ class DropdownGUI(UIObject):
         self._help_button = toolkit.InformationButton(label_text)
 
         self.widgets = [
-            None,
+            toolkit.Empty(),
             self._label,
             self._dropdown,
-            None,
+            toolkit.Empty(),
             self._help_button
         ]
 
@@ -183,6 +192,9 @@ class LabelGUI(UIObject):
     def __init__(self, core_element):
         UIObject.__init__(self, core_element)
         self.widgets = toolkit.Label(self.element.label())
+
+    def set_visible(self, is_visible):
+        self.widgets.set_visible(is_visible)
 
 class FormGUI():
     def __init__(self, core_element):

@@ -56,9 +56,8 @@ class QtWidget(QtGui.QWidget):
     def set_visible(self, is_visible):
         self.setVisible(is_visible)
 
-class Empty(QtGui.QWidget):
-    def __init__(self):
-        QtGui.QWidget.__init__(self)
+class Empty(QtWidget):
+    pass
 
 class Group(QtGui.QGroupBox, QtWidget):
     def __init__(self):
@@ -108,9 +107,10 @@ class Container(Group):
     def set_collapsible(self, is_collapsible):
         self.setCheckable(is_collapsible)
 
-class Button(QtGui.QPushButton):
+class Button(QtGui.QPushButton, QtWidget):
     _icon = None
     def __init__(self):
+        QtWidget.__init__(self)
         QtGui.QPushButton.__init__(self)
         self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         if self._icon is not None:
@@ -261,17 +261,19 @@ class ValidationButton(InformationButton):
 
         return str(title + message + body + width_table)
 
-class Label(QtGui.QLabel):
+class Label(QtGui.QLabel, QtWidget):
     def __init__(self, label_text):
+        QtWidget.__init__(self)
         QtGui.QLabel.__init__(self, label_text)
         self.setTextFormat(QtCore.Qt.RichText)
         self.setWordWrap(True)
 
-class ElementLabel(QtGui.QLabel):
+class ElementLabel(QtGui.QLabel, QtWidget):
     #error_changed = QtCore.Signal(bool)
     error_changed = QtCore.pyqtSignal(bool)
 
     def __init__(self, label_text):
+        QtWidget.__init__(self)
         QtGui.QLabel.__init__(self, label_text)
         self.error_changed.connect(self._set_error)
         self.setWordWrap(False)
@@ -297,11 +299,12 @@ class ElementLabel(QtGui.QLabel):
         else:
             self.setStyleSheet("QWidget {}")
 
-class TextField(QtGui.QLineEdit):
+class TextField(QtGui.QLineEdit, QtWidget):
     #error_changed = QtCore.Signal(bool)
     error_changed = QtCore.pyqtSignal(bool)
 
     def __init__(self, starting_value):
+        QtWidget.__init__(self)
         QtGui.QLineEdit.__init__(self, starting_value)
         self.setMinimumWidth(400)
 
@@ -389,9 +392,10 @@ class FileDialog(QtGui.QFileDialog):
 
         return unicode(filename, 'utf-8')
 
-class Dropdown(QtGui.QComboBox):
+class Dropdown(QtGui.QComboBox, QtWidget):
     def __init__(self, options, default_value):
         QtGui.QComboBox.__init__(self)
+        QtWidget.__init__(self)
         for option in options:
             self.addItem(option)
 
@@ -501,10 +505,11 @@ class ErrorDialog(InfoDialog):
         self.body.setMinimumSize(self.body.sizeHint())
         InfoDialog.showEvent(self)
 
-class FormWindow(QtGui.QWidget):
+class FormWindow(QtWidget, QtGui.QWidget):
     """A Form is a window where you have a set of inputs that the user fills in
     or configures and then presses 'submit'."""
     def __init__(self, input_pane):
+        QtWidget.__init__(self)
         QtGui.QWidget.__init__(self)
 
         # The form has two elements arranged vertically: the form window (which

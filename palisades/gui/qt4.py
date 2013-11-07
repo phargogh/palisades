@@ -52,20 +52,25 @@ class Application(object):
     def execute(self):
         self.app.exec_()
 
+class QtWidget(QtGui.QWidget):
+    def set_visible(self, is_visible):
+        self.setVisible(is_visible)
+
 class Empty(QtGui.QWidget):
     def __init__(self):
         QtGui.QWidget.__init__(self)
 
-class Group(QtGui.QGroupBox):
-    def __init__(self, label_text):
+class Group(QtGui.QGroupBox, QtWidget):
+    def __init__(self):
+        QtWidget.__init__(self)
         QtGui.QGroupBox.__init__(self)
-        self.setTitle(label_text)
         self.setLayout(QtGui.QGridLayout())
 
     def add_widget(self, gui_object):
         # do the logic of adding the widgets of the gui_object to the Qt Widget.
         layout = self.layout()
         current_row = layout.rowCount()
+        print gui_object
 
         # If the item has a widgets attribute that is a list, we assume that we
         # want to add widgets to the UI in that order.
@@ -84,8 +89,21 @@ class Group(QtGui.QGroupBox):
             # it is, then there would not be any columns, which throws off the
             # rest of the layout.
             num_cols = max(5, layout.columnCount())
-            self.layout().addWidget(gui_object.widgets, current_row, 0, 1, num_cols)
             gui_object.widgets.show()
+            self.layout().addWidget(gui_object.widgets, current_row, 0, 1, num_cols)
+
+class Container(Group):
+    def __init__(self, label_text):
+        print 'creating a container!'
+        Group.__init__(self)
+        self.setTitle(label_text)
+
+        self.checkbox_toggled = Communicator()
+        self.toggled.connect(self._container_toggled)
+
+    def _container_toggled(self):
+        # returns whether the container is collapsed.
+        self.checkbox_toggled.emit(not self.isChecked())
 
     def set_collapsible(self, is_collapsible):
         self.setCheckable(is_collapsible)

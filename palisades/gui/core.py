@@ -3,6 +3,8 @@ from types import *
 from palisades.gui import qt4 as toolkit
 from palisades.validation import V_ERROR
 
+class NotYetImplemented(Exception): pass
+
 class ApplicationGUI(object):
     def __init__(self):
         object.__init__(self)
@@ -26,6 +28,12 @@ class UIObject(object):
     def __init__(self, core_element):
         self.element = core_element
 
+        self.element.visibility_changed.register(self.set_visibility)
+
+    def set_visibility(self, is_visible):
+        """Update the element's visibility in the toolkit."""
+        raise NotYetImplemented
+
 class GroupGUI(UIObject):
     def __init__(self, core_element, registrar=None):
         UIObject.__init__(self, core_element)
@@ -46,8 +54,12 @@ class GroupGUI(UIObject):
             registry.update(registrar)
 
         self.registrar = registry
-        self.widgets = toolkit.Group(core_element.label())
-        self.widgets.set_collapsible(self.element.is_collapsible())
+
+        # If a subclass has already set up a toolkit widget for this object, we
+        # want to use that widget.  Assumes that the widget is a subclass of
+        # toolkit.Group.
+        if not hasattr(self, 'widgets'):
+            self.widgets = toolkit.Group()
 
         self.elements = []
 
@@ -78,8 +90,19 @@ class GroupGUI(UIObject):
                 self.widgets.add_widget(new_element)
                 self.elements.append(new_element)
 
+    def set_visibility(self, is_visible):
+        """Set the visibility of this element."""
+        self.widgets.set_visible(is_visible)
+
 class ContainerGUI(GroupGUI):
-    pass
+    def __init__(self, core_element, registrar=None):
+        self.widgets = toolkit.Container(core_element.label())
+        GroupGUI.__init__(self, core_element, registrar)
+        self.widgets.set_collapsible(self.element.is_collapsible())
+
+        # when the container is collapsed by the GUI user, set the underlying
+        # element to be collapsed
+        self.widgets.checkbox_toggled.register(self.element.set_collapsed)
 
 class TextGUI(UIObject):
     def __init__(self, core_element):
@@ -161,9 +184,9 @@ class LabelGUI(UIObject):
         UIObject.__init__(self, core_element)
         self.widgets = toolkit.Label(self.element.label())
 
-class FormGUI(UIObject):
+class FormGUI():
     def __init__(self, core_element):
-        UIObject.__init__(self, core_element)
+        self.element = core_element
 
         self.group = GroupGUI(self.element._ui)
         self.window = toolkit.FormWindow(self.group.widgets)

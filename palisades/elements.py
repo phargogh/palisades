@@ -548,8 +548,11 @@ class Container(Group):
         self._collapsed = is_collapsed
         self.toggled.emit(is_collapsed)
 
+        print('collapsed: %s' % is_collapsed)
+
         for element in self.elements():
             element.set_enabled(not is_collapsed)
+            element.set_visible(not is_collapsed)
 
     def is_collapsible(self):
         return self._collapsible

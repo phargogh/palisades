@@ -192,3 +192,35 @@ class QtContainerIntegrationTest(unittest.TestCase):
         # assert the correct number of rows in the group's layout
         # Qt thinks there's always one extra row, hence the -1.
         self.assertEqual(self.gui.widgets.layout().rowCount() - 1, 2)
+
+        # assert that the default is a non-collapsible container.
+        self.assertEqual(self.element.is_collapsible(), False)
+        self.assertEqual(self.gui.widgets.isCheckable(), False)
+
+        # when the Container is not collapsible, I should not be able to
+        # collapse it.
+        self.assertRaises(elements.InteractionError,
+            self.element.set_collapsed, True)
+
+    def test_collapsing(self):
+        config = {
+            'label': 'Container!',
+            'collapsible': True,
+            'elements': [
+                {
+                    'type': 'label',
+                    'label': 'hello there!',
+                },
+                {
+                    'type': 'file',
+                    'label': 'Select a file',
+                },
+            ]
+        }
+        self.element = elements.Container(config)
+        self.gui = core.ContainerGUI(self.element)
+
+        # assert that when the config defines that the element is collapsible,
+        # the widget is indeed collapsible/checkable.
+        #TODO: finish this testing!
+

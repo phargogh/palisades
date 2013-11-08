@@ -83,3 +83,62 @@ class QtContainerTest(QtGroupTest):
         self.widget.setChecked(not self.widget.isChecked())
         self.assertEqual(mock_func.called, True)
 
+class ButtonTest(QtWidgetTest):
+    def setUp(self):
+        self.widget = qt4.Button()
+
+class InformationButtonTest(ButtonTest):
+    def setUp(self):
+        self.title = 'Title!'
+        self.widget = qt4.InformationButton(self.title)
+
+    def test_setup(self):
+        self.assertEqual(self.title, self.widget.title())
+        self.assertEqual('', self.widget.body())
+
+    def test_deactivate(self):
+        # behavior I care about:
+        #  * icon is blank
+        #  * element is disabled
+        self.assertEqual(self.widget.isEnabled(), True)
+
+        self.widget.deactivate()
+        self.assertEqual(self.widget.isEnabled(), False)
+
+class ValidationButtonTest(InformationButtonTest):
+    def setUp(self):
+        self.title = 'Title!'
+        self.widget = qt4.ValidationButton(self.title)
+
+    def test_deactivate(self):
+        # overridden from InformationButtonTest, because the validation button
+        # is disabled by default.
+        self.widget.setEnabled(True)
+
+        # now, run the rest of the test.
+        InformationButtonTest.test_deactivate(self)
+
+    def test_set_error_fail(self):
+        error_string = 'some error occurred'
+        error_state = 'error'
+
+        self.widget.set_error(error_string, error_state)
+        self.assertEqual(self.widget.error_text, error_string)
+        self.assertEqual(self.widget.error_state, error_state)
+
+    def test_set_error_warning(self):
+        error_string = 'some error occurred'
+        error_state = 'warning'
+
+        self.widget.set_error(error_string, error_state)
+        self.assertEqual(self.widget.error_text, error_string)
+        self.assertEqual(self.widget.error_state, error_state)
+
+    def test_set_error_pass(self):
+        error_string = 'some error occurred'
+        error_state = 'pass'
+
+        self.widget.set_error(error_string, error_state)
+        self.assertEqual(self.widget.error_text, error_string)
+        self.assertEqual(self.widget.error_state, error_state)
+

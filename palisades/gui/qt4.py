@@ -140,8 +140,8 @@ class InformationButton(Button):
             returns nothing."""
 
         Button.__init__(self)
-        self.title = title
-        self.body_text = body_text
+        self._title = title
+        self._body_text = body_text
         self.pressed.connect(self.show_info_popup)
         self.setFlat(True)
 
@@ -171,12 +171,20 @@ class InformationButton(Button):
     def set_title(self, title_text):
         """Set the title of the InformationPopup text.  title_text is a python
             string."""
-        self.title = title_text
+        self._title = title_text
+
+    def title(self):
+        """Return the title of the button"""
+        return self._title
 
     def set_body(self, body_string):
         """Set the body of the InformationPopup.  body_string is a python
             string."""
-        self.body_text = body_string
+        self._body_text = body_string
+
+    def body(self):
+        """Return the string body of the InformationPopup."""
+        return self._body_text
 
     def build_contents(self):
         """Take the python string components of this instance of
@@ -204,7 +212,7 @@ class ValidationButton(InformationButton):
         }
         InformationButton.__init__(self, title, body_text)
         self.error_text = ''
-        self.error_state = None
+        self.error_state = 'pass'
         self.deactivate()
 
     def setEnabled(self, state):
@@ -220,19 +228,19 @@ class ValidationButton(InformationButton):
             button's icon according to the error contained in error_string.
             error_string is a python string."""
 
-        if state == None:
-            state = 'pass'
+        assert state in ['pass', 'warning', 'error'], ('Error state must be '
+            'one of "pass", "warning" or "error", %s found"' % state)
 
         self.error_text = error_string
         self.error_state = state
-        button_is_flat = False
 
         try:
             button_icon = self._states[state]
         except KeyError:
             button_icon = self._states[None]
 
-        if state == 'pass' or state == None:
+        button_is_flat = False
+        if state == 'pass':
             button_is_flat = True
 
         self.setIcon(button_icon)

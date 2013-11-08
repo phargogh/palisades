@@ -107,6 +107,9 @@ class Container(Group):
     def set_collapsible(self, is_collapsible):
         self.setCheckable(is_collapsible)
 
+    def is_collapsible(self):
+        return self.isCheckable()
+
 class Button(QtGui.QPushButton, QtWidget):
     _icon = None
     def __init__(self):

@@ -1,6 +1,9 @@
 import unittest
 import os
 import time
+from types import ListType
+
+import mock
 
 from PyQt4.QtTest import QTest
 
@@ -202,7 +205,8 @@ class QtContainerIntegrationTest(unittest.TestCase):
         self.assertRaises(elements.InteractionError,
             self.element.set_collapsed, True)
 
-    def test_collapsing(self):
+class QtCollapsibleContainerIntegrationTest(QtContainerIntegrationTest):
+    def setUp(self):
         config = {
             'label': 'Container!',
             'collapsible': True,
@@ -220,7 +224,105 @@ class QtContainerIntegrationTest(unittest.TestCase):
         self.element = elements.Container(config)
         self.gui = core.ContainerGUI(self.element)
 
+    def test_setup(self):
+        """Assert that the container builds correctly."""
+        # assert the correct number of elements in the core container
+        self.assertEqual(len(self.element._elements), 2)
+
+        # assert the correct number of rows in the group's layout
+        # Qt thinks there's always one extra row, hence the -1.
+        self.assertEqual(self.gui.widgets.layout().rowCount() - 1, 2)
+
+        # assert that the default is a non-collapsible container.
+        self.assertEqual(self.element.is_collapsible(), True)
+        self.assertEqual(self.gui.widgets.isCheckable(), True)
+
+    def test_collapsing(self):
         # assert that when the config defines that the element is collapsible,
-        # the widget is indeed collapsible/checkable.
-        #TODO: finish this testing!
+        # the widget is indeed collapsible/checkable and that the container is
+        # interactive to the user.
+        self.assertEqual(self.gui.widgets.isCheckable(), True)
+        self.assertEqual(self.gui.widgets.isEnabled(), True)
+
+        # verify the default check state is unchecked
+        self.assertEqual(self.gui.widgets.isChecked(), True)
+
+        # verify that contained elements are enabled by default.
+        for gui_elem, core_elem in zip(self.gui.elements, self.element.elements()):
+            self.assertEqual(core_elem.is_enabled(), True)
+
+            # if this is a primitive, elements are in a list.
+            if type(gui_elem.widgets) is ListType:
+                # loop through the list of widgets and assert each widget is
+                # enabled.
+                for qt_widget in gui_elem.widgets:
+                    self.assertEqual(qt_widget.isEnabled(), True)
+
+            else:
+                # just access the widget directly and ensure it's enabled.
+                self.assertEqual(gui_elem.widgets.isEnabled(), True)
+
+            # assert that the palisades element is enabled and visible.
+            self.assertEqual(core_elem.is_enabled(), True)
+            self.assertEqual(core_elem.is_visible(), True)
+
+        # Check the checkbox to close the container and ensure that the
+        # checkbox_toggled signal is emitted.
+        mock_function = mock.MagicMock(name='Function')
+        self.gui.widgets.checkbox_toggled.register(mock_function)
+        self.gui.widgets.setChecked(True)
+        QTest.qWait(10)  # wait a few ms for event loop to notice, emit signal
+
+        # assert that checking the container did what it was supposed to
+        self.assertEqual(mock_function.called, True)  # verify signal emitted
+        self.assertEqual(self.gui.widgets.isChecked(), True)  # box is checked
+
+        # verify all contained elements and widgets are disabled, as expected.
+        for gui_elem, core_elem in zip(self.gui.elements, self.element.elements()):
+            self.assertEqual(core_elem.is_enabled(), False)
+
+            # if this is a primitive, elements are in a list.
+            if type(gui_elem.widgets) is ListType:
+                # loop through the list of widgets and assert each widget is
+                # enabled.
+                for qt_widget in gui_elem.widgets:
+                    self.assertEqual(qt_widget.isEnabled(), False)
+
+            else:
+                # just access the widget directly and ensure it's enabled.
+                self.assertEqual(gui_elem.widgets.isEnabled(), False)
+
+            # assert that the palisades element is disabled and invisible.
+            self.assertEqual(core_elem.is_enabled(), False)
+            self.assertEqual(core_elem.is_visible(), False)
+
+        # re-open the container and verify all container elements are enabled in
+        # Qt and visible (and enabled) in palisades.
+        new_mock_function = mock.MagicMock(name='Function')
+        self.gui.widgets.checkbox_toggled.register(new_mock_function)
+        self.gui.widgets.setChecked(False)
+        QTest.qWait(10)  # wait a few ms for event loop to notice, emit signal
+
+        # assert that checking the container did what it was supposed to
+        self.assertEqual(new_mock_function.called, True)  # verify signal emitted
+        self.assertEqual(self.gui.widgets.isChecked(), False)  # box is checked
+
+        # verify all contained elements and widgets are disabled, as expected.
+        for gui_elem, core_elem in zip(self.gui.elements, self.element.elements()):
+            self.assertEqual(core_elem.is_enabled(), True)
+
+            # if this is a primitive, elements are in a list.
+            if type(gui_elem.widgets) is ListType:
+                # loop through the list of widgets and assert each widget is
+                # enabled.
+                for qt_widget in gui_elem.widgets:
+                    self.assertEqual(qt_widget.isEnabled(), True)
+
+            else:
+                # just access the widget directly and ensure it's enabled.
+                self.assertEqual(gui_elem.widgets.isEnabled(), True)
+
+            # assert that the palisades element is disabled and invisible.
+            self.assertEqual(core_elem.is_enabled(), True)
+            self.assertEqual(core_elem.is_visible(), True)
 

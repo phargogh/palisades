@@ -86,6 +86,8 @@ class GroupGUI(UIObject):
                 print 'ERROR ERROR: %s in %s' % (error, element_classname)
 
             # If the new element is None, there's no visualization.  Skip.
+            # new_element is the GUI representation of a palisades Element.
+            # TODO: create a better naming scheme for each layer.
             if new_element is not None:
                 self.widgets.add_widget(new_element)
                 self.elements.append(new_element)

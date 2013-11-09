@@ -1,5 +1,6 @@
 import os
 import threading
+from types import BooleanType
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -119,6 +120,14 @@ class Button(QtGui.QPushButton, QtWidget):
         if self._icon is not None:
             self.setIcon(QtGui.QIcon(self._icon))
 
+    def set_active(self, is_active):
+        """Activate or deactivate the button.  If is_active is True, the button
+        will be enabled.  False if not."""
+
+        assert type(is_active) is BooleanType, 'is_active must be True or False'
+        self.setEnabled(is_active)
+
+
 class InformationButton(Button):
     """This class represents the information that a user will see when pressing
         the information button.  This specific class simply represents an object
@@ -160,13 +169,6 @@ class InformationButton(Button):
         self.setWhatsThis(self.build_contents())  # set popup text
         QtGui.QWhatsThis.enterWhatsThisMode()
         QtGui.QWhatsThis.showText(self.pos(), self.whatsThis(), self)
-
-    def deactivate(self):
-        """Visually disable the button: set it to be flat, disable it, and clear
-            its icon."""
-        self.setFlat(True)
-        self.setEnabled(False)
-        self.setIcon(self._disabled_icon)
 
     def set_title(self, title_text):
         """Set the title of the InformationPopup text.  title_text is a python
@@ -213,15 +215,27 @@ class ValidationButton(InformationButton):
         InformationButton.__init__(self, title, body_text)
         self.error_text = ''
         self.error_state = 'pass'
-        self.deactivate()
 
-    def setEnabled(self, state):
-        if state == False:
+        self.set_active(False)
+
+    def set_active(self, is_active):
+        """Set the active state of the button based on the error state of the
+        button.
+
+        is_active - a boolean.  If True, the button will be enabled.  If
+            False, the button will be disabled.
+
+        Reimplemented from InformationButton.set_active."""
+        InformationButton.set_active(self, is_active)
+
+        if is_active is False:
             self.setIcon(self._states[None])
         else:
-            self.set_error(self.error_text, self.error_state)
-
-        QtGui.QWidget.setEnabled(self, state)
+            self.setIcon(self._states[self.error_state])
+            if self.error_state == 'pass':
+                self.setFlat(True)
+            else:
+                self.setFlat(False)
 
     def set_error(self, error_string, state):
         """Set the error string of this InformationPopup and also set this
@@ -233,19 +247,6 @@ class ValidationButton(InformationButton):
 
         self.error_text = error_string
         self.error_state = state
-
-        try:
-            button_icon = self._states[state]
-        except KeyError:
-            button_icon = self._states[None]
-
-        button_is_flat = False
-        if state == 'pass':
-            button_is_flat = True
-
-        self.setIcon(button_icon)
-        self.setFlat(button_is_flat)
-        QtGui.QWidget.setEnabled(self, True)  # enable the button; validation has completed
 
     def build_contents(self):
         """Take the python string components of this instance of

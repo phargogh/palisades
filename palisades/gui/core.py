@@ -2,6 +2,7 @@ from types import *
 
 from palisades.gui import qt4 as toolkit
 from palisades.validation import V_ERROR
+from palisades.validation import V_PASS
 
 class NotYetImplemented(Exception): pass
 
@@ -144,7 +145,14 @@ class TextGUI(PrimitiveGUI):
     def _update_validation(self, error_state):
         # error_state is a tuple of (error_state, error_msg)
         error_msg, error = error_state
+        if error == None:
+            error = 'pass'
+
+        if error_msg == None:
+            error_msg = ''
+
         self._validation_button.set_error(error_msg, error)
+        self._validation_button.set_active(True)
         self._text_field.set_error(error == V_ERROR)
         self._label.set_error(error == V_ERROR)
 

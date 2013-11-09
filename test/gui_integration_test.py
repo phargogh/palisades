@@ -39,7 +39,7 @@ class QtTextIntegrationTest(unittest.TestCase):
         """Assert element's validation state when validation completes"""
         # assert that validation state is True by default.
         self.assertEqual(self.gui._validation_button.error_text , '')
-        self.assertEqual(self.gui._validation_button.error_state, None)
+        self.assertEqual(self.gui._validation_button.error_state, 'pass')
         self.assertEqual(self.gui._validation_button.isEnabled(), False)
         self.assertEqual(self.element.is_valid(), True)
 
@@ -89,7 +89,7 @@ class QtFileIntegrationTest(unittest.TestCase):
         self.assertEqual(self.element.value(), os.getcwd())
 
         # check the validation state to start out
-        self.assertEqual(self.gui._validation_button.error_state, None)
+        self.assertEqual(self.gui._validation_button.error_state, 'pass')
         self.assertEqual(self.element.is_valid(), True)
 
         # set the textfield value to something else.

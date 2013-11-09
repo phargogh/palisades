@@ -247,6 +247,7 @@ class ValidationButton(InformationButton):
 
         self.error_text = error_string
         self.error_state = state
+        self.set_active(state != 'pass')
 
     def build_contents(self):
         """Take the python string components of this instance of

@@ -87,6 +87,16 @@ class ButtonTest(QtWidgetTest):
     def setUp(self):
         self.widget = qt4.Button()
 
+    def test_set_active(self):
+        # check that I can deactivate/activate the button easily.
+        self.assertEqual(self.widget.isEnabled(), True)
+
+        self.widget.set_active(False)
+        self.assertEqual(self.widget.isEnabled(), False)
+
+        self.widget.set_active(True)
+        self.assertEqual(self.widget.isEnabled(), True)
+
 class InformationButtonTest(ButtonTest):
     def setUp(self):
         self.title = 'Title!'
@@ -96,27 +106,31 @@ class InformationButtonTest(ButtonTest):
         self.assertEqual(self.title, self.widget.title())
         self.assertEqual('', self.widget.body())
 
-    def test_deactivate(self):
-        # behavior I care about:
-        #  * icon is blank
-        #  * element is disabled
-        self.assertEqual(self.widget.isEnabled(), True)
-
-        self.widget.deactivate()
-        self.assertEqual(self.widget.isEnabled(), False)
-
 class ValidationButtonTest(InformationButtonTest):
     def setUp(self):
         self.title = 'Title!'
         self.widget = qt4.ValidationButton(self.title)
 
-    def test_deactivate(self):
-        # overridden from InformationButtonTest, because the validation button
-        # is disabled by default.
+    def test_set_active(self):
+        # verify that ButtonTests' set_active works.
+        # button is disabled by default, so enable it for the sake of the
+        # ButtonTests's test.
         self.widget.setEnabled(True)
+        ButtonTest.test_set_active(self)
 
-        # now, run the rest of the test.
-        InformationButtonTest.test_deactivate(self)
+        # when error state is 'error' or 'warning', button has raised edges
+        for state in ['error', 'warning']:
+            self.widget.set_error('', state)
+            self.widget.set_active(True)
+            self.assertEqual(self.widget.isEnabled(), True)
+            self.assertEqual(self.widget.isFlat(), False)
+
+        # when error state is 'pass', button is flat
+        self.widget.set_error('', 'pass')
+        self.widget.set_active(True)
+        self.assertEqual(self.widget.isEnabled(), True)
+        self.assertEqual(self.widget.isFlat(), True)
+
 
     def test_set_error_fail(self):
         error_string = 'some error occurred'

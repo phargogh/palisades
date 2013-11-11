@@ -156,3 +156,27 @@ class ValidationButtonTest(InformationButtonTest):
         self.assertEqual(self.widget.error_text, error_string)
         self.assertEqual(self.widget.error_state, error_state)
 
+class LabelTest(QtWidgetTest):
+    def setUp(self):
+        self.text = 'hello world, this is a label with some text in it.'
+        self.widget = qt4.Label(self.text)
+
+    def test_label_contents(self):
+        self.assertEqual(self.widget.text(), self.text)
+
+class ElementLabelTest(QtWidgetTest):
+    def setUp(self):
+        self.text = 'Element label'
+        self.widget = qt4.ElementLabel(self.text)
+
+    def test_label_contents(self):
+        self.assertEqual(self.widget.text(), self.text)
+
+    def test_set_error_smoke(self):
+        self.widget.set_error(True)
+        self.widget.set_error(False)
+
+        # verify an assertionError is raised if a boolean is not passed in.
+        self.assertRaises(AssertionError, self.widget.set_error, 'False')
+
+

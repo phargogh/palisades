@@ -152,7 +152,6 @@ class TextGUI(PrimitiveGUI):
             error_msg = ''
 
         self._validation_button.set_error(error_msg, error)
-        self._validation_button.set_active(True)
         self._text_field.set_error(error == V_ERROR)
         self._label.set_error(error == V_ERROR)
 

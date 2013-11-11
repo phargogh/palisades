@@ -298,6 +298,9 @@ class ElementLabel(QtGui.QLabel, QtWidget):
 
         Returns nothing."""
 
+        assert type(is_error) is BooleanType, ('is_error must be boolean, '
+            '%s found instead' % type(is_error))
+
         # For some reason, usin this sometimes prints an error message saying 
         # "QPixmap: It is not safe to use pixmaps outside the GUI thread"
         # I'm leaving it alone for now, since the application seems to work ok

@@ -343,6 +343,10 @@ class TextField(QtGui.QLineEdit, QtWidget):
             is_error - True if there is an error with the input, False if not.
 
         Returns nothing."""
+
+        assert type(is_error) is BooleanType, ('is_error must be boolean, '
+            '%s found instead' % type(is_error))
+
         self.error_changed.emit(is_error)
 
     def _set_error(self, is_error):

@@ -179,4 +179,77 @@ class ElementLabelTest(QtWidgetTest):
         # verify an assertionError is raised if a boolean is not passed in.
         self.assertRaises(AssertionError, self.widget.set_error, 'False')
 
+class TextFieldTest(QtWidgetTest):
+    def setUp(self):
+        self.default_value = 'some default value'
+        self.widget = qt4.TextField(self.default_value)
+
+    def test_default_value(self):
+        self.assertEqual(self.widget.text(), self.default_value)
+
+    def test_set_error_smoke(self):
+        self.widget.set_error(True)
+        self.widget.set_error(False)
+
+        # verify an assertionError is raised if a boolean is not passed in.
+        self.assertRaises(AssertionError, self.widget.set_error, 'False')
+
+    def test_value_changed(self):
+        # verify that when the value of the textfield is changed, the
+        # value_changed communicator is triggered.
+        mock_func = mock.MagicMock(name='function')
+        self.widget.value_changed.register(mock_func)
+
+        # verify the mock function has not yet been called.
+        self.assertEqual(mock_func.called, False)
+
+        # change the value, verify that mock_func has been called.
+        self.widget.set_text('some new value')
+        QTest.qWait(50)  # wait for the Qt event loop to detect changed text
+        self.assertEqual(self.widget.text(), 'some new value')
+        self.assertEqual(mock_func.called, True)
+
+class FileButtonTest(QtWidgetTest):
+    def setUp(self):
+        self.widget = qt4.FileButton()
+
+    def test_file_selected(self):
+        # can't actually get the file dialog's value programmatically, since the
+        # function blocks, but I can verify that the file_selected communicator
+        # is the correct object.
+        self.assertEqual(hasattr(self.widget, 'file_selected'), True)
+        self.assertEqual(self.widget.file_selected.__class__.__name__,
+            'Communicator')
+
+class DropdownTest(QtWidgetTest):
+    def setUp(self):
+        self.options = ['a', 'b', 'c']
+        self.default_index = 0
+        self.widget = qt4.Dropdown(self.options, self.default_index)
+
+    def test_default_options(self):
+        num_options = self.widget.count()
+        options = [unicode(self.widget.itemText(i), 'utf-8') for i in
+            range(num_options)]
+        self.assertEqual(options, self.options)
+
+        # assert the default index is set
+        self.assertEqual(self.widget.currentIndex(), self.default_index)
+
+    def test_value_changed(self):
+        mock_func = mock.MagicMock(name='function')
+        self.widget.value_changed.register(mock_func)
+
+        # verify that when the value is set (but not changed), the function is
+        # not called.
+        self.assertEqual(mock_func.called, False)
+        self.widget.setCurrentIndex(self.widget.currentIndex())
+        self.assertEqual(mock_func.called, False)
+
+        # when the value is changed, verify that the communicator is called
+        new_index = 1
+        self.assertNotEqual(self.widget.currentIndex(), new_index)
+        self.widget.setCurrentIndex(new_index)
+        QTest.qWait(50)  # wait for the qt event loop to catch on
+        self.assertEqual(mock_func.called, True)
 

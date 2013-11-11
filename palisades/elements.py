@@ -282,6 +282,30 @@ class LabeledPrimitive(Primitive):
     def label(self):
         return self._label
 
+class HideablePrimitive(LabeledPrimitive):
+    defaults = {
+        'label': u'',
+        'validateAs': {'type': 'disabled'},
+    }
+
+    def __init__(self, configuration):
+        LabeledPrimitive.__init__(self, configuration)
+        self.set_default_config(self.defaults)
+
+        self._hidden = True
+        self.hidden_toggled = core.Communicator()
+
+    def set_hidden(self, is_hidden):
+        assert type(is_hidden) is BooleanType, ('is_hidden must be Boolean'
+            ', %s found instead' % is_hidden.__class__.__name__)
+
+        if self._hidden != is_hidden:
+            self._hidden = is_hidden
+            self.hidden_toggled.emit(is_hidden)
+
+    def is_hidden(self):
+        return self._hidden
+
 class Dropdown(LabeledPrimitive):
     defaults = {
         'options': ['No options specified'],

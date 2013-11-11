@@ -173,6 +173,23 @@ class FileGUI(TextGUI):
         # set the core element's value
         self.element.set_value(new_value)
 
+class HideableFileEntry(FileGUI):
+    def __init__(self, core_element):
+        FileGUI.__init__(self, core_element)
+        self._label = CheckboxGUI(self.element.label())
+
+        self._label.checkbox_toggled.register(self._toggle_widgets)
+        self._toggle_widgets(False)
+
+
+    def _toggle_widgets(self, show):
+        # show must be boolean.
+        self._validation_button.set_visible(show)
+        self._text_field.set_visible(show)
+        self._file_button.set_visible(show)
+        self._help_button.set_visible(show)
+        self.element.set_hidden(show)
+
 class DropdownGUI(PrimitiveGUI):
     def __init__(self, core_element):
         PrimitiveGUI.__init__(self, core_element)

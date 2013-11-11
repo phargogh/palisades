@@ -260,7 +260,6 @@ class Primitive(Element):
             self._valid = False
 
         self._validation_error = error_msg
-        print 'validation completed'
         self.validation_completed.emit(error)
 
 
@@ -548,8 +547,6 @@ class Container(Group):
         self._collapsed = is_collapsed
         self.toggled.emit(is_collapsed)
 
-        print('collapsed: %s' % is_collapsed)
-
         for element in self.elements():
             element.set_enabled(not is_collapsed)
             element.set_visible(not is_collapsed)
@@ -596,9 +593,7 @@ class Form():
     def submit(self):
         # Check the validity of all inputs
         form_data = [(e.is_valid(), e.value()) for e in self.elements]
-        print form_data
         form_is_invalid = False in [e[0] for e in form_data]
-        print form_is_invalid
 
         # if success, assemble the arguments dictionary and send it off to the
         # base Application
@@ -618,7 +613,6 @@ class Form():
                 except KeyError:
                     LOGGER.debug('Element %s does not have an args_id', element)
 
-            print args_dict
             # TODO: submit the args dict and other relevant data back to app.
             try:
                 self.runner = execution.PythonRunner(self._ui.config['targetScript'],

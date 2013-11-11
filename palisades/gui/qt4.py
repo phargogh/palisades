@@ -70,7 +70,6 @@ class Group(QtGui.QGroupBox, QtWidget):
         # do the logic of adding the widgets of the gui_object to the Qt Widget.
         layout = self.layout()
         current_row = layout.rowCount()
-        print gui_object
 
         # If the item has a widgets attribute that is a list, we assume that we
         # want to add widgets to the UI in that order.
@@ -94,7 +93,6 @@ class Group(QtGui.QGroupBox, QtWidget):
 
 class Container(Group):
     def __init__(self, label_text):
-        print 'creating a container!'
         Group.__init__(self)
         self.setTitle(label_text)
 
@@ -309,7 +307,6 @@ class ElementLabel(QtGui.QLabel, QtWidget):
 
 
     def _set_error(self, is_error):
-        print 'Label - current thread: %s' % threading.current_thread()
         if is_error:
             self.setStyleSheet("QWidget { color: red }")
         else:
@@ -350,7 +347,6 @@ class TextField(QtGui.QLineEdit, QtWidget):
         self.error_changed.emit(is_error)
 
     def _set_error(self, is_error):
-        print 'Textfield - current thread: %s' % threading.current_thread()
         if is_error:
             self.setStyleSheet("QWidget { border: 1px solid red }")
         else:
@@ -465,7 +461,6 @@ class InfoDialog(QtGui.QDialog):
 
     def showEvent(self, event=None):
         center_window(self)
-        print 'showing dialog!'
         QtGui.QDialog.showEvent(self, event)
 
     def set_icon(self, uri):
@@ -535,7 +530,6 @@ class FormWindow(QtWidget, QtGui.QWidget):
         # The form has two elements arranged vertically: the form window (which
         # may eventually need to be scrollable) and the buttonbox.
         self.setLayout(QtGui.QVBoxLayout())
-        print 'Form layout: %s' % self.layout()
 
         # create communicators.
         self.submit_pressed = Communicator()
@@ -576,7 +570,6 @@ class FormWindow(QtWidget, QtGui.QWidget):
         QtGui.QWidget.showEvent(self, event)
 
     def _quit_pressed(self):
-        print 'quit pressed, emitting'
         if not self.close_confirmed:
             self.quit_requested.emit(True)
 
@@ -588,8 +581,6 @@ class FormWindow(QtWidget, QtGui.QWidget):
         QtGui.QWidget.close(self)
 
     def closeEvent(self, event=None):
-        print 'closing!'
-        print 'actually, simulating a Quit press'
         self._quit_pressed()
 
     def add_widget(self, gui_object):

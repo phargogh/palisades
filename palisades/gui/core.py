@@ -21,7 +21,6 @@ class ApplicationGUI(object):
 
     def execute(self):
         for window in self.windows:
-            print window
             window.show()
         self.app.execute()
 
@@ -68,7 +67,6 @@ class GroupGUI(UIObject):
         # created once, not dynamically (though they could be hidden/revealed
         # dynamically), so no need for a separate function.
         for element in core_element._elements:
-            print 'GROUP', element
             # get the correct element type for the new object using the new
             # element's object's string class name.
             # TODO: if element is a Group, it must create its contained widgets
@@ -76,7 +74,6 @@ class GroupGUI(UIObject):
                 element_classname = element.__class__.__name__
                 cls = self.registrar[element_classname]
                 if element_classname in ['Group', 'Container']:
-                    print 'MAKING NEW GROUP: %s' % element_classname
                     new_element = cls(element, self.registrar)
                 else:
                     new_element = cls(element)
@@ -84,7 +81,6 @@ class GroupGUI(UIObject):
                 # Happens when the element's GUI representation in registry is
                 # None, meaning that there should not be a GUI display.
                 new_element = None
-                print 'ERROR ERROR: %s in %s' % (error, element_classname)
 
             # If the new element is None, there's no visualization.  Skip.
             # new_element is the GUI representation of a palisades Element.
@@ -221,8 +217,6 @@ class FormGUI():
         self.window.show()
 
     def close(self, data=None):
-        print 'user requested quit'
-        print 'showing dialog'
         if self.quit_confirm.confirm():
             self.window.close()
 

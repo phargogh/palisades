@@ -367,6 +367,18 @@ class TextField(QtGui.QLineEdit, QtWidget):
         menu.addAction(refresh_action)
         menu.exec_(event.globalPos())
 
+class CheckBox(QtGui.QCheckBox, QtWidget):
+    def __init__(self, label_text):
+        QtGui.QCheckBox.__init__(self)
+        QtWidget.__init__(self)
+
+        self.setText(label_text)
+
+        self.checkbox_toggled = Communicator()
+        self.toggled.connect(self._checkbox_toggled)
+
+    def _checkbox_toggled(self, event=None):
+        self.checkbox_toggled.emit(self.isChecked())
 
 class FileButton(Button):
     _icon = ICON_FOLDER

@@ -741,6 +741,32 @@ class DropdownTest(ElementTest):
         dropdown.set_value(1)
         self.assertEqual(dropdown.value(), 1)
 
+class HideablePrimitiveTest(LabeledPrimitiveTest):
+    def setUp(self):
+        self.config = {
+            'label': '',
+            'validateAs': {'type': 'disabled'},
+        }
+        self.element = elements.HideablePrimitive(self.config)
+
+    def test_hidden(self):
+        # assert element is not hidden by default
+        self.assertEqual(self.element.is_hidden(), True)
+
+        # set the element as hidden, make sure it is.
+        self.element.set_hidden(False)
+        self.assertEqual(self.element.is_hidden(), False)
+
+        # verify that the hidden_toggled signal is emitted when the hidden state
+        # changes.
+        function = mock.MagicMock(name='function')
+        self.element.hidden_toggled.register(function)
+
+        is_hidden = self.element.is_hidden()
+        self.element.set_hidden(not is_hidden)
+        self.assertEqual(self.element.is_hidden(), not is_hidden)
+        self.assertEqual(function.called, True)
+
 class FormTest(unittest.TestCase):
     def setUp(self):
         self.timber_clean = os.path.join(PALISADES_CONFIG, 'timber_clean.json')

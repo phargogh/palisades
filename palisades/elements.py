@@ -293,7 +293,7 @@ class HideablePrimitive(LabeledPrimitive):
         self.set_default_config(self.defaults)
 
         self._hidden = True
-        self.hidden_toggled = core.Communicator()
+        self.hidden_toggled = Communicator()
 
     def set_hidden(self, is_hidden):
         assert type(is_hidden) is BooleanType, ('is_hidden must be Boolean'

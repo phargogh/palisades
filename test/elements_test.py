@@ -767,6 +767,9 @@ class HideablePrimitiveTest(LabeledPrimitiveTest):
         self.assertEqual(self.element.is_hidden(), not is_hidden)
         self.assertEqual(function.called, True)
 
+    # TODO: test that when a HideableFileEntry is hidden, the value cannot be
+    # retrieved.
+
 class FormTest(unittest.TestCase):
     def setUp(self):
         self.timber_clean = os.path.join(PALISADES_CONFIG, 'timber_clean.json')

@@ -253,3 +253,21 @@ class DropdownTest(QtWidgetTest):
         QTest.qWait(50)  # wait for the qt event loop to catch on
         self.assertEqual(mock_func.called, True)
 
+class CheckboxTest(QtWidgetTest):
+    def setUp(self):
+        self.label = 'a label here!'
+        self.widget = qt4.CheckBox(self.label)
+
+    def test_communicator(self):
+        mock_func = mock.MagicMock(name='function')
+        self.assertEqual(mock_func.called, False)
+
+        self.widget.checkbox_toggled.register(mock_func)
+        self.assertEqual(mock_func.called, False)
+
+        # toggle the checkbox and verify the mock function has been called.
+        self.widget.setChecked(not self.widget.isChecked())
+        self.assertEqual(mock_func.called, True)
+
+    def test_default_options(self):
+        self.assertEqual(self.widget.text(), self.label)

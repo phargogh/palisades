@@ -5,6 +5,8 @@ import palisades
 from palisades import elements
 from palisades.gui import core
 
+APPLICATION = core.ApplicationGUI()
+
 class TextGUITest(unittest.TestCase):
     def setUp(self):
         self.application = core.ApplicationGUI()

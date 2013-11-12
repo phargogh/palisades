@@ -199,6 +199,7 @@ class Primitive(Element):
         # update the default configuration and set defaults based on the config.
         self.set_default_config(self.defaults)
         self._hidden = self.config['hideable']
+        self._hideable = self.config['hideable']
 
         # Set up our validator
         self._validator = validation.Validator(
@@ -264,6 +265,9 @@ class Primitive(Element):
 
         self._validation_error = error_msg
         self.validation_completed.emit(error)
+
+    def is_hideable(self):
+        return self._hideable
 
     def set_hidden(self, is_hidden):
         assert type(is_hidden) is BooleanType, ('is_hidden must be Boolean'

@@ -77,6 +77,10 @@ class GroupGUI(UIObject):
                     new_element = cls(element, self.registrar)
                 else:
                     new_element = cls(element)
+                    try:
+                        print(new_element, element.is_hideable())
+                    except:
+                        pass
             except TypeError as error:
                 # Happens when the element's GUI representation in registry is
                 # None, meaning that there should not be a GUI display.
@@ -112,23 +116,48 @@ class PrimitiveGUI(UIObject):
         for widget in self.widgets:
             widget.set_visible(is_visible)
 
-class TextGUI(PrimitiveGUI):
+class LabeledPrimitiveGUI(PrimitiveGUI):
     def __init__(self, core_element):
         PrimitiveGUI.__init__(self, core_element)
 
         label_text = self.element.label()
-        self._label = toolkit.ElementLabel(label_text)
+        if self.element.is_hideable():
+            print 'I\'m hideable!'
+            self._label = toolkit.CheckBox(label_text)
+            self._label.checkbox_toggled.register(self._toggle_widgets)
+            self._toggle_widgets(False)
+        else:
+            self._label = toolkit.ElementLabel(label_text)
+
         self._validation_button = toolkit.ValidationButton(label_text)
-        self._text_field = toolkit.TextField(self.element.value())
         self._help_button = toolkit.InformationButton(label_text)
 
         self.widgets = [
             self._validation_button,
             self._label,
-            self._text_field,
+            toolkit.Empty(),
             toolkit.Empty(),
             self._help_button,
         ]
+
+    def set_widget(self, index, new_widget):
+        self.widgets[index] = new_widget
+
+    def _toggle_widgets(self, show):
+        """Show or hide the widgets in this view."""
+        # show must be boolean.
+        for widget in self.widgets:
+            if widget != self._label:
+                widget.set_visible(show)
+
+        self.element.set_hidden(show)
+
+class TextGUI(LabeledPrimitiveGUI):
+    def __init__(self, core_element):
+        LabeledPrimitiveGUI.__init__(self, core_element)
+
+        self._text_field = toolkit.TextField(self.element.value())
+        self.set_widget(2, self._text_field)
 
         # when the text is modified in the textfield, call down to the element
         # to set the text
@@ -157,14 +186,7 @@ class FileGUI(TextGUI):
 
         self._file_button = toolkit.FileButton()
         self._file_button.file_selected.register(self._file_selected)
-
-        self.widgets = [
-            self._validation_button,
-            self._label,
-            self._text_field,
-            self._file_button,
-            self._help_button,
-        ]
+        self.set_widget(3, self._file_button)
 
     def _file_selected(self, new_value):
         # set the textfield's value
@@ -173,40 +195,13 @@ class FileGUI(TextGUI):
         # set the core element's value
         self.element.set_value(new_value)
 
-class HideableFileEntry(FileGUI):
+class DropdownGUI(LabeledPrimitiveGUI):
     def __init__(self, core_element):
-        FileGUI.__init__(self, core_element)
-        self._label = CheckboxGUI(self.element.label())
+        LabeledPrimitiveGUI.__init__(self, core_element)
 
-        self._label.checkbox_toggled.register(self._toggle_widgets)
-        self._toggle_widgets(False)
-
-
-    def _toggle_widgets(self, show):
-        # show must be boolean.
-        self._validation_button.set_visible(show)
-        self._text_field.set_visible(show)
-        self._file_button.set_visible(show)
-        self._help_button.set_visible(show)
-        self.element.set_hidden(show)
-
-class DropdownGUI(PrimitiveGUI):
-    def __init__(self, core_element):
-        PrimitiveGUI.__init__(self, core_element)
-
-        label_text = self.element.label()
-        self._label = toolkit.ElementLabel(label_text)
         self._dropdown = toolkit.Dropdown(self.element.options,
             self.element.current_index())
-        self._help_button = toolkit.InformationButton(label_text)
-
-        self.widgets = [
-            toolkit.Empty(),
-            self._label,
-            self._dropdown,
-            toolkit.Empty(),
-            self._help_button
-        ]
+        self.set_widget(2, self._dropdown)
 
         self._dropdown.value_changed.register(self.element.set_value)
 

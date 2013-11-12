@@ -75,6 +75,7 @@ class Group(QtGui.QGroupBox, QtWidget):
         # want to add widgets to the UI in that order.
         if isinstance(gui_object.widgets, list):
             for col_index, qt_widget in enumerate(gui_object.widgets):
+                print qt_widget
                 if qt_widget is None:
                     qt_widget = Empty()
                 qt_widget.setVisible(True)

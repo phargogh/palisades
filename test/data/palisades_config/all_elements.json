@@ -122,6 +122,14 @@
                     "type": "dropdown",
                     "label": "A Dropdown",
                     "options": ["hello", "world"]
+                },
+                {
+                    "id": "sample_dropdown",
+                    "args_id": "sample_dropdown",
+                    "hideable": true,
+                    "type": "dropdown",
+                    "label": "A Dropdown",
+                    "options": ["hello", "world"]
                 }
             ]
         }   

@@ -86,7 +86,6 @@ class Group(QtGui.QGroupBox, QtWidget):
             # it is, then there would not be any columns, which throws off the
             # rest of the layout.
             num_cols = max(5, layout.columnCount())
-            gui_object.widgets.show()
             self.layout().addWidget(gui_object.widgets, current_row, 0, 1, num_cols)
 
 class Container(Group):

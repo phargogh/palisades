@@ -122,7 +122,6 @@ class LabeledPrimitiveGUI(PrimitiveGUI):
 
         label_text = self.element.label()
         if self.element.is_hideable():
-            print 'I\'m hideable!'
             self._label = toolkit.CheckBox(label_text)
             self._label.checkbox_toggled.register(self._toggle_widgets)
             self._toggle_widgets(False)

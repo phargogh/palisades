@@ -75,12 +75,9 @@ class Group(QtGui.QGroupBox, QtWidget):
         # want to add widgets to the UI in that order.
         if isinstance(gui_object.widgets, list):
             for col_index, qt_widget in enumerate(gui_object.widgets):
-                print qt_widget
                 if qt_widget is None:
                     qt_widget = Empty()
-                qt_widget.setVisible(True)
                 self.layout().addWidget(qt_widget, current_row, col_index)
-                qt_widget.show()
         # If the item's widgets attribute is not a list (it's assumed to be a
         # toolkit widget), then we want to add that widget to span the whole of
         # a single row.

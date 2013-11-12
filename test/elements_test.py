@@ -163,6 +163,7 @@ class PrimitiveTest(ElementTest):
     def test_default_config(self):
         expected_defaults = {
             'validateAs': {'type': 'disabled'},
+            'hideable': False,
         }
         self.assertEqual(self.element.config, expected_defaults)
 
@@ -229,6 +230,7 @@ class LabeledPrimitiveTest(PrimitiveTest):
         expected_defaults = {
             'label': '',
             'validateAs': {'type': 'disabled'},
+            'hideable': False,
         }
         self.assertEqual(self.element.config, expected_defaults)
 
@@ -245,6 +247,27 @@ class LabeledPrimitiveTest(PrimitiveTest):
         label = self.element.label()
         assert_utf8(label)
 
+    def test_hidden(self):
+        # assert element is not hidden by default
+        self.assertEqual(self.element.is_hidden(), False)
+
+        # set the element as hidden, make sure it is.
+        self.element.set_hidden(True)
+        self.assertEqual(self.element.is_hidden(), True)
+
+        # verify that the hidden_toggled signal is emitted when the hidden state
+        # changes.
+        function = mock.MagicMock(name='function')
+        self.element.hidden_toggled.register(function)
+
+        is_hidden = self.element.is_hidden()
+        self.element.set_hidden(not is_hidden)
+        self.assertEqual(self.element.is_hidden(), not is_hidden)
+        self.assertEqual(function.called, True)
+
+    # TODO: test that when a HideableFileEntry is hidden, the value cannot be
+    # retrieved.
+
 class TextTest(LabeledPrimitiveTest):
     def setUp(self):
         self.element = elements.Text({})
@@ -255,6 +278,7 @@ class TextTest(LabeledPrimitiveTest):
             'defaultValue': '',
             'validateAs': {'type': 'string'},
             'label': u'',
+            'hideable': False,
         }
         self.assertEqual(self.element.config, expected_defaults)
 
@@ -319,6 +343,7 @@ class FileTest(TextTest):
             'defaultValue': '',
             'validateAs': {'type': 'file'},
             'label': u'',
+            'hideable': False,
         }
         self.assertEqual(self.element.config, expected_defaults)
 
@@ -677,6 +702,7 @@ class DropdownTest(ElementTest):
             'options': ['No options specified'],
             'returns': 'strings',
             'validateAs': {'type': 'disabled'},
+            'hideable': False,
         }
         self.assertEqual(dropdown._default_config, default_options)
         self.assertEqual(dropdown.options, default_options['options'])
@@ -740,35 +766,6 @@ class DropdownTest(ElementTest):
         self.assertEqual(dropdown.value(), 2)
         dropdown.set_value(1)
         self.assertEqual(dropdown.value(), 1)
-
-class HideablePrimitiveTest(LabeledPrimitiveTest):
-    def setUp(self):
-        self.config = {
-            'label': '',
-            'validateAs': {'type': 'disabled'},
-        }
-        self.element = elements.HideablePrimitive(self.config)
-
-    def test_hidden(self):
-        # assert element is not hidden by default
-        self.assertEqual(self.element.is_hidden(), True)
-
-        # set the element as hidden, make sure it is.
-        self.element.set_hidden(False)
-        self.assertEqual(self.element.is_hidden(), False)
-
-        # verify that the hidden_toggled signal is emitted when the hidden state
-        # changes.
-        function = mock.MagicMock(name='function')
-        self.element.hidden_toggled.register(function)
-
-        is_hidden = self.element.is_hidden()
-        self.element.set_hidden(not is_hidden)
-        self.assertEqual(self.element.is_hidden(), not is_hidden)
-        self.assertEqual(function.called, True)
-
-    # TODO: test that when a HideableFileEntry is hidden, the value cannot be
-    # retrieved.
 
 class FormTest(unittest.TestCase):
     def setUp(self):

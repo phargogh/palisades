@@ -175,6 +175,7 @@ class Primitive(Element):
     """Primitive represents the simplest input element."""
     defaults = {
         'validateAs': {'type': 'disabled'},
+        'hideable': False,
     }
 
     def __init__(self, configuration):
@@ -193,9 +194,11 @@ class Primitive(Element):
         # Set up our Communicator(s)
         self.value_changed = Communicator()
         self.validation_completed = Communicator()
+        self.hidden_toggled = Communicator()
 
-        # update the default configuration
+        # update the default configuration and set defaults based on the config.
         self.set_default_config(self.defaults)
+        self._hidden = self.config['hideable']
 
         # Set up our validator
         self._validator = validation.Validator(
@@ -262,11 +265,22 @@ class Primitive(Element):
         self._validation_error = error_msg
         self.validation_completed.emit(error)
 
+    def set_hidden(self, is_hidden):
+        assert type(is_hidden) is BooleanType, ('is_hidden must be Boolean'
+            ', %s found instead' % is_hidden.__class__.__name__)
+
+        if self._hidden != is_hidden:
+            self._hidden = is_hidden
+            self.hidden_toggled.emit(is_hidden)
+
+    def is_hidden(self):
+        return self._hidden
 
 class LabeledPrimitive(Primitive):
     defaults = {
         'label': u'',
         'validateAs': {'type': 'disabled'},
+        'hideable': False,
     }
 
     def __init__(self, configuration):
@@ -282,30 +296,6 @@ class LabeledPrimitive(Primitive):
     def label(self):
         return self._label
 
-class HideablePrimitive(LabeledPrimitive):
-    defaults = {
-        'label': u'',
-        'validateAs': {'type': 'disabled'},
-    }
-
-    def __init__(self, configuration):
-        LabeledPrimitive.__init__(self, configuration)
-        self.set_default_config(self.defaults)
-
-        self._hidden = True
-        self.hidden_toggled = Communicator()
-
-    def set_hidden(self, is_hidden):
-        assert type(is_hidden) is BooleanType, ('is_hidden must be Boolean'
-            ', %s found instead' % is_hidden.__class__.__name__)
-
-        if self._hidden != is_hidden:
-            self._hidden = is_hidden
-            self.hidden_toggled.emit(is_hidden)
-
-    def is_hidden(self):
-        return self._hidden
-
 class Dropdown(LabeledPrimitive):
     defaults = {
         'options': ['No options specified'],
@@ -313,6 +303,7 @@ class Dropdown(LabeledPrimitive):
         'returns': 'strings',
         'validateAs': {'type': 'disabled'},
         'label': u'',
+        'hideable': False,
     }
 
     def __init__(self, configuration):
@@ -355,6 +346,7 @@ class Text(LabeledPrimitive):
         'defaultValue': '',
         'validateAs': {'type': 'string'},
         'label': u'',
+        'hideable': False,
     }
 
     def __init__(self, configuration):
@@ -382,6 +374,7 @@ class File(Text):
         'defaultValue': u'',
         'width': 60,
         'label': u'',
+        'hideable': False,
     }
 
     def __init__(self, configuration):

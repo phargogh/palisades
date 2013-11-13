@@ -271,3 +271,8 @@ class CheckboxTest(QtWidgetTest):
 
     def test_default_options(self):
         self.assertEqual(self.widget.text(), self.label)
+
+    def test_set_checked(self):
+        self.assertEqual(self.widget.is_checked(), False)
+        self.widget.set_checked(True)
+        self.assertEqual(self.widget.is_checked(), True)

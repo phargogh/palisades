@@ -380,6 +380,11 @@ class CheckBox(QtGui.QCheckBox, QtWidget):
     def is_checked(self):
         return self.isChecked()
 
+    def set_checked(self, is_checked):
+        assert is_checked in [True, False], ('is_checked must be either True or'
+            ' False, %s (%s) found' % (is_checked, type(is_checked)))
+        self.setChecked(is_checked)
+
 class FileButton(Button):
     _icon = ICON_FOLDER
 

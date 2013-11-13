@@ -352,9 +352,10 @@ class PrimitiveIntegrationTest(UIObjectIntegrationTest):
         # this is effectively a smoke test for this function, since there are no
         # widgets in the PrimitiveGUI view class.
         for widget in self.view.widgets:
-            self.assertEqual(widget.is_visible(), True)
+            self.assertEqual(widget.is_visible(), False, ('Widget %s'
+                ' is not visible when it should be') % widget)
 
-        self.view.set_visible(False)
+        self.view.set_visible(True)
         for widget in self.view.widgets:
             self.assertEqual(widget.is_visible(), True)
 

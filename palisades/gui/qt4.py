@@ -57,6 +57,9 @@ class QtWidget(QtGui.QWidget):
     def set_visible(self, is_visible):
         self.setVisible(is_visible)
 
+    def is_visible(self):
+        return self.isVisible()
+
 class Empty(QtWidget):
     pass
 

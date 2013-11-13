@@ -13,7 +13,7 @@ from palisades.gui import core
 # view for the GUI layer
 
 APPLICATION = core.ApplicationGUI()
-
+@unittest.skip('')
 class QtTextIntegrationTest(unittest.TestCase):
     def setUp(self):
         config = {
@@ -58,6 +58,7 @@ class QtTextIntegrationTest(unittest.TestCase):
         # check the validation state of the GUI.
         self.assertEqual(self.gui._validation_button.error_state, 'pass')
 
+@unittest.skip('')
 class QtFileIntegrationTest(unittest.TestCase):
     def setUp(self):
         config = {
@@ -134,6 +135,7 @@ class QtFileIntegrationTest(unittest.TestCase):
         self.assertEqual(str(self.gui._text_field.text()), new_path)
         self.assertEqual(self.element.value(), new_path)
 
+@unittest.skip('')
 class QtDropdownIntegrationTest(unittest.TestCase):
     def setUp(self):
         config = {
@@ -169,6 +171,7 @@ class QtDropdownIntegrationTest(unittest.TestCase):
         QTest.qWait(50)
         self.assertEqual(self.element.current_index(), 0)
 
+@unittest.skip('')
 class QtContainerIntegrationTest(unittest.TestCase):
     def setUp(self):
         config = {
@@ -205,6 +208,7 @@ class QtContainerIntegrationTest(unittest.TestCase):
         self.assertRaises(elements.InteractionError,
             self.element.set_collapsed, True)
 
+@unittest.skip('')
 class QtCollapsibleContainerIntegrationTest(QtContainerIntegrationTest):
     def setUp(self):
         config = {
@@ -325,4 +329,28 @@ class QtCollapsibleContainerIntegrationTest(QtContainerIntegrationTest):
             # assert that the palisades element is disabled and invisible.
             self.assertEqual(core_elem.is_enabled(), True)
             self.assertEqual(core_elem.is_visible(), True)
+
+class UIObjectIntegrationTest(unittest.TestCase):
+    def setUp(self):
+        self.element = elements.Element({})
+        self.view = core.UIObject(self.element)
+
+    def test_visibility(self):
+        self.assertRaises(core.NotYetImplemented, self.view.set_visible, True)
+
+class PrimitiveIntegrationTest(UIObjectIntegrationTest):
+    def setUp(self):
+        self.element = elements.Primitive({})
+        self.view = core.PrimitiveGUI(self.element)
+
+    def test_visibility(self):
+        # this is effectively a smoke test for this function, since there are no
+        # widgets in the PrimitiveGUI view class.
+        for widget in self.view.widgets:
+            self.assertEqual(widget.is_visible(), True)
+
+        self.view.set_visible(False)
+        for widget in self.view.widgets:
+            self.assertEqual(widget.is_visible(), True)
+
 

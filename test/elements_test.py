@@ -14,7 +14,7 @@ TEST_DIR = os.path.dirname(__file__)
 IUI_CONFIG = os.path.join(TEST_DIR, 'data', 'iui_config')
 PALISADES_CONFIG = os.path.join(TEST_DIR, 'data', 'palisades_config')
 
-#@unittest.skip('no X')
+@unittest.skip('no X')
 class ApplicationTest(unittest.TestCase):
     def test_build_application_no_gui(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
@@ -766,6 +766,67 @@ class DropdownTest(ElementTest):
         self.assertEqual(dropdown.value(), 2)
         dropdown.set_value(1)
         self.assertEqual(dropdown.value(), 1)
+
+class CheckBoxTest(LabeledPrimitiveTest):
+    def setUp(self):
+        self.element = elements.CheckBox({})
+
+    def test_set_value(self):
+        # overridden from PrimitiveTest.set_value(), since the values for a
+        # checkbox are boolean.
+
+        # check that there is no value.
+        self.assertEqual(self.element.value(), False)
+
+        # Change the value and check that the value has been set
+        self.element.set_value(True)
+        self.assertEqual(self.element.value(), True)
+
+        # register a callback
+        def sample_callback(event=None):
+            raise ValueError
+        self.element.value_changed.register(sample_callback)
+
+        # change the value and check that the callback was called.
+        try:
+            self.element.set_value(False)
+            raise AssertionError('Callback was not called')
+        except ValueError:
+            # The valueError was raised correctly, so we pass.
+            pass
+
+    def test_validate(self):
+        # Verify that validation has not been performed.
+        # TODO: Should is_valid() be True?
+        self.assertEqual(self.element._valid, None)
+        self.assertEqual(self.element.is_valid(), True)
+
+        # Start validation by setting the value.
+        self.element.set_value(True)
+
+        # wait until validation thread finishes (using join())
+        self.element._validator.join()
+
+        # check that validation completed by checking the validity of the input.
+        self.assertEqual(self.element.is_valid(), True)
+
+    def test_is_valid(self):
+        #Verify that element validity works and makes sense.
+
+        # TEST 1:
+        # Ensure a new primitive has no value and not valid (due to default
+        # validation of "type": "disabled").
+        # TODO: should is_valid() be True here?
+        self.assertEqual(self.element.value(), False)
+        self.assertEqual(self.element.is_valid(), True)
+
+        # TEST2:
+        # When no validation is specified in the input dictionary, the default
+        # validation is "type: disabled".  Ensure setting the value validates.
+        self.element.set_value(True)
+        self.assertEqual(self.element.value(), True)
+        self.element._validator.join()
+        self.assertEqual(self.element.is_valid(), True)
 
 class FormTest(unittest.TestCase):
     def setUp(self):

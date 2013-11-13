@@ -444,7 +444,21 @@ class Label(Static):
     def label(self):
         return self.config['label']
 
+class CheckBox(LabeledPrimitive):
+    defaults = {
+        'label': u'',
+        'validateAs': {'type': 'disabled'},
+        'hideable': False,
+    }
 
+    def __init__(self, configuration):
+        LabeledPrimitive.__init__(self, configuration)
+        self._value = False  # initialize to be unchecked.
+
+    def set_value(self, new_value):
+        assert type(new_value) is BooleanType, ('new_value must be either True'
+            ' or False, %s found' % type(new_value))
+        LabeledPrimitive.set_value(self, new_value)
 
 class Group(Element):
     def __init__(self, configuration, new_elements=None):

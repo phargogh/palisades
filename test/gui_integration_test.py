@@ -336,6 +336,11 @@ class UIObjectIntegrationTest(unittest.TestCase):
         self.view = core.UIObject(self.element)
 
     def test_visibility(self):
+        # verify that when the core element's visibility changes, this view's
+        # set_visible function is called.
+        self.assertRaises(core.NotYetImplemented, self.element.set_visible,
+            not self.element.is_visible())
+
         self.assertRaises(core.NotYetImplemented, self.view.set_visible, True)
 
 class PrimitiveIntegrationTest(UIObjectIntegrationTest):
@@ -352,5 +357,17 @@ class PrimitiveIntegrationTest(UIObjectIntegrationTest):
         self.view.set_visible(False)
         for widget in self.view.widgets:
             self.assertEqual(widget.is_visible(), True)
+
+        # verify that when the core element's visibility changes, this view's
+        # set_visible function is called.
+        is_visible = self.element.is_visible()
+        self.element.visibility_changed.emit(not is_visible)
+        for widget in self.view.widgets:
+            self.assertEqual(widget.is_visible(), not is_visible)
+
+class LabeledPrimitiveIntegrationTest(PrimitiveIntegrationTest):
+    def setUp(self):
+        self.element = elements.LabeledPrimitive({})
+        self.view = core.LabeledPrimitiveGUI(self.element)
 
 

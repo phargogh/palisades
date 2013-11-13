@@ -377,6 +377,9 @@ class CheckBox(QtGui.QCheckBox, QtWidget):
     def _checkbox_toggled(self, event=None):
         self.checkbox_toggled.emit(self.isChecked())
 
+    def is_checked(self):
+        return self.isChecked()
+
 class FileButton(Button):
     _icon = ICON_FOLDER
 

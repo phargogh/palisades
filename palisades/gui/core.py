@@ -47,6 +47,7 @@ class GroupGUI(UIObject):
             'Static': None,  # None means no GUI display.
             'Dropdown': DropdownGUI,
             'Container': ContainerGUI,
+            'CheckBox': CheckBoxGUI,
         }
 
         if registrar != None:
@@ -150,6 +151,22 @@ class LabeledPrimitiveGUI(PrimitiveGUI):
                 widget.set_visible(show)
 
         self.element.set_hidden(show)
+
+class CheckBoxGUI(LabeledPrimitiveGUI):
+    def __init__(self, core_element):
+        LabeledPrimitiveGUI.__init__(self, core_element)
+
+        # Checkbox widget with no label ... the label is managed by the
+        # LabeledPrimitiveGUI class.
+        self._checkbox = toolkit.CheckBox('')
+        self.set_widget(2, self._checkbox)
+
+        # when the checkbox is checked by the user, set the value of the
+        # underlying element object.
+        self._checkbox.checkbox_toggled.register(self.element.set_value)
+        # I'm deliberately not caring about validation here because a checkbox
+        # should not be validated (as far as I can tell).
+        # TODO: Should a checkbox be able to be validated?  If so, how to show?
 
 class TextGUI(LabeledPrimitiveGUI):
     def __init__(self, core_element):

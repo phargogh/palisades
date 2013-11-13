@@ -472,6 +472,7 @@ class Group(Element):
             'label': Label,
             'dropdown': Dropdown,
             'container': Container,
+            'checkbox': CheckBox,
         }
 
         if new_elements is not None:

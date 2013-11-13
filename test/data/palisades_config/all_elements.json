@@ -129,6 +129,12 @@
                     "type": "dropdown",
                     "label": "A Dropdown",
                     "options": ["hello", "world"]
+                },
+                {
+                    "id": "sample_checkbox",
+                    "args_id": "sample_checkbox",
+                    "type": "checkbox",
+                    "label": "use a checkbox?"
                 }
             ]
         },   
@@ -211,6 +217,13 @@
                     "validText": "-?([0-9]+)?\\.[0-9]+",
                     "defaultValue": "7",
                     "helpText" : "The market discount rate reflects societys preference for immediate benefits over future benefits (e.g., would you rather receive $10 today or $10 five years from now?)."
+                },
+                {
+                    "id": "sample_checkbox",
+                    "args_id": "sample_checkbox",
+                    "type": "checkbox",
+                    "hideable": true,
+                    "label": "use a checkbox?"
                 }
             ]
         }   

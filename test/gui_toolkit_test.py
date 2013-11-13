@@ -16,17 +16,20 @@ class QtWidgetTest(unittest.TestCase):
     def test_visibility(self):
         # assert widget is visible by default (as long as the widget has been
         # shown).
-        self.assertEqual(self.widget.isVisible(), False)
+        self.assertEqual(self.widget.is_visible(), False)
         self.widget.show()
-        self.assertEqual(self.widget.isVisible(), True)
+        self.assertEqual(self.widget.is_visible(), True)
+        self.assertEqual(self.widget.isVisible(), True)  #qt function.
 
         # set widget visibility to False
         self.widget.set_visible(False)
-        self.assertEqual(self.widget.isVisible(), False)
+        self.assertEqual(self.widget.is_visible(), False)
+        self.assertEqual(self.widget.isVisible(), False)  #qt function.
 
         # reset widget visibility and verify change.
         self.widget.set_visible(True)
-        self.assertEqual(self.widget.isVisible(), True)
+        self.assertEqual(self.widget.is_visible(), True)
+        self.assertEqual(self.widget.isVisible(), True)  #qt function.
 
 class QtGroupTest(QtWidgetTest):
     class SampleGUI(object):

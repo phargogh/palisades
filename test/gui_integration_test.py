@@ -13,6 +13,8 @@ from palisades.gui import core
 # view for the GUI layer
 
 APPLICATION = core.ApplicationGUI()
+# TODO: verify that all functionality tested in these classes is still tested
+# TODO: Remove these deprecated integration test classes, if possible.
 @unittest.skip('')
 class QtTextIntegrationTest(unittest.TestCase):
     def setUp(self):

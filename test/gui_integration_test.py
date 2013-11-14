@@ -410,3 +410,25 @@ class LabeledPrimitiveIntegrationTest(PrimitiveIntegrationTest):
             else:
                 self.assertEqual(widget.is_visible(), False, ('Widget %s'
                 ' is visible when it should not be') % widget)
+
+class CheckBoxIntegrationTest(LabeledPrimitiveIntegrationTest):
+    def setUp(self):
+        self.element = elements.CheckBox({})
+        self.view = core.CheckBoxGUI(self.element)
+
+    def test_set_value(self):
+        # check the current value of the element and the check state of the
+        # checkbox before we begin this series of tests.
+        self.assertEqual(self.element.value(), False)
+        self.assertEqual(self.view._checkbox.is_checked(), False)
+
+        # verify that when the checkbox is checked, the core element gets the
+        # message.
+        self.view._checkbox.set_checked(True)
+        self.assertEqual(self.element.value(), True)
+
+        # verify that when the checkbox is unchecked, the core element once
+        # again gets the message.
+        self.view._checkbox.set_checked(False)
+        self.assertEqual(self.element.value(), False)
+

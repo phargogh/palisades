@@ -577,3 +577,8 @@ class LabelIntegrationTest(UIObjectIntegrationTest):
         self.assertEqual(self.element.label(), self.label)
         self.assertEqual(self.view.widgets.text(), self.label)
 
+    def test_visibility(self):
+        # widget will not be visible until it's shown.
+        self.assertEqual(self.view.widgets.is_visible(), False)
+        self.view.widgets.show()
+        self.assertEqual(self.view.widgets.is_visible(), True)

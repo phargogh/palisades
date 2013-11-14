@@ -444,3 +444,21 @@ class CheckBoxIntegrationTest(LabeledPrimitiveIntegrationTest):
         self.view._checkbox.set_checked(False)
         self.assertEqual(self.element.value(), False)
 
+class TextIntegrationTest(LabeledPrimitiveIntegrationTest):
+    def setUp(self):
+        self.element = elements.Text({})
+        self.view = core.TextGUI(self.element)
+
+    def test_set_value(self):
+        # check the current value of the element and the textfield widget before
+        # we begin this series of tests.
+        self.assertEqual(self.element.value(), '')
+        self.assertEqual(self.view._text_field.text(), '')
+
+        # verify that when the textfield's text is set, the core element gets
+        # the message and updates its value.
+        new_value = 'hello world!'
+        self.view._text_field.set_text(new_value)
+        QTest.qWait(50)  # wait for the qt event loop to detect change.
+        self.assertEqual(self.view._text_field.text(), new_value)
+        self.assertEqual(self.element.value(), new_value)

@@ -566,3 +566,14 @@ class ContainerIntegrationTest(GroupIntegrationTest):
         self.view.widgets.set_collapsed(True)
         self.assertEqual(self.element.is_collapsed(), True)
         self.assertEqual(self.view.widgets.is_collapsed(), True)
+
+class LabelIntegrationTest(UIObjectIntegrationTest):
+    def setUp(self):
+        self.label = 'This is a label.'
+        self.element = elements.Label({'label': self.label})
+        self.view = core.LabelGUI(self.element)
+
+    def test_contents(self):
+        self.assertEqual(self.element.label(), self.label)
+        self.assertEqual(self.view.widgets.text(), self.label)
+

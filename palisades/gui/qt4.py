@@ -293,6 +293,9 @@ class Label(QtGui.QLabel, QtWidget):
         self.setTextFormat(QtCore.Qt.RichText)
         self.setWordWrap(True)
 
+    def is_visible(self):
+        return self.isVisible()
+
 class ElementLabel(QtGui.QLabel, QtWidget):
     #error_changed = QtCore.Signal(bool)
     error_changed = QtCore.pyqtSignal(bool)

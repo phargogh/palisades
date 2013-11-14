@@ -352,6 +352,9 @@ class TextField(QtGui.QLineEdit, QtWidget):
         else:
             self.setStyleSheet("QWidget {}")
 
+    def text(self):
+        return QtGui.QLineEdit.text(self)
+
     def set_text(self, new_value):
         self.setText(new_value)
 

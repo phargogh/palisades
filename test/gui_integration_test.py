@@ -546,6 +546,7 @@ class ContainerIntegrationTest(GroupIntegrationTest):
         # toolkit's collapsibility matches the element's collapsibility.
         self.assertEqual(self.element.is_collapsible(), False)
         self.assertEqual(self.view.widgets.is_collapsible(), False)
+        self.assertRaises(RuntimeError, self.view.widgets.set_collapsed, True)
 
         # to test collapsibility, I need to create a container that is
         # collapsible.
@@ -554,6 +555,14 @@ class ContainerIntegrationTest(GroupIntegrationTest):
         self.element = elements.Container(config)
         self.view = core.ContainerGUI(self.element)
 
+        # verify that the newly created element is collapsible, as is the view,
+        # but that the container is expanded by default.
         self.assertEqual(self.element.is_collapsible(), True)
         self.assertEqual(self.view.widgets.is_collapsible(), True)
+        self.assertEqual(self.view.widgets.is_collapsed(), False)
 
+        # now, simulate a user click on the collapsible container and verify
+        # that both the element and the view are collapsed.
+        self.view.widgets.set_collapsed(True)
+        self.assertEqual(self.element.is_collapsed(), True)
+        self.assertEqual(self.view.widgets.is_collapsed(), True)

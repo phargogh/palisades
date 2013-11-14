@@ -101,13 +101,27 @@ class Container(Group):
 
     def _container_toggled(self):
         # returns whether the container is collapsed.
-        self.checkbox_toggled.emit(not self.isChecked())
+        self.checkbox_toggled.emit(self.is_collapsed())
 
     def set_collapsible(self, is_collapsible):
         self.setCheckable(is_collapsible)
 
     def is_collapsible(self):
         return self.isCheckable()
+
+    def is_collapsed(self):
+        # When a collapsible container is checked, it's expanded.
+        # When a collapsible container is unchecked, it's collapsed.
+        # Therefore, return the opposite of the check state.
+        return not self.isChecked()
+
+    def set_collapsed(self, is_collapsed):
+        # TODO: add a toolkit test for this function.
+        if self.is_collapsible():
+            self.setChecked(not is_collapsed)
+        else:
+            raise RuntimeError('Cannot collapse a container that is not '
+                'collapsible')
 
 class Button(QtGui.QPushButton, QtWidget):
     _icon = None

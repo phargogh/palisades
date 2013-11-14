@@ -480,3 +480,20 @@ class FileIntegrationTest(TextIntegrationTest):
         self.view._file_button.file_selected.emit(self.sample_value)
         self.assertEqual(self.view._text_field.text(), self.sample_value)
         self.assertEqual(self.element.value(), self.sample_value)
+
+class DropdownIntegrationTest(LabeledPrimitiveIntegrationTest):
+    def setUp(self):
+        self.element = elements.Dropdown({'options': ['a', 'b', 'c']})
+        self.view = core.DropdownGUI(self.element)
+
+    def test_set_value(self):
+        # check the current value of the element and the index of the
+        # dropdown before we begin this series of tests.
+        self.assertEqual(self.element.value(), 'a')
+        self.assertEqual(self.view._dropdown.index(), 0)
+
+        # verify that when the dropdown's selection changes, the core element is
+        # notified.
+        self.view._dropdown.set_index(1)
+        self.assertEqual(self.element.value(), 'b')
+

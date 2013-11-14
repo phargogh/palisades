@@ -447,6 +447,12 @@ class Dropdown(QtGui.QComboBox, QtWidget):
         # set the default index
         self.setCurrentIndex(default_value)
 
+    def index(self):
+        return self.currentIndex()
+
+    def set_index(self, new_index):
+        self.setCurrentIndex(new_index)
+
 class InfoDialog(QtGui.QDialog):
     def __init__(self):
         QtGui.QDialog.__init__(self)

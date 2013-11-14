@@ -338,6 +338,10 @@ class UIObjectIntegrationTest(unittest.TestCase):
     def test_visibility(self):
         # verify that when the core element's visibility changes, this view's
         # set_visible function is called.
+        # this happens because the core element's set_visible function causes
+        # the visibility_changed signal to be emitted, which then causes the
+        # palisades.gui.core.UIObject.set_visible() function to be called,
+        # which currently just raises NotYetImplemented.
         self.assertRaises(core.NotYetImplemented, self.element.set_visible,
             not self.element.is_visible())
 
@@ -496,4 +500,9 @@ class DropdownIntegrationTest(LabeledPrimitiveIntegrationTest):
         # notified.
         self.view._dropdown.set_index(1)
         self.assertEqual(self.element.value(), 'b')
+
+class GroupIntegrationTest(UIObjectIntegrationTest):
+    def setUp(self):
+        self.element = elements.Group({})
+        self.view = core.GroupGUI(self.element)
 

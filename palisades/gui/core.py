@@ -97,6 +97,7 @@ class GroupGUI(UIObject):
     def set_visible(self, is_visible):
         """Set the visibility of this element."""
         self.widgets.set_visible(is_visible)
+        UIObject.set_visible(self, is_visible)
 
 class ContainerGUI(GroupGUI):
     def __init__(self, core_element, registrar=None):

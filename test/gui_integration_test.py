@@ -411,6 +411,18 @@ class LabeledPrimitiveIntegrationTest(PrimitiveIntegrationTest):
                 self.assertEqual(widget.is_visible(), False, ('Widget %s'
                 ' is visible when it should not be') % widget)
 
+    def test_set_value(self):
+        # I want this test function to pass for this class, but fail hard for
+        # all subclasses unless reimplemented there.  This is because the
+        # set_value functionality is not specified in the LabeledPrimitiveGUI
+        # class.
+        # This function will be able to be the single point of entry when the
+        # TODO in LabeledPrimitiveGUI.set_widget() is addressed.
+        if self.__class__.__name__ == 'LabeledPrimitiveIntegrationTest':
+            pass
+        else:
+            raise AssertionError('Not yet implemented!')
+
 class CheckBoxIntegrationTest(LabeledPrimitiveIntegrationTest):
     def setUp(self):
         self.element = elements.CheckBox({})

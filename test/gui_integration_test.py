@@ -371,4 +371,42 @@ class LabeledPrimitiveIntegrationTest(PrimitiveIntegrationTest):
         self.element = elements.LabeledPrimitive({})
         self.view = core.LabeledPrimitiveGUI(self.element)
 
+    def test_hideable(self):
+        # assumes that hideability is off by default.
+        # when the core element is hideable, we use a checkbox instead of the
+        # label, which has some slightly different behavior.
+        self.element._hideable = True  # make element hideable to verify behavior
+        self.assertEqual(self.element.is_hideable(), True) # verify before tests
 
+        # need to re-create the view for this test to work properly, since the
+        # hideability checkbox is created on __init__.
+        self.view = core.LabeledPrimitiveGUI(self.element)
+
+        # TODO: Verify default widget visibility (issue 2470)
+
+        # I need to show these widgets manually here to simulate the widgets
+        # actually being visible to the user in a UI.
+        for widget in self.view.widgets:
+            widget.show()
+
+        # when hideable, self.view._label is a checkbox that can be checked on
+        # and off using the set_checked() function.  When the checkbox is
+        # checked, verify that the other widgets are toggled correctly
+        self.assertEqual(self.view._label.is_checked(), False)
+
+        self.assertEqual(self.view._label.is_visible(), True)
+        self.view._label.set_checked(True)
+        for widget in self.view.widgets:
+            self.assertEqual(widget.is_visible(), True, ('Widget %s'
+                ' is not visible when it should be') % widget)
+
+        # when the hideable checkbox is unchecked, all non- view._label widgets
+        # should be made invisible.
+        self.view._label.set_checked(False)
+        for widget in self.view.widgets:
+            if widget is self.view._label:
+                self.assertEqual(widget.is_visible(), True, ('Widget %s'
+                ' is not visible when it should be') % widget)
+            else:
+                self.assertEqual(widget.is_visible(), False, ('Widget %s'
+                ' is visible when it should not be') % widget)

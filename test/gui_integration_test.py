@@ -448,6 +448,7 @@ class TextIntegrationTest(LabeledPrimitiveIntegrationTest):
     def setUp(self):
         self.element = elements.Text({})
         self.view = core.TextGUI(self.element)
+        self.sample_value = 'hello world!'
 
     def test_set_value(self):
         # check the current value of the element and the textfield widget before
@@ -457,8 +458,8 @@ class TextIntegrationTest(LabeledPrimitiveIntegrationTest):
 
         # verify that when the textfield's text is set, the core element gets
         # the message and updates its value.
-        new_value = 'hello world!'
-        self.view._text_field.set_text(new_value)
+        self.view._text_field.set_text(self.sample_value)
         QTest.qWait(50)  # wait for the qt event loop to detect change.
-        self.assertEqual(self.view._text_field.text(), new_value)
-        self.assertEqual(self.element.value(), new_value)
+        self.assertEqual(self.view._text_field.text(), self.sample_value)
+        self.assertEqual(self.element.value(), self.sample_value)
+

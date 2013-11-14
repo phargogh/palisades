@@ -140,6 +140,10 @@ class LabeledPrimitiveGUI(PrimitiveGUI):
             self._help_button,
         ]
 
+    # TODO: make this set the active widget.
+    # I'm thinking of a function to set the active input widget, but you could
+    # also pass in the target Communicator to be connected and the function to
+    # be registered with the Communicator.
     def set_widget(self, index, new_widget):
         self.widgets[index] = new_widget
 

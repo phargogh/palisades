@@ -503,6 +503,57 @@ class DropdownIntegrationTest(LabeledPrimitiveIntegrationTest):
 
 class GroupIntegrationTest(UIObjectIntegrationTest):
     def setUp(self):
-        self.element = elements.Group({})
+        self.contained_elements = [
+            {
+                'type': 'file',
+            },
+            {
+                'type': 'text',
+            },
+        ]
+        self.config = {'elements': self.contained_elements}
+        self.element = elements.Group(self.config)
         self.view = core.GroupGUI(self.element)
+
+    # TODO: Do I need to reimplement test_visibility?
+
+    def test_contained_elements(self):
+        # verify that the correct elements are created.
+        expected_elements = [
+            (0, core.FileGUI),
+            (1, core.TextGUI),
+        ]
+        for index, classname in expected_elements:
+            is_instance = isinstance(self.view.elements[index], classname)
+            self.assertEqual(is_instance, True)
+
+class ContainerIntegrationTest(GroupIntegrationTest):
+    def setUp(self):
+        self.contained_elements = [
+            {
+                'type': 'file',
+            },
+            {
+                'type': 'text',
+            },
+        ]
+        self.config = {'elements': self.contained_elements}
+        self.element = elements.Container(self.config)
+        self.view = core.ContainerGUI(self.element)
+
+    def test_collapsibility(self):
+        # The default collapsibility is False, so I'll verify here that the
+        # toolkit's collapsibility matches the element's collapsibility.
+        self.assertEqual(self.element.is_collapsible(), False)
+        self.assertEqual(self.view.widgets.is_collapsible(), False)
+
+        # to test collapsibility, I need to create a container that is
+        # collapsible.
+        config = self.config.copy()
+        config.update({'collapsible': True})
+        self.element = elements.Container(config)
+        self.view = core.ContainerGUI(self.element)
+
+        self.assertEqual(self.element.is_collapsible(), True)
+        self.assertEqual(self.view.widgets.is_collapsible(), True)
 

@@ -468,3 +468,15 @@ class FileIntegrationTest(TextIntegrationTest):
         self.element = elements.File({})
         self.view = core.FileGUI(self.element)
         self.sample_value = __file__
+
+    def test_file_selected(self):
+        # check the current value of the element and the textfield widget before
+        # we begin the series of tests.
+        self.assertEqual(self.element.value(), '')
+        self.assertEqual(self.view._text_field.text(), '')
+
+        # verify that when the file button's file_selected signal is emitted,
+        # the textfield's text is updated and the core element is notified.
+        self.view._file_button.file_selected.emit(self.sample_value)
+        self.assertEqual(self.view._text_field.text(), self.sample_value)
+        self.assertEqual(self.element.value(), self.sample_value)

@@ -463,3 +463,8 @@ class TextIntegrationTest(LabeledPrimitiveIntegrationTest):
         self.assertEqual(self.view._text_field.text(), self.sample_value)
         self.assertEqual(self.element.value(), self.sample_value)
 
+class FileIntegrationTest(TextIntegrationTest):
+    def setUp(self):
+        self.element = elements.File({})
+        self.view = core.FileGUI(self.element)
+        self.sample_value = __file__

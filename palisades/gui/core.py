@@ -124,8 +124,16 @@ class MultiGUI(ContainerGUI):
                 core_element.config['link_text'])
         ContainerGUI.__init__(self, core_element, registrar)
 
+#        self.widgets.element_requested.register(self._add_element)
+        self.widgets.element_requested.register(self.element.add_element)
         self.widgets.element_removed.register(self.element.remove_element)
-        self.widgets.element_added.register(self.element.add_element)
+        self.element.element_added.connect(self._add_element)
+#        self.widgets.element_added.register(self.element.add_element)
+
+    def _add_element(self, new_index):
+        # index is the row index of the new element.
+        # TODO: get the core element, create the GUI view, add to multi widget.
+        pass
 
 class PrimitiveGUI(UIObject):
     def __init__(self, core_element):

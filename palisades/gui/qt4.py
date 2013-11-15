@@ -156,17 +156,17 @@ class Multi(Container):
     def __init__(self, label_text, link_text):
         Container.__init__(self, label_text)
 
-        self.add_element_link = QtGui.QLabel(('<a href='
-            '"naturalcapitalproject.org">%s</a>' % link_text))
-        self.add_element_link.linkActivated.connect(self.add_widget)
-        self.layout().addWidget(self.add_element_link,
-            self.layout().rowCount(), 2)
-
-        self.show()
         # TODO: implement defaultValue
 
+        self.element_requested = Communicator()
         self.element_added = Communicator()
         self.element_removed = Communicator()
+
+        self.add_element_link = QtGui.QLabel(('<a href='
+            '"naturalcapitalproject.org">%s</a>' % link_text))
+        self.add_element_link.linkActivated.connect(self.element_requested.emit)
+        self.layout().addWidget(self.add_element_link,
+            self.layout().rowCount(), 2)
 
     def _remove_element(self, row_num):
         print 'removing a row'

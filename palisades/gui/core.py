@@ -119,17 +119,13 @@ class ContainerGUI(GroupGUI):
 class MultiGUI(ContainerGUI):
     def __init__(self, core_element, registrar=None):
         # TODO: find a better way to specify the toolkit widget.
-        self.widgets = toolkit.Multi(core_element.label())
+        # TODO: implement a way to access link_text without going into config
+        self.widgets = toolkit.Multi(core_element.label(),
+                core_element.config['link_text'])
         ContainerGUI.__init__(self, core_element, registrar)
 
-        print 'finished Container\'s __init__'
-        print self.element.remove_element
-        print self.widgets
-        print self.widgets.element_removed
         self.widgets.element_removed.register(self.element.remove_element)
-        print 'finished registering remove_element'
         self.widgets.element_added.register(self.element.add_element)
-        print 'finished communicators'
 
 class PrimitiveGUI(UIObject):
     def __init__(self, core_element):

@@ -48,6 +48,7 @@ class GroupGUI(UIObject):
             'Dropdown': DropdownGUI,
             'Container': ContainerGUI,
             'CheckBox': CheckBoxGUI,
+            'Multi': MultiGUI,
         }
 
         if registrar != None:
@@ -68,31 +69,35 @@ class GroupGUI(UIObject):
         # created once, not dynamically (though they could be hidden/revealed
         # dynamically), so no need for a separate function.
         for element in core_element._elements:
-            # get the correct element type for the new object using the new
-            # element's object's string class name.
-            # TODO: if element is a Group, it must create its contained widgets
-            try:
-                element_classname = element.__class__.__name__
-                cls = self.registrar[element_classname]
-                if element_classname in ['Group', 'Container']:
-                    new_element = cls(element, self.registrar)
-                else:
-                    new_element = cls(element)
-                    try:
-                        print(new_element, element.is_hideable())
-                    except:
-                        pass
-            except TypeError as error:
-                # Happens when the element's GUI representation in registry is
-                # None, meaning that there should not be a GUI display.
-                new_element = None
+            print 'adding element', element
+            self.add_view(element)
 
-            # If the new element is None, there's no visualization.  Skip.
-            # new_element is the GUI representation of a palisades Element.
-            # TODO: create a better naming scheme for each layer.
-            if new_element is not None:
-                self.widgets.add_widget(new_element)
-                self.elements.append(new_element)
+    def add_view(self, element):
+        # get the correct element type for the new object using the new
+        # element's object's string class name.
+        # TODO: if element is a Group, it must create its contained widgets
+        try:
+            element_classname = element.__class__.__name__
+            cls = self.registrar[element_classname]
+            if element_classname in ['Group', 'Container']:
+                new_element = cls(element, self.registrar)
+            else:
+                new_element = cls(element)
+                try:
+                    print(new_element, element.is_hideable())
+                except:
+                    pass
+        except TypeError as error:
+            # Happens when the element's GUI representation in registry is
+            # None, meaning that there should not be a GUI display.
+            new_element = None
+
+        # If the new element is None, there's no visualization.  Skip.
+        # new_element is the GUI representation of a palisades Element.
+        # TODO: create a better naming scheme for each layer.
+        if new_element is not None:
+            self.widgets.add_widget(new_element)
+            self.elements.append(new_element)
 
     def set_visible(self, is_visible):
         """Set the visibility of this element."""
@@ -108,6 +113,18 @@ class ContainerGUI(GroupGUI):
         # when the container is collapsed by the GUI user, set the underlying
         # element to be collapsed
         self.widgets.checkbox_toggled.register(self.element.set_collapsed)
+
+class MultiGUI(ContainerGUI):
+    def __init__(self, core_element, registrar=None):
+        self.widgets = toolkit.Multi(core_element.label())
+        ContainerGUI.__init__(self, core_element, registrar)
+
+        print 'finished Container\'s __init__'
+        print self.element.remove_element
+        self.widgets.element_removed.register(self.element.remove_element)
+        print 'finished registering remove_element'
+        self.widgets.element_added.register(self.element.add_element)
+        print 'finished communicators'
 
 class PrimitiveGUI(UIObject):
     def __init__(self, core_element):

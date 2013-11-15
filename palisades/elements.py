@@ -473,6 +473,7 @@ class Group(Element):
             'dropdown': Dropdown,
             'container': Container,
             'checkbox': CheckBox,
+            'multi': Multi,
         }
 
         if new_elements is not None:
@@ -623,7 +624,9 @@ class Multi(Container):
         self.element_added = Communicator()
         self.element_removed = Communicator()
 
-    def add_element(self):
+    def add_element(self, index=None):
+        # need an optional argument for when an element is added by the
+        # Container widget.
         self.create_elements([self.config['template']])
         self.element_added.emit(len(self.elements()) - 1)  #index of element
 

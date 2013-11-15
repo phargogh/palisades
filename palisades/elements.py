@@ -603,9 +603,21 @@ class Multi(Container):
             'template': {
                 'type': 'text',
                 'label': 'Input a number',
-                'validatAs': {'type': 'disabled'},
+                'validateAs': {'type': 'disabled'},
             },
         }
+
+        # clean up unused configuration options inherited from Container
+        # we have absolutely no interest in user-defined elements, since this
+        # element only has elements created according to the template.
+        # If any elements happen to have been created by the user, remove them
+        # and log a warning.
+        self.config['label'] = new_defaults['label']
+        if len(self._elements) > 0:
+            self._elements = []
+            LOGGER.warn('Multi element does not currently support '
+                ' non-template elements.  Elements found have been removed.')
+
         self.set_default_config(new_defaults)
 
         self.element_added = Communicator()
@@ -613,10 +625,10 @@ class Multi(Container):
 
     def add_element(self):
         self.create_elements([self.config['template']])
-        self.element_added.emit(len(self.elements))
+        self.element_added.emit(len(self.elements()) - 1)  #index of element
 
     def remove_element(self, index):
-        popped_element = self.elements.pop(index)
+        popped_element = self._elements.pop(index)
         self.element_removed.emit(index)
 
 # The form class represents a single-window form where the user enters various

@@ -123,6 +123,17 @@ class Container(Group):
             raise RuntimeError('Cannot collapse a container that is not '
                 'collapsible')
 
+class Multi(Container):
+    def __init__(self, label_text):
+        Container.__init__(self, label_text)
+
+    def add_widget(self, gui_object):
+        # when an element is added, it must universally have a minus button in
+        # front of it.  This should apply to when the element is supposed to
+        # span all columns as well as when there are a number of individual
+        # widgets.
+        pass
+
 class Button(QtGui.QPushButton, QtWidget):
     _icon = None
     def __init__(self):

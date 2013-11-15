@@ -157,6 +157,7 @@ class Multi(Container):
         Container.__init__(self, label_text)
         self.element_added = Communicator()
         self.element_removed = Communicator()
+        print self
         print 'created Container!'
 
     def _remove_element(self, row_num):
@@ -179,15 +180,15 @@ class Multi(Container):
         self.update()
         self.element_removed.emit(row_num)
 
-    def add_widget(self, gui_object):
+    def add_widget(self, gui_object=None):
         # when an element is added, it must universally have a minus button in
         # front of it.  This should apply to when the element is supposed to
         # span all columns as well as when there are a number of individual
         # widgets.
         'making minus button?'
-        minus_button = self.MinusButton(self.layout().rowCount() - 1)
+        minus_button = self.MinusButton(self.layout().rowCount() - 1 )
         minus_button.pushed.register(self._remove_element)
-
+        print gui_object
         print 'adding widget'
         if isinstance(gui_object.widgets, list):
             gui_object.widgets.insert(0, minus_button)

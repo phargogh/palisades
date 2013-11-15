@@ -106,7 +106,9 @@ class GroupGUI(UIObject):
 
 class ContainerGUI(GroupGUI):
     def __init__(self, core_element, registrar=None):
-        self.widgets = toolkit.Container(core_element.label())
+        # TODO: find a better way to specify the toolkit widget.
+        if not hasattr(self, 'widgets'):
+            self.widgets = toolkit.Container(core_element.label())
         GroupGUI.__init__(self, core_element, registrar)
         self.widgets.set_collapsible(self.element.is_collapsible())
 
@@ -116,11 +118,14 @@ class ContainerGUI(GroupGUI):
 
 class MultiGUI(ContainerGUI):
     def __init__(self, core_element, registrar=None):
+        # TODO: find a better way to specify the toolkit widget.
         self.widgets = toolkit.Multi(core_element.label())
         ContainerGUI.__init__(self, core_element, registrar)
 
         print 'finished Container\'s __init__'
         print self.element.remove_element
+        print self.widgets
+        print self.widgets.element_removed
         self.widgets.element_removed.register(self.element.remove_element)
         print 'finished registering remove_element'
         self.widgets.element_added.register(self.element.add_element)

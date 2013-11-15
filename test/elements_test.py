@@ -543,30 +543,18 @@ class ContainerTest(GroupTest):
         self.assertEqual(self.element.config, expected_defaults)
 
     def test_display_label(self):
-        container_label = "Look!  It's a container!"
-        config = {
-            'elements': self.elements,
-            'label': container_label,
-        }
-        container = elements.Container(config)
-
-        # check the container's label
-        self.assertEqual(container.label(), container_label)
+        # check the container's label is the default value.
+        self.assertEqual(self.element.label(), 'Container')
 
     def test_enabled_defaults(self):
-        config = {
-            'elements': self.elements,
-        }
-        container = elements.Container(config)
-
         # Container should not collapsible by default.
-        self.assertEqual(container.is_collapsible(), False)
+        self.assertEqual(self.element.is_collapsible(), False)
 
         # verify the container is not collapsed by default
-        self.assertEqual(container.is_collapsed(), False)
+        self.assertEqual(self.element.is_collapsed(), False)
 
         # verify the container cannot be collapsed because it's not collapsible
-        self.assertRaises(elements.InteractionError, container.set_collapsed, True)
+        self.assertRaises(elements.InteractionError, self.element.set_collapsed, True)
 
     def test_collapsability(self):
         config = {
@@ -575,61 +563,78 @@ class ContainerTest(GroupTest):
         }
         container = elements.Container(config)
 
-        # verify container is collapsible
-        self.assertEqual(container.is_collapsible(), True)
+        # to make the container collapsible after the config, I set the private
+        # collapsible variable to True.
+        self.element._collapsible = True
 
-        # verify container is enabled and not collapsed
-        self.assertEqual(container.is_enabled(), True)
-        self.assertEqual(container.is_collapsed(), False)
+        # I want to creat a couple elements after the fact to better simulate
+        # collapsibility, and verify that the correct number of elements have
+        # been created.
+        self.element.create_elements(self.elements)
+        self.assertEqual(len(self.element.elements()), 2)
+
+        # verify container is collapsible
+        self.assertEqual(self.element.is_collapsible(), True)
+
+        # verify self.element is enabled and not collapsed
+        self.assertEqual(self.element.is_enabled(), True)
+        self.assertEqual(self.element.is_collapsed(), False)
 
         # collapse the conainer and verify all contained elements are disabled
         # Container should still be enabled, but all container elements should
         # not.
-        container.set_collapsed(True)
-        self.assertEqual(container.is_collapsed(), True)
-        self.assertEqual(container.is_enabled(), True)
-        for element in container.elements():
+        self.element.set_collapsed(True)
+        self.assertEqual(self.element.is_collapsed(), True)
+        self.assertEqual(self.element.is_enabled(), True)
+        for element in self.element.elements():
             self.assertEqual(element.is_enabled(), False,
                 "Element %s was not disabled" % element)
 
         # re-enable the container and verify all contained elements are
         # re-enabled.
-        container.set_collapsed(False)
-        self.assertEqual(container.is_collapsed(), False)
-        self.assertEqual(container.is_enabled(), True)
-        for element in container.elements():
+        self.element.set_collapsed(False)
+        self.assertEqual(self.element.is_collapsed(), False)
+        self.assertEqual(self.element.is_enabled(), True)
+        for element in self.element.elements():
             self.assertEqual(element.is_enabled(), True,
                 "Element %s was not re-enabled" % element)
 
     def test_set_collapsed(self):
-        config = {
-            "elements": self.elements,
-            "collapsible": True,
-        }
-        container = elements.Container(config)
+        # to make the container collapsible after creation (definitely not
+        # kosher), I set the correct variable.
+        self.element._collapsible = True
 
-        self.assertEqual(container.is_collapsed(), False)
+        self.assertEqual(self.element.is_collapsed(), False)
 
         # collapse the container
-        container.set_collapsed(True)
-        self.assertEqual(container.is_collapsed(), True)
+        self.element.set_collapsed(True)
+        self.assertEqual(self.element.is_collapsed(), True)
 
         # re-expand the container
-        container.set_collapsed(False)
-        self.assertEqual(container.is_collapsed(), False)
+        self.element.set_collapsed(False)
+        self.assertEqual(self.element.is_collapsed(), False)
 
     def test_set_collapsed_uncollapsible(self):
-        config = {
-            "elements": self.elements,
-            "collapsible": False,
-        }
-        container = elements.Container(config)
-
-        self.assertEqual(container.is_collapsed(), False)
+        # the default collapsibility should be False.
+        self.assertEqual(self.element.is_collapsed(), False)
 
         # Verify that we can't collapse the container.
-        self.assertRaises(elements.InteractionError, container.set_collapsed,
+        self.assertRaises(elements.InteractionError, self.element.set_collapsed,
             True)
+
+class MultiTest(ContainerTest):
+    def setUp(self):
+        self.default_config = {}
+        self.element = elements.Container(self.default_config)
+
+        self.elements = [
+            {
+                'type': 'file',
+            },
+            {
+                'type': 'text',
+            },
+        ]
 
 
 class StaticTest(ElementTest):

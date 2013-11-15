@@ -593,6 +593,32 @@ class Container(Group):
     def is_collapsed(self):
         return self._collapsed
 
+class Multi(Container):
+    def __init__(self, configuration, new_elements=None):
+        Container.__init__(self, configuration, new_elements)
+        new_defaults = {
+            'label': '',
+            'collapsible': False,
+            'link_text': 'Add another',
+            'template': {
+                'type': 'text',
+                'label': 'Input a number',
+                'validatAs': {'type': 'disabled'},
+            },
+        }
+        self.set_default_config(new_defaults)
+
+        self.element_added = Communicator()
+        self.element_removed = Communicator()
+
+    def add_element(self):
+        self.create_elements([self.config['template']])
+        self.element_added.emit(len(self.elements))
+
+    def remove_element(self, index):
+        popped_element = self.elements.pop(index)
+        self.element_removed.emit(index)
+
 # The form class represents a single-window form where the user enters various
 # inputs and then does something with them.  The IUI ModelUI would be an example
 # of a form.

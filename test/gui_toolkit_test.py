@@ -86,6 +86,11 @@ class QtContainerTest(QtGroupTest):
         self.widget.setChecked(not self.widget.isChecked())
         self.assertEqual(mock_func.called, True)
 
+class QtMultiTest(QtContainerTest):
+    def setUp(self):
+        self.label_text = 'Multi element'
+        self.widget = qt4.Multi(self.label_text)
+
 class ButtonTest(QtWidgetTest):
     def setUp(self):
         self.widget = qt4.Button()

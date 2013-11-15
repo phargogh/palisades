@@ -69,7 +69,7 @@ class Group(QtGui.QGroupBox, QtWidget):
         QtGui.QGroupBox.__init__(self)
         self.setLayout(QtGui.QGridLayout())
 
-    def add_widget(self, gui_object):
+    def add_widget(self, gui_object, start_index=0):
         # do the logic of adding the widgets of the gui_object to the Qt Widget.
         layout = self.layout()
         current_row = layout.rowCount()
@@ -77,7 +77,7 @@ class Group(QtGui.QGroupBox, QtWidget):
         # If the item has a widgets attribute that is a list, we assume that we
         # want to add widgets to the UI in that order.
         if isinstance(gui_object.widgets, list):
-            for col_index, qt_widget in enumerate(gui_object.widgets):
+            for col_index, qt_widget in enumerate(gui_object.widgets, start_index):
                 if qt_widget is None:
                     qt_widget = Empty()
                 self.layout().addWidget(qt_widget, current_row, col_index)
@@ -88,8 +88,9 @@ class Group(QtGui.QGroupBox, QtWidget):
             # need this just in case a label object is the first in a Group.  If
             # it is, then there would not be any columns, which throws off the
             # rest of the layout.
-            num_cols = max(5, layout.columnCount())
-            self.layout().addWidget(gui_object.widgets, current_row, 0, 1, num_cols)
+            num_cols = max(5 + start_index, layout.columnCount())
+            self.layout().addWidget(gui_object.widgets, current_row, 0 +
+                    start_index, 1, num_cols)
 
 class Container(Group):
     def __init__(self, label_text):
@@ -123,17 +124,6 @@ class Container(Group):
             raise RuntimeError('Cannot collapse a container that is not '
                 'collapsible')
 
-class Multi(Container):
-    def __init__(self, label_text):
-        Container.__init__(self, label_text)
-
-    def add_widget(self, gui_object):
-        # when an element is added, it must universally have a minus button in
-        # front of it.  This should apply to when the element is supposed to
-        # span all columns as well as when there are a number of individual
-        # widgets.
-        pass
-
 class Button(QtGui.QPushButton, QtWidget):
     _icon = None
     def __init__(self):
@@ -150,6 +140,58 @@ class Button(QtGui.QPushButton, QtWidget):
         assert type(is_active) is BooleanType, 'is_active must be True or False'
         self.setEnabled(is_active)
 
+class Multi(Container):
+    class MinusButton(Button):
+        def __init__(self, row_index):
+            print 'starting to create button'
+            Button.__init__(self)
+            self._row_index = row_index
+            self.pushed = Communicator()
+            self.pressed.connect(self._button_pushed)
+            print 'creating button!'
+
+        def _button_pushed(self):
+            self.pushed.emit(self._row_index)
+
+    def __init__(self, label_text):
+        Container.__init__(self, label_text)
+        self.element_added = Communicator()
+        self.element_removed = Communicator()
+        print 'created Container!'
+
+    def _remove_element(self, row_num):
+        print 'removing a row'
+        for element in self.elements:
+            element_row_num = element.elements[1].row_num
+            if element_row_num == row_num:
+                self.multi_widget.elements.remove(element)
+                break
+
+        for j in range(selflayout().columnCount()):
+            sub_item = selflayout().itemAtPosition(row_num, j)
+            sub_widget = sub_item.widget()
+            self.layout().removeWidget(sub_widget)
+            sub_widget.deleteLater()
+
+        self.layout().setRowMinimumHeight(row_num, 0)
+        self.setMinimumSize(self.sizeHint())
+        self.setMinimumSize(self.sizeHint())
+        self.update()
+        self.element_removed.emit(row_num)
+
+    def add_widget(self, gui_object):
+        # when an element is added, it must universally have a minus button in
+        # front of it.  This should apply to when the element is supposed to
+        # span all columns as well as when there are a number of individual
+        # widgets.
+        'making minus button?'
+        minus_button = self.MinusButton(self.layout().rowCount() - 1)
+        minus_button.pushed.register(self._remove_element)
+
+        print 'adding widget'
+        if isinstance(gui_object.widgets, list):
+            gui_object.widgets.insert(0, minus_button)
+            Container.add_widget(self, gui_object)
 
 class InformationButton(Button):
     """This class represents the information that a user will see when pressing

@@ -557,12 +557,6 @@ class ContainerTest(GroupTest):
         self.assertRaises(elements.InteractionError, self.element.set_collapsed, True)
 
     def test_collapsability(self):
-        config = {
-            'elements': self.elements,
-            'collapsible': True,
-        }
-        container = elements.Container(config)
-
         # to make the container collapsible after the config, I set the private
         # collapsible variable to True.
         self.element._collapsible = True
@@ -624,9 +618,6 @@ class ContainerTest(GroupTest):
 
 class MultiTest(ContainerTest):
     def setUp(self):
-        self.default_config = {}
-        self.element = elements.Container(self.default_config)
-
         self.elements = [
             {
                 'type': 'file',
@@ -635,7 +626,68 @@ class MultiTest(ContainerTest):
                 'type': 'text',
             },
         ]
+        self.element = elements.Multi({})
 
+    def test_default_config(self):
+        expected_defaults = {
+            'label': '',
+            'collapsible': False,
+            'elements': [],
+            'link_text': 'Add another',
+            'template': {
+                'type': 'text',
+                'label': 'Input a number',
+                'validateAs': {'type': 'disabled'},
+            },
+        }
+        self.assertEqual(self.element.config, expected_defaults)
+
+        # verify that there are no elements by default, until the user creates
+        # some by way of the template.
+        self.assertEqual(len(self.element.elements()), 0)
+
+    def test_display_label(self):
+        self.assertEqual(self.element.label(), '')
+
+    def test_add_element(self):
+        # verify that there are no elements by default.
+        self.assertEqual(len(self.element.elements()), 0)
+
+        # when I call add_element, I should see a new Text element appear in
+        # elements().
+        self.element.add_element()
+        self.assertEqual(len(self.element.elements()), 1)
+        self.assertEqual(self.element.elements()[0].__class__.__name__, 'Text')
+
+        # create a mock function and make sure that it's called when an element
+        # is created by add_element and that it was called with the correct
+        # argument.
+        add_elem_func = mock.MagicMock()
+        self.element.element_added.register(add_elem_func)
+        self.element.add_element()
+        self.assertEqual(add_elem_func.called, True)
+        add_elem_func.assert_called_with(1)
+        self.assertEqual(len(self.element.elements()), 2)
+
+        self.element.add_element()
+        self.assertEqual(len(self.element.elements()), 3)
+        add_elem_func.assert_called_with(2)
+
+    def test_remove_element(self):
+        # verify there are no elements by default.
+        self.assertEqual(len(self.element.elements()), 0)
+
+        # create two new elements.
+        # test_add_elements tests that the elements are correct.  This test
+        # assumes that add_element works properly.
+        for i in range(3):
+            self.element.add_element()
+
+        remove_elem_func = mock.MagicMock()
+        self.element.element_removed.register(remove_elem_func)
+        self.element.remove_element(1)
+        remove_elem_func.assert_called_with(1)
+        self.assertEqual(len(self.element.elements()), 2)
 
 class StaticTest(ElementTest):
     def test_static_defaults(self):

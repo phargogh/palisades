@@ -8,8 +8,6 @@ import palisades
 from palisades import elements
 from palisades import validation
 
-from PyQt4.QtGui import QApplication
-
 TEST_DIR = os.path.dirname(__file__)
 IUI_CONFIG = os.path.join(TEST_DIR, 'data', 'iui_config')
 PALISADES_CONFIG = os.path.join(TEST_DIR, 'data', 'palisades_config')
@@ -27,7 +25,7 @@ class ApplicationTest(unittest.TestCase):
 #        gui = palisades.gui.build(ui._window)
 #        gui.execute()
 
-#    @unittest.skip('blocking')
+    @unittest.skip('blocking')
     def test_build_application_qt_gui(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
             'all_elements.json'))

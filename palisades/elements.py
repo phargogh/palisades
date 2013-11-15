@@ -613,7 +613,6 @@ class Multi(Container):
         # element only has elements created according to the template.
         # If any elements happen to have been created by the user, remove them
         # and log a warning.
-        self.config['label'] = new_defaults['label']
         if len(self._elements) > 0:
             self._elements = []
             LOGGER.warn('Multi element does not currently support '

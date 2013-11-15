@@ -230,6 +230,12 @@ class ValidationButton(InformationButton):
 
         self.set_active(False)
 
+    def has_error(self):
+        # return whether there is an error or validation warning.
+        if self.error_state == 'pass':
+            return False
+        return True
+
     def set_active(self, is_active):
         """Set the active state of the button based on the error state of the
         button.

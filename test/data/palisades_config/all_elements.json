@@ -105,6 +105,15 @@
             "options": ["hello", "world"]
         },
         {
+            "id": "sample_multi",
+            "args_id": "multi",
+            "type": "multi",
+            "label": "Mutiple elements!",
+            "template": {
+                "type": "file"
+            }
+        },
+        {
             "id": "sample_container",
             "type": "container",
             "label": "It's a Container!",

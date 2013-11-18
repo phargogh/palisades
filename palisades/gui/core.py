@@ -127,13 +127,16 @@ class MultiGUI(ContainerGUI):
 #        self.widgets.element_requested.register(self._add_element)
         self.widgets.element_requested.register(self.element.add_element)
         self.widgets.element_removed.register(self.element.remove_element)
-        self.element.element_added.connect(self._add_element)
+        self.element.element_added.register(self._add_element)
 #        self.widgets.element_added.register(self.element.add_element)
 
     def _add_element(self, new_index):
         # index is the row index of the new element.
         # TODO: get the core element, create the GUI view, add to multi widget.
-        pass
+        new_element = self.element.elements()[new_index]
+        new_view = self.add_view(new_element)
+        self.widgets.add_widget(new_view)
+        # TODO: emit a communicator here??
 
 class PrimitiveGUI(UIObject):
     def __init__(self, core_element):

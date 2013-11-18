@@ -168,22 +168,33 @@ class Multi(Container):
         self.layout().addWidget(self.add_element_link,
             self.layout().rowCount(), 2)
 
+        self._contained_elements = []
+
     def _remove_element(self, row_num):
         print 'removing a row'
-        for element in self.elements:
-            element_row_num = element.elements[1].row_num
-            if element_row_num == row_num:
-                self.multi_widget.elements.remove(element)
-                break
+#        # there is no local elements object.
+#        for element in self.elements:
+#            element_row_num = element.elements()[1].row_num
+#            if element_row_num == row_num:
+#                self.elements.remove(element)
+#                break
 
-        for j in range(selflayout().columnCount()):
-            sub_item = selflayout().itemAtPosition(row_num, j)
-            sub_widget = sub_item.widget()
-            self.layout().removeWidget(sub_widget)
-            sub_widget.deleteLater()
+        # remove all the widgets in the target row, but I'll leave the 
 
-        self.layout().setRowMinimumHeight(row_num, 0)
-        self.setMinimumSize(self.sizeHint())
+        # get the internal row number based on the row_num passed in
+        internal_row_num = self._contained_elements[row_num - 1]
+
+        print('rows: %s' % self.layout().rowCount())
+        for j in range(self.layout().columnCount()):
+            print(internal_row_num, j)
+            # itemAtPosition is 0-based for the row num.
+            sub_item = self.layout().itemAtPosition(internal_row_num - 1, j)
+            if sub_item != None:
+                sub_widget = sub_item.widget()
+                self.layout().removeWidget(sub_widget)
+                sub_widget.deleteLater()
+
+        self.layout().setRowMinimumHeight(internal_row_num, 0)
         self.setMinimumSize(self.sizeHint())
         self.update()
         self.element_removed.emit(row_num)
@@ -201,6 +212,11 @@ class Multi(Container):
         if isinstance(gui_object.widgets, list):
             gui_object.widgets.insert(0, minus_button)
             Container.add_widget(self, gui_object)
+
+        # keep track of the row that we're adding so we can more easily access
+        # the widget later on
+        print ('adding widget to row', self.layout().rowCount())
+        self._contained_elements.append(self.layout().rowCount())
 
 class InformationButton(Button):
     """This class represents the information that a user will see when pressing

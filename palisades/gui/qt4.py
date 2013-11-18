@@ -188,11 +188,12 @@ class Multi(Container):
         for j in range(self.layout().columnCount()):
             print(internal_row_num, j)
             # itemAtPosition is 0-based for the row num.
-            sub_item = self.layout().itemAtPosition(internal_row_num - 1, j)
+            sub_item = self.layout().itemAtPosition(internal_row_num, j)
             if sub_item != None:
                 sub_widget = sub_item.widget()
-                self.layout().removeWidget(sub_widget)
-                sub_widget.deleteLater()
+                sub_widget.hide()
+               # self.layout().removeWidget(sub_widget)
+               # sub_widget.deleteLater()
 
         self.layout().setRowMinimumHeight(internal_row_num, 0)
         self.setMinimumSize(self.sizeHint())
@@ -215,8 +216,8 @@ class Multi(Container):
 
         # keep track of the row that we're adding so we can more easily access
         # the widget later on
-        print ('adding widget to row', self.layout().rowCount())
-        self._contained_elements.append(self.layout().rowCount())
+        print ('adding widget to row', self.layout().rowCount() -1)
+        self._contained_elements.append(self.layout().rowCount() -1)
 
 class InformationButton(Button):
     """This class represents the information that a user will see when pressing

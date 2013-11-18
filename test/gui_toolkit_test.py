@@ -110,6 +110,41 @@ class QtMultiTest(QtContainerTest):
         minus_button = self.widget.layout().itemAtPosition(2, 0).widget()
         self.assertEqual(isinstance(minus_button, qt4.Multi.MinusButton), True)
 
+    def test_remove_widget(self):
+        # verify the starting number of rows.
+        self.assertEqual(self.widget.layout().rowCount(), 2)
+
+        # add a row to verify
+        new_element = elements.File({})
+        new_view = core.FileGUI(new_element)
+        self.widget.add_widget(new_view)
+
+        # when I click the 'remove' button for the row, it should hide all the
+        # widgets in that row (including the remove button).
+        current_row = 2
+        def get_widget(column_index, current_row):
+            item = self.widget.layout().itemAtPosition(current_row,
+                column_index)
+            return item.widget()
+        get_widget(0, current_row).pressed.emit()  # simulate a minus button press
+
+        for column_index in range(self.widget.layout().columnCount()):
+            is_visible = get_widget(column_index, current_row).is_visible()
+            self.assertEqual(is_visible, False)
+
+        # try to create another element the same way and then try to remove it.
+        new_element = elements.File({})
+        new_view = core.FileGUI(new_element)
+        self.widget.add_widget(new_view)
+
+        current_row = 3
+        get_widget(0, current_row).pressed.emit()  # simulate a minus button press
+        for column_index in range(self.widget.layout().columnCount()):
+            is_visible = get_widget(column_index, current_row).is_visible()
+            self.assertEqual(is_visible, False)
+
+
+
 class ButtonTest(QtWidgetTest):
     def setUp(self):
         self.widget = qt4.Button()

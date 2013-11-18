@@ -187,7 +187,7 @@ class Multi(Container):
         self.layout().setRowMinimumHeight(internal_row_num, 0)
         self.setMinimumSize(self.sizeHint())
         self.update()
-        self.element_removed.emit(row_num)
+        self.element_removed.emit(row_num)  # make it 0-based
 
     def add_widget(self, gui_object=None):
         # when an element is added, it must universally have a minus button in

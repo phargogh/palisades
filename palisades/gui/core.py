@@ -134,7 +134,8 @@ class MultiGUI(ContainerGUI):
         # index is the row index of the new element.
         # TODO: get the core element, create the GUI view, add to multi widget.
         new_element = self.element.elements()[new_index]
-        new_view = self.add_view(new_element)
+        self.add_view(new_element)
+        new_view = self.elements[-1]
         self.widgets.add_widget(new_view)
         # TODO: emit a communicator here??
 

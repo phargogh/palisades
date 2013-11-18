@@ -143,8 +143,6 @@ class QtMultiTest(QtContainerTest):
             is_visible = get_widget(column_index, current_row).is_visible()
             self.assertEqual(is_visible, False)
 
-
-
 class ButtonTest(QtWidgetTest):
     def setUp(self):
         self.widget = qt4.Button()

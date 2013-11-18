@@ -89,7 +89,18 @@ class QtContainerTest(QtGroupTest):
 class QtMultiTest(QtContainerTest):
     def setUp(self):
         self.label_text = 'Multi element'
-        self.widget = qt4.Multi(self.label_text)
+        self.link_text = 'Add another'
+        self.widget = qt4.Multi(self.label_text, self.link_text)
+
+    def test_add_widget(self):
+        # the only widget that should exist in the container by default should
+        # be the add another link text.  This will take up a row.
+        self.assertEqual(self.widget.layout().rowCount(), 2)
+
+    def test_add_another(self):
+        # test the element adding functionality
+        # verify that there's just one row to start out with.
+        self.assertEqual(self.widget.layout().rowCount(), 2)
 
 class ButtonTest(QtWidgetTest):
     def setUp(self):

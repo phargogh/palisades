@@ -4,6 +4,7 @@ import mock
 from PyQt4.QtTest import QTest
 from PyQt4 import QtGui
 
+from palisades import elements
 from palisades.gui import qt4
 from palisades.gui import core
 
@@ -97,10 +98,17 @@ class QtMultiTest(QtContainerTest):
         # be the add another link text.  This will take up a row.
         self.assertEqual(self.widget.layout().rowCount(), 2)
 
-    def test_add_another(self):
-        # test the element adding functionality
-        # verify that there's just one row to start out with.
-        self.assertEqual(self.widget.layout().rowCount(), 2)
+        # add another widget to the toolkit
+        new_element = elements.File({})
+        new_view = core.FileGUI(new_element)
+        self.widget.add_widget(new_view)
+        self.assertEqual(self.widget.layout().rowCount(), 3)
+
+        # verify that there's now an extra widget and it's a MinusButton
+        self.assertEqual(isinstance(new_view.widgets[0],
+            qt4.Multi.MinusButton), True)
+        minus_button = self.widget.layout().itemAtPosition(2, 0).widget()
+        self.assertEqual(isinstance(minus_button, qt4.Multi.MinusButton), True)
 
 class ButtonTest(QtWidgetTest):
     def setUp(self):

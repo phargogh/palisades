@@ -277,7 +277,8 @@ class MultiIntegrationTest(ContainerIntegrationTest):
         self.assertEqual(len(self.element.elements()), 0)
 
         # click the add_another link.
-        self.view.widgets.add_element_link.clicked.emit(True)
+#        self.view.widgets.add_element_link.clicked.emit(True)
+        self.view.widgets.add_element_link._click_me()
         print self.view.widgets.add_element_link.clicked.callbacks
         print self.view.widgets.element_requested.callbacks
 

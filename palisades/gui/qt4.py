@@ -92,6 +92,7 @@ class Group(QtGui.QGroupBox, QtWidget):
             num_cols = max(5 + start_index, layout.columnCount())
             self.layout().addWidget(gui_object.widgets, current_row, 0 +
                     start_index, 1, num_cols)
+        print 'FINISHED ADDING WIDGET'
 
 class Container(Group):
     def __init__(self, label_text):
@@ -162,6 +163,10 @@ class Multi(Container):
 
             self.clicked = Communicator()
             self.linkActivated.connect(self.clicked.emit)
+
+        def _click_me(self):
+            print 'CLICKED'
+            self.clicked.emit(True)
 
     def __init__(self, label_text, link_text):
         Container.__init__(self, label_text)

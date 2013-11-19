@@ -148,8 +148,9 @@ class Multi(Container):
             Button.__init__(self)
             self._row_index = row_index
             self.pushed = Communicator()
-            self.pressed.connect(self._button_pushed)
+            self.released.connect(self._button_pushed)
             self.setIcon(QtGui.QIcon(ICON_MINUS))
+            self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
         def _button_pushed(self):
             self.pushed.emit(self._row_index)

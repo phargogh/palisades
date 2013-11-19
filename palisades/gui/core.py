@@ -69,7 +69,6 @@ class GroupGUI(UIObject):
         # created once, not dynamically (though they could be hidden/revealed
         # dynamically), so no need for a separate function.
         for element in core_element._elements:
-            print 'adding element', element
             self.add_view(element)
 
     def add_view(self, element):
@@ -83,10 +82,6 @@ class GroupGUI(UIObject):
                 new_element = cls(element, self.registrar)
             else:
                 new_element = cls(element)
-                try:
-                    print(new_element, element.is_hideable())
-                except:
-                    pass
         except TypeError as error:
             # Happens when the element's GUI representation in registry is
             # None, meaning that there should not be a GUI display.
@@ -131,17 +126,9 @@ class MultiGUI(ContainerGUI):
 #        self.widgets.element_added.register(self.element.add_element)
 
     def _add_element(self, new_index):
-        print('New element being created at index', new_index)
         # index is the row index of the new element.
-        # TODO: get the core element, create the GUI view, add to multi widget.
         new_element = self.element.elements()[new_index]
         self.add_view(new_element)
-#        new_view = self.elements[-1]
-#        self.widgets.add_widget(new_view)
-        print self.widgets.element_requested.callbacks
-        print self.element.element_added.callbacks
-        print self.widgets.element_removed.callbacks
-        print "FINISHED ADDING ELEMENT TO VIEW"
         # TODO: emit a communicator here??
 
 class PrimitiveGUI(UIObject):

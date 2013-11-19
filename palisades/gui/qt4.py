@@ -92,7 +92,6 @@ class Group(QtGui.QGroupBox, QtWidget):
             num_cols = max(5 + start_index, layout.columnCount())
             self.layout().addWidget(gui_object.widgets, current_row, 0 +
                     start_index, 1, num_cols)
-        print 'FINISHED ADDING WIDGET'
 
 class Container(Group):
     def __init__(self, label_text):
@@ -145,12 +144,10 @@ class Button(QtGui.QPushButton, QtWidget):
 class Multi(Container):
     class MinusButton(Button):
         def __init__(self, row_index):
-            print 'starting to create button'
             Button.__init__(self)
             self._row_index = row_index
             self.pushed = Communicator()
             self.pressed.connect(self._button_pushed)
-            print 'creating button!'
 
         def _button_pushed(self):
             self.pushed.emit(self._row_index)
@@ -164,10 +161,6 @@ class Multi(Container):
             self.clicked = Communicator()
             self.linkActivated.connect(self.clicked.emit)
 
-        def _click_me(self):
-            print 'CLICKED'
-            self.clicked.emit(True)
-
     def __init__(self, label_text, link_text):
         Container.__init__(self, label_text)
 
@@ -178,9 +171,6 @@ class Multi(Container):
         self.element_removed = Communicator()
 
         self.add_element_link = self.AddElementLink(link_text)
-#        self.add_element_link = QtGui.QLabel(('<a href='
-#            '"naturalcapitalproject.org">%s</a>' % link_text))
-#        self.add_element_link.linkActivated.connect(self.element_requested.emit)
         self.add_element_link.clicked.register(self.element_requested.emit)
         self.layout().addWidget(self.add_element_link,
             self.layout().rowCount(), 2)
@@ -215,20 +205,14 @@ class Multi(Container):
         # front of it.  This should apply to when the element is supposed to
         # span all columns as well as when there are a number of individual
         # widgets.
-        print('add_widget.  Element_requested',
-                self.element_requested.callbacks)
-        traceback.print_stack()
         minus_button = self.MinusButton(self.layout().rowCount() - 1 )
         minus_button.pushed.register(self._remove_element)
         if isinstance(gui_object.widgets, list):
             gui_object.widgets.insert(0, minus_button)
-            print('Calling Container')
             Container.add_widget(self, gui_object)
-            print('finished with Container\'s add_widget')
 
         # keep track of the row that we're adding so we can more easily access
         # the widget later on
-        print('added gui_object', gui_object)
         self._contained_elements.append(self.layout().rowCount() -1)
 
 class InformationButton(Button):

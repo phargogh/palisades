@@ -277,14 +277,9 @@ class MultiIntegrationTest(ContainerIntegrationTest):
         self.assertEqual(len(self.element.elements()), 0)
 
         # click the add_another link.
-#        self.view.widgets.add_element_link.clicked.emit(True)
-        self.view.widgets.add_element_link._click_me()
-        print self.view.widgets.add_element_link.clicked.callbacks
-        print self.view.widgets.element_requested.callbacks
+        self.view.widgets.add_element_link.clicked.emit(True)
 
         # verify that a row has been added to the layout
-        print('num elements in widget', self.view.widgets.count())
-        print('widgets there', self.view.widgets._contained_elements)
         self.assertEqual(len(self.element.elements()), 1)
         self.assertEqual(self.view.widgets.count(), 1)
 

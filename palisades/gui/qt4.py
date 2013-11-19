@@ -675,8 +675,14 @@ class FormWindow(QtWidget, QtGui.QWidget):
 
         # Create the QWidget pane for the inputs and add it to the layout.
         self.input_pane = input_pane
-        #self.input_pane.setLayout(QtGui.QGridLayout())
-        self.layout().addWidget(self.input_pane)
+        self.scroll_area = QtGui.QScrollArea()
+        self.scroll_area.setWidget(self.input_pane)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.verticalScrollBar().rangeChanged.connect(
+            self._update_scroll_border)
+        self.layout().addWidget(self.scroll_area)
+        self._update_scroll_border(self.scroll_area.verticalScrollBar().minimum(),
+            self.scroll_area.verticalScrollBar().maximum())
 
         # Create the buttonBox and add it to the layout.
         self.run_button = QtGui.QPushButton(' Run')
@@ -702,6 +708,12 @@ class FormWindow(QtWidget, QtGui.QWidget):
         #add the buttonBox to the window.
         self.layout().addWidget(self.button_box)
         self.close_confirmed = False
+
+    def _update_scroll_border(self, min, max):
+        if min == 0 and max == 0:
+            self.scroll_area.setStyleSheet("QScrollArea { border: None } ")
+        else:
+            self.scroll_area.setStyleSheet("")
 
     def showEvent(self, event):
         center_window(self)

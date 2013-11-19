@@ -157,6 +157,7 @@ class Multi(Container):
             self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
         def _button_pushed(self):
+            print('row index', self._row_index)
             self.pushed.emit(self._row_index)
 
     class AddElementLink(QtGui.QLabel):

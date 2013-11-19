@@ -284,8 +284,30 @@ class MultiIntegrationTest(ContainerIntegrationTest):
         self.assertEqual(self.view.widgets.count(), 1)
 
         # verify that there's a new element of the correct class in the core
-        # element.
+        # element.  A Text element is created by default.
+        self.assertEqual(self.element.elements()[0].__class__.__name__, 'Text')
 
+    def test_remove_element(self):
+        # simulate clicking the add another link to add three elements.
+        self.view.widgets.add_element_link.clicked.emit(True)
+        self.view.widgets.add_element_link.clicked.emit(True)
+        self.view.widgets.add_element_link.clicked.emit(True)
+
+        # to make it easier to test which element is which later on, I'll set
+        # the values of the respective elements.
+        self.element.elements()[0].set_value('aaa')
+        self.element.elements()[1].set_value('bbb')
+        self.element.elements()[2].set_value('ccc')
+
+        # when the GUI's minus button is clicked, verify that the element in
+        # core is removed.
+        self.view.elements[0].widgets[0]._button_pushed()
+        print self.element.elements()
+        print [e.value() for e in self.element.elements()]
+        self.assertEqual(len(self.element.elements()), 2)
+        self.assertEqual(self.element.elements()[0].value(), 'bbb')
+        self.assertEqual(self.element.elements()[1].value(), 'ccc')
+        self.assertEqual(self.view.widgets.count(), 2)
 
 class LabelIntegrationTest(UIObjectIntegrationTest):
     def setUp(self):

@@ -122,7 +122,7 @@ class MultiGUI(ContainerGUI):
 #        self.widgets.element_requested.register(self._add_element)
         self.widgets.element_requested.register(self.element.add_element)
         self.element.element_added.register(self._add_element)
-#        self.widgets.element_removed.register(self.element.remove_element)
+        self.widgets.element_removed.register(self.element.remove_element)
 #        self.widgets.element_added.register(self.element.add_element)
 
     def _add_element(self, new_index):

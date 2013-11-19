@@ -1,4 +1,5 @@
 import os
+import traceback
 import threading
 from types import BooleanType
 
@@ -153,6 +154,15 @@ class Multi(Container):
         def _button_pushed(self):
             self.pushed.emit(self._row_index)
 
+    class AddElementLink(QtGui.QLabel):
+        def __init__(self, link_text):
+            template = '<a href="naturalcapitalproject.org">%s</a>'
+            rendered_link = template % link_text
+            QtGui.QLabel.__init__(self, rendered_link)
+
+            self.clicked = Communicator()
+            self.linkActivated.connect(self.clicked.emit)
+
     def __init__(self, label_text, link_text):
         Container.__init__(self, label_text)
 
@@ -162,13 +172,19 @@ class Multi(Container):
         self.element_added = Communicator()
         self.element_removed = Communicator()
 
-        self.add_element_link = QtGui.QLabel(('<a href='
-            '"naturalcapitalproject.org">%s</a>' % link_text))
-        self.add_element_link.linkActivated.connect(self.element_requested.emit)
+        self.add_element_link = self.AddElementLink(link_text)
+#        self.add_element_link = QtGui.QLabel(('<a href='
+#            '"naturalcapitalproject.org">%s</a>' % link_text))
+#        self.add_element_link.linkActivated.connect(self.element_requested.emit)
+        self.add_element_link.clicked.register(self.element_requested.emit)
         self.layout().addWidget(self.add_element_link,
             self.layout().rowCount(), 2)
 
         self._contained_elements = []
+
+    def count(self):
+        # return the number of elements in the layout that are active.
+        return len(self._contained_elements)
 
     def _remove_element(self, row_num):
         # get the internal row number based on the row_num passed in
@@ -194,14 +210,20 @@ class Multi(Container):
         # front of it.  This should apply to when the element is supposed to
         # span all columns as well as when there are a number of individual
         # widgets.
+        print('add_widget.  Element_requested',
+                self.element_requested.callbacks)
+        traceback.print_stack()
         minus_button = self.MinusButton(self.layout().rowCount() - 1 )
         minus_button.pushed.register(self._remove_element)
         if isinstance(gui_object.widgets, list):
             gui_object.widgets.insert(0, minus_button)
+            print('Calling Container')
             Container.add_widget(self, gui_object)
+            print('finished with Container\'s add_widget')
 
         # keep track of the row that we're adding so we can more easily access
         # the widget later on
+        print('added gui_object', gui_object)
         self._contained_elements.append(self.layout().rowCount() -1)
 
 class InformationButton(Button):

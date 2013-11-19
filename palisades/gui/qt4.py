@@ -23,6 +23,7 @@ from palisades.gui import ICON_REFRESH
 from palisades.gui import ICON_UNDO
 from palisades.gui import ICON_WARN
 from palisades.gui import ICON_WARN_BIG
+from palisades.gui import ICON_MINUS
 from palisades.utils import Communicator
 
 LAYOUTS = {
@@ -148,6 +149,7 @@ class Multi(Container):
             self._row_index = row_index
             self.pushed = Communicator()
             self.pressed.connect(self._button_pushed)
+            self.setIcon(QtGui.QIcon(ICON_MINUS))
 
         def _button_pushed(self):
             self.pushed.emit(self._row_index)

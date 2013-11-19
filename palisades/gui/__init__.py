@@ -22,6 +22,7 @@ ICON_INFO = _path('info.png')
 ICON_REFRESH = _path('refresh.png')  # TODO: not showing up.
 ICON_ERROR = _path('validate-fail.png')
 ICON_CHECKMARK = _path('validate-pass.png')
+ICON_MINUS = _path('minus-icon.png')
 
 # app_structure is a list of pointers, or an element in the list can be a nested
 # list of pointers.

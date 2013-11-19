@@ -106,6 +106,7 @@ class Container(Group):
 
     def _container_toggled(self):
         # returns whether the container is collapsed.
+        self.set_collapsed(not self.is_collapsed())
         self.checkbox_toggled.emit(self.is_collapsed())
 
     def set_collapsible(self, is_collapsible):
@@ -124,6 +125,8 @@ class Container(Group):
         # TODO: add a toolkit test for this function.
         if self.is_collapsible():
             self.setChecked(not is_collapsed)
+            self.setMinimumSize(self.sizeHint())
+            self.update()
         else:
             raise RuntimeError('Cannot collapse a container that is not '
                 'collapsible')

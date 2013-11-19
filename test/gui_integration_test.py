@@ -252,6 +252,45 @@ class ContainerIntegrationTest(GroupIntegrationTest):
         self.assertEqual(self.element.is_collapsed(), True)
         self.assertEqual(self.view.widgets.is_collapsed(), True)
 
+class MultiIntegrationTest(ContainerIntegrationTest):
+    def setUp(self):
+        self.contained_elements = [
+            {
+                'type': 'file',
+            },
+            {
+                'type': 'text',
+            },
+        ]
+        self.config = {'elements': self.contained_elements}
+        self.element = elements.Multi(self.config)
+        self.view = core.MultiGUI(self.element)
+
+    def test_contained_elements(self):
+        # there should be no contained elements by default, even though there
+        # are some contained elements in the user-defined config.
+        self.assertEqual(len(self.view.elements), 0)
+
+    def test_add_element(self):
+        # verify that there are no elements ... yet
+        self.assertEqual(self.view.widgets.count(), 0)
+        self.assertEqual(len(self.element.elements()), 0)
+
+        # click the add_another link.
+        self.view.widgets.add_element_link.clicked.emit(True)
+        print self.view.widgets.add_element_link.clicked.callbacks
+        print self.view.widgets.element_requested.callbacks
+
+        # verify that a row has been added to the layout
+        print('num elements in widget', self.view.widgets.count())
+        print('widgets there', self.view.widgets._contained_elements)
+        self.assertEqual(len(self.element.elements()), 1)
+        self.assertEqual(self.view.widgets.count(), 1)
+
+        # verify that there's a new element of the correct class in the core
+        # element.
+
+
 class LabelIntegrationTest(UIObjectIntegrationTest):
     def setUp(self):
         self.label = 'This is a label.'

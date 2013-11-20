@@ -505,7 +505,10 @@ class Group(Element):
 
             Returns nothing."""
         for element_config in elements:
-            new_element = self._registrar[element_config['type']](element_config)
+            try:
+                new_element = self._registrar[element_config['type']](element_config)
+            except KeyError as error:
+                raise KeyError('%s not recognized as an acceptable element type' % error)
             LOGGER.debug('Creating new element %s', new_element)
 
             self._add_element(new_element)

@@ -714,6 +714,24 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.layout().addWidget(self.button_box)
         self.close_confirmed = False
 
+        # adjust the window size.
+        screen_geometry = QtGui.QDesktopWidget().availableGeometry()
+        screen_width = screen_geometry.width()
+        min_width = 800
+        if min_width > screen_width:
+            width = screen_width - 50
+        else:
+            width = min_width
+
+        screen_height = screen_geometry.height() * 0.95
+        min_height = self.input_pane.minimumSizeHint().height()
+        if min_height > screen_height:
+            height = screen_height
+        else:
+            height = min_height
+
+        self.resize(width, height)
+
     def _update_scroll_border(self, min, max):
         if min == 0 and max == 0:
             self.scroll_area.setStyleSheet("QScrollArea { border: None } ")

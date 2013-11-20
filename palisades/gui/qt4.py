@@ -155,6 +155,7 @@ class Multi(Container):
             self.released.connect(self._button_pushed)
             self.setIcon(QtGui.QIcon(ICON_MINUS))
             self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+            print('created button with index', row_index)
 
         def _button_pushed(self):
             print('row index', self._row_index)
@@ -193,7 +194,7 @@ class Multi(Container):
 
     def _remove_element(self, row_num):
         # get the internal row number based on the row_num passed in
-        internal_row_num = self._contained_elements[row_num - 1]
+        internal_row_num = self._contained_elements.pop(row_num - 1)
 
         # instead of actually removing the widgets (likely to cause segfault
         # problems while testing), I'll just hide the widgets.  They're
@@ -215,7 +216,7 @@ class Multi(Container):
         # front of it.  This should apply to when the element is supposed to
         # span all columns as well as when there are a number of individual
         # widgets.
-        minus_button = self.MinusButton(self.layout().rowCount() - 1 )
+        minus_button = self.MinusButton(self.count())
         minus_button.pushed.register(self._remove_element)
         if isinstance(gui_object.widgets, list):
             gui_object.widgets.insert(0, minus_button)

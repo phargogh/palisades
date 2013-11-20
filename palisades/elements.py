@@ -627,6 +627,8 @@ class Multi(Container):
         # need an optional argument for when an element is added by the
         # Container widget.
         self.create_elements([self.config['template']])
+        print('elements', [e.value() for e in self.elements()])
+        print('new index', len(self.elements()) - 1)
         self.element_added.emit(len(self.elements()) - 1)  #index of element
 
     def remove_element(self, index):

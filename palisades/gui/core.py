@@ -127,6 +127,7 @@ class MultiGUI(ContainerGUI):
 
     def _add_element(self, new_index):
         # index is the row index of the new element.
+        print('GUI Core index', new_index)
         new_element = self.element.elements()[new_index]
         self.add_view(new_element)
         # TODO: emit a communicator here??

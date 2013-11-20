@@ -300,14 +300,15 @@ class MultiIntegrationTest(ContainerIntegrationTest):
         self.element.elements()[2].set_value('ccc')
 
         # when the GUI's minus button is clicked, verify that the element in
-        # core is removed.
+        # core is removed and that the number of active elements in the Multi
+        # widget is also correct.
         self.view.elements[0].widgets[0]._button_pushed()
-        print self.element.elements()
-        print [e.value() for e in self.element.elements()]
+#        print self.element.elements()
+#        print [e.value() for e in self.element.elements()]
         self.assertEqual(len(self.element.elements()), 2)
+        self.assertEqual(self.view.widgets.count(), 2)
         self.assertEqual(self.element.elements()[0].value(), 'bbb')
         self.assertEqual(self.element.elements()[1].value(), 'ccc')
-        self.assertEqual(self.view.widgets.count(), 2)
 
 class LabelIntegrationTest(UIObjectIntegrationTest):
     def setUp(self):

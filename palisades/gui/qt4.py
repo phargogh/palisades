@@ -680,6 +680,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
 
         # Create the QWidget pane for the inputs and add it to the layout.
         self.input_pane = input_pane
+        self.input_pane.setFlat(True)
         self.scroll_area = QtGui.QScrollArea()
         self.scroll_area.setWidget(self.input_pane)
         self.scroll_area.setWidgetResizable(True)

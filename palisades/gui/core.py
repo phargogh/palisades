@@ -1,3 +1,4 @@
+import logging
 from types import *
 
 from palisades.gui import qt4 as toolkit
@@ -5,6 +6,8 @@ from palisades.validation import V_ERROR
 from palisades.validation import V_PASS
 
 class NotYetImplemented(Exception): pass
+
+LOGGER = logging.getLogger('gui.core')
 
 class ApplicationGUI(object):
     def __init__(self):
@@ -84,13 +87,15 @@ class GroupGUI(UIObject):
             except KeyError as missing_key:
                 raise KeyError('%s not a recognized GUI type' % missing_key)
 
-            if element_classname in ['Group', 'Container']:
+            if element_classname in ['Group', 'Container', 'TabGroup', 'Tab']:
                 new_element = cls(element, self.registrar)
             else:
                 new_element = cls(element)
         except TypeError as error:
             # Happens when the element's GUI representation in registry is
             # None, meaning that there should not be a GUI display.
+            LOGGER.critical('Error when creating the view for a %s: %s',
+                element_classname, error)
             new_element = None
 
         # If the new element is None, there's no visualization.  Skip.

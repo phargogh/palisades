@@ -668,10 +668,11 @@ class TabGroup(QtGui.QTabWidget, Group):
         QtGui.QTabWidget.__init__(self)
         Group.__init__(self)
 
-    def add_widget(self, widget, label=''):
+    def add_widget(self, gui_object, label=''):
+        # gui_object is assumed to be a Tab instance.
         if label == '':
             label = 'Tab %s' % self.count()
-        self.addTab(widget, label)
+        self.addTab(gui_object.widgets, label)
 
     def widgets(self):
         pass

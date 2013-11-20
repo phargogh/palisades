@@ -659,6 +659,9 @@ class Tab(Group):
         }
         self.set_default_config(new_defaults)
 
+    def label(self):
+        return self.config['label']
+
 # The form class represents a single-window form where the user enters various
 # inputs and then does something with them.  The IUI ModelUI would be an example
 # of a form.

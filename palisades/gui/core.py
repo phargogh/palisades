@@ -49,6 +49,8 @@ class GroupGUI(UIObject):
             'Container': ContainerGUI,
             'CheckBox': CheckBoxGUI,
             'Multi': MultiGUI,
+            'Tab': TabGUI,
+            'TabGroup': TabGroupGUI,
         }
 
         if registrar != None:
@@ -77,7 +79,11 @@ class GroupGUI(UIObject):
         # TODO: if element is a Group, it must create its contained widgets
         try:
             element_classname = element.__class__.__name__
-            cls = self.registrar[element_classname]
+            try:
+                cls = self.registrar[element_classname]
+            except KeyError as missing_key:
+                raise KeyError('%s not a recognized GUI type' % missing_key)
+
             if element_classname in ['Group', 'Container']:
                 new_element = cls(element, self.registrar)
             else:
@@ -98,6 +104,21 @@ class GroupGUI(UIObject):
         """Set the visibility of this element."""
         self.widgets.set_visible(is_visible)
         UIObject.set_visible(self, is_visible)
+
+class TabGroupGUI(GroupGUI):
+    def __init__(self, core_element, registrar=None):
+        if not hasattr(self, 'widgets'):
+            self.widgets = toolkit.TabGroup()
+        GroupGUI.__init__(self, core_element, registrar)
+
+class TabGUI(GroupGUI):
+    def __init__(self, core_element, registrar=None):
+        if not hasattr(self, 'widgets'):
+            self.widgets = toolkit.Group()
+        GroupGUI.__init__(self, core_element, registrar)
+
+    def label(self):
+        return self.element.label()
 
 class ContainerGUI(GroupGUI):
     def __init__(self, core_element, registrar=None):

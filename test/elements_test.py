@@ -545,10 +545,10 @@ class TabGroupTest(GroupTest):
 
         self.elements = [
             {
-                'type': 'tab',
+                'type': 'file',
             },
             {
-                'type': 'tab',
+                'type': 'text',
             },
         ]
 

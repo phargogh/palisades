@@ -474,6 +474,7 @@ class Group(Element):
             'container': Container,
             'checkbox': CheckBox,
             'multi': Multi,
+            'tab': Tab,
         }
 
         if new_elements is not None:

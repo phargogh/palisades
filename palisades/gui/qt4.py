@@ -663,6 +663,19 @@ class ErrorDialog(InfoDialog):
         self.body.setMinimumSize(self.body.sizeHint())
         InfoDialog.showEvent(self)
 
+class TabGroup(QtGui.QTabWidget, Group):
+    def __init__(self):
+        QtGui.QTabWidget.__init__(self)
+        Group.__init__(self)
+
+    def add_widget(self, widget, label=''):
+        if label == '':
+            label = 'Tab %s' % self.count()
+        self.addTab(widget, label)
+
+    def widgets(self):
+        pass
+
 class FormWindow(QtWidget, QtGui.QWidget):
     """A Form is a window where you have a set of inputs that the user fills in
     or configures and then presses 'submit'."""

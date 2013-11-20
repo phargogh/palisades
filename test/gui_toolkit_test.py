@@ -59,6 +59,23 @@ class QtGroupTest(QtWidgetTest):
         self.widget.add_widget(self.SampleLabel())
         self.assertEqual(self.widget.layout().rowCount(), 3)
 
+class QtTabGroupTest(QtGroupTest):
+    def setUp(self):
+        self.widget = qt4.TabGroup()
+
+    def test_add_widget(self):
+        # need to reimplement this, since the TabGroup is a special case of the
+        # Group element.
+        # verify no tabs by default.
+        self.assertEqual(self.widget.count(), 0)
+
+        # add a widget as a tab.
+        self.widget.add_widget(qt4.QtWidget())
+        self.assertEqual(self.widget.count(), 1)
+
+        # add a widget as a tab with a label
+        self.widget.add_widget(qt4.QtWidget(), 'Tab label')
+        self.assertEqual(self.widget.count(), 2)
 class QtContainerTest(QtGroupTest):
     def setUp(self):
         self.label_text = 'hello there!'

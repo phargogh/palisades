@@ -517,6 +517,27 @@ class GroupTest(ElementTest):
             self.assertEqual(element.is_visible(), True)
             self.assertEqual(element.is_enabled(), True)
 
+class TabTest(GroupTest):
+    def setUp(self):
+        self.default_config = {}
+        self.element = elements.Tab(self.default_config)
+
+        self.elements = [
+            {
+                'type': 'file',
+            },
+            {
+                'type': 'text',
+            },
+        ]
+
+    def test_default_config(self):
+        expected_defaults = {
+            'elements': [],
+            'label': '',
+        }
+        self.assertEqual(self.element.config, expected_defaults)
+
 class ContainerTest(GroupTest):
     def setUp(self):
         self.default_config = {}

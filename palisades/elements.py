@@ -638,6 +638,23 @@ class Multi(Container):
     def value(self):
         return [e.value() for e in self.elements()]
 
+class TabGroup(Group):
+    def create_elements(self, elements):
+        """Create elements after first asserting that all contained elements
+        are tabs."""
+        for element_config in elements:
+            assert element_config['type'] == 'tab', ('Element type must be '
+                '"tab", %s found instead' % element_config['type'])
+        Group.create_elements(self, elements)
+
+class Tab(Group):
+    def __init__(self, configuration, new_elements=None):
+        Group.__init__(self, configuration, new_elements)
+        new_defaults = {
+            'label': '',
+        }
+        self.set_default_config(new_defaults)
+
 # The form class represents a single-window form where the user enters various
 # inputs and then does something with them.  The IUI ModelUI would be an example
 # of a form.

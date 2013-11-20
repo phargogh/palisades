@@ -76,6 +76,7 @@ class QtTabGroupTest(QtGroupTest):
         # add a widget as a tab with a label
         self.widget.add_widget(qt4.QtWidget(), 'Tab label')
         self.assertEqual(self.widget.count(), 2)
+
 class QtContainerTest(QtGroupTest):
     def setUp(self):
         self.label_text = 'hello there!'

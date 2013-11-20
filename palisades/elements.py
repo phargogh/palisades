@@ -627,13 +627,16 @@ class Multi(Container):
         # need an optional argument for when an element is added by the
         # Container widget.
         self.create_elements([self.config['template']])
-        print('elements', [e.value() for e in self.elements()])
-        print('new index', len(self.elements()) - 1)
-        self.element_added.emit(len(self.elements()) - 1)  #index of element
+        new_index = len(self.elements()) - 1
+        LOGGER.debug('Adding a new element at index %s', new_index)
+        self.element_added.emit(new_index)  #index of element
 
     def remove_element(self, index):
         popped_element = self._elements.pop(index)
         self.element_removed.emit(index)
+
+    def value(self):
+        return [e.value() for e in self.elements()]
 
 # The form class represents a single-window form where the user enters various
 # inputs and then does something with them.  The IUI ModelUI would be an example

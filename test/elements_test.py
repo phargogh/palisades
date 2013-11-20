@@ -12,7 +12,7 @@ TEST_DIR = os.path.dirname(__file__)
 IUI_CONFIG = os.path.join(TEST_DIR, 'data', 'iui_config')
 PALISADES_CONFIG = os.path.join(TEST_DIR, 'data', 'palisades_config')
 
-#@unittest.skip('no X')
+@unittest.skip('no X')
 class ApplicationTest(unittest.TestCase):
     def test_build_application_no_gui(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
@@ -686,6 +686,20 @@ class MultiTest(ContainerTest):
         self.element.remove_element(1)
         remove_elem_func.assert_called_with(1)
         self.assertEqual(len(self.element.elements()), 2)
+
+    def test_value(self):
+        # add a couple of default elements
+        self.element.add_element()
+        self.element.add_element()
+
+        # verify that we're getting the correct, blank list of values back
+        self.assertEqual(self.element.value(), ['', ''])
+
+        # set the value of the individual contained elements and verify that
+        # the value of the multi element has changed.
+        self.element._elements[0].set_value('aaa')
+        self.element._elements[1].set_value('bbb')
+        self.assertEqual(self.element.value(), ['aaa', 'bbb'])
 
 class StaticTest(ElementTest):
     def test_static_defaults(self):

@@ -555,7 +555,7 @@ class Container(Group):
     def __init__(self, configuration, new_elements=None):
         Group.__init__(self, configuration, new_elements)
         new_defaults = {
-            'label': 'Container',
+            'label': '',
             'collapsible': False,
         }
         self.set_default_config(new_defaults)

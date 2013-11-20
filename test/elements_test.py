@@ -536,13 +536,13 @@ class ContainerTest(GroupTest):
         expected_defaults = {
             'elements': [],
             'collapsible': False,
-            'label': 'Container',
+            'label': '',
         }
         self.assertEqual(self.element.config, expected_defaults)
 
     def test_display_label(self):
         # check the container's label is the default value.
-        self.assertEqual(self.element.label(), 'Container')
+        self.assertEqual(self.element.label(), '')
 
     def test_enabled_defaults(self):
         # Container should not collapsible by default.

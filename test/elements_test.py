@@ -538,6 +538,20 @@ class TabTest(GroupTest):
         }
         self.assertEqual(self.element.config, expected_defaults)
 
+class TabGroupTest(GroupTest):
+    def setUp(self):
+        self.default_config = {}
+        self.element = elements.TabGroup(self.default_config)
+
+        self.elements = [
+            {
+                'type': 'tab',
+            },
+            {
+                'type': 'tab',
+            },
+        ]
+
 class ContainerTest(GroupTest):
     def setUp(self):
         self.default_config = {}

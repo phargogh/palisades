@@ -310,6 +310,8 @@ class MultiIntegrationTest(ContainerIntegrationTest):
         self.assertEqual(self.element.elements()[0].value(), 'bbb')
         self.assertEqual(self.element.elements()[1].value(), 'ccc')
 
+#class TabGroupIntegrationTest(GroupIntegrationTest):
+
 class LabelIntegrationTest(UIObjectIntegrationTest):
     def setUp(self):
         self.label = 'This is a label.'

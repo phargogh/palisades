@@ -475,6 +475,7 @@ class Group(Element):
             'checkbox': CheckBox,
             'multi': Multi,
             'tab': Tab,
+            'tabGroup': TabGroup,
         }
 
         if new_elements is not None:

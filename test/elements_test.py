@@ -552,6 +552,18 @@ class TabGroupTest(GroupTest):
             },
         ]
 
+    def test_create_elements(self):
+        # when I create elements in a tabGroup that are not tabs, an
+        # AssertionError should be raised.
+        self.assertRaises(AssertionError, self.element.create_elements,
+            self.elements)
+
+        # when I create elements in a TabGroup that are all tabs, they should
+        # create just fine.
+        tabs = [{'type': 'tab'}, {'type': 'tab'}]
+        self.element.create_elements(tabs)
+        self.assertEqual(len(self.element.elements()), 2)
+
 class ContainerTest(GroupTest):
     def setUp(self):
         self.default_config = {}

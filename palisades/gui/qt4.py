@@ -155,10 +155,8 @@ class Multi(Container):
             self.released.connect(self._button_pushed)
             self.setIcon(QtGui.QIcon(ICON_MINUS))
             self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-            print('created button with index', row_index)
 
         def _button_pushed(self):
-            print('row index', self._row_index)
             self.pushed.emit(self._row_index)
 
     class AddElementLink(QtGui.QLabel):
@@ -186,37 +184,40 @@ class Multi(Container):
 
         self.setMinimumSize(self.sizeHint())
         self.update()
-        self._contained_elements = []
+        self._active_elements = []
 
     def count(self):
         # return the number of elements in the layout that are active.
-        return len(self._contained_elements)
+        return len(self._active_elements)
 
-    def _remove_element(self, row_num):
+    def _remove_element(self, layout_row_num):
         # get the internal row number based on the row_num passed in
-        internal_row_num = self._contained_elements.pop(row_num - 1)
+        element_index = self._active_elements.index(layout_row_num)
+        element_ordinal = self._active_elements.pop(element_index)
 
         # instead of actually removing the widgets (likely to cause segfault
         # problems while testing), I'll just hide the widgets.  They're
         # invisible to the user when this happens, and the core element is the
         # one that actually reports element values.
         for j in range(self.layout().columnCount()):
-            sub_item = self.layout().itemAtPosition(internal_row_num, j)
+            sub_item = self.layout().itemAtPosition(layout_row_num, j)
             if sub_item != None:  # None when no widget is there.
                 sub_widget = sub_item.widget()
                 sub_widget.hide()
 
-        self.layout().setRowMinimumHeight(internal_row_num, 0)
+        self.layout().setRowMinimumHeight(layout_row_num, 0)
         self.setMinimumSize(self.sizeHint())
         self.update()
-        self.element_removed.emit(row_num)  # make it 0-based
+        self.element_removed.emit(element_index)
 
     def add_widget(self, gui_object=None):
         # when an element is added, it must universally have a minus button in
         # front of it.  This should apply to when the element is supposed to
         # span all columns as well as when there are a number of individual
         # widgets.
-        minus_button = self.MinusButton(self.count())
+        #minus_button = self.MinusButton(self.count())
+        row_number = self.layout().rowCount()
+        minus_button = self.MinusButton(row_number)
         minus_button.pushed.register(self._remove_element)
         if isinstance(gui_object.widgets, list):
             gui_object.widgets.insert(0, minus_button)
@@ -224,7 +225,7 @@ class Multi(Container):
 
         # keep track of the row that we're adding so we can more easily access
         # the widget later on
-        self._contained_elements.append(self.layout().rowCount() -1)
+        self._active_elements.append(row_number)
 
         # readjust the minimum size to accommodate the new elements.
         self.setMinimumSize(self.sizeHint())

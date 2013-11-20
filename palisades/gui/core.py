@@ -119,15 +119,19 @@ class MultiGUI(ContainerGUI):
                 core_element.config['link_text'])
         ContainerGUI.__init__(self, core_element, registrar)
 
-#        self.widgets.element_requested.register(self._add_element)
         self.widgets.element_requested.register(self.element.add_element)
         self.element.element_added.register(self._add_element)
-        self.widgets.element_removed.register(self.element.remove_element)
-#        self.widgets.element_added.register(self.element.add_element)
+#        self.widgets.element_removed.register(self.element.remove_element)
+        self.widgets.element_removed.register(self._remove_element)
+
+    def _remove_element(self, index):
+        # remove the target element from the internal elements list and call
+        # the element's remove_element function.
+        removed_element = self.elements.pop(index)
+        self.element.remove_element(index)
 
     def _add_element(self, new_index):
         # index is the row index of the new element.
-        print('GUI Core index', new_index)
         new_element = self.element.elements()[new_index]
         self.add_view(new_element)
         # TODO: emit a communicator here??

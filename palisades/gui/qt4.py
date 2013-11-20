@@ -95,6 +95,7 @@ class Group(QtGui.QGroupBox, QtWidget):
             gui_object.widgets.setMinimumSize(gui_object.widgets.sizeHint())
             self.layout().addWidget(gui_object.widgets, current_row, 0 +
                     start_index, 1, num_cols)
+        self.layout().setRowStretch(current_row, 0)
 
 class Container(Group):
     def __init__(self, label_text):
@@ -668,8 +669,9 @@ class TabGroup(QtGui.QTabWidget, Group):
         QtGui.QTabWidget.__init__(self)
         Group.__init__(self)
 
-    def add_widget(self, gui_object, label=''):
+    def add_widget(self, gui_object):
         # gui_object is assumed to be a Tab instance.
+        label = gui_object.label()
         if label == '':
             label = 'Tab %s' % self.count()
         self.addTab(gui_object.widgets, label)

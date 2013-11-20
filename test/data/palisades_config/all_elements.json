@@ -14,6 +14,7 @@
                 {
                     "id": "tab 1",
                     "type": "tab",
+                    "label": "Normal widgets",
                     "elements": [
                         {
                             "id":"output_dir",
@@ -117,6 +118,7 @@
                 {
                     "id": "tab 2",
                     "type": "tab",
+                    "label": "Groups of widgets",
                     "elements": [
                         {
                             "id": "sample_multi",

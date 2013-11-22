@@ -110,3 +110,9 @@ def save_dict_to_json(dictionary, uri):
 
     json_file.writelines(json.dumps(dictionary))
     json_file.close
+
+def load_json(uri):
+    """Load a JSON object from the file at URI.  Returns a python dictionary
+    parsed from the JSON object at URI."""
+    json_file = open(uri).read()
+    return json.loads(json_file)

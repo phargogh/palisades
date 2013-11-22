@@ -126,5 +126,5 @@ def get_md5sum(data_dict):
         Returns a string hash for the dictionary."""
 
     json_string = json.dumps(data_dict, sort_keys=True)
-    data_md5sum = hashlib.md5(json.dumps(json_string)).hexdigest()
+    data_md5sum = hashlib.md5(json_string).hexdigest()
     return data_md5sum

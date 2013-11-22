@@ -219,6 +219,22 @@ class PrimitiveTest(ElementTest):
         self.element._validator.join()
         self.assertEqual(self.element.is_valid(), True)
 
+    def test_get_state(self):
+        # verify that the state returns the correct value.
+        expected_state = {
+            'value': self.element.value(),
+        }
+        self.assertEqual(expected_state, self.element.state())
+
+    def test_set_state(self):
+        # verify that setting the state performs as expected.
+        new_value = 'some new value'
+        self.assertNotEqual(self.element.value(), new_value)
+        state = {
+            'value': new_value,
+        }
+        self.element.set_state(state)
+        self.assertEqual(self.element.value(), new_value)
 
 class LabeledPrimitiveTest(PrimitiveTest):
     def setUp(self):
@@ -411,6 +427,16 @@ class FileTest(TextTest):
         # fail.
         self.assertEqual(self.element.value(), u'')
         self.assertEqual(self.element.is_valid(), False)
+
+    def test_set_state(self):
+        # verify that setting the state performs as expected.
+        new_value = '/'
+        self.assertNotEqual(self.element.value(), new_value)
+        state = {
+            'value': new_value,
+        }
+        self.element.set_state(state)
+        self.assertEqual(self.element.value(), new_value)
 
 class GroupTest(ElementTest):
     def setUp(self):
@@ -943,6 +969,16 @@ class CheckBoxTest(LabeledPrimitiveTest):
         self.assertEqual(self.element.value(), True)
         self.element._validator.join()
         self.assertEqual(self.element.is_valid(), True)
+
+    def test_set_state(self):
+        # verify that setting the state performs as expected.
+        new_value = True
+        self.assertNotEqual(self.element.value(), new_value)
+        state = {
+            'value': new_value,
+        }
+        self.element.set_state(state)
+        self.assertEqual(self.element.value(), new_value)
 
 class FormTest(unittest.TestCase):
     def setUp(self):

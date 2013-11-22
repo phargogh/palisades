@@ -285,6 +285,7 @@ class Primitive(Element):
         state_dict = {
             'value': self.value()
         }
+        return state_dict
 
     def set_state(self, state):
         """Set the state of this Element.

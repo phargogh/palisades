@@ -1072,6 +1072,58 @@ class DropdownTest(LabeledPrimitiveTest):
         element_id = self.element.get_id()
         self.assertEqual(element_id, '3d498b434dc5a1d10e483c9b1f942dcd')
 
+    def test_is_valid(self):
+        #Reimplementing here because values are specific to Dropdown.
+        #Verify that element validity works and makes sense.
+
+
+        # TEST 1:
+        # Ensure a new primitive has no value and not valid (due to default
+        # validation of "type": "disabled").
+        # TODO: should is_valid() be True here?
+        self.assertEqual(self.element.value(), 'No options specified')
+        self.assertEqual(self.element.is_valid(), True)
+
+        # TEST2:
+        # When no validation is specified in the input dictionary, the default
+        # validation is "type: disabled".  Ensure setting the value validates.
+        element_config = {
+            'options': ['a', 'b', 'c'],
+        }
+        element = elements.Dropdown(element_config)
+
+        element.set_value(1)
+        self.assertEqual(element.value(), 'b')
+        element._validator.join()
+        self.assertEqual(element.is_valid(), True)
+
+    def test_validate(self):
+        # reimplementing here because of datatype restrictions for Dropdown
+
+        # Verify that validation has not been performed.
+        # TODO: Should is_valid() be True?
+        self.assertEqual(self.element._valid, None)
+        self.assertEqual(self.element.is_valid(), True)
+
+        # Start validation by setting the value.
+        self.element.set_value(0)
+
+        # wait until validation thread finishes (using join())
+        self.element._validator.join()
+
+        # check that validation completed by checking the validity of the input.
+        self.assertEqual(self.element.is_valid(), True)
+
+    def test_set_state(self):
+        # verify that setting the state performs as expected.
+        new_value = 0
+        self.assertNotEqual(self.element.value(), new_value)
+        state = {
+            'value': new_value,
+        }
+        self.element.set_state(state)
+        self.assertEqual(self.element.value(), 'No options specified')
+
 class CheckBoxTest(LabeledPrimitiveTest):
     def setUp(self):
         self.element = elements.CheckBox({})

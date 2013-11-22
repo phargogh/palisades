@@ -384,7 +384,8 @@ class Dropdown(LabeledPrimitive):
         self._value = self.config['defaultValue']
 
     def set_value(self, new_value):
-        assert type(new_value) is IntType, 'Dropdown index must be an int'
+        assert type(new_value) is IntType, ('Dropdown index must be an '
+         'int, %s found' % new_value)
         assert new_value >= 0, 'Dropdown index must be >= 0'
         assert new_value < len(self.options), 'Dropdown index must exist'
         LabeledPrimitive.set_value(self, new_value)

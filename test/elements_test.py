@@ -164,7 +164,7 @@ class ElementTest(unittest.TestCase):
     def test_get_state(self):
         element_cls_name = self.element.__class__.__name__
         if element_cls_name == 'Element':
-            self.assertRaises(Exception, self.element.set_state, {})
+            self.assertRaises(Exception, self.element.state)
         else:
             raise AssertionError('test_get_state must be reimplemented')
 

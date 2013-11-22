@@ -280,6 +280,21 @@ class Primitive(Element):
     def is_hidden(self):
         return self._hidden
 
+    def state(self):
+        """Return a python dictionary describing the state of this element."""
+        state_dict = {
+            'value': self.value()
+        }
+
+    def set_state(self, state):
+        """Set the state of this Element.
+
+            state - a python dictionary defining the state of this element.
+                Must have the following attributes:
+                    'value' -> some pythonic value relevant to this element.
+        """
+        self.set_value(state['value'])
+
 class LabeledPrimitive(Primitive):
     defaults = {
         'label': u'',

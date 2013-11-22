@@ -4,6 +4,7 @@ import threading
 import os
 import json
 import logging
+import hashlib
 
 class SignalNotFound(Exception):
     """A custom exception for when a signal was not found."""
@@ -116,3 +117,14 @@ def load_json(uri):
     parsed from the JSON object at URI."""
     json_file = open(uri).read()
     return json.loads(json_file)
+
+def get_md5sum(data_dict):
+    """Get the MD5 hash for a dictionary of data.
+
+        data_dict - a python dictionary to get the MD5sum from.
+
+        Returns a string hash for the dictionary."""
+
+    json_string = json.dumps(data_dict, sort_keys=True)
+    data_md5sum = hashlib.md5(json.dumps(json_string)).hexdigest()
+    return data_md5sum

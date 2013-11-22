@@ -980,6 +980,7 @@ class FormTest(unittest.TestCase):
             ]
         }
         self.form = elements.Form(self.config)
+        self.maxDiff = None
 
     def test_collect_arguments(self):
         expected_args = {
@@ -990,6 +991,20 @@ class FormTest(unittest.TestCase):
         }
         returned_args = self.form.collect_arguments()
         self.assertEqual(returned_args, expected_args)
+
+        expected_args = {
+            'workspace_dir': os.path.join(TEST_DIR, 'sample_folder'),
+            'timber_shape_uri': self.timber_clean,
+            'market_disc_rate': '7',
+        }
+        # disable the attr_table_uri element and verify that its value was not
+        # in the returned dictionary.
+        # we know that it's element index 2 because that's the order in which it
+        # was created.
+        self.form.elements[2].set_enabled(False)
+        returned_args = self.form.collect_arguments()
+        self.assertEqual(returned_args, expected_args)
+
 
     def test_form_creation(self):
         form = elements.Form(self.config)

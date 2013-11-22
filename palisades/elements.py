@@ -706,10 +706,14 @@ class Form():
         # Create the args dictionary and pass it back to the Application.
         args_dict = {}
         for element in self.elements:
-            try:
-                args_dict[element.config['args_id']] = element.value()
-            except KeyError:
-                LOGGER.debug('Element %s does not have an args_id', element)
+            if element.is_enabled():
+                try:
+                    args_dict[element.config['args_id']] = element.value()
+                except KeyError:
+                    LOGGER.debug('Element %s does not have an args_id', element)
+            else:
+                LOGGER.debug('Element %s is not enabled, skipping args_id',
+                    element)
         return args_dict
 
     def submit(self):

@@ -1,10 +1,15 @@
 """This file contains the core logic of the palisade package."""
 
 import threading
+import os
+import json
+import logging
 
 class SignalNotFound(Exception):
     """A custom exception for when a signal was not found."""
     pass
+
+LOGGER = logging.getLogger('utils')
 
 class RepeatingTimer(threading.Thread):
     """A timer thread that calls a function after n seconds until the cancel()
@@ -90,3 +95,18 @@ def apply_defaults(configuration, defaults, skip_duplicates=True):
         sanitized_config.update(defaults)
 
     return sanitized_config
+
+def save_dict_to_json(dictionary, uri):
+    """Save a python dictionary to JSON at the specified URI."""
+    if os.path.exists(uri):
+        LOGGER.warn('File %s exists and will be overwritten.', uri)
+
+    try:
+        json_file = open(uri, mode='w+')
+    except IOError:
+        # IOError thrown when the folder structure of self.uri doesn't exist.
+        os.makedirs(os.path.dirname(uri))
+        json_file = open(uri, mode='w+')
+
+    json_file.writelines(json.dumps(dictionary))
+    json_file.close

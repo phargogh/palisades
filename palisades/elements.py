@@ -84,6 +84,7 @@ class Element(object):
 
         self._parent_ui = parent
         self._default_config = {}
+        self._hashable_config = []  # keys corresponding to config keys to hash
 
         # Set up the communicators
         self.config_changed = Communicator()
@@ -177,12 +178,29 @@ class Element(object):
     def state(self):
         raise Exception('Must be implemented for subclasses')
 
+    def _get_hashable_config(self):
+        """Get the hashable configuration dictionary."""
+        hashable_obj = {}
+        for config_key, value in self.config.iteritems():
+            if config_key in self._hashable_config:
+                hashable_obj[config_key] = value
+        return hashable_obj
+
     def get_id(self, id_type='md5sum'):
         # md5sum represents a hash of relevant element attributes.
         # user represents the user-defined identifier, if provided (None if not
         # provided in JSON config)
         assert id_type in ['md5sum', 'user']
-        raise Exception('Need to finish this!')
+
+        if id_type == 'md5sum':
+            return utils.get_md5sum(self._get_hashable_config())
+        else: # id type must be user-defined
+            try:
+                return self.config['id']
+            except KeyError:
+                # If the user did not specify an ID, then there is no user key.
+                # when this happens, get the md5sum ID instead.
+                return self.get_id('md5sum')
 
 class Primitive(Element):
     """Primitive represents the simplest input element."""

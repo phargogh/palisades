@@ -184,12 +184,23 @@ class Element(object):
         for config_key, value in self.config.iteritems():
             if config_key in self._hashable_config:
                 hashable_obj[config_key] = value
+
+        # we always want to add certain object information, so add that here.
+        hashable_obj['classname'] = self.__class__.__name__
+        try:
+            hashable_obj['args_id'] = self.config['args_id']
+        except KeyError:
+            # if there's no args_id for this element, skip it.
+            pass
+
+        LOGGER.debug('Hashable object: %s', hashable_obj)
         return hashable_obj
 
     def get_id(self, id_type='md5sum'):
         # md5sum represents a hash of relevant element attributes.
         # user represents the user-defined identifier, if provided (None if not
         # provided in JSON config)
+        # TODO: make this work for Groups.
         assert id_type in ['md5sum', 'user']
 
         if id_type == 'md5sum':
@@ -221,6 +232,7 @@ class Primitive(Element):
         #           warning)
         self._valid = None
         self._validation_error = None
+        self._hashable_config = ['hideable', 'validateAs']
 
         # Set up our Communicator(s)
         self.value_changed = Communicator()
@@ -336,6 +348,7 @@ class LabeledPrimitive(Primitive):
 
     def __init__(self, configuration):
         Primitive.__init__(self, configuration)
+        self._hashable_config = ['hideable', 'validateAs', 'label']
 
         self.set_default_config(self.defaults)
         self._label = self.config['label']
@@ -359,6 +372,8 @@ class Dropdown(LabeledPrimitive):
 
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
+        self._hashable_config = ['hideable', 'validateAs', 'options',
+            'label']
 
         self.set_default_config(self.defaults)
         assert self.config['returns'] in ['strings', 'ordinals'], (
@@ -471,6 +486,7 @@ class File(Text):
 class Static(Element):
     def __init__(self, configuration):
         Element.__init__(self, configuration)
+        self._hashable_config = ['returns']
         new_defaults = {
             'returns': None
         }
@@ -479,6 +495,12 @@ class Static(Element):
 
     def value(self):
         return self.config['returns']
+
+    def state(self):
+        return None
+
+    def set_state(self, state):
+        pass
 
 class Label(Static):
     def __init__(self, configuration):
@@ -490,6 +512,12 @@ class Label(Static):
 
     def label(self):
         return self.config['label']
+
+    def state(self):
+        return
+
+    def set_state(self, state):
+        pass
 
 class CheckBox(LabeledPrimitive):
     defaults = {

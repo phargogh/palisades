@@ -171,6 +171,12 @@ class Element(object):
             self._visible = new_visibility
             self.visibility_changed.emit(self._visible)
 
+    def set_state(self, state):
+        raise Exception('Must be implemented for subclasses')
+
+    def state(self):
+        raise Exception('Must be implemented for subclasses')
+
 class Primitive(Element):
     """Primitive represents the simplest input element."""
     defaults = {

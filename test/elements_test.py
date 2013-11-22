@@ -154,6 +154,20 @@ class ElementTest(unittest.TestCase):
         self.element.set_visible(not self.element.is_visible())
         self.assertEqual(function.called, True)
 
+    def test_set_state(self):
+        element_cls_name = self.element.__class__.__name__
+        if element_cls_name == 'Element':
+            self.assertRaises(Exception, self.element.set_state, {})
+        else:
+            raise AssertionError('test_set_state must be reimplemented')
+
+    def test_get_state(self):
+        element_cls_name = self.element.__class__.__name__
+        if element_cls_name == 'Element':
+            self.assertRaises(Exception, self.element.set_state, {})
+        else:
+            raise AssertionError('test_get_state must be reimplemented')
+
 class PrimitiveTest(ElementTest):
     def setUp(self):
         self.element = elements.Primitive({})

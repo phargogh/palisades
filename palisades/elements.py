@@ -177,6 +177,13 @@ class Element(object):
     def state(self):
         raise Exception('Must be implemented for subclasses')
 
+    def get_id(self, id_type='md5sum'):
+        # md5sum represents a hash of relevant element attributes.
+        # user represents the user-defined identifier, if provided (None if not
+        # provided in JSON config)
+        assert id_type in ['md5sum', 'user']
+        raise Exception('Need to finish this!')
+
 class Primitive(Element):
     """Primitive represents the simplest input element."""
     defaults = {
@@ -753,6 +760,8 @@ class Form():
 
         Returns a list of element object references."""
 
+        # TODO: if two elements have the same ID, raise an exception with a
+        # helpful error message.
         all_elements = []
 
         def append_elements(element_list):
@@ -785,6 +794,43 @@ class Form():
                 LOGGER.debug('Element %s is not enabled, skipping args_id',
                     element)
         return args_dict
+
+    def save_state(self, uri):
+        """Assemble the state of all elements and save them to a json object.
+
+            uri - a URI to the file where the dictionary should be saved as JSON
+
+            Returns nothing."""
+        state_dict = {}
+        for element in self.elements:
+            element_id = element.get_id()
+            element_state = element.state()
+            state_dict[element_id] = element_state
+
+        utils.save_dict_to_json(state_dict, uri)
+
+    def load_state(self, state_uri):
+        """Load a state from a file on disk.
+
+            state_uri - a URI to a file on disk from where the Form's state can
+                be loaded.
+
+            Returns nothing."""
+        form_state = utils.load_json(state_uri)
+        for element in self.elements:
+            element_id = element.get_id()
+
+            # get the state of the element that matches this ID.
+            try:
+                element_state = form_state[element_id]
+                element.set_state(element_state)
+            except KeyError as missing_key:
+                # When an ID key is missing, it means that the developer added
+                # an element or else changed the element enough for it to not be
+                # recognizeable to palisades.  When this happens, we can't set
+                # the state, so log a warning and proceed.
+                LOGGER.warn('Element ID %s does not have a saved state.',
+                        missing_key)
 
     def submit(self):
         # Check the validity of all inputs

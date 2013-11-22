@@ -297,8 +297,8 @@ class InformationButton(Button):
             InformationPopup, wrap them up in HTML as necessary and return a
             single string containing HTML markup.  Returns a python string."""
         width_table = '<table style="width:400px"></table>'
-        title = '<h3 style="color:black">%s</h3><br/>' % (self.title)
-        body = '<div style="color:black">%s</div>' % (self.body_text)
+        title = '<h3 style="color:black">%s</h3><br/>' % (self.title())
+        body = '<div style="color:black">%s</div>' % (self.body())
 
         return str(title + body + width_table)
 
@@ -364,7 +364,7 @@ class ValidationButton(InformationButton):
             InformationPopup, wrap them up in HTML as necessary and return a
             single string containing HTML markup.  Returns a python string."""
         width_table = '<table style="width:400px"></table>'
-        title = '<h3 style="color:black">%s</h3><br/>' % (self.title)
+        title = '<h3 style="color:black">%s</h3><br/>' % (self.title())
 
         #### CHECK ERROR STATE TO DETERMINE TEXT
         if self.error_state == 'warning':
@@ -380,7 +380,7 @@ class ValidationButton(InformationButton):
         message = '<b style="color:%s">%s %s</b><br/>' % (color, text,
             self.error_text)
 
-        body = '<div style="color:black">%s</div>' % (self.body_text)
+        body = '<div style="color:black">%s</div>' % (self.body())
 
         return str(title + message + body + width_table)
 

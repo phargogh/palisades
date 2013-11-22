@@ -12,7 +12,7 @@ TEST_DIR = os.path.dirname(__file__)
 IUI_CONFIG = os.path.join(TEST_DIR, 'data', 'iui_config')
 PALISADES_CONFIG = os.path.join(TEST_DIR, 'data', 'palisades_config')
 
-#@unittest.skip('no X')
+@unittest.skip('no X')
 class ApplicationTest(unittest.TestCase):
     def test_build_application_no_gui(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
@@ -168,6 +168,10 @@ class ElementTest(unittest.TestCase):
         else:
             raise AssertionError('test_get_state must be reimplemented')
 
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, 'dce4f711d1bc0b86ada3d5a7cfdc77f6')
+
 class PrimitiveTest(ElementTest):
     def setUp(self):
         self.element = elements.Primitive({})
@@ -250,6 +254,10 @@ class PrimitiveTest(ElementTest):
         self.element.set_state(state)
         self.assertEqual(self.element.value(), new_value)
 
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, '9cba20199e30dca32349e4964271a224')
+
 class LabeledPrimitiveTest(PrimitiveTest):
     def setUp(self):
         self.element = elements.LabeledPrimitive({})
@@ -295,6 +303,9 @@ class LabeledPrimitiveTest(PrimitiveTest):
 
     # TODO: test that when a HideableFileEntry is hidden, the value cannot be
     # retrieved.
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, '581741fc0dabd8652403bb6d8a0f8b19')
 
 class TextTest(LabeledPrimitiveTest):
     def setUp(self):
@@ -359,6 +370,10 @@ class TextTest(LabeledPrimitiveTest):
         self.assertEqual(self.element.value(), unicode(4))
         self.element._validator.join()
         self.assertEqual(self.element.is_valid(), True)
+
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, 'cbc4d60d477c32883a589588fdfd4ac9')
 
 class FileTest(TextTest):
     def setUp(self):
@@ -451,6 +466,10 @@ class FileTest(TextTest):
         }
         self.element.set_state(state)
         self.assertEqual(self.element.value(), new_value)
+
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, 'd783e40c664369d01f7aed0802f5acc0')
 
 class GroupTest(ElementTest):
     def setUp(self):
@@ -571,6 +590,10 @@ class GroupTest(ElementTest):
         self.element.set_state(new_state)
         self.assertEqual(self.element.is_enabled(), False)
 
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, '26da3d2e0de6c15d2e1931a7345c353f')
+
 class TabTest(GroupTest):
     def setUp(self):
         self.default_config = {}
@@ -591,6 +614,10 @@ class TabTest(GroupTest):
             'label': '',
         }
         self.assertEqual(self.element.config, expected_defaults)
+
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, '10d129869ca10b1861fa123074f95465')
 
 class TabGroupTest(GroupTest):
     def setUp(self):
@@ -617,6 +644,10 @@ class TabGroupTest(GroupTest):
         tabs = [{'type': 'tab'}, {'type': 'tab'}]
         self.element.create_elements(tabs)
         self.assertEqual(len(self.element.elements()), 2)
+
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, '6fa33e1076f00ab0377683511042b3b1')
 
 class ContainerTest(GroupTest):
     def setUp(self):
@@ -732,6 +763,10 @@ class ContainerTest(GroupTest):
         self.assertEqual(self.element.is_enabled(), False)
         self.assertEqual(self.element.is_collapsed(), False)
 
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, '49b77b1e66870317bc5969720f2a58b4')
+
 class MultiTest(ContainerTest):
     def setUp(self):
         self.elements = [
@@ -838,7 +873,20 @@ class MultiTest(ContainerTest):
         self.assertEqual(self.element.is_collapsed(), False)
         self.assertEqual(len(self.element.elements()), 0)
 
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, '027588c3492fd9dda1342862158ba3f6')
+
 class StaticTest(ElementTest):
+    def setUp(self):
+        self.element = elements.Static({})
+
+    def test_default_config(self):
+        expected_defaults = {
+            'returns': None
+        }
+        self.assertEqual(expected_defaults, self.element.config)
+
     def test_static_defaults(self):
         element = elements.Static({})
         self.assertEqual(element.value(), None)
@@ -853,7 +901,28 @@ class StaticTest(ElementTest):
         element = elements.Static({'returns': value})
         self.assertEqual(element.value(), value)
 
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, 'f315982c931dbca88d2782cc5d90c09d')
+
+    def test_get_state(self):
+        # nothing to test, since there's no relevant state.
+        pass
+
+    def test_set_state(self):
+        # nothing to test, since there's no relevant state.
+        pass
+
 class LabelTest(ElementTest):
+    def setUp(self):
+        self.element = elements.Label({})
+
+    def test_default_config(self):
+        expected_defaults = {
+            'label': '',
+            'returns': None,
+        }
+
     def test_static_defaults(self):
         element = elements.Label({})
         self.assertEqual(element.value(), None)
@@ -898,7 +967,33 @@ class LabelTest(ElementTest):
         # assert that thtere's the correct return value as well
         self.assertEqual(label_obj.value(), return_value)
 
-class DropdownTest(ElementTest):
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, '4874d73f92ac1b38bd1fad4b01959665')
+
+    def test_get_state(self):
+        # nothing to test, since there's no relevant state.
+        pass
+
+    def test_set_state(self):
+        # nothing to test, since there's no relevant state.
+        pass
+
+class DropdownTest(LabeledPrimitiveTest):
+    def setUp(self):
+        self.element = elements.Dropdown({})
+
+    def test_default_config(self):
+        expected_defaults = {
+            'defaultValue': 0,
+            'label': u'',
+            'options': ['No options specified'],
+            'returns': 'strings',
+            'validateAs': {'type': 'disabled'},
+            'hideable': False,
+        }
+        self.assertEqual(self.element.config, expected_defaults)
+
     def test_defaults(self):
         options = {}
         dropdown = elements.Dropdown(options)
@@ -973,6 +1068,10 @@ class DropdownTest(ElementTest):
         dropdown.set_value(1)
         self.assertEqual(dropdown.value(), 1)
 
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, '3d498b434dc5a1d10e483c9b1f942dcd')
+
 class CheckBoxTest(LabeledPrimitiveTest):
     def setUp(self):
         self.element = elements.CheckBox({})
@@ -1043,6 +1142,10 @@ class CheckBoxTest(LabeledPrimitiveTest):
         }
         self.element.set_state(state)
         self.assertEqual(self.element.value(), new_value)
+
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, 'e3ea1643e88dc2f1390de791149f79ed')
 
 class FormTest(unittest.TestCase):
     def setUp(self):

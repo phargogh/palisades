@@ -696,6 +696,22 @@ class Form():
         return all_elements
 
 
+    def collect_arguments(self):
+        """Collect arguments from all elements in this form into a single
+        dictionary in the form of {'args_id': value()}.  If an element does not
+        have an args_id attribute, it is skipped.
+
+        Returns a python dictionary."""
+
+        # Create the args dictionary and pass it back to the Application.
+        args_dict = {}
+        for element in self.elements:
+            try:
+                args_dict[element.config['args_id']] = element.value()
+            except KeyError:
+                LOGGER.debug('Element %s does not have an args_id', element)
+        return args_dict
+
     def submit(self):
         # Check the validity of all inputs
         form_data = [(e.is_valid(), e.value()) for e in self.elements]
@@ -711,13 +727,7 @@ class Form():
 
             raise InvalidData(invalid_inputs)
         else:
-            # Create the args dictionary and pass it back to the Application.
-            args_dict = {}
-            for element in self.elements:
-                try:
-                    args_dict[element.config['args_id']] = element.value()
-                except KeyError:
-                    LOGGER.debug('Element %s does not have an args_id', element)
+            args_dict = self.collect_arguments()
 
             # TODO: submit the args dict and other relevant data back to app.
             try:

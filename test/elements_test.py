@@ -972,9 +972,24 @@ class FormTest(unittest.TestCase):
                     'type': 'text',
                     'defaultValue': '7',
                     'args_id': 'market_disc_rate',
+                },
+                {
+                    'type': 'text',
+                    'defaultValue': '8'
                 }
             ]
         }
+        self.form = elements.Form(self.config)
+
+    def test_collect_arguments(self):
+        expected_args = {
+            'workspace_dir': os.path.join(TEST_DIR, 'sample_folder'),
+            'timber_shape_uri': self.timber_clean,
+            'attr_table_uri': self.timber_clean,
+            'market_disc_rate': '7',
+        }
+        returned_args = self.form.collect_arguments()
+        self.assertEqual(returned_args, expected_args)
 
     def test_form_creation(self):
         form = elements.Form(self.config)

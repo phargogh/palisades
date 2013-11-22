@@ -576,6 +576,22 @@ class Group(Element):
 
         Element.set_visible(self, new_visibility)
 
+    def state(self):
+        """Returns a python dictionary with the relevant state of the Group (not
+            including contained elements)."""
+        state_dict = {
+            'enabled': self.is_enabled(),
+        }
+        return state_dict
+
+    def set_state(self, state):
+        """Set the state of this group element.
+
+            state - a python dictionary with these attributes;
+                'enabled' -> a boolean
+        """
+        self.set_enabled(state['enabled'])
+
 class Container(Group):
     """A Container is a special kind of Group that can enable or disable all its
     sub-elements."""
@@ -621,6 +637,24 @@ class Container(Group):
     def is_collapsed(self):
         return self._collapsed
 
+    def state(self):
+        """Returns a python dictionary with the relevant state of the Group (not
+            including contained elements)."""
+        state_dict = Group.state(self)
+        state_dict['collapsed'] = self.is_collapsed()
+        return state_dict
+
+    def set_state(self, state):
+        """Set the state of this group element.
+
+            state - a python dictionary with these attributes;
+                'enabled' -> a boolean
+                'collapsed' -> a boolean
+        """
+        if self.is_collapsible():
+            self.set_collapsed(self.is_collapsed())
+        Group.set_state(self, state)
+
 class Multi(Container):
     def __init__(self, configuration, new_elements=None):
         Container.__init__(self, configuration, new_elements)
@@ -662,8 +696,22 @@ class Multi(Container):
         popped_element = self._elements.pop(index)
         self.element_removed.emit(index)
 
+    def set_value(self, value_list):
+        for value in value_list:
+            self.add_element()
+            self.elements()[-1].set_value(value)
+
     def value(self):
         return [e.value() for e in self.elements()]
+
+    def state(self):
+        state_dict = Container.state(self)
+        state_dict['value'] = self.value()
+        return state_dict
+
+    def set_state(self, state):
+        self.set_value(state['value'])
+        Container.set_state(self, state)
 
 class TabGroup(Group):
     def create_elements(self, elements):

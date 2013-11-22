@@ -557,6 +557,20 @@ class GroupTest(ElementTest):
             self.assertEqual(element.is_visible(), True)
             self.assertEqual(element.is_enabled(), True)
 
+    def test_get_state(self):
+        expected_state = {
+            'enabled': self.element.is_enabled(),
+        }
+        self.assertEqual(self.element.state(), expected_state)
+
+
+    def test_set_state(self):
+        new_state = {
+            'enabled': False,
+        }
+        self.element.set_state(new_state)
+        self.assertEqual(self.element.is_enabled(), False)
+
 class TabTest(GroupTest):
     def setUp(self):
         self.default_config = {}
@@ -701,6 +715,23 @@ class ContainerTest(GroupTest):
         self.assertRaises(elements.InteractionError, self.element.set_collapsed,
             True)
 
+    def test_get_state(self):
+        expected_state = {
+            'enabled': self.element.is_enabled(),
+            'collapsed': self.element.is_collapsed(),
+        }
+        self.assertEqual(self.element.state(), expected_state)
+
+
+    def test_set_state(self):
+        new_state = {
+            'enabled': False,
+            'collapsed': False,
+        }
+        self.element.set_state(new_state)
+        self.assertEqual(self.element.is_enabled(), False)
+        self.assertEqual(self.element.is_collapsed(), False)
+
 class MultiTest(ContainerTest):
     def setUp(self):
         self.elements = [
@@ -787,6 +818,25 @@ class MultiTest(ContainerTest):
         self.element._elements[0].set_value('aaa')
         self.element._elements[1].set_value('bbb')
         self.assertEqual(self.element.value(), ['aaa', 'bbb'])
+
+    def test_get_state(self):
+        expected_state = {
+            'enabled': self.element.is_enabled(),
+            'collapsed': self.element.is_collapsed(),
+            'value': [],
+        }
+        self.assertEqual(self.element.state(), expected_state)
+
+    def test_set_state(self):
+        new_state = {
+            'enabled': False,
+            'collapsed': False,
+            'value': [],
+        }
+        self.element.set_state(new_state)
+        self.assertEqual(self.element.is_enabled(), False)
+        self.assertEqual(self.element.is_collapsed(), False)
+        self.assertEqual(len(self.element.elements()), 0)
 
 class StaticTest(ElementTest):
     def test_static_defaults(self):

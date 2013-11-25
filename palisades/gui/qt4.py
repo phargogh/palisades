@@ -25,7 +25,9 @@ from palisades.gui import ICON_WARN
 from palisades.gui import ICON_WARN_BIG
 from palisades.gui import ICON_MINUS
 from palisades.utils import Communicator
+import palisades.i18n
 
+_ = palisades.i18n.language.ugettext
 LAYOUTS = {
     palisades.LAYOUT_VERTICAL: QtGui.QVBoxLayout,
     palisades.LAYOUT_HORIZONTAL: QtGui.QHBoxLayout,
@@ -369,13 +371,13 @@ class ValidationButton(InformationButton):
         #### CHECK ERROR STATE TO DETERMINE TEXT
         if self.error_state == 'warning':
             color = 'orange'
-            text = 'WARNING:'
+            text = _('WARNING:')
         elif self.error_state == 'error':
             color = 'red'
-            text = 'ERROR:'
+            text = _('ERROR:')
         else:
             color = 'green'
-            text = 'Validation successful'
+            text = _('Validation successful')
 
         message = '<b style="color:%s">%s %s</b><br/>' % (color, text,
             self.error_text)
@@ -479,7 +481,7 @@ class TextField(QtGui.QLineEdit, QtWidget):
         This function allows me to make changes to the context menu when one
         is requested before I show the menu."""
         menu = self.createStandardContextMenu()
-        refresh_action = QtGui.QAction('Refresh', menu)
+        refresh_action = QtGui.QAction(_('Refresh'), menu)
         refresh_action.setIcon(QtGui.QIcon(ICON_REFRESH))
         refresh_action.triggered.connect(self._value_changed)
         menu.addAction(refresh_action)
@@ -522,14 +524,14 @@ class FileButton(Button):
 
 class FileDialog(QtGui.QFileDialog):
     filters = {
-        "all": ["All files (* *.*)"],
-        "EXISTS": ["All files (* *.*)"],
-        "CSV": ["Comma separated value file (*.csv *.CSV)"],
-        "GDAL": ["[GDAL] Arc/Info Binary Grid (hdr.adf HDR.ADF hdr.ADF)",
-                 "[GDAL] Arc/Info ASCII Grid (*.asc *.ASC)",
-                 "[GDAL] GeoTiff (*.tif *.tiff *.TIF *.TIFF)"],
-        "OGR": ["[OGR] ESRI Shapefiles (*.shp *.SHP)"],
-        "DBF": ["[DBF] dBase legacy file (*dbf *.DBF)"],
+        "all": [_("All files (* *.*)")],
+        "EXISTS": [_("All files (* *.*)")],
+        "CSV": [_("Comma separated value file (*.csv *.CSV)")],
+        "GDAL": [_("[GDAL] Arc/Info Binary Grid (hdr.adf HDR.ADF hdr.ADF)"),
+                 _("[GDAL] Arc/Info ASCII Grid (*.asc *.ASC)"),
+                 _("[GDAL] GeoTiff (*.tif *.tiff *.TIF *.TIFF)")],
+        "OGR": [_("[OGR] ESRI Shapefiles (*.shp *.SHP)")],
+        "DBF": [_("[DBF] dBase legacy file (*dbf *.DBF)")],
     }
 
     def __init__(self):
@@ -538,7 +540,7 @@ class FileDialog(QtGui.QFileDialog):
 
     def get_file(self, title, default_folder='~'):
         default_folder = os.path.expanduser(default_folder)
-        dialog_title = 'Select ' + title
+        dialog_title = _('Select ') + title
 
         filename, filter = self.getOpenFileNameAndFilter(
             self, dialog_title, default_folder, initialFilter=self.last_filter)
@@ -573,7 +575,7 @@ class InfoDialog(QtGui.QDialog):
         QtGui.QDialog.__init__(self)
         self.messages = []
         self.resize(400, 200)
-        self.setWindowTitle('Errors exist!')
+        self.setWindowTitle(_('Errors exist!'))
         self.setLayout(QtGui.QVBoxLayout())
         self.icon = QtGui.QLabel()
         self.icon.setStyleSheet('QLabel { padding: 10px }')
@@ -581,11 +583,11 @@ class InfoDialog(QtGui.QDialog):
         self.icon.setSizePolicy(QtGui.QSizePolicy.Fixed,
             QtGui.QSizePolicy.Fixed)
         self.title = QtGui.QLabel()
-        self.set_title('Whoops!')
+        self.set_title(_('Whoops!'))
         self.title.setStyleSheet('QLabel { font: bold 18px }')
         self.body = QtGui.QLabel()
         self.body.setWordWrap(True)
-        self.ok_button = QtGui.QPushButton('OK')
+        self.ok_button = QtGui.QPushButton(_('OK'))
         self.ok_button.clicked.connect(self.accept)
 
         error_widget = QtGui.QWidget()
@@ -625,27 +627,27 @@ class InfoDialog(QtGui.QDialog):
 class WarningDialog(InfoDialog):
     def __init__(self):
         InfoDialog.__init__(self)
-        self.set_title('Warning...')
+        self.set_title(_('Warning...'))
         self.set_icon(ICON_WARN_BIG)
-        self.body.setText('Some inputs cannot be validated and may cause ' +
-           'this program to fail.  Continue anyways?')
-        self.no_button = QtGui.QPushButton('Back')
+        self.body.setText(_('Some inputs cannot be validated and may cause ' +
+           'this program to fail.  Continue anyways?'))
+        self.no_button = QtGui.QPushButton(_('Back'))
         self.no_button.clicked.connect(self.reject)
         self.button_box.addButton(self.no_button, QtGui.QDialogButtonBox.RejectRole)
 
 class ConfirmQuitDialog(WarningDialog):
     def __init__(self):
         WarningDialog.__init__(self)
-        self.setWindowTitle('Are you sure you want to quit?')
-        self.set_title('Really quit?')
+        self.setWindowTitle(_('Are you sure you want to quit?'))
+        self.set_title(_('Really quit?'))
         self.set_icon(ICON_BULB_BIG)
-        self.body.setText('You will lose any changes to your parameter fields.')
-        self.ok_button.setText('Quit')
+        self.body.setText(_('You will lose any changes to your parameter fields.'))
+        self.ok_button.setText(_('Quit'))
 
 class ErrorDialog(InfoDialog):
     def __init__(self):
         InfoDialog.__init__(self)
-        self.set_title('Whoops!')
+        self.set_title(_('Whoops!'))
 
     def showEvent(self, event=None):
         label_string = '<ul>'
@@ -655,12 +657,12 @@ class ErrorDialog(InfoDialog):
 
         num_messages = len(self.messages)
         if num_messages == 1:
-            num_error_string = 'is 1 error'
+            num_error_string = _('is 1 error')
         else:
-            num_error_string = 'are %s errors' % num_messages
+            num_error_string = _('are %s errors') % num_messages
 
-        self.body.setText(str("There %s that must be resolved" +
-            " before this tool can be run:%s") % (num_error_string, label_string))
+        self.body.setText(_(str("There %s that must be resolved" +
+            " before this tool can be run:%s")) % (num_error_string, label_string))
         self.body.setMinimumSize(self.body.sizeHint())
         InfoDialog.showEvent(self)
 
@@ -673,7 +675,7 @@ class TabGroup(QtGui.QTabWidget, Group):
         # gui_object is assumed to be a Tab instance.
         label = gui_object.label()
         if label == '':
-            label = 'Tab %s' % self.count()
+            label = _('Tab %s') % self.count()
         self.addTab(gui_object.widgets, label)
 
     def widgets(self):
@@ -707,13 +709,13 @@ class FormWindow(QtWidget, QtGui.QWidget):
             self.scroll_area.verticalScrollBar().maximum())
 
         # Create the buttonBox and add it to the layout.
-        self.run_button = QtGui.QPushButton(' Run')
+        self.run_button = QtGui.QPushButton(_(' Run'))
         self.run_button.setIcon(QtGui.QIcon(os.path.join(ICON_ENTER)))
 
-        self.quit_button = QtGui.QPushButton(' Quit')
+        self.quit_button = QtGui.QPushButton(_(' Quit'))
         self.quit_button.setIcon(QtGui.QIcon(os.path.join(ICON_CLOSE)))
 
-        self.reset_button = QtGui.QPushButton(' Reset')
+        self.reset_button = QtGui.QPushButton(_(' Reset'))
         self.reset_button.setIcon(QtGui.QIcon(os.path.join(ICON_UNDO)))
 
         #create the buttonBox (a container for buttons)

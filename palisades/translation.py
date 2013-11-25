@@ -88,8 +88,12 @@ def translate_config(config, lang_code, extra_keys=[]):
 
         returns a python dictionary."""
 
+    # Copying the input configuration prevents side effects and also allows us
+    # to retain all the configuration options, whatever they may be.
     translated_config = config.copy()
 
+    # these are the known keys to be checked for translation.  User-defined keys
+    # are searched in addition to these predefined keys.
     translateable_keys = ['label', 'modelName', 'helpText'] + extra_keys
 
     for known_key in translateable_keys:
@@ -98,6 +102,11 @@ def translate_config(config, lang_code, extra_keys=[]):
         # if not a dict, return the original string.
         try:
             config_value = config[known_key]
+
+            # If the value is a dictionary, it's expected to be a translation
+            # dictionary mapping language code to the translated string.
+            # if it's not a language dictionary, we just leave the value alone,
+            # whatever it may be.
             if type(config_value) is DictType:
                 translated_string = config_value[lang_code]
             else:
@@ -107,6 +116,8 @@ def translate_config(config, lang_code, extra_keys=[]):
             # the translateable key was not found, so we can just pass.
             pass
 
+    # If this element is a Group, we want to recurse through all contained
+    # elements, translating as we go.
     if 'elements' in config:
         translated_elements_list = []
         for element_config in config['elements']:

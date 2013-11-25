@@ -12,20 +12,20 @@ TEST_DIR = os.path.dirname(__file__)
 IUI_CONFIG = os.path.join(TEST_DIR, 'data', 'iui_config')
 PALISADES_CONFIG = os.path.join(TEST_DIR, 'data', 'palisades_config')
 
-@unittest.skip('no X')
+#@unittest.skip('no X')
 class ApplicationTest(unittest.TestCase):
     def test_build_application_no_gui(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
             'timber_clean.json'))
         self.assertRaises(elements.InvalidData, ui._window.submit)
 
-#    def test_build_application_qt_gui(self):
-#        ui = elements.Application(os.path.join(PALISADES_CONFIG,
-#            'timber_clean.json'))
-#        gui = palisades.gui.build(ui._window)
-#        gui.execute()
+    def test_build_application_qt_gui_timber(self):
+        ui = elements.Application(os.path.join(PALISADES_CONFIG,
+            'timber_clean.json'), 'de')
+        gui = palisades.gui.build(ui._window)
+        gui.execute()
 
-#    @unittest.skip('blocking')
+    @unittest.skip('blocking')
     def test_build_application_qt_gui(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
             'all_elements.json'))

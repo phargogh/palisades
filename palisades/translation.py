@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 import json
 from types import DictType
 from types import ListType

@@ -6,9 +6,6 @@ import palisades.utils
 
 # assume per-attribute translation
 def translate_config(config, lang_code, extra_keys=[]):
-    assert type(config) is DictType
-    assert type(extra_keys) is ListType
-
     translated_config = config.copy()
 
     translateable_keys = ['label', 'modelName', 'helpText'] + extra_keys
@@ -28,9 +25,16 @@ def translate_config(config, lang_code, extra_keys=[]):
             # the translateable key was not found, so we can just pass.
             pass
 
+    if 'elements' in config:
+        translated_elements_list = []
+        for element_config in config['elements']:
+            translated_element_config = translate_config(element_config,
+                lang_code, extra_keys)
+            translated_elements_list.append(translated_element_config)
+
+        translated_config['elements'] = translated_elements_list
+
     return translated_config
-
-
 
 
 

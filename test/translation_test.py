@@ -62,3 +62,49 @@ class TrivialTranslationTest(unittest.TestCase):
         }
         self.assertEqual(palisades.translation.translate_config(config, 'es',
             ['some_attribute']), expected_spanish)
+
+
+    def test_contained_elements(self):
+        config = {
+            'id': 'sample_element',
+            'label': {
+                'en': 'hello world!',
+                'de': 'Hallo, Weld!',
+                'es': u'¡Hola, mundo!',
+            },
+            'elements': [
+                {
+                    'id': 'element_1',
+                    'label': {
+                        'en': 'element one',
+                        'de': 'das Element eins',
+                        'es': 'elemento uno',
+                    }
+                },
+                {
+                    'id': 'element_2',
+                    'label': {
+                        'en': 'element two',
+                        'de': 'das Element zwei',
+                        'es': 'elemento dos',
+                    }
+                }
+            ]
+        }
+
+        expected_german = {
+            'id': 'sample_element',
+            'label': 'Hallo, Weld!',
+            'elements': [
+                {
+                    'id': 'element_1',
+                    'label': 'das Element eins',
+                },
+                {
+                    'id': 'element_2',
+                    'label': 'das Element zwei',
+                }
+            ]
+        }
+        self.assertEqual(palisades.translation.translate_config(config, 'de'),
+            expected_german)

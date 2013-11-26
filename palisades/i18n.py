@@ -12,7 +12,7 @@ APP_NAME = "Palisades"
 # This is ok for maemo. Not sure in a regular desktop:
 # assume we're executing from the palisades source root.
 APP_DIR = os.getcwd()
-LOCALE_DIR = os.path.join(APP_DIR, 'i18n') # .mo files will then be located
+LOCALE_DIR = os.path.join(APP_DIR, 'locale') # .mo files will then be located
                                            #in APP_Dir/i18n/LANGUAGECODE/LC_MESSAGES/
 
 # Now we need to choose the language. We will provide a list, and gettext

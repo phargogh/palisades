@@ -10,7 +10,8 @@ import gettext
 APP_NAME = "Palisades"
 
 # This is ok for maemo. Not sure in a regular desktop:
-APP_DIR = os.path.join(sys.prefix, 'share')
+# assume we're executing from the palisades source root.
+APP_DIR = '/home/jadoug06/workspace/invest-natcap.user-interface'
 LOCALE_DIR = os.path.join(APP_DIR, 'i18n') # .mo files will then be located
                                            #in APP_Dir/i18n/LANGUAGECODE/LC_MESSAGES/
 
@@ -20,7 +21,7 @@ LOCALE_DIR = os.path.join(APP_DIR, 'i18n') # .mo files will then be located
 #  In maemo it is in the LANG environment variable
 #  (on desktop is usually LANGUAGES)
 DEFAULT_LANGUAGES = os.environ.get('LANG', '').split(':')
-DEFAULT_LANGUAGES += ['en_US']
+DEFAULT_LANGUAGES += ['en_US', 'de']
 
 lc, encoding = locale.getdefaultlocale()
 if lc:
@@ -33,11 +34,11 @@ mo_location = LOCALE_DIR
 
 # Lets tell those details to gettext
 #  (nothing to change here for you)
-gettext.install(True, localedir=None, unicode=1)
+gettext.install(APP_NAME, localedir=None, unicode=1)
 
 gettext.find(APP_NAME, mo_location)
 
-gettext.textdomain (APP_NAME)
+gettext.textdomain(APP_NAME)
 
 gettext.bind_textdomain_codeset(APP_NAME, "UTF-8")
 

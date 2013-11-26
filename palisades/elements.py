@@ -10,7 +10,7 @@ from palisades import validation
 from palisades import execution
 from palisades import translation
 import palisades.gui
-
+import palisades.i18n
 
 LOGGER = logging.getLogger('elements')
 
@@ -52,6 +52,7 @@ def get_elements_list(group_pointer):
 class Application(object):
     def __init__(self, config_uri, lang_code='en'):
         # if GUI is None, have to visual display.
+        # install the specified internal language.
         configuration = translation.translate_json(config_uri, lang_code)
         self._window = Form(configuration)
 

@@ -1,0 +1,132 @@
+# Spanish translations for jadoug package.
+# Copyright (C) 2013 THE jadoug'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the jadoug package.
+# James Douglass <jdouglass@stanford.edu>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: jadoug 06\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-11-25 15:31-0800\n"
+"PO-Revision-Date: 2013-11-26 12:45-0800\n"
+"Last-Translator: James Douglass <jdouglass@stanford.edu>\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: palisades/gui/qt4.py:374
+msgid "WARNING:"
+msgstr ""
+
+#: palisades/gui/qt4.py:377
+msgid "ERROR:"
+msgstr ""
+
+#: palisades/gui/qt4.py:380
+msgid "Validation successful"
+msgstr ""
+
+#: palisades/gui/qt4.py:484
+msgid "Refresh"
+msgstr ""
+
+#: palisades/gui/qt4.py:527 palisades/gui/qt4.py:528
+msgid "All files (* *.*)"
+msgstr ""
+
+#: palisades/gui/qt4.py:529
+msgid "Comma separated value file (*.csv *.CSV)"
+msgstr ""
+
+#: palisades/gui/qt4.py:530
+msgid "[GDAL] Arc/Info Binary Grid (hdr.adf HDR.ADF hdr.ADF)"
+msgstr ""
+
+#: palisades/gui/qt4.py:531
+msgid "[GDAL] Arc/Info ASCII Grid (*.asc *.ASC)"
+msgstr ""
+
+#: palisades/gui/qt4.py:532
+msgid "[GDAL] GeoTiff (*.tif *.tiff *.TIF *.TIFF)"
+msgstr ""
+
+#: palisades/gui/qt4.py:533
+msgid "[OGR] ESRI Shapefiles (*.shp *.SHP)"
+msgstr ""
+
+#: palisades/gui/qt4.py:534
+msgid "[DBF] dBase legacy file (*dbf *.DBF)"
+msgstr ""
+
+#: palisades/gui/qt4.py:543
+msgid "Select "
+msgstr ""
+
+#: palisades/gui/qt4.py:578
+msgid "Errors exist!"
+msgstr ""
+
+#: palisades/gui/qt4.py:586 palisades/gui/qt4.py:650
+msgid "Whoops!"
+msgstr ""
+
+#: palisades/gui/qt4.py:590
+msgid "OK"
+msgstr ""
+
+#: palisades/gui/qt4.py:630
+msgid "Warning..."
+msgstr ""
+
+#: palisades/gui/qt4.py:632
+msgid "Some inputs cannot be validated and may cause "
+msgstr ""
+
+#: palisades/gui/qt4.py:634
+msgid "Back"
+msgstr ""
+
+#: palisades/gui/qt4.py:641
+msgid "Are you sure you want to quit?"
+msgstr ""
+
+#: palisades/gui/qt4.py:642
+msgid "Really quit?"
+msgstr ""
+
+#: palisades/gui/qt4.py:644
+msgid "You will lose any changes to your parameter fields."
+msgstr ""
+
+#: palisades/gui/qt4.py:645
+msgid "Quit"
+msgstr ""
+
+#: palisades/gui/qt4.py:660
+msgid "is 1 error"
+msgstr ""
+
+#: palisades/gui/qt4.py:662
+#, python-format
+msgid "are %s errors"
+msgstr ""
+
+#: palisades/gui/qt4.py:678
+#, python-format
+msgid "Tab %s"
+msgstr ""
+
+#: palisades/gui/qt4.py:712
+msgid " Run"
+msgstr ""
+
+#: palisades/gui/qt4.py:715
+msgid " Quit"
+msgstr ""
+
+#: palisades/gui/qt4.py:718
+msgid " Reset"
+msgstr ""

@@ -11,7 +11,7 @@ APP_NAME = "Palisades"
 
 # This is ok for maemo. Not sure in a regular desktop:
 # assume we're executing from the palisades source root.
-APP_DIR = '/home/jadoug06/workspace/invest-natcap.user-interface'
+APP_DIR = os.getcwd()
 LOCALE_DIR = os.path.join(APP_DIR, 'i18n') # .mo files will then be located
                                            #in APP_Dir/i18n/LANGUAGECODE/LC_MESSAGES/
 
@@ -42,5 +42,48 @@ gettext.textdomain(APP_NAME)
 
 gettext.bind_textdomain_codeset(APP_NAME, "UTF-8")
 
-language = gettext.translation(APP_NAME, mo_location,
-    languages=languages, fallback=True)
+print('LANGUAGES: ', languages)
+#language = gettext.translation(APP_NAME, mo_location,
+#    languages=languages, fallback=True)
+
+get_trans = lambda code: gettext.translation(APP_NAME, mo_location,
+        languages=[code], fallback=True)
+
+class Language(object):
+    def __init__(self):
+        self.current_lang = 'en'
+
+        self.available_langs = {
+            'en': get_trans('en'),
+            'es': get_trans('es'),
+            'de': get_trans('de'),
+        }
+
+    def __call__(self):
+        print 'current language is %s' % self.current_lang
+        current_language = self.available_langs[self.current_lang]
+        current_language.install()
+        return current_language
+
+    def _lang(self):
+        return self.available_langs[self.current_lang]
+
+    def set(self, lang_code):
+        self.current_lang = lang_code
+        print 'setting current lang to %s' % lang_code
+#        self.available_langs[self.current_lang].install()
+
+    def ugettext(self, message):
+        self._lang().install()
+        return self._lang().ugettext(message)
+
+    def info(self):
+        return self._lang().info()
+
+language = Language()
+
+def current_lang():
+    """Return the string language code of the currently-active language."""
+    return language.info()['language']
+
+

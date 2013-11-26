@@ -53,6 +53,7 @@ class Application(object):
     def __init__(self, config_uri, lang_code='en'):
         # if GUI is None, have to visual display.
         # install the specified internal language.
+        palisades.i18n.language.set(lang_code)
         configuration = translation.translate_json(config_uri, lang_code)
         self._window = Form(configuration)
 

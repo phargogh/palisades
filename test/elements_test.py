@@ -5,7 +5,7 @@ import time
 import mock
 
 import palisades
-from palisades import elements
+from palisades import elements as elements
 from palisades import validation
 
 TEST_DIR = os.path.dirname(__file__)
@@ -20,6 +20,12 @@ class ApplicationTest(unittest.TestCase):
         self.assertRaises(elements.InvalidData, ui._window.submit)
 
     def test_build_application_qt_gui_timber(self):
+        ui = elements.Application(os.path.join(PALISADES_CONFIG,
+            'timber_clean.json'))
+        gui = palisades.gui.build(ui._window)
+        gui.execute()
+
+    def test_build_application_qt_gui_timber_de(self):
         ui = elements.Application(os.path.join(PALISADES_CONFIG,
             'timber_clean.json'), 'de')
         gui = palisades.gui.build(ui._window)

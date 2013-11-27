@@ -8,7 +8,7 @@ from palisades import utils
 from palisades.utils import Communicator
 from palisades import validation
 from palisades import execution
-from palisades import translation
+from palisades.i18n import translation
 import palisades.gui
 import palisades.i18n
 

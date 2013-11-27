@@ -9,6 +9,8 @@ import palisades.i18n.msgfmt
 
 class build_translations(cmd.Command):
     description = 'Compile .po files to .mo files'
+    user_options = []
+
     def initialize_options(self):
         pass
 
@@ -27,15 +29,10 @@ class build_translations(cmd.Command):
                     dest = os.path.join(dest_path, 'palisades.mo')
                     if not os.path.exists(dest_path):
                         os.makedirs(dest_path)
-                    if not os.path.exists(dest):
-                        print 'Compiling %s' % src
-                        palisades.i18n.msgfmt.make(src, dest)
-                    else:
-                        src_mtime = os.stat(src)[8]
-                        dest_mtime = os.stat(dest)[8]
-                        if src_mtime > dest_mtime:
-                            print 'Compiling %s' % src
-                            palisades.i18n.msgfmt.make(src, dest)
+
+                    # I always want to recompile.
+                    print 'Compiling %s to %s' % (src, dest)
+                    palisades.i18n.msgfmt.make(src, dest)
 
 class build(_build):
     sub_commands = _build.sub_commands + [('build_trans', None)]

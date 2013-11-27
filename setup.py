@@ -1,11 +1,15 @@
+import distutils.sysconfig
 from distutils.core import setup
 from distutils import cmd
 from distutils.command.install_data import install_data as _install_data
 from distutils.command.build import build as _build
 import os
+import glob
 
 import palisades
 import palisades.i18n.msgfmt
+
+SITE_PACKAGES = distutils.sysconfig.get_python_lib()
 
 class build_translations(cmd.Command):
     description = 'Compile .po files to .mo files'
@@ -42,18 +46,22 @@ class build(_build):
 class install_data(_install_data):
     def run(self):
         for lang in os.listdir('build/locale'):
-            lang_dir = os.path.join('lib', 'site-packages', 'palisades', 'i18n',
+            lang_dir = os.path.join(SITE_PACKAGES, 'palisades', 'i18n',
                 'locale', lang, 'LC_MESSAGES')
             lang_file = os.path.join('build', 'locale', lang, 'LC_MESSAGES',
                 'palisades.mo')
             self.data_files.append((lang_dir, [lang_file]))
         _install_data.run(self)
 
+icon_dir = os.path.join(SITE_PACKAGES, 'palisades', 'gui', 'icons')
+data_files = [(icon_dir, glob.glob('palisades/gui/icons/*.png'))]
+
 setup(
     name      = 'palisades',
     version   = palisades.__version__,
     packages  = ['palisades', 'palisades.gui', 'palisades.i18n'],
     license   = 'Apache',
+    data_files = data_files,
     cmdclass  = {
         'build': build,
         'build_trans': build_translations,

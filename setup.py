@@ -22,7 +22,7 @@ class build_translations(cmd.Command):
         pass
 
     def run(self):
-        po_dir = os.path.join(os.path.dirname(os.curdir), 'i18n')
+        po_dir = os.path.join(os.path.dirname(os.curdir), 'po')
         for path, names, filenames in os.walk(po_dir):
             for filepath in filenames:
                 if filepath.endswith('.po'):

@@ -7,12 +7,11 @@ import gettext
 # Change this variable to your app name!
 #  The translation files will be under
 #  @LOCALE_DIR@/@LANGUAGE@/LC_MESSAGES/@APP_NAME@.mo
-APP_NAME = "Palisades"
+APP_NAME = "palisades"
 
 # This is ok for maemo. Not sure in a regular desktop:
 # assume we're executing from the palisades source root.
-APP_DIR = os.getcwd()
-LOCALE_DIR = os.path.join(APP_DIR, 'locale') # .mo files will then be located
+LOCALE_DIR = os.path.join(os.path.dirname(__file__), 'locale') # .mo files will then be located
                                            #in APP_Dir/i18n/LANGUAGECODE/LC_MESSAGES/
 
 # Now we need to choose the language. We will provide a list, and gettext

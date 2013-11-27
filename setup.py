@@ -55,7 +55,7 @@ class install_data(_install_data):
 setup(
     name      = 'palisades',
     version   = palisades.__version__,
-    packages  = ['palisades', 'palisades.gui'],
+    packages  = ['palisades', 'palisades.gui', 'palisades.i18n'],
     license   = 'Apache',
     cmdclass  = {
         'build': build,

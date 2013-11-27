@@ -8,7 +8,7 @@ import platform
 
 import palisades
 
-TEST_DATA = os.path.join('test', 'data')
+TEST_DATA = os.path.join(os.path.dirname(__file__), 'data')
 VALIDATION_DATA = os.path.join(TEST_DATA, 'validation')
 
 class CheckerTester(unittest.TestCase):

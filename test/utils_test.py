@@ -76,7 +76,38 @@ class CoreTest(unittest.TestCase):
 
     def test_convert_config(self):
         # take an IUI configuration object and convert it to palisades.
-        pass
+        sample_config = {
+            'modelName': 'some model',
+            'label': 'some label',
+            'helpText': 'some help text',
+            'elements': [
+                {
+                    'type': 'list',
+                    'elements': [
+                        {
+                            'type': 'label',
+                            'label': 'label 1',
+                            'helpText': 'helptext 1'
+                        },
+                    ]
+                }
+            ]
+        }
+
+        expected_config = {
+            'modelName': 'some model',
+            'label': {'en': 'some label'},
+            'helpText': {'en': 'some help text'},
+            'elements': [
+                {
+                    'type': 'label',
+                    'label': {'en': 'label 1'},
+                    'helpText': {'en': 'helptext 1'}
+                },
+            ]
+        }
+
+        self.assertEqual(utils.convert_iui(sample_config), expected_config)
 
     def test_add_translations_defaults(self):
         sample_config = {

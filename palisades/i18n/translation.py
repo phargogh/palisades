@@ -7,6 +7,8 @@ from types import ListType
 
 import palisades.utils
 
+TRANS_KEYS = ['label', 'modelName', 'helpText']
+
 # assume per-attribute translation
 def translate_config(config, lang_code, extra_keys=[]):
     """Translate a dictionary containing element configuration options.  Any
@@ -97,7 +99,7 @@ def translate_config(config, lang_code, extra_keys=[]):
 
     # these are the known keys to be checked for translation.  User-defined keys
     # are searched in addition to these predefined keys.
-    translateable_keys = ['label', 'modelName', 'helpText'] + extra_keys
+    translateable_keys = TRANS_KEYS + extra_keys
 
     for known_key in translateable_keys:
         # get the old value.  If it's a dictionary, assume that it's a

@@ -6,6 +6,8 @@ import json
 import logging
 import hashlib
 
+import palisades.i18n.translation
+
 class SignalNotFound(Exception):
     """A custom exception for when a signal was not found."""
     pass
@@ -128,3 +130,48 @@ def get_md5sum(data_dict):
     json_string = json.dumps(data_dict, sort_keys=True)
     data_md5sum = hashlib.md5(json_string).hexdigest()
     return data_md5sum
+
+def add_translations_to_iui(config, lang_codes=['en'], current_lang='en'):
+    # add translations to an IUI application
+    new_config = config.copy()
+    for known_key in palisades.i18n.translation.TRANS_KEYS:
+        try:
+            current_value = new_config[known_key]
+
+            translations = dict((lang, None) for lang in lang_codes)
+            translations[current_lang] = current_value
+
+            new_config[known_key] = translations
+        except KeyError:
+            # the translateable key was not found, so we skip it.
+            pass
+    return new_config
+
+def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
+    # convert an iui configuration dictionary into a palisades-compatible
+    # configuration dictionary.
+    # iui_config is a dictoinary.
+    # lang_codes (TODO LATER) - a list of string language codes to insert.
+    # current_lang - a language string defining what language the config is
+    # currently written in.
+    # this is to be run before the language selection phase of configuration
+    # reading.
+    # returns a python dictionary that has been converted to palisades format.
+
+    assert current_lang in lang_codes
+
+    def recurse_through_element(element):
+        new_config = element.copy()
+        new_config = add_translations_to_iui(new_config, lang_codes,
+            current_lang)
+
+        if 'elements' in new_config:
+            translated_elements_list = []
+            for contained_config in new_config['elements']:
+                translated_config = recurse_through_element(contained_config)
+                translated_elements_list.append(translated_config)
+            new_config['elements'] = translated_elements_list
+        return new_config
+
+    return recurse_through_element(iui_config)
+

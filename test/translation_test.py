@@ -2,7 +2,7 @@
 
 import unittest
 
-import palisades.translation
+import palisades.i18n.translation
 
 class TrivialTranslationTest(unittest.TestCase):
     def setUp(self):
@@ -22,14 +22,14 @@ class TrivialTranslationTest(unittest.TestCase):
             'id': 'sample_element',
             'label': 'Hallo, Weld!',
         }
-        self.assertEqual(palisades.translation.translate_config(config, 'de'),
+        self.assertEqual(palisades.i18n.translation.translate_config(config, 'de'),
             expected_german)
 
         expected_spanish = {
             'id': 'sample_element',
             'label': u'¡Hola, mundo!',
         }
-        self.assertEqual(palisades.translation.translate_config(config, 'es'),
+        self.assertEqual(palisades.i18n.translation.translate_config(config, 'es'),
             expected_spanish)
 
     def test_extra_keys(self):
@@ -52,7 +52,7 @@ class TrivialTranslationTest(unittest.TestCase):
             'label': 'Hallo, Weld!',
             'some_attribute': 'noch einer Attribut',
         }
-        self.assertEqual(palisades.translation.translate_config(config, 'de',
+        self.assertEqual(palisades.i18n.translation.translate_config(config, 'de',
             ['some_attribute']), expected_german)
 
         expected_spanish = {
@@ -60,7 +60,7 @@ class TrivialTranslationTest(unittest.TestCase):
             'label': u'¡Hola, mundo!',
             'some_attribute': 'otro atributo',
         }
-        self.assertEqual(palisades.translation.translate_config(config, 'es',
+        self.assertEqual(palisades.i18n.translation.translate_config(config, 'es',
             ['some_attribute']), expected_spanish)
 
 
@@ -106,7 +106,7 @@ class TrivialTranslationTest(unittest.TestCase):
                 }
             ]
         }
-        self.assertEqual(palisades.translation.translate_config(config, 'de'),
+        self.assertEqual(palisades.i18n.translation.translate_config(config, 'de'),
             expected_german)
 
     def test_nested_contained_elements(self):
@@ -167,5 +167,5 @@ class TrivialTranslationTest(unittest.TestCase):
                 }
             ]
         }
-        self.assertEqual(palisades.translation.translate_config(config, 'de'),
+        self.assertEqual(palisades.i18n.translation.translate_config(config, 'de'),
             expected_german)

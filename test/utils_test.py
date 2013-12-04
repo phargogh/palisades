@@ -95,7 +95,7 @@ class CoreTest(unittest.TestCase):
         }
 
         expected_config = {
-            'modelName': 'some model',
+            'modelName': {'en': 'some model'},
             'label': {'en': 'some label'},
             'helpText': {'en': 'some help text'},
             'elements': [
@@ -106,6 +106,8 @@ class CoreTest(unittest.TestCase):
                 },
             ]
         }
+
+        converted_config = utils.convert_iui(sample_config)
 
         self.assertEqual(utils.convert_iui(sample_config), expected_config)
 

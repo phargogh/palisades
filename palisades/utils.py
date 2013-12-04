@@ -168,8 +168,21 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
         if 'elements' in new_config:
             translated_elements_list = []
             for contained_config in new_config['elements']:
-                translated_config = recurse_through_element(contained_config)
-                translated_elements_list.append(translated_config)
+                try:
+                    element_type = contained_config['type']
+                except KeyError:
+                    # If there's no type defined, then we just translate like
+                    # normal.
+                    element_type = None
+
+                if element_type is 'list':
+                    for list_element in contained_config['elements']:
+                        translated_config = recurse_through_element(list_element)
+                        translated_elements_list.append(translated_config)
+                else:
+                    translated_config = recurse_through_element(contained_config)
+                    translated_elements_list.append(translated_config)
+
             new_config['elements'] = translated_elements_list
         return new_config
 

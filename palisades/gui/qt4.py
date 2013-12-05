@@ -494,6 +494,7 @@ class TextField(QtGui.QLineEdit, QtWidget):
         menu.exec_(event.globalPos())
 
 class CheckBox(QtGui.QCheckBox, QtWidget):
+    error_changed = QtCore.pyqtSignal(bool)
     def __init__(self, label_text):
         QtGui.QCheckBox.__init__(self)
         QtWidget.__init__(self)
@@ -502,6 +503,7 @@ class CheckBox(QtGui.QCheckBox, QtWidget):
 
         self.checkbox_toggled = Communicator()
         self.toggled.connect(self._checkbox_toggled)
+        self.error_changed.connect(self._set_error)
 
     def _checkbox_toggled(self, event=None):
         self.checkbox_toggled.emit(self.isChecked())
@@ -517,6 +519,25 @@ class CheckBox(QtGui.QCheckBox, QtWidget):
     def showEvent(self, event):
         # when this checkbox is shown, emit the current checkstate.
         self._checkbox_toggled()
+
+    def set_error(self, is_error):
+        assert type(is_error) is BooleanType, ('is_error must be boolean, '
+            '%s found instead' % type(is_error))
+        # For some reason, usin this sometimes prints an error message saying 
+        # "QPixmap: It is not safe to use pixmaps outside the GUI thread"
+        # I'm leaving it alone for now, since the application seems to work ok
+        # without it.
+        self.error_changed.emit(is_error)
+
+    def _set_error(self, is_error):
+        # This doesn't work in Qt.  Not sure why.  See this post for someone
+        # else with the same idea for styling:
+        # http://stackoverflow.com/a/11155163/299084.  I tried the QPalette
+        # approach, but that didn't work for me either.
+        if is_error:
+            self.setStyleSheet("QWidget { color: red }")
+        else:
+            self.setStyleSheet("QWidget {}")
 
 class FileButton(Button):
     _icon = ICON_FOLDER

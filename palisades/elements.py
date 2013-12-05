@@ -882,7 +882,7 @@ class Form():
                 LOGGER.warn('Element ID %s does not have a saved state.',
                         missing_key)
 
-    def submit(self):
+    def submit(self, event=None):
         # Check the validity of all inputs
         form_data = [(e.is_valid(), e.value()) for e in self.elements]
         form_is_invalid = False in [e[0] for e in form_data]

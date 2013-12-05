@@ -342,6 +342,7 @@ class ValidationButton(InformationButton):
 
         if is_active is False:
             self.setIcon(self._states[None])
+            self.setFlat(True)
         else:
             self.setIcon(self._states[self.error_state])
             if self.error_state == 'pass':
@@ -756,7 +757,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.button_box.addButton(self.reset_button, QtGui.QDialogButtonBox.ResetRole)
 
         #connect the buttons to their functions.
-#        self.run_button.clicked.connect(self.okPressed)
+        self.run_button.clicked.connect(self._run_pressed)
         self.quit_button.clicked.connect(self._quit_pressed)
 #        self.reset_button.clicked.connect(self.resetParametersToDefaults)
 
@@ -796,6 +797,8 @@ class FormWindow(QtWidget, QtGui.QWidget):
         if not self.close_confirmed:
             self.quit_requested.emit(True)
 
+    def _run_pressed(self):
+        self.submit_pressed.emit(True)
 
     def close(self):
         # If close() is called, we know for sure that we want to close thw

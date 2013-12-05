@@ -1,5 +1,6 @@
 import argparse
 import json
+import sys
 
 from palisades import utils
 
@@ -20,6 +21,11 @@ parser.add_argument('-d', '--default-lang', type=str, default='en',
     of the given language codes. (default='en')""")
 
 args = parser.parse_args()
+
+if args.default_lang not in args.languages:
+    print ('Error: Default language "%s" not found in the languages list: %s' %
+        (args.default_lang, args.languages))
+    sys.exit(1)
 
 json_config = utils.load_json(args.iui_uri)
 converted_config = utils.convert_iui(json_config, args.languages,

@@ -508,6 +508,10 @@ class CheckBox(QtGui.QCheckBox, QtWidget):
             ' False, %s (%s) found' % (is_checked, type(is_checked)))
         self.setChecked(is_checked)
 
+    def showEvent(self, event):
+        # when this checkbox is shown, emit the current checkstate.
+        self._checkbox_toggled()
+
 class FileButton(Button):
     _icon = ICON_FOLDER
 

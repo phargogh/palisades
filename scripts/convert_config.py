@@ -1,3 +1,7 @@
+"""Convert an IUI JSON configuration object to palisades format.  For usage
+instructions:
+    python convert_config.py --help
+"""
 import argparse
 import json
 import sys

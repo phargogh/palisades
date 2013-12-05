@@ -441,8 +441,14 @@ class TextField(QtGui.QLineEdit, QtWidget):
         # set up my communicator instances and connect them to the correct Qt
         # signals.
         self.value_changed = Communicator()
+        self.clicked = Communicator()
         self.textChanged.connect(self._value_changed)
         self.error_changed.connect(self._set_error)
+
+    def mousePressEvent(self, event=None):
+        if event.button() == QtCore.Qt.LeftButton:
+            self.clicked.emit(True)
+        QtGui.QLineEdit.mousePressEvent(self, event)
 
     def _value_changed(self, qstring_value):
         """Callback for the TextChanged signal.  Casts to a python string anc

@@ -258,9 +258,15 @@ class FileGUI(TextGUI):
     def __init__(self, core_element):
         TextGUI.__init__(self, core_element)
 
+        self._text_field.clicked.register(self._file_requested)
+
         self._file_button = toolkit.FileButton()
         self._file_button.file_selected.register(self._file_selected)
         self.set_widget(3, self._file_button)
+
+    def _file_requested(self, event=None):
+        if len(self.element.value()) == 0:
+            self._file_button._get_file()
 
     def _file_selected(self, new_value):
         # set the textfield's value

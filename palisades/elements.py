@@ -221,6 +221,7 @@ class Primitive(Element):
     defaults = {
         'validateAs': {'type': 'disabled'},
         'hideable': False,
+        'required': False,
     }
 
     def __init__(self, configuration):
@@ -246,6 +247,7 @@ class Primitive(Element):
         self.set_default_config(self.defaults)
         self._hidden = self.config['hideable']
         self._hideable = self.config['hideable']
+        self._required = self.config['required']
 
         # Set up our validator
         self._validator = validation.Validator(
@@ -284,8 +286,15 @@ class Primitive(Element):
             self.validate()
 
         self._validator.join()
+
         # Return whether validation passed (a boolean).
-        return self._valid
+        if self.has_input():
+            return self._valid
+        else:
+            if self.is_required():
+                return self._valid
+            else:
+                return True  # if no input and optional, input is valid.
 
     def validate(self):
         # if validation is already in progress, block until finished.
@@ -342,11 +351,20 @@ class Primitive(Element):
         """
         self.set_value(state['value'])
 
+    def is_required(self):
+        return self._required
+
+    def has_input(self):
+        if self.value() != None:
+            return True
+        return False
+
 class LabeledPrimitive(Primitive):
     defaults = {
         'label': u'',
         'validateAs': {'type': 'disabled'},
         'hideable': False,
+        'required': False,
     }
 
     def __init__(self, configuration):
@@ -371,6 +389,7 @@ class Dropdown(LabeledPrimitive):
         'validateAs': {'type': 'disabled'},
         'label': u'',
         'hideable': False,
+        'required': False,
     }
 
     def __init__(self, configuration):
@@ -417,6 +436,7 @@ class Text(LabeledPrimitive):
         'validateAs': {'type': 'string'},
         'label': u'',
         'hideable': False,
+        'required': False,
     }
 
     def __init__(self, configuration):
@@ -438,6 +458,11 @@ class Text(LabeledPrimitive):
         cast_value = unicode(new_value).decode('utf-8')
         LabeledPrimitive.set_value(self, cast_value)
 
+    def has_input(self):
+        if len(self.value()) > 0:
+            return True
+        return False
+
 class File(Text):
     defaults = {
         'validateAs': {'type': 'file'},
@@ -445,6 +470,7 @@ class File(Text):
         'width': 60,
         'label': u'',
         'hideable': False,
+        'required': False,
     }
 
     def __init__(self, configuration):
@@ -528,6 +554,7 @@ class CheckBox(LabeledPrimitive):
         'label': u'',
         'validateAs': {'type': 'disabled'},
         'hideable': False,
+        'required': False,
     }
 
     def __init__(self, configuration):
@@ -885,6 +912,9 @@ class Form():
     def submit(self, event=None):
         # Check the validity of all inputs
         form_data = [(e.is_valid(), e.value()) for e in self.elements]
+        for element in form_data:
+            print element
+
         form_is_invalid = False in [e[0] for e in form_data]
 
         # if success, assemble the arguments dictionary and send it off to the

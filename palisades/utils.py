@@ -99,7 +99,7 @@ def apply_defaults(configuration, defaults, skip_duplicates=True):
 
     return sanitized_config
 
-def save_dict_to_json(dictionary, uri):
+def save_dict_to_json(dictionary, uri, indent=None):
     """Save a python dictionary to JSON at the specified URI."""
     if os.path.exists(uri):
         LOGGER.warn('File %s exists and will be overwritten.', uri)
@@ -111,7 +111,7 @@ def save_dict_to_json(dictionary, uri):
         os.makedirs(os.path.dirname(uri))
         json_file = open(uri, mode='w+')
 
-    json_file.writelines(json.dumps(dictionary))
+    json_file.writelines(json.dumps(dictionary, indent=indent))
     json_file.close
 
 def load_json(uri):

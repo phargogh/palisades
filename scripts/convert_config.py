@@ -11,11 +11,19 @@ parser.add_argument('iui_uri',
 parser.add_argument('out_uri', type=str, default=None,
     help="""Converted JSON file location.  If excluded, converted JSON will be
     printed to stdout.""")
+parser.add_argument('-l', '--languages', type=str, default=['en'],
+    dest='languages', nargs='+',
+    help="""A space-separated list of language codes (default='en').""")
+parser.add_argument('-d', '--default-lang', type=str, default='en',
+    dest='default_lang',
+    help="""A string language code to use as the default language.  Must be one
+    of the given language codes. (default='en')""")
 
 args = parser.parse_args()
 
 json_config = utils.load_json(args.iui_uri)
-converted_config = utils.convert_iui(json_config)
+converted_config = utils.convert_iui(json_config, args.languages,
+    args.default_lang)
 
 if args.out_uri is None:
     print json.dumps(converted_config, indent=4)

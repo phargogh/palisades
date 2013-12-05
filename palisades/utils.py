@@ -161,8 +161,7 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
     assert current_lang in lang_codes
 
     def recurse_through_element(element):
-        new_config = element.copy()
-        new_config = add_translations_to_iui(new_config, lang_codes,
+        new_config = add_translations_to_iui(element.copy(), lang_codes,
             current_lang)
 
         if 'elements' in new_config:
@@ -175,7 +174,7 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
                     # normal.
                     element_type = None
 
-                if element_type is 'list':
+                if element_type == 'list':
                     for list_element in contained_config['elements']:
                         translated_config = recurse_through_element(list_element)
                         translated_elements_list.append(translated_config)

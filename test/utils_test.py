@@ -107,8 +107,6 @@ class CoreTest(unittest.TestCase):
             ]
         }
 
-        converted_config = utils.convert_iui(sample_config)
-
         self.assertEqual(utils.convert_iui(sample_config), expected_config)
 
     def test_add_translations_defaults(self):

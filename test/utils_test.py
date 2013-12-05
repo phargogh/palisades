@@ -74,4 +74,85 @@ class CoreTest(unittest.TestCase):
         self.assertEqual(utils.apply_defaults(test_configuration, defaults,
             False), duplicates_replaced_result)
 
+    def test_convert_config(self):
+        # take an IUI configuration object and convert it to palisades.
+        sample_config = {
+            'modelName': 'some model',
+            'label': 'some label',
+            'helpText': 'some help text',
+            'elements': [
+                {
+                    'type': 'list',
+                    'elements': [
+                        {
+                            'type': 'label',
+                            'label': 'label 1',
+                            'helpText': 'helptext 1'
+                        },
+                    ]
+                }
+            ]
+        }
+
+        expected_config = {
+            'modelName': {'en': 'some model'},
+            'label': {'en': 'some label'},
+            'helpText': {'en': 'some help text'},
+            'elements': [
+                {
+                    'type': 'label',
+                    'label': {'en': 'label 1'},
+                    'helpText': {'en': 'helptext 1'}
+                },
+            ]
+        }
+
+        converted_config = utils.convert_iui(sample_config)
+
+        self.assertEqual(utils.convert_iui(sample_config), expected_config)
+
+    def test_add_translations_defaults(self):
+        sample_config = {
+            'modelName': 'some model',
+            'label': 'some label',
+            'helpText': 'some help text',
+        }
+
+        expected_result = {
+            'modelName': {'en': 'some model'},
+            'label': {'en': 'some label'},
+            'helpText': {'en': 'some help text'},
+        }
+        self.assertEqual(utils.add_translations_to_iui(sample_config),
+            expected_result)
+
+    def test_add_translations_multi_lang(self):
+        sample_config = {
+            'modelName': 'some model',
+            'label': 'some label',
+            'helpText': 'some help text',
+        }
+
+        lang_codes = ['en', 'de', 'es']
+        current_lang = 'en'
+
+        expected_result = {
+            'modelName': {
+                'en': 'some model',
+                'de': None,
+                'es': None,
+            },
+            'label': {
+                'en': 'some label',
+                'de': None,
+                'es': None,
+            },
+            'helpText': {
+                'en': 'some help text',
+                'de': None,
+                'es': None,
+            },
+        }
+        self.assertEqual(utils.add_translations_to_iui(sample_config,
+            lang_codes, current_lang), expected_result)
 

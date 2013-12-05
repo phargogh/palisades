@@ -164,6 +164,18 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
         new_config = add_translations_to_iui(element.copy(), lang_codes,
             current_lang)
 
+        try:
+            element_type = new_config['type']
+        except KeyError:
+            element_type = None
+
+        # If we have a hideableFileEntry, replace it with a file element that
+        # has the hideable flag enabled.
+        if element_type == 'hideableFileEntry':
+            new_config['type'] = 'file'
+            new_config['hideable'] = True
+
+
         if 'elements' in new_config:
             translated_elements_list = []
             for contained_config in new_config['elements']:

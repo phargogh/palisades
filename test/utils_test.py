@@ -89,6 +89,11 @@ class CoreTest(unittest.TestCase):
                             'label': 'label 1',
                             'helpText': 'helptext 1'
                         },
+                        {
+                            'type': 'hideableFileEntry',
+                            'label': 'label 2',
+                            'helpText': 'helptext 2',
+                        },
                     ]
                 }
             ]
@@ -103,6 +108,12 @@ class CoreTest(unittest.TestCase):
                     'type': 'label',
                     'label': {'en': 'label 1'},
                     'helpText': {'en': 'helptext 1'}
+                },
+                {
+                    'type': 'file',
+                    'hideable': True,
+                    'label': {'en': 'label 2'},
+                    'helpText': {'en': 'helptext 2'},
                 },
             ]
         }

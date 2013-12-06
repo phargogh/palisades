@@ -49,7 +49,16 @@ def locate_module(module):
     else:
         LOGGER.debug('PATH: %s', sys.path)
         try:
-            model = __import__(module)
+            # __import__ only imports the top-level package if a multi-level
+            # package string is provided (e.g. in package.subpackage.module,
+            # the resulting import will be for package only).
+            # therefore, we need to import each level sequentially
+            modules = module.split('.')
+            model = __import__(modules[0])  # import base level
+            if len(modules) > 1:  # if more than one level, get desired module.
+                for subpackage in modules[1:]:
+                    model = __import__(subpackage)
+
             model_name = model.__name__
             LOGGER.debug('Imported directly from the existing PATH')
         except ImportError:
@@ -261,6 +270,11 @@ class Executor(threading.Thread):
         self.log_manager.print_args(self.args)
         try:
             function = getattr(self.module, self.func_name)
+        except AttributeError as error:
+            raise AttributeError(('Unable to find function "%s" in module "%s" '
+                'at %s') % (self.func_name, self.module.__name__,
+                self.module.__file__))
+        try:
             function(self.args)
         except Exception as error:
             # We deliverately want to catch all possible exceptions.

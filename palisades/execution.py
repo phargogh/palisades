@@ -194,9 +194,7 @@ class LogManager():
         Returns nothing."""
 
         # we want arguments to be printed very simply.
-        self.logfile_handler.setFormatter(self._print_formatter)
 
-        LOGGER.debug("Arguments:")
         sorted_args = sorted(args.iteritems(), key=lambda x: x[0])
         if len(sorted_args) > 0:
             max_key_width = max(map(lambda x:len(x[0]), sorted_args))
@@ -204,12 +202,10 @@ class LogManager():
             max_key_width = 0
 
         format_str = "%-" + str(max_key_width) + "s %s"
-        for name, value in sorted_args:
-            LOGGER.debug(format_str % (name, value))
-        LOGGER.debug("")
 
-        # Restore the logfile formatter to the full file formatting.
-        self.logfile_handler.setFormatter(self._file_formatter)
+        args_string = '\n'.join([format_str % (arg) for arg in sorted_args])
+        args_string = "Printing arguments\nArguments:\n%s\n" % args_string
+        LOGGER.info(args_string)
 
     def add_log_handler(self, handler):
         """Add a logging handler.  Before the handler is added to the logger

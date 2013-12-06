@@ -34,7 +34,6 @@ LAYOUTS = {
     palisades.LAYOUT_GRID: QtGui.QGridLayout,
 }
 ICONS = os.path.join(os.path.dirname(__file__), 'icons')
-IUI_DIR = ''
 
 def center_window(window_ptr):
     """Center a window on whatever screen it appears.
@@ -807,8 +806,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.backButton.setToolTip('Return to parameter list')
 
         #add button icons
-        self.backButton.setIcon(QtGui.QIcon(os.path.join(IUI_DIR,
-            'dialog-ok.png')))
+        self.backButton.setIcon(QtGui.QIcon(ICON_ENTER))
 
         #disable the 'Back' button by default
         self.backButton.setDisabled(True)

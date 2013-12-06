@@ -831,6 +831,8 @@ class Form():
         self.elements = self.find_elements()
         self.runner = None
 
+        self.submitted = Communicator()
+
     def find_elements(self):
         """Recurse through all elements in this Form's UI and locate all Element
         objects.
@@ -933,9 +935,11 @@ class Form():
             try:
                 self.runner = execution.PythonRunner(self._ui.config['targetScript'],
                     args_dict)
-                self.runner.start()
+                self.submitted.emit(True)
             except ImportError as error:
                 LOGGER.error('Problem loading %s', self._ui.config['targetScript'])
                 raise
+
+            self.runner.start()
 
 

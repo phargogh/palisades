@@ -7,6 +7,7 @@ import sys
 import traceback
 
 from palisades.utils import Communicator
+from palisades.utils import RepeatingTimer
 
 logging.basicConfig(format='%(asctime)s %(name)-18s %(threadName)-10s %(levelname)-8s \
      %(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %H:%M:%S ')
@@ -53,6 +54,7 @@ def locate_module(module):
             # package string is provided (e.g. in package.subpackage.module,
             # the resulting import will be for package only).
             # therefore, we need to import each level sequentially
+            # TODO: test this
             modules = module.split('.')
             model = __import__(modules[0])  # import base level
             if len(modules) > 1:  # if more than one level, get desired module.
@@ -135,7 +137,7 @@ class PythonRunner():
 
         log_file_uri = os.path.join(args['workspace_dir'], filename)
         self.executor = Executor(module, args, func_name, log_file_uri)
-        self._checker = threading.Timer(0.1, self._check_executor)
+        self._checker = RepeatingTimer(0.1, self._check_executor)
 
         self.started = Communicator()
         self.finished = Communicator()
@@ -171,6 +173,7 @@ class LogManager():
                 be saved to that file.
         """
         self.log_uri = log_uri
+        self.thread_name = thread_name
         self._print_formatter = logging.Formatter(None, None)
         self._file_formatter = logging.Formatter(self.LOG_FMT, self.DATE_FMT)
 
@@ -207,6 +210,13 @@ class LogManager():
 
         # Restore the logfile formatter to the full file formatting.
         self.logfile_handler.setFormatter(self._file_formatter)
+
+    def add_log_handler(self, handler):
+        """Add a logging handler.  Before the handler is added to the logger
+        object, we also add a logging filter so that it only logs messages from
+        this thread."""
+        handler.addFilter(ThreadFilter(self.thread_name))
+        LOGGER.addHandler(handler)
 
     def print_message(self, message):
         """Print the input message to the log using the simple print formatter."""

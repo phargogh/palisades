@@ -300,10 +300,29 @@ class FormGUI():
         self.group = GroupGUI(self.element._ui)
         self.window = toolkit.FormWindow(self.group.widgets)
         self.quit_confirm = toolkit.ConfirmQuitDialog()
+        self.messages_dialog = toolkit.RealtimeMessagesDialog()
 
-        self.window.submit_pressed.register(self.element.submit)
+        self.messages_handler = logging.StreamHandler(self.messages_dialog)
+
+        self.window.submit_pressed.register(self.submit)
         self.window.quit_requested.register(self.close)
+        self.element.submitted.register(self.messages_dialog.start)
         #TODO: Add more communicators here ... menu item actions?
+
+    def submit(self, event=None):
+        self.messages_dialog.show()
+        self.element.submit()
+
+        self.element.runner.executor.log_manager.add_log_handler(self.messages_handler)
+        self.element.runner.finished.register(self._runner_finished)
+
+    def _runner_finished(self, event=None):
+        thread_failed = self.element.runner.executor.failed
+        if thread_failed:
+            self.messages_dialog.finish(thread_failed,
+                self.element.runner.executor.exception)
+        else:
+            self.messages_dialog.finish(False)
 
     def show(self):
         self.window.show()

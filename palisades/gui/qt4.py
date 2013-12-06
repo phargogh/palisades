@@ -34,6 +34,7 @@ LAYOUTS = {
     palisades.LAYOUT_GRID: QtGui.QGridLayout,
 }
 ICONS = os.path.join(os.path.dirname(__file__), 'icons')
+IUI_DIR = ''
 
 def center_window(window_ptr):
     """Center a window on whatever screen it appears.
@@ -712,6 +713,172 @@ class TabGroup(QtGui.QTabWidget, Group):
 
     def widgets(self):
         pass
+
+class MessageArea(QtGui.QLabel):
+    def __init__(self):
+        QtGui.QLabel.__init__(self)
+        self.setWordWrap(True)
+        self.setTextFormat(QtCore.Qt.RichText)
+        self.messages = []
+
+    def clear(self):
+        """Clear all text and set the stylesheet to none."""
+
+        self.hide()
+        self.setText('')
+        self.setStyleSheet('')
+
+    def setText(self, text=None):
+        if text == None:
+            text = []
+        else:
+            text = [text + '<br/>']
+        messages = text + self.messages
+        string = "<br/>".join(messages)
+        QtGui.QLabel.setText(self, string)
+
+    def append(self, string):
+        self.messages.append(string)
+        self.setText()
+
+    def set_error(self, is_error):
+        if not is_error:
+            self.setStyleSheet('QLabel { padding: 15px;' +
+                'background-color: #d4efcc; border: 2px solid #3e895b;}')
+        else:
+            self.setStyleSheet('QLabel { padding: 15px;' +
+                'background-color: #ebabb6; border: 2px solid #a23332;}')
+        self.show()
+
+class RealtimeMessagesDialog(QtGui.QDialog):
+    """ModelDialog is a class defining a modal window presented to the user
+        while the model is running.  This modal window prevents the user from
+        interacting with the main UI window while the model is processing and
+        provides status updates for the model.
+
+        This window is not configurable through the JSON configuration file."""
+    error_changed = QtCore.pyqtSignal(bool)
+
+    def __init__(self):
+        """Constructor for the ModelDialog class.
+
+            root - a pointer to the parent window
+
+            returns an instance of ModelDialog."""
+        QtGui.QDialog.__init__(self)
+
+        #set window attributes
+        self.setLayout(QtGui.QVBoxLayout())
+        self.setWindowTitle("Running the model")
+        self.resize(700, 400)
+        center_window(self)
+        self.setModal(True)
+
+        self.cancel = False
+
+        #create statusArea-related widgets for the window.        
+        self.statusAreaLabel = QtGui.QLabel('Messages:')
+        self.statusArea = QtGui.QPlainTextEdit()
+        self.statusArea.setReadOnly(True)
+        self.cursor = self.statusArea.textCursor()
+
+        #set the background color of the statusArea widget to be white.
+        self.statusArea.setStyleSheet("QWidget { background-color: White }")
+
+        #create an indeterminate progress bar.  According to the Qt 
+        #documentation, an indeterminate progress bar is created when a 
+        #QProgressBar's minimum and maximum are both set to 0.
+        self.progressBar = QtGui.QProgressBar()
+        self.progressBar.setMinimum(0)
+        self.progressBar.setMaximum(0)
+        self.progressBar.setTextVisible(False)
+
+        self.messageArea = MessageArea()
+        self.messageArea.clear()
+
+        #Add the new widgets to the window
+        self.layout().addWidget(self.statusAreaLabel)
+        self.layout().addWidget(self.statusArea)
+        self.layout().addWidget(self.messageArea)
+        self.layout().addWidget(self.progressBar)
+
+
+        self.backButton = QtGui.QPushButton(' Back')
+        self.backButton.setToolTip('Return to parameter list')
+
+        #add button icons
+        self.backButton.setIcon(QtGui.QIcon(os.path.join(IUI_DIR,
+            'dialog-ok.png')))
+
+        #disable the 'Back' button by default
+        self.backButton.setDisabled(True)
+
+        #create the buttonBox (a container for buttons) and add the buttons to
+        #the buttonBox.
+        self.buttonBox = QtGui.QDialogButtonBox()
+        self.buttonBox.addButton(self.backButton, QtGui.QDialogButtonBox.AcceptRole)
+
+        #connect the buttons to their callback functions.
+        self.backButton.clicked.connect(self.closeWindow)
+
+        #add the buttonBox to the window.        
+        self.layout().addWidget(self.buttonBox)
+
+        self.error_changed.connect(self.messageArea.set_error)
+
+    def start(self, event=None):
+        self.statusArea.clear()
+        self.start_buttons()
+
+        self.write('Initializing...\n')
+
+    def start_buttons(self):
+        self.progressBar.setMaximum(0) #start the progressbar.
+        self.backButton.setDisabled(True)
+
+    def stop_buttons(self):
+        self.progressBar.setMaximum(1) #stops the progressbar.
+        self.backButton.setDisabled(False)
+
+    def write(self, text):
+        """Write text.  If printing to the status area, also scrolls to the end 
+            of the text region after writing to it.  Otherwise, print to stdout.
+
+            text - a string to be written to self.statusArea.
+
+            returns nothing."""
+
+        self.statusArea.insertPlainText(QtCore.QString(text))
+        self.cursor.movePosition(QtGui.QTextCursor.End)
+        self.statusArea.setTextCursor(self.cursor)
+
+    def flush(self):
+        pass
+
+    def finish(self, exception_found, thread_exception=None):
+        """Notify the user that model processing has finished.
+
+            returns nothing."""
+
+        self.stop_buttons()
+        if exception_found:
+            self.messageArea.setText(str('<b>%s</b> encountered: <em>%s</em> <br/>' +
+                'See the log for details.') % (thread_exception.__class__.__name__,
+                str(thread_exception)))
+        else:
+            self.messageArea.setText('Model completed successfully.')
+        self.error_changed.emit(exception_found)
+        self.cursor.movePosition(QtGui.QTextCursor.End)
+        self.statusArea.setTextCursor(self.cursor)
+
+    def closeWindow(self):
+        """Close the window and ensure the modelProcess has completed.
+
+            returns nothing."""
+
+        self.messageArea.clear()
+        self.cancel = False
+        self.done(0)
 
 class FormWindow(QtWidget, QtGui.QWidget):
     """A Form is a window where you have a set of inputs that the user fills in

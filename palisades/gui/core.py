@@ -294,6 +294,9 @@ class LabelGUI(UIObject):
         self.widgets.set_visible(is_visible)
 
 class FormGUI():
+    LOG_FMT = "%(asctime)s %(name)-18s %(levelname)-8s %(message)s"
+    DATE_FMT = "%m/%d/%Y %H:%M:%S "
+
     def __init__(self, core_element):
         self.element = core_element
 
@@ -303,6 +306,8 @@ class FormGUI():
         self.messages_dialog = toolkit.RealtimeMessagesDialog()
 
         self.messages_handler = logging.StreamHandler(self.messages_dialog)
+        self.messages_formatter = logging.Formatter(self.LOG_FMT, self.DATE_FMT)
+        self.messages_handler.setFormatter(self.messages_formatter)
 
         self.window.submit_pressed.register(self.submit)
         self.window.quit_requested.register(self.close)

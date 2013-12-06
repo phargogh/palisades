@@ -288,7 +288,7 @@ class Executor(threading.Thread):
             function(self.args)
         except Exception as error:
             # We deliverately want to catch all possible exceptions.
-            self.log_manager.print_message(traceback.print_exc())
+            LOGGER.exception(error)
             self.failed = True
             self.exception = error
         finally:

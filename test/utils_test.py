@@ -74,6 +74,35 @@ class CoreTest(unittest.TestCase):
         self.assertEqual(utils.apply_defaults(test_configuration, defaults,
             False), duplicates_replaced_result)
 
+    def test_nested_defaults(self):
+        defaults = {
+            'a': 'test_value',
+            'b': 'another',
+            'd': {
+                'nested 1': 1,
+            },
+        }
+
+        test_configuration = {
+            0: 'something',
+            'a': 'custom_value',
+            'd': {
+                'nested 2': 2,
+            },
+        }
+
+        expected_result = {
+            0: 'something',
+            'a': 'custom_value',
+            'b': 'another',
+            'd': {
+                'nested 1': 1,
+                'nested 2': 2,
+            },
+        }
+        self.assertEqual(utils.apply_defaults(test_configuration, defaults),
+            expected_result)
+
     def test_convert_config(self):
         # take an IUI configuration object and convert it to palisades.
         sample_config = {

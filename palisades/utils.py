@@ -5,6 +5,7 @@ import os
 import json
 import logging
 import hashlib
+from types import DictType
 
 import palisades.i18n.translation
 
@@ -90,12 +91,22 @@ def apply_defaults(configuration, defaults, skip_duplicates=True):
     Returns a dictionary with rendered default values."""
 
     sanitized_config = configuration.copy()
-    if skip_duplicates:
-        for key, default_value in defaults.iteritems():
+    for key, default_value in defaults.iteritems():
+        try:
+            if type(default_value) is DictType:
+                default_value = apply_defaults(sanitized_config[key], default_value)
+                sanitized_config[key] = default_value
+        except:
+            # if the key is missing from the user's dictionary, we'll pass for
+            # now.  It's handled below.
+            pass
+
+        if skip_duplicates:
             if key not in sanitized_config:
                 sanitized_config[key] = default_value
-    else:
-        sanitized_config.update(defaults)
+            else:
+        else:
+            sanitized_config[key] = default_value
 
     return sanitized_config
 

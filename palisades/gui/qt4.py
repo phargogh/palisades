@@ -458,6 +458,10 @@ class TextField(QtGui.QLineEdit, QtWidget):
         new_value = unicode(qstring_value, 'utf-8')
         self.value_changed.emit(new_value)
 
+    def showEvent(self, event=None):
+        if len(self.text()) > 0:
+            self._value_changed(self.text())
+
     def set_error(self, is_error):
         """Change the styling of this textfield according to is_error.
 

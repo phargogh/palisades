@@ -182,7 +182,9 @@ class LogManager():
         else:
             self.logfile_handler = logging.NullHandler()
 
-        self.logfile_handler.addFilter(ThreadFilter(thread_name))
+        self.thread_filter = ThreadFilter(thread_name)
+
+        self.logfile_handler.addFilter(self.thread_filter)
         self.logfile_handler.setFormatter(self._file_formatter)
         LOGGER.addHandler(self.logfile_handler)
 
@@ -211,8 +213,13 @@ class LogManager():
         """Add a logging handler.  Before the handler is added to the logger
         object, we also add a logging filter so that it only logs messages from
         this thread."""
-        handler.addFilter(ThreadFilter(self.thread_name))
+        handler.addFilter(self.thread_filter)
         LOGGER.addHandler(handler)
+
+    def remove_log_handler(self, handler):
+        """Remove a logging handler."""
+        handler.removeFilter(self.thread_filter)
+        LOGGER.removeHandler(handler)
 
     def print_message(self, message):
         """Print the input message to the log using the simple print formatter."""

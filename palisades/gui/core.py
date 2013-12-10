@@ -328,6 +328,8 @@ class FormGUI():
                 self.element.runner.executor.exception)
         else:
             self.messages_dialog.finish(False)
+        self.element.runner.executor.log_manager.remove_log_handler(self.messages_handler)
+
 
     def show(self):
         self.window.show()

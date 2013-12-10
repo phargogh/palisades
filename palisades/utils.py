@@ -104,7 +104,6 @@ def apply_defaults(configuration, defaults, skip_duplicates=True):
         if skip_duplicates:
             if key not in sanitized_config:
                 sanitized_config[key] = default_value
-            else:
         else:
             sanitized_config[key] = default_value
 

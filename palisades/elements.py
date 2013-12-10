@@ -222,6 +222,10 @@ class Primitive(Element):
         'validateAs': {'type': 'disabled'},
         'hideable': False,
         'required': False,
+        'returns': {
+            'ifDisabled': False,
+            'ifEmpty': False,
+        },
     }
 
     def __init__(self, configuration):
@@ -368,15 +372,15 @@ class Primitive(Element):
 
         # if element is disabled and we're not supposed to return if disabled,
         # return False.
-        return_if_disabled == self.config['returns']['ifDisabled']
-        if not return_if_disabled and self.is_enabled():
+        return_if_disabled = self.config['returns']['ifDisabled']
+        if return_if_disabled and not self.is_enabled():
             LOGGER.debug('Element %s is disabled.', self)
             return False
 
         # if the element is empty and we're not supposed to return if it's
         # empty, return False.
-        return_if_empty == self.config['returns']['ifEmpty']
-        if not return_if_empty and self.has_input():
+        return_if_empty = self.config['returns']['ifEmpty']
+        if return_if_empty and not self.has_input():
             LOGGER.debug('Element %s is empty', self)
             return False
 
@@ -389,6 +393,10 @@ class LabeledPrimitive(Primitive):
         'validateAs': {'type': 'disabled'},
         'hideable': False,
         'required': False,
+        'returns': {
+            'ifDisabled': False,
+            'ifEmpty': False,
+        },
     }
 
     def __init__(self, configuration):
@@ -409,11 +417,15 @@ class Dropdown(LabeledPrimitive):
     defaults = {
         'options': ['No options specified'],
         'defaultValue': 0,
-        'returns': 'strings',
         'validateAs': {'type': 'disabled'},
         'label': u'',
         'hideable': False,
         'required': False,
+        'returns': {
+            'ifDisabled': False,
+            'ifEmpty': False,
+            'type': 'strings'
+        },
     }
 
     def __init__(self, configuration):
@@ -422,8 +434,8 @@ class Dropdown(LabeledPrimitive):
             'label']
 
         self.set_default_config(self.defaults)
-        assert self.config['returns'] in ['strings', 'ordinals'], (
-            'the "returns" key must be either "strings" or "ordinals", '
+        assert self.config['returns']['type']in ['strings', 'ordinals'], (
+            'the "returns" type key must be either "strings" or "ordinals", '
             'not %s' % self.config['returns'])
 
         self.options = self.config['options']
@@ -447,8 +459,8 @@ class Dropdown(LabeledPrimitive):
             return None
 
         # get the value of the currently selected option.
-        return_option = self.config['returns']
-        if return_option is 'strings':
+        return_option = self.config['returns']['type']
+        if return_option == 'strings':
             return self.options[self._value]
         else:  # return option is 'ordinals'
             return self._value
@@ -461,7 +473,10 @@ class Text(LabeledPrimitive):
         'label': u'',
         'hideable': False,
         'required': False,
-        'returns': {'ifEmpty': False},
+        'returns': {
+            'ifDisabled': False,
+            'ifEmpty': False,
+        },
     }
 
     def __init__(self, configuration):
@@ -496,7 +511,10 @@ class File(Text):
         'label': u'',
         'hideable': False,
         'required': False,
-        'returns': {'ifEmpty': False},
+        'returns': {
+            'ifDisabled': False,
+            'ifEmpty': False,
+        },
     }
 
     def __init__(self, configuration):
@@ -581,6 +599,10 @@ class CheckBox(LabeledPrimitive):
         'validateAs': {'type': 'disabled'},
         'hideable': False,
         'required': False,
+        'returns': {
+            'ifDisabled': False,
+            'ifEmpty': False,
+        },
     }
 
     def __init__(self, configuration):

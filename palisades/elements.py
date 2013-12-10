@@ -380,7 +380,7 @@ class Primitive(Element):
         # if the element is empty and we're not supposed to return if it's
         # empty, return False.
         return_if_empty = self.config['returns']['ifEmpty']
-        if return_if_empty and not self.has_input():
+        if not return_if_empty and not self.has_input():
             LOGGER.debug('Element %s is empty', self)
             return False
 

@@ -761,6 +761,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
 
         This window is not configurable through the JSON configuration file."""
     error_changed = QtCore.pyqtSignal(bool)
+    message_added = QtCore.pyqtSignal(unicode)
 
     def __init__(self):
         """Constructor for the ModelDialog class.
@@ -827,6 +828,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.layout().addWidget(self.buttonBox)
 
         self.error_changed.connect(self.messageArea.set_error)
+        self.message_added.connect(self._write)
 
     def start(self, event=None):
         self.statusArea.clear()
@@ -843,13 +845,17 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.backButton.setDisabled(False)
 
     def write(self, text):
-        """Write text.  If printing to the status area, also scrolls to the end 
-            of the text region after writing to it.  Otherwise, print to stdout.
+        """Write text.  If printing to the status area, also scrolls to the end
+            of the text region after writing to it.  This function is
+            necessarily thread-safe, thanks to Qt's signal/slot implementation.
 
             text - a string to be written to self.statusArea.
 
             returns nothing."""
 
+        self.message_added.emit(text)
+
+    def _write(self, text):
         self.statusArea.insertPlainText(QtCore.QString(text))
         self.cursor.movePosition(QtGui.QTextCursor.End)
         self.statusArea.setTextCursor(self.cursor)

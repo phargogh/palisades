@@ -359,6 +359,30 @@ class Primitive(Element):
             return True
         return False
 
+    def should_return(self):
+        # if element does not have an args_id, we're not supposed to return.
+        # Therefore, return False.
+        if 'args_id' not in self.config:
+            LOGGER.debug('Element %s does not have an args_id', self)
+            return False
+
+        # if element is disabled and we're not supposed to return if disabled,
+        # return False.
+        return_if_disabled == self.config['returns']['ifDisabled']
+        if not return_if_disabled and self.is_enabled():
+            LOGGER.debug('Element %s is disabled.', self)
+            return False
+
+        # if the element is empty and we're not supposed to return if it's
+        # empty, return False.
+        return_if_empty == self.config['returns']['ifEmpty']
+        if not return_if_empty and self.has_input():
+            LOGGER.debug('Element %s is empty', self)
+            return False
+
+        # If none of the previous conditions have been met, return True.
+        return True
+
 class LabeledPrimitive(Primitive):
     defaults = {
         'label': u'',
@@ -437,6 +461,7 @@ class Text(LabeledPrimitive):
         'label': u'',
         'hideable': False,
         'required': False,
+        'returns': {'ifEmpty': False},
     }
 
     def __init__(self, configuration):
@@ -471,6 +496,7 @@ class File(Text):
         'label': u'',
         'hideable': False,
         'required': False,
+        'returns': {'ifEmpty': False},
     }
 
     def __init__(self, configuration):
@@ -857,20 +883,19 @@ class Form():
     def collect_arguments(self):
         """Collect arguments from all elements in this form into a single
         dictionary in the form of {'args_id': value()}.  If an element does not
-        have an args_id attribute, it is skipped.
+        have an args_id attribute, it is skipped.  Likewise, if an element
+        should not be returned (if its should_return() function returns False),
+        the element is skipped.
 
         Returns a python dictionary."""
 
         # Create the args dictionary and pass it back to the Application.
         args_dict = {}
         for element in self.elements:
-            if element.is_enabled():
-                try:
-                    args_dict[element.config['args_id']] = element.value()
-                except KeyError:
-                    LOGGER.debug('Element %s does not have an args_id', element)
+            if element.should_return():
+                args_dict[element.config['args_id']] = element.value()
             else:
-                LOGGER.debug('Element %s is not enabled, skipping args_id',
+                LOGGER.debug('Element %s should not return, skipping args_id',
                     element)
         return args_dict
 

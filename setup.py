@@ -3,6 +3,8 @@ from distutils.core import setup
 from distutils import cmd
 from distutils.command.install_data import install_data as _install_data
 from distutils.command.build import build as _build
+from distutils.command.build_py import build_py as _build_py
+from distutils.command.sdist import sdist as _sdist
 import os
 import glob
 
@@ -53,6 +55,32 @@ class install_data(_install_data):
             self.data_files.append((lang_dir, [lang_file]))
         _install_data.run(self)
 
+class CustomPythonBuilder(_build_py):
+    """Custom python build step for distutils.  Builds a python distribution in
+    the specified folder ('build' by default) and writes the adept version
+    information to the temporary source tree therein."""
+    def run(self):
+        _build_py.run(self)
+
+        # Write version information (which is derived from the adept mercurial
+        # source tree) to the build folder's copy of adept.__init__.
+        filename = os.path.join(self.build_lib, 'palisades', '__init__.py')
+        print 'Writing version data to %s' % filename
+        palisades.versioning.write_build_info(filename)
+
+class CustomSdist(_sdist):
+    """Custom source distribution builder.  Builds a source distribution via the
+    distutils sdist command, but then writes the adept version information to
+    the temp source tree before everything is archived for distribution."""
+    def make_release_tree(self, base_dir, files):
+        _sdist.make_release_tree(self, base_dir, files)
+
+        # Write version information (which is derived from the adept mercurial
+        # source tree) to the build folder's copy of adept.__init__.
+        filename = os.path.join(base_dir, 'palisades', '__init__.py')
+        print 'Writing version data to %s' % filename
+        palisades.versioning.write_build_info(filename)
+
 icon_dir = os.path.join(SITE_PACKAGES, 'palisades', 'gui', 'icons')
 data_files = [(icon_dir, glob.glob('palisades/gui/icons/*.png'))]
 
@@ -65,5 +93,7 @@ setup(
     cmdclass  = {
         'build': build,
         'build_trans': build_translations,
+        'build_py': CustomPythonBuilder,
+        'sdist': CustomSdist,
         'install_data': install_data},
 )

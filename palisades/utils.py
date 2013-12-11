@@ -185,6 +185,15 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
             new_config['type'] = 'file'
             new_config['hideable'] = True
 
+        # If we have a dropdown menu, the 'returns' options have changed
+        # slightly.  If the user has not defined return configuration options,
+        # skip the tweaking since defaults are assumed internally.
+        if element_type == 'dropdown':
+            try:
+                return_type = new_config['returns']
+                new_config['returns'] = {'type': return_type}
+            except KeyError:
+                pass
 
         if 'elements' in new_config:
             translated_elements_list = []

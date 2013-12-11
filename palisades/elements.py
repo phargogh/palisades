@@ -469,11 +469,11 @@ class Dropdown(LabeledPrimitive):
             return self._value
 
     def state(self):
-        superclass_state = LabeledPrimitive.state()
         state_dict = {
-            'value': self._value  # always return the current index
+            'value': self._value,  # always return the current index
+            'is_hidden': self.is_hidden()
         }
-        return superclass_state.update(state_dict)
+        return state_dict
 
 class Text(LabeledPrimitive):
     defaults = {
@@ -893,7 +893,12 @@ class Form():
 
         # now that the form has been created, load the lastrun state, if
         # appliccable.
-        self.load_state(self.lastrun_uri())
+        try:
+            self.load_state(self.lastrun_uri())
+        except IOError:
+            # when no lastrun file exists for this version
+            LOGGER.warn('No lastrun file found at %s.  Skipping.',
+                self.lastrun_uri())
 
     def find_elements(self):
         """Recurse through all elements in this Form's UI and locate all Element

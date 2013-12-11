@@ -179,6 +179,7 @@ class LabeledPrimitiveGUI(PrimitiveGUI):
         if self.element.is_hideable():
             self._label = toolkit.CheckBox(label_text)
             self._label.checkbox_toggled.register(self._toggle_widgets)
+            self._label.set_checked(not self.element.is_hidden())
             self._toggle_widgets(False)
         else:
             self._label = toolkit.ElementLabel(label_text)
@@ -208,7 +209,7 @@ class LabeledPrimitiveGUI(PrimitiveGUI):
             if widget != self._label:
                 widget.set_visible(show)
 
-        self.element.set_hidden(show)
+        self.element.set_hidden(not show)
 
 class CheckBoxGUI(LabeledPrimitiveGUI):
     def __init__(self, core_element):

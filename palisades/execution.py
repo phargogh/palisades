@@ -33,6 +33,27 @@ class ThreadFilter(logging.Filter):
             return True
         return False
 
+class ErrorQueueFilter(logging.Filter):
+    """When used, this filters for log messages that have a user-defined log
+    level or greated and tracks matching messages.
+    This is useful for accumulating log messages for the end of a script run.
+
+    Arguments passed to the constructor:
+        threshold - an int.  Defaults to logging.WARNING (30)
+    """
+    def __init__(self, threshold=logging.WARNING):
+        logging.Filter.__init__(self)
+        self.threshold = threshold
+        self._queue = []
+
+    def filter(self, record):
+        if record.levelno >= self.threshold:
+            self._queue.append(record)
+        return True
+
+    def get_errors(self):
+        return self._queue
+
 def locate_module(module):
     """Locate and import the requested module.
 
@@ -183,8 +204,10 @@ class LogManager():
             self.logfile_handler = logging.NullHandler()
 
         self.thread_filter = ThreadFilter(thread_name)
+        self.error_queue_filter = ErrorQueueFilter()
 
         self.logfile_handler.addFilter(self.thread_filter)
+        self.logfile_handler.addFilter(self.error_queue_filter)
         self.logfile_handler.setFormatter(self._file_formatter)
         LOGGER.addHandler(self.logfile_handler)
 
@@ -209,6 +232,16 @@ class LogManager():
         args_string = "Printing arguments\nArguments:\n%s\n" % args_string
         LOGGER.info(args_string)
 
+    def print_errors(self):
+        """Print all logging errors"""
+        error_records = self.error_queue_filter.get_errors()
+        if len(error_records) > 0:
+            self.logfile_handler.removeFilter(self.error_queue_filter)
+            LOGGER.warn('\n\nErrors encountered while processing:')
+            for error_record in self.error_queue_filter.get_errors():
+                LOGGER.handle(error_record)
+            self.logfile_handler.addFilter(self.error_queue_filter)
+
     def add_log_handler(self, handler):
         """Add a logging handler.  Before the handler is added to the logger
         object, we also add a logging filter so that it only logs messages from
@@ -219,6 +252,7 @@ class LogManager():
     def remove_log_handler(self, handler):
         """Remove a logging handler."""
         handler.removeFilter(self.thread_filter)
+        handler.removeFilter(self.error_queue_filter)
         LOGGER.removeHandler(handler)
 
     def print_message(self, message):
@@ -231,7 +265,8 @@ class LogManager():
         """Close the logfile handler and un-register it from the LOGGER
         object."""
         self.logfile_handler.close()
-        LOGGER.removeHandler(self.logfile_handler)
+        self.remove_log_handler(self.logfile_handler)
+        #LOGGER.removeHandler(self.logfile_handler)
 
 
 class Executor(threading.Thread):
@@ -295,6 +330,7 @@ class Executor(threading.Thread):
             self.failed = True
             self.exception = error
         finally:
+            self.log_manager.print_errors()
             self.log_manager.close()
 
 

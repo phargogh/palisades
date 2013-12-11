@@ -5,13 +5,25 @@ import os
 import json
 import logging
 import hashlib
+import platform
 from types import DictType
+import tempfile
 
 import palisades.i18n.translation
 
 class SignalNotFound(Exception):
     """A custom exception for when a signal was not found."""
     pass
+
+_EXPAND_DIR = lambda x: os.path.expanduser(os.path.join(*x))
+_SETTINGS_FOLDERS = {
+    'Windows': _EXPAND_DIR(['~', 'Appdata', 'local', 'NatCap']),
+    'Linux': _EXPAND_DIR(['~', '.natcap']),
+    'Darwin': _EXPAND_DIR(['~', 'Library', 'Preferences', 'NatCap']),
+    '': tempfile.gettempdir(),  # if python doesn't know the platform.
+}
+SETTINGS_DIR = _SETTINGS_FOLDERS[platform.system()]
+
 
 LOGGER = logging.getLogger('utils')
 

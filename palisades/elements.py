@@ -342,7 +342,8 @@ class Primitive(Element):
     def state(self):
         """Return a python dictionary describing the state of this element."""
         state_dict = {
-            'value': self.value()
+            'value': self.value(),
+            'is_hidden': self.is_hidden()
         }
         return state_dict
 
@@ -352,8 +353,10 @@ class Primitive(Element):
             state - a python dictionary defining the state of this element.
                 Must have the following attributes:
                     'value' -> some pythonic value relevant to this element.
+                    'is_hidden' -> a boolean.  Ignored if not hideable.
         """
         self.set_value(state['value'])
+        self.set_hidden(state['is_hidden'])
 
     def is_required(self):
         return self._required
@@ -464,6 +467,13 @@ class Dropdown(LabeledPrimitive):
             return self.options[self._value]
         else:  # return option is 'ordinals'
             return self._value
+
+    def state(self):
+        superclass_state = LabeledPrimitive.state()
+        state_dict = {
+            'value': self._value  # always return the current index
+        }
+        return superclass_state.update(state_dict)
 
 class Text(LabeledPrimitive):
     defaults = {

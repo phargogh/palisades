@@ -3,6 +3,9 @@
 import os, sys
 import locale
 import gettext
+import logging
+
+LOGGER = logging.getLogger('palisades.i18n')
 
 # Change this variable to your app name!
 #  The translation files will be under
@@ -41,7 +44,7 @@ gettext.textdomain(APP_NAME)
 
 gettext.bind_textdomain_codeset(APP_NAME, "UTF-8")
 
-print('LANGUAGES: ', languages)
+LOGGER.debug('Available languages: %s', languages)
 #language = gettext.translation(APP_NAME, mo_location,
 #    languages=languages, fallback=True)
 

@@ -933,7 +933,7 @@ class Form():
             element_state = element.state()
             state_dict[element_id] = element_state
 
-        utils.save_dict_to_json(state_dict, uri)
+        utils.save_dict_to_json(state_dict, uri, 4)
 
     def load_state(self, state_uri):
         """Load a state from a file on disk.
@@ -976,6 +976,16 @@ class Form():
 
             raise InvalidData(invalid_inputs)
         else:
+            # save the current state of the UI to the lastrun location.
+            if palisades.release == 'null':
+                version_str = 'dev'
+            else:
+                version_str = palisades.__version__
+            lastrun_uri = os.path.join(palisades.utils.SETTINGS_DIR,
+                '%s_lastrun_%s.json' % (self._ui.config['modelName'],
+                version_str))
+            self.save_state(lastrun_uri)
+
             args_dict = self.collect_arguments()
 
             # TODO: submit the args dict and other relevant data back to app.

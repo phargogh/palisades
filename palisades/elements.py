@@ -881,6 +881,10 @@ class Form():
 
         self.submitted = Communicator()
 
+        # now that the form has been created, load the lastrun state, if
+        # appliccable.
+        self.load_state(self.lastrun_uri())
+
     def find_elements(self):
         """Recurse through all elements in this Form's UI and locate all Element
         objects.
@@ -958,6 +962,19 @@ class Form():
                 LOGGER.warn('Element ID %s does not have a saved state.',
                         missing_key)
 
+    def lastrun_uri(self):
+        """Fetch the URI for the internal lastrun save file."""
+        if palisades.release == 'null':
+            version_str = 'dev'
+        else:
+            version_str = palisades.__version__
+        lastrun_filename = '%s_lastrun_%s.json' % (self._ui.config['modelName'],
+            version_str)
+
+        lastrun_uri = os.path.join(palisades.utils.SETTINGS_DIR, lastrun_filename)
+        LOGGER.debug('Lastrun URI: %s', lastrun_uri)
+        return lastrun_uri
+
     def submit(self, event=None):
         # Check the validity of all inputs
         form_data = [(e.is_valid(), e.value()) for e in self.elements]
@@ -977,14 +994,7 @@ class Form():
             raise InvalidData(invalid_inputs)
         else:
             # save the current state of the UI to the lastrun location.
-            if palisades.release == 'null':
-                version_str = 'dev'
-            else:
-                version_str = palisades.__version__
-            lastrun_uri = os.path.join(palisades.utils.SETTINGS_DIR,
-                '%s_lastrun_%s.json' % (self._ui.config['modelName'],
-                version_str))
-            self.save_state(lastrun_uri)
+            self.save_state(self.lastrun_uri())
 
             args_dict = self.collect_arguments()
 

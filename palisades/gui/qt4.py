@@ -573,16 +573,19 @@ class FileDialog(QtGui.QFileDialog):
     def __init__(self):
         QtGui.QFileDialog.__init__(self)
         self.last_filter = QtCore.QString()
+        self.last_folder = '~'
 
-    def get_file(self, title, default_folder='~'):
-        default_folder = os.path.expanduser(default_folder)
+    def get_file(self, title):
+        default_folder = os.path.expanduser(self.last_folder)
         dialog_title = _('Select ') + title
 
         filename, filter = self.getOpenFileNameAndFilter(
             self, dialog_title, default_folder, initialFilter=self.last_filter)
+        filename = unicode(filename, 'utf-8')
         self.last_filter = filter
+        self.last_folder = os.path.dirname(filename)
 
-        return unicode(filename, 'utf-8')
+        return filename
 
 class Dropdown(QtGui.QComboBox, QtWidget):
     def __init__(self, options, default_value):

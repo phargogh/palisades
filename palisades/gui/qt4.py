@@ -556,7 +556,8 @@ class FileButton(Button):
 
     def _get_file(self):
         filename = self.file_dialog.get_file('file')
-        self.file_selected.emit(filename)
+        if filename != '':
+            self.file_selected.emit(filename)
 
 class FileDialog(QtGui.QFileDialog):
     filters = {

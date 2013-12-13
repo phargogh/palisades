@@ -54,6 +54,12 @@ class Application(object):
             app = QtGui.QApplication([''])
         self.app = app
 
+        lang = palisades.i18n.language.current_lang
+        self.translator = QtCore.QTranslator()
+        self.translator.load("qt_%s" % lang,
+            QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath))
+        self.app.installTranslator(self.translator)
+
     def execute(self):
         self.app.exec_()
 

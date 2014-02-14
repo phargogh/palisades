@@ -567,9 +567,9 @@ class File(Text):
             absolute_path = os.path.abspath(os.path.expanduser(new_value))
         Text.set_value(self, absolute_path)
 
-class Static(Element):
+class Static(Primitive):
     def __init__(self, configuration):
-        Element.__init__(self, configuration)
+        Primitive.__init__(self, configuration)
         self._hashable_config = ['returns']
         new_defaults = {
             'returns': None
@@ -585,6 +585,9 @@ class Static(Element):
 
     def set_state(self, state):
         pass
+
+    def is_valid(self):
+        return True
 
 class Label(Static):
     def __init__(self, configuration):

@@ -106,6 +106,12 @@ def _get_module_from_path(module_list, path=None):
         returns an executeable python module object if it can be found.
         Returns None if not."""
 
+    LOGGER.debug('Importing module list %s.', module_list)
+    if path is not None:
+        LOGGER.debug('Adding to path %s', path)
+        sys.path += path  # path is expected to be a list of URIs.
+        LOGGER.debug(sys.path)
+
     current_name = module_list[0]
     module_info = imp.find_module(current_name, path)
     imported_module = imp.load_module(current_name, *module_info)

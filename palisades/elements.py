@@ -384,7 +384,8 @@ class Primitive(Element):
         # empty, return False.
         return_if_empty = self.config['returns']['ifEmpty']
         if not return_if_empty and not self.has_input():
-            LOGGER.debug('Element %s is empty', self)
+            LOGGER.debug('Element %s (%s) is empty', self,
+                    self.config['args_id'])
             return False
 
         # If none of the previous conditions have been met, return True.
@@ -578,6 +579,10 @@ class Static(Primitive):
         self.set_default_config(new_defaults)
 
     def value(self):
+        try:
+            return self.config['defaultValue']
+        except:
+            pass
         return self.config['returns']
 
     def state(self):
@@ -939,8 +944,8 @@ class Form():
             if element.should_return():
                 args_dict[element.config['args_id']] = element.value()
             else:
-                LOGGER.debug('Element %s should not return, skipping args_id',
-                    element)
+                LOGGER.debug('Element %s should not return, skipping args_id %s',
+                    element, element.config['args_id'])
         return args_dict
 
     def save_state(self, uri):

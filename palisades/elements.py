@@ -585,6 +585,9 @@ class Static(Primitive):
             pass
         return self.config['returns']
 
+    def should_return(self):
+        return True  # static should ALWAYS return.
+
     def state(self):
         return None
 

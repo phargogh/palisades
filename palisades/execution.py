@@ -325,6 +325,8 @@ class Executor(threading.Thread):
         try:
             function = getattr(self.module, self.func_name)
         except AttributeError as error:
+            LOGGER.exception(error)
+            self.failed = True
             raise AttributeError(('Unable to find function "%s" in module "%s" '
                 'at %s') % (self.func_name, self.module.__name__,
                 self.module.__file__))

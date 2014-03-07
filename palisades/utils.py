@@ -133,7 +133,7 @@ def save_dict_to_json(dictionary, uri, indent=None):
         os.makedirs(os.path.dirname(uri))
         json_file = open(uri, mode='w+')
 
-    json_file.writelines(json.dumps(dictionary, indent=indent))
+    json_file.writelines(json.dumps(dictionary, indent=indent, sort_keys=True))
     json_file.close
 
 def load_json(uri):

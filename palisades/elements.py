@@ -1003,7 +1003,7 @@ class Form():
 
     def submit(self, event=None):
         # Check the validity of all inputs
-        form_data = [(e.is_valid(), e.value()) for e in self.elements]
+        form_data = [(e.config['args_id'], e.is_valid(), e.value()) for e in self.elements]
         for element in form_data:
             print element
 

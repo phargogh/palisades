@@ -1,5 +1,7 @@
 import versioning
 import sys
+import glob
+import os
 
 # The __version__ attribute MUST be set to 'dev'.  It is changed automatically
 # when the package is built.  The build_attrs attribute is set at the same time,
@@ -22,3 +24,12 @@ if __version__ == 'dev' and build_data == None:
 LAYOUT_VERTICAL = 1
 LAYOUT_HORIZONTAL = 2
 LAYOUT_GRID = 3
+
+def get_py2exe_datafiles():
+    """Return a list of tuples of data required for a py2exe installation of
+    palisades."""
+    icon_path = 'palisades/gui/icons'
+    local_icon_path = os.path.join(os.path.dirname(__file__), 'gui', 'icons')
+    icons = map(os.path.abspath, glob.glob(local_icon_path + '/*'))
+    return [(icon_path, icons)]
+

@@ -20,7 +20,7 @@ try:
 except ImportError:
     import osgeo.gdal as gdal
 
-from dbfpy import dbf
+from invest_natcap.dbfpy import dbf
 
 from palisades.utils import Communicator
 from palisades.utils import RepeatingTimer

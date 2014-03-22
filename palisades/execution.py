@@ -76,8 +76,20 @@ def locate_module(module):
             # the resulting import will be for package only).
             # therefore, we need to import each level sequentially
             # TODO: test this
-            modules = module.split('.')
-            model = __import__(modules[0])  # import base level
+
+            try:
+                imp.find_module(module)
+            except ImportError:
+                LOGGER.debug('Could not find module via imp')
+            print module
+
+            try:
+                model = __import__(module)
+            except ImportError:
+                LOGGER.debug('Direct import failed, trying to split module')
+                modules = module.split('.')
+                model = __import__(modules[0])  # import base level
+
             if len(modules) > 1:  # if more than one level, get desired module.
                 for subpackage in modules[1:]:
                     model = __import__(subpackage)
@@ -86,10 +98,37 @@ def locate_module(module):
             LOGGER.debug('Imported directly from the existing PATH')
         except ImportError:
             module_list = module.split('.')
-            model = _get_module_from_path(module_list)
-            model_name = module_list[-1]  # model name is last entry in list
+            try:
+                model = _iui_style_import(module_list)
+            except ImportError:
+                model = _get_module_from_path(module_list)
+                model_name = module_list[-1]  # model name is last entry in list
         LOGGER.debug('Loading %s from PATH', model_name)
     return (model, model_name)
+
+def _iui_style_import(module_list, path=None):
+    """Search for and return an executable module object as long as the target
+        module is within the pythonpath.  This method recursively uses the
+        find_module and load_module functions of the python imp module to
+        locate the target module by its heirarchical module name.
+
+        module_list - a python list of strings, where each element is the name
+            of a contained module.  For example, os.path would be represented
+            here as ['os', 'path'].
+        path=None - the base path to search.  If None, the pythonpath will be
+            used.
+
+        returns an executeable python module object if it can be found.
+        Returns None if not."""
+
+    current_name = module_list[0]
+    module_info = imp.find_module(current_name, path)
+    imported_module = imp.load_module(current_name, *module_info)
+
+    if len(module_list) > 1:
+        return locate_module(module_list[1:], imported_module.__path__)
+    else:
+        return imported_module
 
 def _get_module_from_path(module_list, path=None):
     """Search for and return an executable module object as long as the target

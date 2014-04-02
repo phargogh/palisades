@@ -5,6 +5,7 @@ import imp
 import datetime
 import sys
 import traceback
+from types import DictType
 
 from palisades.utils import Communicator
 from palisades.utils import RepeatingTimer
@@ -77,18 +78,15 @@ def locate_module(module):
             # therefore, we need to import each level sequentially
             # TODO: test this
 
-            try:
-                imp.find_module(module)
-            except ImportError:
-                LOGGER.debug('Could not find module via imp')
-            print module
+#            try:
+#                imp.find_module(module)
+#            except ImportError:
+#                LOGGER.debug('Could not find module via imp')
+#            print module
 
-            try:
-                model = __import__(module)
-            except ImportError:
-                LOGGER.debug('Direct import failed, trying to split module')
-                modules = module.split('.')
-                model = __import__(modules[0])  # import base level
+            LOGGER.debug('Direct import failed, trying to split module')
+            modules = module.split('.')
+            model = __import__(modules[0])  # import base level
 
             if len(modules) > 1:  # if more than one level, get desired module.
                 for subpackage in modules[1:]:
@@ -126,7 +124,7 @@ def _iui_style_import(module_list, path=None):
     imported_module = imp.load_module(current_name, *module_info)
 
     if len(module_list) > 1:
-        return locate_module(module_list[1:], imported_module.__path__)
+        return _iui_style_import(module_list[1:], imported_module.__path__)
     else:
         return imported_module
 
@@ -189,6 +187,9 @@ class PythonRunner():
                 function specified.
             func_name='execute' - the function to be called on the loaded
                 module.  Defaults to 'execute' for IUI compatibility."""
+
+        assert type(args) is DictType, ('Args must be a dict, '
+            '%s (%s) found instead' % (args, type(args)))
 
         module, module_name = locate_module(module_string)
 
@@ -370,7 +371,9 @@ class Executor(threading.Thread):
                 'at %s') % (self.func_name, self.module.__name__,
                 self.module.__file__))
         try:
-            function(self.args)
+            LOGGER.debug('Found function %s', function)
+            LOGGER.debug('Starting model with %s args', self.args)
+            function(self.args.copy())
         except Exception as error:
             # We deliverately want to catch all possible exceptions.
             LOGGER.exception(error)

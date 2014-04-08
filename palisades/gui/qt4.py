@@ -5,9 +5,12 @@ from types import BooleanType
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
+Signal = QtCore.pyqtSignal
 
 #from PySide import QtGui
 #from PySide import QtCore
+#Signal = QtCore.Signal
+#QtCore.QString = unicode  # pySide uses unicode objects for qstring
 
 import palisades
 import palisades.gui
@@ -63,20 +66,22 @@ class Application(object):
     def execute(self):
         self.app.exec_()
 
-class QtWidget(QtGui.QWidget):
+#class QtWidget(QtGui.QWidget):
+class QtWidget(object):
+    # REQUIRED: subclasses must also be a subclass of QWidget
     def set_visible(self, is_visible):
         self.setVisible(is_visible)
 
     def is_visible(self):
         return self.isVisible()
 
-class Empty(QtWidget):
+class Empty(QtGui.QWidget, QtWidget):
     pass
 
 class Group(QtGui.QGroupBox, QtWidget):
     def __init__(self):
-        QtWidget.__init__(self)
         QtGui.QGroupBox.__init__(self)
+        QtWidget.__init__(self)
         self.setLayout(QtGui.QGridLayout())
 
     def add_widget(self, gui_object, start_index=0):
@@ -405,7 +410,8 @@ class Label(QtGui.QLabel, QtWidget):
 
 class ElementLabel(QtGui.QLabel, QtWidget):
     #error_changed = QtCore.Signal(bool)
-    error_changed = QtCore.pyqtSignal(bool)
+    #error_changed = QtCore.pyqtSignal(bool)
+    error_changed = Signal(bool)
 
     def __init__(self, label_text):
         QtWidget.__init__(self)
@@ -438,7 +444,8 @@ class ElementLabel(QtGui.QLabel, QtWidget):
 
 class TextField(QtGui.QLineEdit, QtWidget):
     #error_changed = QtCore.Signal(bool)
-    error_changed = QtCore.pyqtSignal(bool)
+    #error_changed = QtCore.pyqtSignal(bool)
+    error_changed = Signal(bool)
 
     def __init__(self, starting_value):
         QtWidget.__init__(self)
@@ -505,7 +512,7 @@ class TextField(QtGui.QLineEdit, QtWidget):
         menu.exec_(event.globalPos())
 
 class CheckBox(QtGui.QCheckBox, QtWidget):
-    error_changed = QtCore.pyqtSignal(bool)
+    error_changed = Signal(bool)
     def __init__(self, label_text):
         QtGui.QCheckBox.__init__(self)
         QtWidget.__init__(self)
@@ -652,7 +659,8 @@ class InfoDialog(QtGui.QDialog):
         self.layout().addWidget(self.button_box)
 
     def showEvent(self, event=None):
-        center_window(self)
+        #center_window(self)
+        print 'InfoDialog showing'
         QtGui.QDialog.showEvent(self, event)
 
     def set_icon(self, uri):
@@ -695,22 +703,23 @@ class ErrorDialog(InfoDialog):
         InfoDialog.__init__(self)
         self.set_title(_('Whoops!'))
 
-    def showEvent(self, event=None):
-        label_string = '<ul>'
-        for element_tuple in self.messages:
-            label_string += '<li>%s: %s</li>' % element_tuple
-        label_string += '</ul>'
-
-        num_messages = len(self.messages)
-        if num_messages == 1:
-            num_error_string = _('is 1 error')
-        else:
-            num_error_string = _('are %s errors') % num_messages
-
-        self.body.setText(_(str("There %s that must be resolved" +
-            " before this tool can be run:%s")) % (num_error_string, label_string))
-        self.body.setMinimumSize(self.body.sizeHint())
-        InfoDialog.showEvent(self)
+#    def showEvent(self, event=None):
+#        label_string = '<ul>'
+#        for element_tuple in self.messages:
+#            label_string += '<li>%s: %s</li>' % element_tuple
+#        label_string += '</ul>'
+#
+#        num_messages = len(self.messages)
+#        if num_messages == 1:
+#            num_error_string = _('is 1 error')
+#        else:
+#            num_error_string = _('are %s errors') % num_messages
+#
+#        self.body.setText(_(str("There %s that must be resolved" +
+#            " before this tool can be run:%s")) % (num_error_string, label_string))
+#        self.body.setMinimumSize(self.body.sizeHint())
+#        print 'ErrorDialog Showing'
+#        InfoDialog.showEvent(self)
 
 class TabGroup(QtGui.QTabWidget, Group):
     def __init__(self):
@@ -770,8 +779,10 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         provides status updates for the model.
 
         This window is not configurable through the JSON configuration file."""
-    error_changed = QtCore.pyqtSignal(bool)
-    message_added = QtCore.pyqtSignal(unicode)
+    error_changed = Signal(bool)
+    message_added = Signal(unicode)
+    #error_changed = QtCore.pyqtSignal(bool)
+    #message_added = QtCore.pyqtSignal(unicode)
 
     def __init__(self):
         """Constructor for the ModelDialog class.

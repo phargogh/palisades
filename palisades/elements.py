@@ -1002,20 +1002,21 @@ class Form():
         return lastrun_uri
 
     def submit(self, event=None):
+        LOGGER.debug('Starting the form submission process')
         # Check the validity of all inputs
         form_data = [(e.config['args_id'], e.is_valid(), e.value()) for e in self.elements]
         for element in form_data:
             print element
 
-        form_is_invalid = False in [e[0] for e in form_data]
+        form_is_invalid = False in [e[1] for e in form_data]
 
         # if success, assemble the arguments dictionary and send it off to the
         # base Application
         if form_is_invalid:
             invalid_inputs = []
-            for is_valid, value in form_data:
+            for args_id, is_valid, value in form_data:
                 if not is_valid:
-                    invalid_inputs.append(value)
+                    invalid_inputs.append((args_id, value))
 
             raise InvalidData(invalid_inputs)
         else:

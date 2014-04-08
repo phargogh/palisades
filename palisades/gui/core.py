@@ -323,7 +323,7 @@ class FormGUI():
             errors = []
         except InvalidData as error:
             errors = error.data[:]
-            #self.errors_dialog.set_messages(errors)
+            self.errors_dialog.set_messages(errors)
             self.errors_dialog.show()
             return
 

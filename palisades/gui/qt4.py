@@ -409,8 +409,6 @@ class Label(QtGui.QLabel, QtWidget):
         return self.isVisible()
 
 class ElementLabel(QtGui.QLabel, QtWidget):
-    #error_changed = QtCore.Signal(bool)
-    #error_changed = QtCore.pyqtSignal(bool)
     error_changed = Signal(bool)
 
     def __init__(self, label_text):
@@ -443,8 +441,6 @@ class ElementLabel(QtGui.QLabel, QtWidget):
             self.setStyleSheet("QWidget {}")
 
 class TextField(QtGui.QLineEdit, QtWidget):
-    #error_changed = QtCore.Signal(bool)
-    #error_changed = QtCore.pyqtSignal(bool)
     error_changed = Signal(bool)
 
     def __init__(self, starting_value):
@@ -781,8 +777,6 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         This window is not configurable through the JSON configuration file."""
     error_changed = Signal(bool)
     message_added = Signal(unicode)
-    #error_changed = QtCore.pyqtSignal(bool)
-    #message_added = QtCore.pyqtSignal(unicode)
 
     def __init__(self):
         """Constructor for the ModelDialog class.

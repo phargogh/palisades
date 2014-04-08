@@ -637,6 +637,7 @@ class InfoDialog(QtGui.QDialog):
         self.body.setWordWrap(True)
         self.ok_button = QtGui.QPushButton(_('OK'))
         self.ok_button.clicked.connect(self.accept)
+        self.setModal(True)
 
         error_widget = QtGui.QWidget()
         error_widget.setLayout(QtGui.QHBoxLayout())

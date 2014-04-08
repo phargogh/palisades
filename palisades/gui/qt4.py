@@ -433,7 +433,6 @@ class ElementLabel(QtGui.QLabel, QtWidget):
         # without it.
         self.error_changed.emit(is_error)
 
-
     def _set_error(self, is_error):
         if is_error:
             self.setStyleSheet("QWidget { color: red }")
@@ -655,9 +654,8 @@ class InfoDialog(QtGui.QDialog):
         self.layout().addWidget(self.button_box)
 
     def showEvent(self, event=None):
-        #center_window(self)
-        print 'InfoDialog showing'
         QtGui.QDialog.showEvent(self, event)
+        center_window(self)
 
     def set_icon(self, uri):
         self.icon.setPixmap(QtGui.QPixmap(uri))
@@ -714,7 +712,6 @@ class ErrorDialog(InfoDialog):
         self.body.setText(_(str("There %s that must be resolved" +
             " before this tool can be run:%s")) % (num_error_string, label_string))
         self.body.setMinimumSize(self.body.sizeHint())
-        print 'ErrorDialog Showing'
         InfoDialog.showEvent(self, event)
 
 class TabGroup(QtGui.QTabWidget, Group):

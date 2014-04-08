@@ -699,23 +699,23 @@ class ErrorDialog(InfoDialog):
         InfoDialog.__init__(self)
         self.set_title(_('Whoops!'))
 
-#    def showEvent(self, event=None):
-#        label_string = '<ul>'
-#        for element_tuple in self.messages:
-#            label_string += '<li>%s: %s</li>' % element_tuple
-#        label_string += '</ul>'
-#
-#        num_messages = len(self.messages)
-#        if num_messages == 1:
-#            num_error_string = _('is 1 error')
-#        else:
-#            num_error_string = _('are %s errors') % num_messages
-#
-#        self.body.setText(_(str("There %s that must be resolved" +
-#            " before this tool can be run:%s")) % (num_error_string, label_string))
-#        self.body.setMinimumSize(self.body.sizeHint())
-#        print 'ErrorDialog Showing'
-#        InfoDialog.showEvent(self)
+    def showEvent(self, event=None):
+        label_string = '<ul>'
+        for element_tuple in self.messages:
+            label_string += '<li>%s: %s</li>' % element_tuple
+        label_string += '</ul>'
+
+        num_messages = len(self.messages)
+        if num_messages == 1:
+            num_error_string = _('is 1 error')
+        else:
+            num_error_string = _('are %s errors') % num_messages
+
+        self.body.setText(_(str("There %s that must be resolved" +
+            " before this tool can be run:%s")) % (num_error_string, label_string))
+        self.body.setMinimumSize(self.body.sizeHint())
+        print 'ErrorDialog Showing'
+        InfoDialog.showEvent(self, event)
 
 class TabGroup(QtGui.QTabWidget, Group):
     def __init__(self):

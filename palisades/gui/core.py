@@ -4,6 +4,7 @@ from types import *
 from palisades.gui import qt4 as toolkit
 from palisades.validation import V_ERROR
 from palisades.validation import V_PASS
+from palisades.elements import InvalidData
 
 class NotYetImplemented(Exception): pass
 
@@ -304,6 +305,7 @@ class FormGUI():
         self.group = GroupGUI(self.element._ui)
         self.window = toolkit.FormWindow(self.group.widgets)
         self.quit_confirm = toolkit.ConfirmQuitDialog()
+        self.errors_dialog = toolkit.ErrorDialog()
         self.messages_dialog = toolkit.RealtimeMessagesDialog()
 
         self.messages_handler = logging.StreamHandler(self.messages_dialog)
@@ -316,8 +318,16 @@ class FormGUI():
         #TODO: Add more communicators here ... menu item actions?
 
     def submit(self, event=None):
+        try:
+            self.element.submit()
+            errors = []
+        except InvalidData as error:
+            errors = error.data[:]
+            #self.errors_dialog.set_messages(errors)
+            self.errors_dialog.show()
+            return
+
         self.messages_dialog.show()
-        self.element.submit()
 
         self.element.runner.executor.log_manager.add_log_handler(self.messages_handler)
         self.element.runner.finished.register(self._runner_finished)

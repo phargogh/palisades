@@ -1,4 +1,5 @@
 import os
+import sys
 
 # A mapping of which UI Elements are configured to work with which GUI classes
 #REPRESENTATIONS = {
@@ -7,7 +8,12 @@ import os
 #    elements.Group: core.Group,
 #}
 
-ICON_DIR = os.path.join(os.path.dirname(__file__), 'icons')
+if getattr(sys, 'frozen', False):
+    # adapt to running in a PyInstaller executable
+    base_dir = os.path.join(sys._MEIPASS, 'palisades', 'gui')
+else:
+    base_dir = os.path.dirname(__file__)
+ICON_DIR = os.path.join(base_dir, 'icons')
 _path = lambda icon: os.path.join(ICON_DIR, icon)
 
 ICON_CLOSE = _path('dialog-close.png')

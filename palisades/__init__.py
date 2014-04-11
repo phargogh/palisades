@@ -33,3 +33,21 @@ def get_py2exe_datafiles():
     icons = map(os.path.abspath, glob.glob(local_icon_path + '/*'))
     return [(icon_path, icons)]
 
+def launch(json_uri, splash_img=None):
+    """Construct a core application instance based on the user-defined
+    configuration file and then build a GUI instance off of that core
+    application.  Once this latter component has been constructed, call its
+    execute() function.
+
+        json_uri - a URI to a palisades JSON configuration file.
+        splash_img=None - a URI to a raster graphic to use for a splash image
+            while the program is loading.  If None, no splash image will be
+            used.
+
+    Returns nothing."""
+    from palisades import elements
+    import palisades.gui
+
+    ui = elements.Application(json_uri)
+    gui = palisades.gui.build(ui._window)
+    gui.execute()

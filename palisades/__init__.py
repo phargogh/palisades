@@ -48,6 +48,32 @@ def launch(json_uri, splash_img=None):
     from palisades import elements
     import palisades.gui
 
-    ui = elements.Application(json_uri)
+    # if the user provided a relative path to the configuration file, it's
+    # possible that we're in a frozen environment.  If this is the case, we
+    # should check out the possible locations of the file.
+    possible_paths = [json_uri]
+    if not os.path.isabs(json_uri):
+        if getattr(sys, 'frozen', False):
+            # running within PyInstaller frozen application
+            possible_paths.append(os.path.join(sys._MEIPASS, json_uri))
+
+        # the current directory
+        possible_paths.append(os.path.join(os.getcwd(), json_uri))
+
+        # Helpful for PyInstaller --onedir builds
+        possible_paths.append(os.path.join(os.path.dirname(sys.executable),
+            json_uri))
+
+    found_json = None
+    for possible_path in possible_paths:
+        if os.path.exists(possible_path):
+            found_json = possible_path
+
+    if found_json is None:
+        raise IOError('Configuration file %s could not be found in %s',
+            possible_paths)
+    print found_json
+
+    ui = elements.Application(found_json)
     gui = palisades.gui.build(ui._window)
     gui.execute()

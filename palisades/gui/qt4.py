@@ -555,15 +555,23 @@ class CheckBox(QtGui.QCheckBox, QtWidget):
 class FileButton(Button):
     _icon = ICON_FOLDER
 
-    def __init__(self):
+    def __init__(self, dialog_type):
         Button.__init__(self)
+
+        assert dialog_type in ['file', 'folder']
+        self.dialog_type = dialog_type
+
         self.file_dialog = FileDialog()
+
         self.clicked.connect(self._get_file)
 
         self.file_selected = Communicator()
 
     def _get_file(self):
-        filename = self.file_dialog.get_file('file')
+        if self.dialog_type == 'file':
+            filename = self.file_dialog.get_file(self.dialog_type)
+        else:
+            filename = self.file_dialog.get_folder(self.dialog_type)
         if filename != '':
             self.file_selected.emit(filename)
 
@@ -595,6 +603,18 @@ class FileDialog(QtGui.QFileDialog):
         self.last_folder = os.path.dirname(filename)
 
         return filename
+
+    def get_folder(self, title):
+        default_folder = os.path.expanduser(self.last_folder)
+        dialog_title = _('Select ') + title
+
+        dirname = self.getExistingDirectory(self, dialog_title,
+                default_folder)
+        dirname = unicode(dirname, 'utf-8')
+        self.last_folder = dirname
+
+        return dirname
+
 
 class Dropdown(QtGui.QComboBox, QtWidget):
     def __init__(self, options, default_value):

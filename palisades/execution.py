@@ -98,11 +98,14 @@ def locate_module(module):
         except ImportError:
             module_list = module.split('.')
             try:
+                LOGGER.debug('Trying IUI-style import')
                 model = _iui_style_import(module_list)
             except ImportError:
+                LOGGER.debug('Trying to load module from PATH')
                 model = _get_module_from_path(module_list)
                 model_name = module_list[-1]  # model name is last entry in list
         LOGGER.debug('Loading %s from PATH', model_name)
+    LOGGER.debug('Model successfully loaded from %s', model.__file__)
     return (model, model_name)
 
 def _iui_style_import(module_list, path=None):

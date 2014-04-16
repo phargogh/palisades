@@ -71,6 +71,7 @@ def locate_module(module):
         LOGGER.debug('Loading %s from %s', model_name, model)
     else:
         LOGGER.debug('PATH: %s', sys.path)
+        model_name = os.path.splitext(os.path.basename(module))[0]
         try:
             # __import__ only imports the top-level package if a multi-level
             # package string is provided (e.g. in package.subpackage.module,

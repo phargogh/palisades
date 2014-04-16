@@ -317,6 +317,7 @@ class FormGUI():
         self.window.submit_pressed.register(self.submit)
         self.window.quit_requested.register(self.close)
         self.element.submitted.register(self.messages_dialog.start)
+        self.element.submitted.register(self._open_messages_window)
         #TODO: Add more communicators here ... menu item actions?
 
     def submit(self, event=None):
@@ -329,10 +330,11 @@ class FormGUI():
             self.errors_dialog.show()
             return
 
-        self.messages_dialog.show()
-
-        self.element.runner.executor.log_manager.add_log_handler(self.messages_handler)
         self.element.runner.finished.register(self._runner_finished)
+
+    def _open_messages_window(self, event=None):
+        self.messages_dialog.show()
+        self.element.runner.executor.log_manager.add_log_handler(self.messages_handler)
 
     def _runner_finished(self, event=None):
         thread_failed = self.element.runner.executor.failed

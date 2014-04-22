@@ -63,8 +63,14 @@ def locate_module(module):
 
         Returns a tuple of (executeable module, module name)"""
 
-    LOGGER.debug('Trying to import %s' % module)
-    if os.path.isfile(module):
+    LOGGER.debug('Trying to import %s', module)
+    LOGGER.debug('Existing modules: %s', sys.modules.keys())
+
+    if module in sys.modules:
+        model = sys.modules[module]
+        model_name = model.__name__
+        LOGGER.debug('Found %s in sys.modules', module)
+    elif os.path.isfile(module):
         model = imp.load_source('model', module)
        # Model name is name of module file, minus the extension
         model_name = os.path.splitext(os.path.basename(module))[0]

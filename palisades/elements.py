@@ -225,6 +225,7 @@ class Primitive(Element):
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
+            'ifHidden': False,
         },
     }
 
@@ -371,6 +372,11 @@ class Primitive(Element):
         # Therefore, return False.
         if 'args_id' not in self.config:
             LOGGER.debug('Element %s does not have an args_id', self)
+            return False
+
+        return_if_hidden = self.config['returns']['ifHidden']
+        if return_if_hidden and self.is_hidden():
+            LOGGER.debug('Element %s is hidden.', self)
             return False
 
         # if element is disabled and we're not supposed to return if disabled,

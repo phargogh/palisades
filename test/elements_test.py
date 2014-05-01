@@ -178,6 +178,7 @@ class ElementTest(unittest.TestCase):
         element_id = self.element.get_id()
         self.assertEqual(element_id, 'dce4f711d1bc0b86ada3d5a7cfdc77f6')
 
+
 class PrimitiveTest(ElementTest):
     def setUp(self):
         self.element = elements.Primitive({})
@@ -263,6 +264,51 @@ class PrimitiveTest(ElementTest):
     def test_get_id(self):
         element_id = self.element.get_id()
         self.assertEqual(element_id, '9cba20199e30dca32349e4964271a224')
+
+class HideablePrimitiveTest(PrimitiveTest):
+    def setUp(self):
+        self.element = elements.Primitive({'hideable': True})
+
+    def test_default_config(self):
+        expected_defaults = {
+            'validateAs': {'type': 'disabled'},
+            'required': False,
+            'hideable': True,
+            'returns': {
+                'ifDisabled': False,
+                'ifEmpty': False,
+                'ifHidden': False,
+            }
+        }
+        self.assertEqual(self.element.config, expected_defaults)
+
+    def test_get_state(self):
+        expected_state = {
+            'value': self.element.value(),
+            'is_hidden': self.element.is_hidden(),
+        }
+        self.assertEqual(self.element.state(), expected_state)
+
+    def test_set_state(self):
+        expected_state = {
+            'value': 'aaa',  # some placeholder value
+            'is_hidden': True,
+        }
+        self.element.set_state(expected_state)
+        self.assertEqual(self.element.value(), expected_state['value'])
+        self.assertEqual(self.element.is_hidden(), expected_state['is_hidden'])
+
+        new_state = {
+            'value': 'bbb',
+            'is_hidden': False,
+        }
+        self.element.set_state(new_state)
+        self.assertEqual(self.element.value(), new_state['value'])
+        self.assertEqual(self.element.is_hidden(), new_state['is_hidden'])
+
+    def test_get_id(self):
+        element_id = self.element.get_id()
+        self.assertEqual(element_id, 'f93edaf757add9479cb27116584ec16c')
 
 class LabeledPrimitiveTest(PrimitiveTest):
     def setUp(self):

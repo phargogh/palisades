@@ -368,6 +368,7 @@ class Primitive(Element):
         return False
 
     def should_return(self):
+        LOGGER.debug('Checking whether should return: %s', self)
         # if element does not have an args_id, we're not supposed to return.
         # Therefore, return False.
         if 'args_id' not in self.config:
@@ -375,7 +376,7 @@ class Primitive(Element):
             return False
 
         return_if_hidden = self.config['returns']['ifHidden']
-        if return_if_hidden and self.is_hidden():
+        if return_if_hidden or self.is_hidden():
             LOGGER.debug('Element %s is hidden.', self)
             return False
 
@@ -406,6 +407,7 @@ class LabeledPrimitive(Primitive):
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
+            'ifHidden': False,
         },
     }
 
@@ -434,6 +436,7 @@ class Dropdown(LabeledPrimitive):
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
+            'ifHidden': False,
             'type': 'strings'
         },
     }
@@ -493,6 +496,7 @@ class Text(LabeledPrimitive):
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
+            'ifHidden': False,
         },
     }
 
@@ -531,6 +535,7 @@ class File(Text):
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
+            'ifHidden': False,
         },
     }
 
@@ -629,6 +634,7 @@ class CheckBox(LabeledPrimitive):
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
+            'ifHidden': False,
         },
     }
 

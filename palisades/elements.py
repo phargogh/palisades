@@ -1039,8 +1039,13 @@ class Form():
 
             # TODO: submit the args dict and other relevant data back to app.
             try:
+                try:
+                    function_name = self._ui.config['targetFunction']
+                except KeyError:
+                    function_name = 'execute'
+
                 self.runner = execution.PythonRunner(self._ui.config['targetScript'],
-                    args_dict)
+                    args_dict, function_name)
                 self.submitted.emit(True)
             except ImportError as error:
                 LOGGER.error('Problem loading %s', self._ui.config['targetScript'])

@@ -5,6 +5,7 @@ import imp
 import datetime
 import sys
 import traceback
+import time
 from types import DictType
 
 from palisades.utils import Communicator
@@ -371,6 +372,7 @@ class Executor(threading.Thread):
         handler.  If an exception is raised in either the loading or execution
         of the module or function, a traceback is printed and the exception is
         saved."""
+        start_time = time.time()
         self.log_manager.print_args(self.args)
         try:
             function = getattr(self.module, self.func_name)
@@ -390,7 +392,24 @@ class Executor(threading.Thread):
             self.failed = True
             self.exception = error
         finally:
+            elapsed_time = round(time.time() - start_time, 2)
+            LOGGER.info('Elapsed time: %s', format_time(elapsed_time))
             self.log_manager.print_errors()
             self.log_manager.close()
 
+def format_time(seconds):
+    """Render the integer number of seconds as a string.  Returns a string.
+    """
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    hours = int(hours)
+    minutes = int(minutes)
+
+    if hours > 0:
+        return "%sh %sm %ss" % (hours, minutes, seconds)
+
+    if minutes > 0:
+        return "%sm %ss" % (minutes, seconds)
+    return "%ss" % seconds
 

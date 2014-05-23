@@ -5,12 +5,15 @@ import platform
 import shutil
 import subprocess
 import tempfile
+import time
 
 HG_CALL = 'hg log -r . --config ui.report_untrusted=False'
 
 LOGGER = logging.getLogger('versioning')
 LOGGER.setLevel(logging.ERROR)
 
+if platform.system() != 'Windows':
+    from shutil import WindowsError
 
 def build_data():
     """Returns a dictionary of relevant build data."""
@@ -44,7 +47,22 @@ def write_build_info(source_file_uri):
 
     source_file.close()
     os.remove(source_file_uri)
-    shutil.copyfile(temp_file_uri, source_file_uri)
+
+    # This whole block of try/except logic is an attempt to mitigate a problem
+    # we've experienced on Windows, where a file had not quite been deleted
+    # before we tried to copy the new file over the old one.
+    file_copied = False
+    for index in range(10):
+        try:
+            shutil.copyfile(temp_file_uri, source_file_uri)
+            file_copied = True
+            break  # if we successfully copy, end the loop.
+        except WindowsError:
+            time.sleep(0.25)
+
+    if not file_copied:
+        raise IOError('Could not copy %s to %s', temp_file_uri,
+            source_file_uri)
 
 def _temporary_filename():
     """Returns a temporary filename using mkstemp. The file is deleted

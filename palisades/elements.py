@@ -983,6 +983,13 @@ class Form():
         for element in self.elements:
             element_id = element.get_id()
             element_state = element.state()
+            try:
+                element_state['_debug'] = element._get_hashable_config()
+            except TypeError:
+                # happens when element_state is None, which can happen when the
+                # element is not a primitive.
+                pass
+
             state_dict[element_id] = element_state
 
         utils.save_dict_to_json(state_dict, uri, 4)

@@ -652,7 +652,8 @@ class TableChecker(FileChecker, ValidationAssembler):
 
     def verify_restrictions(self, restriction_list):
         table = self._build_table()
-        for restriction in restriction_list:
+        for restriction_orig in restriction_list:
+            restriction = restriction_orig.copy()
             restricted_fields = self.get_matching_fields(restriction['field'])
 
             # If the user has not defined whether the field is required,

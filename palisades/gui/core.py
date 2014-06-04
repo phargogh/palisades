@@ -187,6 +187,7 @@ class LabeledPrimitiveGUI(PrimitiveGUI):
 
         self._validation_button = toolkit.ValidationButton(label_text)
         self._help_button = toolkit.InformationButton(label_text)
+        self._help_button.set_body(self.element.help_text())
 
         self.widgets = [
             self._validation_button,

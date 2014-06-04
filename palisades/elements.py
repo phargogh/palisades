@@ -222,6 +222,7 @@ class Primitive(Element):
         'validateAs': {'type': 'disabled'},
         'hideable': False,
         'required': False,
+        'helpText': "",
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
@@ -398,6 +399,10 @@ class Primitive(Element):
         # If none of the previous conditions have been met, return True.
         return True
 
+    def help_text(self):
+        """Returns the helpText attribute string."""
+        return self.config['helpText']
+
 class LabeledPrimitive(Primitive):
     defaults = {
         'label': u'',
@@ -433,6 +438,7 @@ class Dropdown(LabeledPrimitive):
         'label': u'',
         'hideable': False,
         'required': False,
+        'helpText': "",
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
@@ -493,6 +499,7 @@ class Text(LabeledPrimitive):
         'label': u'',
         'hideable': False,
         'required': False,
+        'helpText': "",
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
@@ -532,6 +539,7 @@ class File(Text):
         'label': u'',
         'hideable': False,
         'required': False,
+        'helpText': "",
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
@@ -631,6 +639,7 @@ class CheckBox(LabeledPrimitive):
         'validateAs': {'type': 'disabled'},
         'hideable': False,
         'required': False,
+        'helpText': "",
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
@@ -827,6 +836,7 @@ class Multi(Container):
             'label': '',
             'collapsible': False,
             'link_text': 'Add another',
+            'helpText': "",
             'template': {
                 'type': 'text',
                 'label': 'Input a number',

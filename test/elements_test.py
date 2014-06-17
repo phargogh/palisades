@@ -178,6 +178,12 @@ class ElementTest(unittest.TestCase):
         element_id = self.element.get_id()
         self.assertEqual(element_id, 'dce4f711d1bc0b86ada3d5a7cfdc77f6')
 
+        # assert that the element's ID has not changed following validation
+        self.element.validate()
+        time.sleep(100)
+        self.assertEqual(element_id, 'dce4f711d1bc0b86ada3d5a7cfdc77f6')
+
+
 
 class PrimitiveTest(ElementTest):
     def setUp(self):

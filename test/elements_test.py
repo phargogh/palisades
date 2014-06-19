@@ -261,6 +261,7 @@ class PrimitiveTest(ElementTest):
         # verify that the state returns the correct value.
         expected_state = {
             'value': self.element.value(),
+            'is_hidden': False,
         }
         self.assertEqual(expected_state, self.element.state())
 
@@ -270,9 +271,11 @@ class PrimitiveTest(ElementTest):
         self.assertNotEqual(self.element.value(), new_value)
         state = {
             'value': new_value,
+            'is_hidden': False,
         }
         self.element.set_state(state)
         self.assertEqual(self.element.value(), new_value)
+        self.assertEqual(self.element.is_hidden(), state['is_hidden'])
 
     def test_get_id(self):
         element_id = self.element.get_id()

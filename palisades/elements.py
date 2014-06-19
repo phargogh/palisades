@@ -267,7 +267,7 @@ class Primitive(Element):
         Returns nothing."""
 
 
-        LOGGER.debug('%s setting value to %s', self.config['id'], self._value)
+        LOGGER.debug('%s setting value to %s', self.get_id('user'), self._value)
         if not self.is_enabled():
             return
 

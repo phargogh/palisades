@@ -974,8 +974,12 @@ class Form():
             if element.should_return():
                 args_dict[element.config['args_id']] = element.value()
             else:
+                try:
+                    args_id = element.config['args_id']
+                except KeyError:
+                    args_id = element.get_id('user')
                 LOGGER.debug('Element %s should not return, skipping args_id %s',
-                    element, element.config['args_id'])
+                    element, args_id)
         return args_dict
 
     def save_state(self, uri):

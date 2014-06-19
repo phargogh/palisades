@@ -89,7 +89,7 @@ class Communicator(object):
             raise SignalNotFound(('Signal %s ' % str(target),
                 'was not found or was previously removed'))
 
-def apply_defaults(configuration, defaults, skip_duplicates=True):
+def apply_defaults(configuration, defaults, skip_duplicates=True, cleanup=False):
     """Take the input configuration and apply default values if and only if the
     configuration option was not specified by the user.
 
@@ -99,6 +99,8 @@ def apply_defaults(configuration, defaults, skip_duplicates=True):
         dictionary and in defaults wil be skipped.  If False, the defaults
         dictionary will be blindly applied to the configuration.  Defaults to
         True.
+    cleanup - a boolean.  indicates whether to remove entries from
+        configuration that are not in defaults.
 
     Returns a dictionary with rendered default values."""
 
@@ -106,7 +108,8 @@ def apply_defaults(configuration, defaults, skip_duplicates=True):
     for key, default_value in defaults.iteritems():
         try:
             if type(default_value) is DictType:
-                default_value = apply_defaults(sanitized_config[key], default_value)
+                default_value = apply_defaults(sanitized_config[key],
+                    default_value, cleanup=cleanup)
                 sanitized_config[key] = default_value
         except:
             # if the key is missing from the user's dictionary, we'll pass for
@@ -118,6 +121,11 @@ def apply_defaults(configuration, defaults, skip_duplicates=True):
                 sanitized_config[key] = default_value
         else:
             sanitized_config[key] = default_value
+
+    if cleanup:
+        for sanitized_key in sanitized_config.keys():
+            if sanitized_key not in defaults:
+                del sanitized_config[sanitized_key]
 
     return sanitized_config
 

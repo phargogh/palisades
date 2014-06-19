@@ -103,6 +103,38 @@ class CoreTest(unittest.TestCase):
         self.assertEqual(utils.apply_defaults(test_configuration, defaults),
             expected_result)
 
+    def test_default_config_update(self):
+        # a case where existing defaults are not overridden by user input.
+        test_configuration = {
+        }
+        first_defaults = {
+            0: {'hello': 'world'}
+        }
+        first_update = utils.apply_defaults(test_configuration, first_defaults)
+        self.assertEqual(first_update, {0: {'hello': 'world'}})
+
+        second_defaults = {
+            0: None
+        }
+
+        # add 3rd parameter=False to make this pass
+        second_update = utils.apply_defaults(first_update, second_defaults)
+        self.assertEqual(second_update, {0: None})
+
+    def test_default_config_cleanup(self):
+        # verify cleaning up attributes not defined in defaults works.
+        test_config = {
+            'attribute': 'to delete',
+            'keep': 'this',
+        }
+        test_defaults = {
+            'keep': 'this line',
+        }
+
+        # add cleanup=True to make this pass
+        result = utils.apply_defaults(test_config, test_defaults, cleanup)
+        self.assertEqual(result, {'keep': 'this'})
+
     def test_convert_config(self):
         # take an IUI configuration object and convert it to palisades.
         sample_config = {

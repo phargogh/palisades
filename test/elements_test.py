@@ -288,6 +288,7 @@ class HideablePrimitiveTest(PrimitiveTest):
     def test_default_config(self):
         expected_defaults = {
             'validateAs': {'type': 'disabled'},
+            'helpText': '',
             'required': False,
             'hideable': True,
             'returns': {

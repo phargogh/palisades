@@ -386,9 +386,12 @@ class Primitive(Element):
         # if element is disabled and we're not supposed to return if disabled,
         # return False.
         return_if_disabled = self.config['returns']['ifDisabled']
-        if return_if_disabled and not self.is_enabled():
-            LOGGER.debug('Element %s is disabled.', self)
-            return False
+        if self.is_enabled() is False:
+            if return_if_disabled is False:
+                LOGGER.debug('Element %s is disabled and should not return',
+                    self)
+                return False
+
 
         # if the element is empty and we're not supposed to return if it's
         # empty, return False.

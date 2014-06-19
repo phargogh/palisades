@@ -1313,6 +1313,7 @@ class FormTest(unittest.TestCase):
     def setUp(self):
         self.timber_clean = os.path.join(PALISADES_CONFIG, 'timber_clean.json')
         self.config = {
+            'modelName': 'Example_script',
             'targetScript': os.path.join(TEST_DIR, 'data', 'sample_scripts.py'),
             'elements': [
                 {
@@ -1360,13 +1361,15 @@ class FormTest(unittest.TestCase):
         expected_args = {
             'workspace_dir': os.path.join(TEST_DIR, 'sample_folder'),
             'timber_shape_uri': self.timber_clean,
-            'market_disc_rate': '7',
+            'market_disc_rate': u'7',
         }
         # disable the attr_table_uri element and verify that its value was not
         # in the returned dictionary.
         # we know that it's element index 2 because that's the order in which it
         # was created.
         self.form.elements[2].set_enabled(False)
+        self.assertEqual(self.form.elements[2].is_enabled(), False)
+        self.assertEqual(self.form.elements[2].should_return(), False)
         returned_args = self.form.collect_arguments()
         self.assertEqual(returned_args, expected_args)
 

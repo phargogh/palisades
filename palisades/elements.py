@@ -411,6 +411,7 @@ class Primitive(Element):
 class LabeledPrimitive(Primitive):
     defaults = {
         'label': u'',
+        'helpText': '',
         'validateAs': {'type': 'disabled'},
         'hideable': False,
         'required': False,

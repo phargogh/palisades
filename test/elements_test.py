@@ -260,7 +260,7 @@ class PrimitiveTest(ElementTest):
     def test_get_state(self):
         # verify that the state returns the correct value.
         expected_state = {
-            'value': self.element.value(),
+            'value': self.element._value, # value() returns strings
             'is_hidden': False,
         }
         self.assertEqual(expected_state, self.element.state())
@@ -1080,7 +1080,14 @@ class DropdownTest(LabeledPrimitiveTest):
             'defaultValue': 0,
             'label': u'',
             'options': ['No options specified'],
-            'returns': 'strings',
+            'returns': {
+                'type': 'strings',
+                'ifDisabled': False,
+                'ifEmpty': False,
+                'ifHidden': False,
+            },
+            'required': False,
+            'helpText': '',
             'validateAs': {'type': 'disabled'},
             'hideable': False,
         }
@@ -1092,8 +1099,15 @@ class DropdownTest(LabeledPrimitiveTest):
         default_options = {
             'defaultValue': 0,
             'label': u'',
+            'helpText': '',
             'options': ['No options specified'],
-            'returns': 'strings',
+            'returns': {
+                'type': 'strings',
+                'ifEmpty': False,
+                'ifHidden': False,
+                'ifDisabled': False,
+            },
+            'required': False,
             'validateAs': {'type': 'disabled'},
             'hideable': False,
         }
@@ -1130,7 +1144,7 @@ class DropdownTest(LabeledPrimitiveTest):
         """Assert the correct output value of a Dropdown (strings)"""
         config = {
             'options': ['a', 'b', 'c'],
-            'returns': 'strings',
+            'returns': {'type': 'strings'},
         }
         dropdown = elements.Dropdown(config)
 
@@ -1147,7 +1161,7 @@ class DropdownTest(LabeledPrimitiveTest):
         """Assert the correct output value of a Dropdown (ordinals)"""
         config = {
             'options': ['a', 'b', 'c'],
-            'returns': 'ordinals',
+            'returns': {'type': 'ordinals'},
         }
         dropdown = elements.Dropdown(config)
 
@@ -1212,6 +1226,7 @@ class DropdownTest(LabeledPrimitiveTest):
         self.assertNotEqual(self.element.value(), new_value)
         state = {
             'value': new_value,
+            'is_hidden': True,
         }
         self.element.set_state(state)
         self.assertEqual(self.element.value(), 'No options specified')

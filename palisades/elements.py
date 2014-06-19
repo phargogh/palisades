@@ -1038,7 +1038,15 @@ class Form():
     def submit(self, event=None):
         LOGGER.debug('Starting the form submission process')
         # Check the validity of all inputs
-        form_data = [(e.config['args_id'], e.is_valid(), e.value()) for e in self.elements]
+        form_data = []
+        for element in self.elements:
+            try:
+                form_data.append((element.config['args_id'], element.is_valid(),
+                    element.value()))
+            except KeyError:
+                # no attribute args_id, so skip.
+                pass
+
         for element in form_data:
             print element
 

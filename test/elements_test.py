@@ -465,7 +465,14 @@ class FileTest(TextTest):
         # override from ElementTest
         expected_defaults = {
             'width': 60,
-            'defaultValue': '',
+            'helpText': '',
+            'defaultValue': u'',
+            'required': False,
+            'returns': {
+                'ifDisabled': False,
+                'ifEmpty': False,
+                'ifHidden': False,
+            },
             'validateAs': {'type': 'file'},
             'label': u'',
             'hideable': False,
@@ -474,9 +481,8 @@ class FileTest(TextTest):
 
     def test_validate(self):
         # Verify that validation has not been performed.
-        # TODO: Should is_valid() be True?
+        # calling element.is_valid() causes validation to occur.
         self.assertEqual(self.element._valid, None)
-        self.assertEqual(self.element.is_valid(), False)
 
         # Start validation by setting the value.
         # wait until validation thread finishes (using join())
@@ -537,6 +543,7 @@ class FileTest(TextTest):
         # default validation is for a file, so if we provide a folder, it should
         # fail.
         self.assertEqual(self.element.value(), u'')
+        self.assertEqual(self.element._valid, False)
         self.assertEqual(self.element.is_valid(), False)
 
     def test_set_state(self):
@@ -545,9 +552,11 @@ class FileTest(TextTest):
         self.assertNotEqual(self.element.value(), new_value)
         state = {
             'value': new_value,
+            'is_hidden': False,
         }
         self.element.set_state(state)
         self.assertEqual(self.element.value(), new_value)
+        self.assertEqual(self.element.is_hidden(), state['is_hidden'])
 
     def test_get_id(self):
         element_id = self.element.get_id()

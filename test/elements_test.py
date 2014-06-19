@@ -385,6 +385,13 @@ class TextTest(LabeledPrimitiveTest):
             'defaultValue': '',
             'validateAs': {'type': 'string'},
             'label': u'',
+            'helpText': '',
+            'required': False,
+            'returns': {
+                'ifDisabled': False,
+                'ifEmpty': False,
+                'ifHidden': False,
+            },
             'hideable': False,
         }
         self.assertEqual(self.element.config, expected_defaults)

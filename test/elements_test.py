@@ -333,8 +333,9 @@ class LabeledPrimitiveTest(PrimitiveTest):
 
     def test_default_config(self):
         expected_defaults = {
-            'label': '',
+            'label': u'',
             'required': False,
+            'helpText': '',
             'returns': {
                 'ifDisabled': False,
                 'ifEmpty': False,
@@ -1298,9 +1299,11 @@ class CheckBoxTest(LabeledPrimitiveTest):
         self.assertNotEqual(self.element.value(), new_value)
         state = {
             'value': new_value,
+            'is_hidden': True,
         }
         self.element.set_state(state)
         self.assertEqual(self.element.value(), new_value)
+        self.assertEqual(self.element.is_hidden(), state['is_hidden'])
 
     def test_get_id(self):
         element_id = self.element.get_id()

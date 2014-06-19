@@ -42,3 +42,8 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+# vim swap files
+*.swp
+*.swo
+

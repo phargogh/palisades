@@ -333,6 +333,12 @@ class LabeledPrimitiveTest(PrimitiveTest):
     def test_default_config(self):
         expected_defaults = {
             'label': '',
+            'required': False,
+            'returns': {
+                'ifDisabled': False,
+                'ifEmpty': False,
+                'ifHidden': False,
+            },
             'validateAs': {'type': 'disabled'},
             'hideable': False,
         }

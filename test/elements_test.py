@@ -857,6 +857,7 @@ class MultiTest(ContainerTest):
     def test_default_config(self):
         expected_defaults = {
             'label': '',
+            'helpText': '',
             'collapsible': False,
             'elements': [],
             'link_text': 'Add another',

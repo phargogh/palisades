@@ -111,8 +111,10 @@ class Element(object):
 
         Returns nothing."""
 
+        old_defaults = self._default_config.copy()
         self._default_config.update(new_defaults)
-        self.config = utils.apply_defaults(self.config, self._default_config)
+        self.config = utils.apply_defaults(self.config, self._default_config,
+                old_defaults=old_defaults)
         self.config_changed.emit(self.config)
 
     def is_enabled(self):

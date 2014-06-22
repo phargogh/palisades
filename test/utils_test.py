@@ -118,7 +118,8 @@ class CoreTest(unittest.TestCase):
         }
 
         # add 3rd parameter=False to make this pass
-        second_update = utils.apply_defaults(first_update, second_defaults)
+        second_update = utils.apply_defaults(first_update, second_defaults,
+            old_defaults=first_defaults)
         self.assertEqual(second_update, {0: None})
 
     def test_default_config_cleanup(self):
@@ -132,7 +133,7 @@ class CoreTest(unittest.TestCase):
         }
 
         # add cleanup=True to make this pass
-        result = utils.apply_defaults(test_config, test_defaults, cleanup)
+        result = utils.apply_defaults(test_config, test_defaults, cleanup=True)
         self.assertEqual(result, {'keep': 'this'})
 
     def test_convert_config(self):

@@ -89,7 +89,8 @@ class Communicator(object):
             raise SignalNotFound(('Signal %s ' % str(target),
                 'was not found or was previously removed'))
 
-def apply_defaults(configuration, defaults, skip_duplicates=True, cleanup=False):
+def apply_defaults(configuration, defaults, skip_duplicates=True,
+        cleanup=False, old_defaults=None):
     """Take the input configuration and apply default values if and only if the
     configuration option was not specified by the user.
 
@@ -101,11 +102,26 @@ def apply_defaults(configuration, defaults, skip_duplicates=True, cleanup=False)
         True.
     cleanup - a boolean.  indicates whether to remove entries from
         configuration that are not in defaults.
+    old_defaults - a dictionary or None.  If a dictionary, it should be of the
+        current default dictionary.  If None, this indicates that no defaults
+        should be considered.
 
     Returns a dictionary with rendered default values."""
 
+
+    # Sanitize old_defaults for use later.
+    if old_defaults is None:
+        old_defaults = {}
+
     sanitized_config = configuration.copy()
     for key, default_value in defaults.iteritems():
+        # If we find the current entry in the old_defaults dictionary AND the
+        # value is the same as the old default value, we know that the default
+        # value should be overridden with the new default value.
+        if key in old_defaults:
+            if old_defaults[key] == sanitized_config[key]:
+                sanitized_config[key] = default_value
+
         try:
             if type(default_value) is DictType:
                 default_value = apply_defaults(sanitized_config[key],
@@ -121,6 +137,7 @@ def apply_defaults(configuration, defaults, skip_duplicates=True, cleanup=False)
                 sanitized_config[key] = default_value
         else:
             sanitized_config[key] = default_value
+
 
     if cleanup:
         for sanitized_key in sanitized_config.keys():

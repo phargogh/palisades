@@ -603,6 +603,17 @@ class Static(Primitive):
             'returns': None
         }
 
+        # If the user-defined returns attribute is a dictionary, it's highly
+        # likely that there's been some accidental merging of default
+        # attributes.  Clean up these attributes so that only what the user
+        # defined remains.
+        if type(self.config['returns']) is DictType:
+            returns_dict = {}
+            for key, value in self.config['returns'].iteritems():
+                if key not in self._default_config:
+                    returns_dict[key] = value
+            self.config['returns'] = returns_dict
+
         self.set_default_config(new_defaults)
 
     def value(self):

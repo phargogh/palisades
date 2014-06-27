@@ -976,7 +976,16 @@ class StaticTest(ElementTest):
 
     def test_default_config(self):
         expected_defaults = {
-            'returns': None
+            'returnValue': None,
+            'helpText': '',
+            'hideable': False,
+            'required': False,
+            'returns': {
+                'ifDisabled': False,
+                'ifEmpty': False,
+                'ifHidden': False,
+            },
+            'validateAs': {'type': 'disabled'},
         }
         self.assertEqual(expected_defaults, self.element.config)
 
@@ -986,17 +995,17 @@ class StaticTest(ElementTest):
 
     def test_returns_string(self):
         value = "hello world!"
-        element = elements.Static({'returns': value})
+        element = elements.Static({'returnValue': value})
         self.assertEqual(element.value(), value)
 
     def test_returns_dict(self):
         value = {"a":1}
-        element = elements.Static({'returns': value})
+        element = elements.Static({'returnValue': value})
         self.assertEqual(element.value(), value)
 
     def test_get_id(self):
         element_id = self.element.get_id()
-        self.assertEqual(element_id, 'f315982c931dbca88d2782cc5d90c09d')
+        self.assertEqual(element_id, 'd5075c3e868b9b76ae2bce70de38696e')
 
     def test_get_state(self):
         # nothing to test, since there's no relevant state.
@@ -1013,23 +1022,37 @@ class LabelTest(ElementTest):
     def test_default_config(self):
         expected_defaults = {
             'label': '',
-            'returns': None,
+            'returnValue': None,
         }
 
     def test_static_defaults(self):
         element = elements.Label({})
         self.assertEqual(element.value(), None)
 
-        self.assertEqual(element.config, {'label': '', 'returns': None})
+        expected_config = {
+            'label': '',
+            'helpText': '',
+            'returnValue': None,
+            'hideable': False,
+            'required': False,
+            'validateAs': {'type': 'disabled'},
+            'returns': {
+                'ifDisabled': False,
+                'ifEmpty': False,
+                'ifHidden': False,
+            }
+        }
+
+        self.assertEqual(element.config, expected_config)
 
     def test_returns_string(self):
         value = "hello world!"
-        element = elements.Label({'returns': value})
+        element = elements.Label({'returnValue': value})
         self.assertEqual(element.value(), value)
 
     def test_returns_dict(self):
         value = {"a":1}
-        element = elements.Label({'returns': value})
+        element = elements.Label({'returnValue': value})
         self.assertEqual(element.value(), value)
 
     def test_label_func(self):
@@ -1050,7 +1073,7 @@ class LabelTest(ElementTest):
         return_value = 'some_value'
         config = {
             'label': label_string,
-            'returns': return_value,
+            'returnValue': return_value,
         }
         label_obj = elements.Label(config)
 
@@ -1062,7 +1085,7 @@ class LabelTest(ElementTest):
 
     def test_get_id(self):
         element_id = self.element.get_id()
-        self.assertEqual(element_id, '4874d73f92ac1b38bd1fad4b01959665')
+        self.assertEqual(element_id, '303f45c98833f41625e27a54e5574bbe')
 
     def test_get_state(self):
         # nothing to test, since there's no relevant state.

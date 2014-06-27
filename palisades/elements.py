@@ -598,21 +598,10 @@ class File(Text):
 class Static(Primitive):
     def __init__(self, configuration):
         Primitive.__init__(self, configuration)
-        self._hashable_config = ['returns']
+        self._hashable_config = ['returnValue']
         new_defaults = {
-            'returns': None
+            'returnValue': None,
         }
-
-        # If the user-defined returns attribute is a dictionary, it's highly
-        # likely that there's been some accidental merging of default
-        # attributes.  Clean up these attributes so that only what the user
-        # defined remains.
-        if type(self.config['returns']) is DictType:
-            returns_dict = {}
-            for key, value in self.config['returns'].iteritems():
-                if key not in self._default_config:
-                    returns_dict[key] = value
-            self.config['returns'] = returns_dict
 
         self.set_default_config(new_defaults)
 
@@ -621,7 +610,7 @@ class Static(Primitive):
             return self.config['defaultValue']
         except:
             pass
-        return self.config['returns']
+        return self.config['returnValue']
 
     def should_return(self):
         return True  # static should ALWAYS return.

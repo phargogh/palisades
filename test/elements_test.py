@@ -178,12 +178,6 @@ class ElementTest(unittest.TestCase):
         element_id = self.element.get_id()
         self.assertEqual(element_id, 'dce4f711d1bc0b86ada3d5a7cfdc77f6')
 
-        # assert that the element's ID has not changed following validation
-        self.element.validate()
-        time.sleep(100)
-        self.assertEqual(element_id, 'dce4f711d1bc0b86ada3d5a7cfdc77f6')
-
-
 
 class PrimitiveTest(ElementTest):
     def setUp(self):
@@ -281,6 +275,12 @@ class PrimitiveTest(ElementTest):
         element_id = self.element.get_id()
         self.assertEqual(element_id, '9cba20199e30dca32349e4964271a224')
 
+        # assert that the element's ID has not changed following
+        # validation
+        self.element.validate()
+        time.sleep(.1)
+        self.assertEqual(element_id, '9cba20199e30dca32349e4964271a224')
+
 class HideablePrimitiveTest(PrimitiveTest):
     def setUp(self):
         self.element = elements.Primitive({'hideable': True})
@@ -325,6 +325,12 @@ class HideablePrimitiveTest(PrimitiveTest):
 
     def test_get_id(self):
         element_id = self.element.get_id()
+        self.assertEqual(element_id, 'f93edaf757add9479cb27116584ec16c')
+
+        # assert that the element's ID has not changed following
+        # validation
+        self.element.validate()
+        time.sleep(.1)
         self.assertEqual(element_id, 'f93edaf757add9479cb27116584ec16c')
 
 class LabeledPrimitiveTest(PrimitiveTest):
@@ -382,6 +388,13 @@ class LabeledPrimitiveTest(PrimitiveTest):
     def test_get_id(self):
         element_id = self.element.get_id()
         self.assertEqual(element_id, '581741fc0dabd8652403bb6d8a0f8b19')
+
+        # assert that the element's ID has not changed following
+        # validation
+        self.element.validate()
+        time.sleep(.1)
+        self.assertEqual(element_id, '581741fc0dabd8652403bb6d8a0f8b19')
+
 
 class TextTest(LabeledPrimitiveTest):
     def setUp(self):
@@ -456,6 +469,12 @@ class TextTest(LabeledPrimitiveTest):
 
     def test_get_id(self):
         element_id = self.element.get_id()
+        self.assertEqual(element_id, 'cbc4d60d477c32883a589588fdfd4ac9')
+
+        # assert that the element's ID has not changed following
+        # validation
+        self.element.validate()
+        time.sleep(.1)
         self.assertEqual(element_id, 'cbc4d60d477c32883a589588fdfd4ac9')
 
 class FileTest(TextTest):
@@ -568,6 +587,12 @@ class FileTest(TextTest):
 
     def test_get_id(self):
         element_id = self.element.get_id()
+        self.assertEqual(element_id, 'd783e40c664369d01f7aed0802f5acc0')
+
+        # assert that the element's ID has not changed following
+        # validation
+        self.element.validate()
+        time.sleep(.1)
         self.assertEqual(element_id, 'd783e40c664369d01f7aed0802f5acc0')
 
 class GroupTest(ElementTest):
@@ -1014,6 +1039,12 @@ class StaticTest(ElementTest):
         element_id = self.element.get_id()
         self.assertEqual(element_id, 'd5075c3e868b9b76ae2bce70de38696e')
 
+        # assert that the element's ID has not changed following
+        # validation
+        self.element.validate()
+        time.sleep(.1)
+        self.assertEqual(element_id, 'd5075c3e868b9b76ae2bce70de38696e')
+
     def test_get_state(self):
         # nothing to test, since there's no relevant state.
         pass
@@ -1092,6 +1123,12 @@ class LabelTest(ElementTest):
 
     def test_get_id(self):
         element_id = self.element.get_id()
+        self.assertEqual(element_id, '303f45c98833f41625e27a54e5574bbe')
+
+        # assert that the element's ID has not changed following
+        # validation
+        self.element.validate()
+        time.sleep(.1)
         self.assertEqual(element_id, '303f45c98833f41625e27a54e5574bbe')
 
     def test_get_state(self):
@@ -1207,6 +1244,12 @@ class DropdownTest(LabeledPrimitiveTest):
 
     def test_get_id(self):
         element_id = self.element.get_id()
+        self.assertEqual(element_id, '3d498b434dc5a1d10e483c9b1f942dcd')
+
+        # assert that the element's ID has not changed following
+        # validation
+        self.element.validate()
+        time.sleep(.1)
         self.assertEqual(element_id, '3d498b434dc5a1d10e483c9b1f942dcd')
 
     def test_is_valid(self):
@@ -1337,6 +1380,12 @@ class CheckBoxTest(LabeledPrimitiveTest):
 
     def test_get_id(self):
         element_id = self.element.get_id()
+        self.assertEqual(element_id, 'e3ea1643e88dc2f1390de791149f79ed')
+
+        # assert that the element's ID has not changed following
+        # validation
+        self.element.validate()
+        time.sleep(.1)
         self.assertEqual(element_id, 'e3ea1643e88dc2f1390de791149f79ed')
 
 class FormTest(unittest.TestCase):

@@ -117,7 +117,7 @@ class ElementTest(unittest.TestCase):
             # So we continue on to the next assertion.
             pass
         self.assertEqual(self.element._default_config, {'a': 'ccc', 'b': 'bbb'})
-        self.assertEqual(self.element.config, {'a': 'aaa', 'b': 'bbb'})
+        self.assertEqual(self.element.config, {'a': 'ccc', 'b': 'bbb'})
 
     def test_visibility(self):
         # verify that this element is visible and enabled by default.

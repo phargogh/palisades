@@ -122,6 +122,27 @@ class CoreTest(unittest.TestCase):
             old_defaults=first_defaults)
         self.assertEqual(second_update, {0: None})
 
+    def test_default_config_update_dicts(self):
+        test_configuration = {
+            'returns': {'some': 'value'},
+        }
+        first_defaults = {
+            'returns': {
+                'ifEmpty': True,
+                'ifNot': False,
+            }
+        }
+        first_update = utils.apply_defaults(test_configuration, first_defaults)
+        self.assertEqual(first_update, {'returns': {'some': 'value',
+            'ifEmpty': True, 'ifNot': False}})
+
+        second_defaults = {
+            'returns': None,
+        }
+        second_update = utils.apply_defaults(first_update, second_defaults,
+            old_defaults=first_defaults)
+        self.assertEqual(second_update, {'returns': {'some': 'value'}})
+
     def test_default_config_cleanup(self):
         # verify cleaning up attributes not defined in defaults works.
         test_config = {

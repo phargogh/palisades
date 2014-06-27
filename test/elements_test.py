@@ -544,7 +544,14 @@ class FileTest(TextTest):
         # default validation is for a file, so if we provide a folder, it should
         # fail.
         self.assertEqual(self.element.value(), u'')
-        self.assertEqual(self.element._valid, False)
+        self.assertEqual(self.element._valid, None)
+        self.assertEqual(self.element.is_required(), False)
+
+        # element is valid because there's no input and input is optional.
+        self.assertEqual(self.element.is_valid(), True)
+
+        self.element.set_value(os.getcwd())  # set to a dir
+        self.assertEqual(self.element.value(), os.getcwd())
         self.assertEqual(self.element.is_valid(), False)
 
     def test_set_state(self):

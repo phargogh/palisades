@@ -1,6 +1,7 @@
 import unittest
 import os
 import time
+import shutil
 
 import mock
 
@@ -1426,6 +1427,10 @@ class FormTest(unittest.TestCase):
         }
         self.form = elements.Form(self.config)
         self.maxDiff = None
+        self.workspace = self.config['elements'][0]['defaultValue']
+
+    def tearDown(self):
+        shutil.rmtree(self.workspace)
 
     def test_collect_arguments(self):
         expected_args = {

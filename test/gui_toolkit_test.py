@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unittest
 
 import mock
@@ -183,6 +184,10 @@ class InformationButtonTest(ButtonTest):
     def test_setup(self):
         self.assertEqual(self.title, self.widget.title())
         self.assertEqual('', self.widget.body())
+
+#    def test_unicode(self):
+#        unicode_text = u'Но дуо квюач декат, кибо дыкоры альяквюам шэа ку.'
+#        self.widget.set_title(unicode_text)
 
 class ValidationButtonTest(InformationButtonTest):
     def setUp(self):

@@ -199,6 +199,24 @@ class GDALCheckerTester(CheckerTester):
         self.validate_as['value'] += 'aaa'
         self.assertError()
 
+class UnicodeGDALCheckerTester(GDALCheckerTester):
+    def setUp(self):
+        self.unicode_dir = u'folder_тамквюам'
+        self.validate_as = {
+            'type': 'GDAL',
+            'value': os.path.join(self.unicode_dir, 'lulc_samp_cur'),
+        }
+        self.checker = validation.GDALChecker()
+
+        # copy the whole validation data dir to the new folder for this suite
+        # of tests.
+        if os.path.exists(self.unicode_dir):
+            shutil.rmtree(self.unicode_dir)
+        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.unicode_dir)
+
 class OGRCheckerTester(CheckerTester):
     """Test the class palisades.validation.OGRChecker"""
     def setUp(self):

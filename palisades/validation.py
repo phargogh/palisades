@@ -547,9 +547,9 @@ class GDALChecker(FileChecker):
         Returns an error string if in error.  Returns none otherwise."""
 
         gdal.PushErrorHandler('CPLQuietErrorHandler')
-        file_obj = gdal.Open(str(self.uri))
+        file_obj = gdal.Open(self.uri)
         if file_obj == None:
-            return str('Must be a raster that GDAL can open')
+            return 'Must be a raster that GDAL can open'
 
 class TableChecker(FileChecker, ValidationAssembler):
     """This class provides a template for validation of table-based files."""

@@ -404,7 +404,7 @@ class Checker(Registrar):
                         return error
         except Exception as e:
             print '%s: \'%s\' encountered, for input %s passing validation.' % \
-                (e.__class__.__name__, str(e), valid_dict['value'])
+                (e.__class__.__name__, e, valid_dict['value'])
             print traceback.format_exc()
             raise Warning('An unexpected error was encountered during' +
                           ' validation.  Use this input at your own risk.')
@@ -427,7 +427,7 @@ class URIChecker(Checker):
         self.uri = valid_dict['value']
 
         if os.path.exists(self.uri) == False:
-            return str('File not found: %s' % self.uri)
+            return 'File not found: %s' % self.uri
 
     def check_permissions(self, permissions):
         """Verify that the URI has the given permissions.

@@ -65,9 +65,11 @@ class CheckerTester(unittest.TestCase):
 class FileCheckerTester(CheckerTester):
     """Test the class palisades.validation.FileChecker"""
     def setUp(self):
-        self.validate_as = {'type': 'file',
-                            'value': os.path.join(VALIDATION_DATA, 'text_test.txt')}
-        self.checker = palisades.validation.FileChecker()
+        self.validate_as = {
+            'type': 'file',
+            'value': os.path.join(VALIDATION_DATA, u'text_test_кибо.txt')
+        }
+        self.checker = validation.FileChecker()
 
     def test_uri_exists(self):
         """Assert that the FileChecker can open a file."""

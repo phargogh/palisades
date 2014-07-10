@@ -134,7 +134,7 @@ class QtMultiTest(QtContainerTest):
         self.assertEqual(self.widget.layout().rowCount(), 2)
 
         # add a row to verify
-        new_element = elements.File({})
+        new_element = elements.File({'type': 'file'})
         new_view = core.FileGUI(new_element)
         self.widget.add_widget(new_view)
 
@@ -152,7 +152,7 @@ class QtMultiTest(QtContainerTest):
             self.assertEqual(is_visible, False)
 
         # try to create another element the same way and then try to remove it.
-        new_element = elements.File({})
+        new_element = elements.File({'type': 'file'})
         new_view = core.FileGUI(new_element)
         self.widget.add_widget(new_view)
 

@@ -492,7 +492,7 @@ class FolderChecker(URIChecker):
             return str('Folder must exist on disk')
         else:
             if os.path.isfile(self.uri):
-                return str(self.uri + ' already exists on disk')
+                return self.uri + ' already exists on disk'
 
     def check_contents(self, files):
         """Verify that the files listed in `files` exist.  Paths in `files` must

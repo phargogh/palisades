@@ -6,6 +6,7 @@ import unittest
 import os
 import pdb
 import platform
+import shutil
 
 import palisades
 from palisades import validation
@@ -103,8 +104,10 @@ class FileCheckerTester(CheckerTester):
 class FolderCheckerTester(CheckerTester):
     """Test the class palisades.validation.FileChecker"""
     def setUp(self):
-        self.validate_as = {'type': 'folder',
-                            'value': VALIDATION_DATA}
+        self.validate_as = {
+            'type': 'folder',
+            'value': VALIDATION_DATA
+        }
         self.checker = validation.FolderChecker()
 
     def test_folder_exists(self):
@@ -162,6 +165,23 @@ class FolderCheckerTester(CheckerTester):
         self.validate_as['value'] = VALIDATION_DATA
         self.assertNoError()
 
+class UnicodeFolderCheckerTester(FolderCheckerTester):
+    def setUp(self):
+        self.unicode_dir = u'folder_тамквюам'
+        self.validate_as = {
+            'type': 'folder',
+            'value': self.unicode_dir,
+        }
+        self.checker = validation.FolderChecker()
+
+        # copy the whole validation data dir to the new folder for this suite
+        # of tests.
+        if os.path.exists(self.unicode_dir):
+            shutil.rmtree(self.unicode_dir)
+        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.unicode_dir)
 
 class GDALCheckerTester(CheckerTester):
     """Test the class iui_validate.GDALChecker"""

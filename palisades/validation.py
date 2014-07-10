@@ -718,7 +718,7 @@ class OGRChecker(TableChecker):
     def open(self, valid_dict):
         """Attempt to open the shapefile."""
 
-        self.file = ogr.Open(str(self.uri))
+        self.file = ogr.Open(self.uri)
 
         if not isinstance(self.file, ogr.DataSource):
             return str('Shapefile not compatible with OGR')

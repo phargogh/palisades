@@ -360,6 +360,23 @@ class OGRCheckerTester(CheckerTester):
         self.validate_as.update(updates)
         self.assertNoError()
 
+class UnicodeOGRCheckerTester(OGRCheckerTester):
+    def setUp(self):
+        self.unicode_dir = u'folder_тамквюам'
+        self.validate_as = {'type':'OGR',
+                            'value': os.path.join(self.unicode_dir, 'AOI_WCVI')}
+        self.checker = validation.OGRChecker()
+
+        # copy the whole validation data dir to the new folder for this suite
+        # of tests.
+        if os.path.exists(self.unicode_dir):
+            shutil.rmtree(self.unicode_dir)
+        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.unicode_dir)
+
+
 class DBFCheckerTester(CheckerTester):
         """Test the class palisades.validation.DBFChecker"""
         def setUp(self):

@@ -304,6 +304,10 @@ class FileButtonTest(QtWidgetTest):
         self.assertEqual(self.widget.file_selected.__class__.__name__,
             'Communicator')
 
+class FolderButtonTest(FileButtonTest):
+    def setUp(self):
+        self.widget = qt4.FileButton('folder')
+
 class DropdownTest(QtWidgetTest):
     def setUp(self):
         self.options = ['a', 'b', 'c']

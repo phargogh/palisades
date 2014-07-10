@@ -294,7 +294,7 @@ class TextFieldTest(QtWidgetTest):
 
 class FileButtonTest(QtWidgetTest):
     def setUp(self):
-        self.widget = qt4.FileButton()
+        self.widget = qt4.FileButton('file')
 
     def test_file_selected(self):
         # can't actually get the file dialog's value programmatically, since the

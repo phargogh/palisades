@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """This file contains test cases for classes contained within the module
 invest_natcap.iui.palisades.validation."""
 

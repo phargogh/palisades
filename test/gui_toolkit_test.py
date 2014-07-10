@@ -190,6 +190,8 @@ class InformationButtonTest(ButtonTest):
         unicode_text = u'Но дуо квюач декат, кибо дыкоры альяквюам шэа ку.'
         self.widget.set_title(unicode_text)
 
+        self.widget.build_contents()
+
 class ValidationButtonTest(InformationButtonTest):
     def setUp(self):
         self.title = 'Title!'

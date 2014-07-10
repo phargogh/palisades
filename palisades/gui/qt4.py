@@ -312,7 +312,7 @@ class InformationButton(Button):
         title = '<h3 style="color:black">%s</h3><br/>' % (self.title())
         body = '<div style="color:black">%s</div>' % (self.body())
 
-        return str(title + body + width_table)
+        return title + body + width_table
 
 class ValidationButton(InformationButton):
     _error_icon = ICON_ERROR
@@ -395,7 +395,7 @@ class ValidationButton(InformationButton):
 
         body = '<div style="color:black">%s</div>' % (self.body())
 
-        return str(title + message + body + width_table)
+        return title + message + body + width_table
 
 class Label(QtGui.QLabel, QtWidget):
     def __init__(self, label_text):
@@ -902,9 +902,9 @@ class RealtimeMessagesDialog(QtGui.QDialog):
 
         self.stop_buttons()
         if exception_found:
-            self.messageArea.setText(str('<b>%s</b> encountered: <em>%s</em> <br/>' +
+            self.messageArea.setText((u'<b>%s</b> encountered: <em>%s</em> <br/>' +
                 'See the log for details.') % (thread_exception.__class__.__name__,
-                str(thread_exception)))
+                unicode(thread_exception, 'utf-8')))
         else:
             self.messageArea.setText('Model completed successfully.')
         self.error_changed.emit(exception_found)

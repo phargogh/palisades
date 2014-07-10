@@ -423,6 +423,26 @@ class DBFCheckerTester(CheckerTester):
                                                 str_restriction]
             self.assertNoError()
 
+class UnicodeDBFCheckerTester(DBFCheckerTester):
+    """Test the class palisades.validation.DBFChecker"""
+    def setUp(self):
+        self.unicode_dir = u'folder_тамквюам'
+        self.validate_as = {
+            'type': 'DBF',
+            'value': os.path.join(self.unicode_dir, 'harv_samp_cur.dbf'),
+            'fieldsExist': [],
+        }
+        self.checker = validation.DBFChecker()
+
+        # copy the whole validation data dir to the new folder for this suite
+        # of tests.
+        if os.path.exists(self.unicode_dir):
+            shutil.rmtree(self.unicode_dir)
+        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.unicode_dir)
+
 class CSVCheckerTester(CheckerTester):
         """Test the class palisades.validation.CSVChecker"""
         def setUp(self):
@@ -529,6 +549,26 @@ class CSVCheckerTester(CheckerTester):
             # Try default numeric validation on the bad guilds file.
             self.validate_as['restrictions'][0]['validateAs'] = {'type': 'number'}
             self.assertNoError()
+
+class UnicodeCSVCheckerTester(CSVCheckerTester):
+    """Test the class palisades.validation.CSVChecker"""
+    def setUp(self):
+        self.unicode_dir = u'folder_тамквюам'
+        self.validate_as = {
+            'type': 'CSV',
+            'value': os.path.join(self.unicode_dir, 'Machine_PelamisParamCSV.csv'),
+            'fieldsExist': [],
+        }
+        self.checker = validation.CSVChecker()
+
+        # copy the whole validation data dir to the new folder for this suite
+        # of tests.
+        if os.path.exists(self.unicode_dir):
+            shutil.rmtree(self.unicode_dir)
+        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.unicode_dir)
 
 class FlexibleTableCheckerTester(CheckerTester):
     """Test the class palisades.validation.FlexibleTableChecker"""

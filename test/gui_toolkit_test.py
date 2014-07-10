@@ -118,7 +118,7 @@ class QtMultiTest(QtContainerTest):
         self.assertEqual(self.widget.layout().rowCount(), 2)
 
         # add another widget to the toolkit
-        new_element = elements.File({})
+        new_element = elements.File({'type': 'file'})
         new_view = core.FileGUI(new_element)
         self.widget.add_widget(new_view)
         self.assertEqual(self.widget.layout().rowCount(), 3)

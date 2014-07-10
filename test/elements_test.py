@@ -1430,7 +1430,10 @@ class FormTest(unittest.TestCase):
         self.workspace = self.config['elements'][0]['defaultValue']
 
     def tearDown(self):
-        shutil.rmtree(self.workspace)
+        try:
+            shutil.rmtree(self.workspace)
+        except OSError:
+            pass
 
     def test_collect_arguments(self):
         expected_args = {

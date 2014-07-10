@@ -404,7 +404,7 @@ class Checker(Registrar):
                         return error
         except Exception as e:
             print '%s: \'%s\' encountered, for input %s passing validation.' % \
-                (e.__class__.__name__, str(e), valid_dict['value'])
+                (e.__class__.__name__, e, valid_dict['value'])
             print traceback.format_exc()
             raise Warning('An unexpected error was encountered during' +
                           ' validation.  Use this input at your own risk.')
@@ -427,7 +427,7 @@ class URIChecker(Checker):
         self.uri = valid_dict['value']
 
         if os.path.exists(self.uri) == False:
-            return str('File not found: %s' % self.uri)
+            return 'File not found: %s' % self.uri
 
     def check_permissions(self, permissions):
         """Verify that the URI has the given permissions.
@@ -492,7 +492,7 @@ class FolderChecker(URIChecker):
             return str('Folder must exist on disk')
         else:
             if os.path.isfile(self.uri):
-                return str(self.uri + ' already exists on disk')
+                return self.uri + ' already exists on disk'
 
     def check_contents(self, files):
         """Verify that the files listed in `files` exist.  Paths in `files` must
@@ -547,9 +547,9 @@ class GDALChecker(FileChecker):
         Returns an error string if in error.  Returns none otherwise."""
 
         gdal.PushErrorHandler('CPLQuietErrorHandler')
-        file_obj = gdal.Open(str(self.uri))
+        file_obj = gdal.Open(self.uri)
         if file_obj == None:
-            return str('Must be a raster that GDAL can open')
+            return 'Must be a raster that GDAL can open'
 
 class TableChecker(FileChecker, ValidationAssembler):
     """This class provides a template for validation of table-based files."""
@@ -718,7 +718,7 @@ class OGRChecker(TableChecker):
     def open(self, valid_dict):
         """Attempt to open the shapefile."""
 
-        self.file = ogr.Open(str(self.uri))
+        self.file = ogr.Open(self.uri)
 
         if not isinstance(self.file, ogr.DataSource):
             return str('Shapefile not compatible with OGR')
@@ -735,17 +735,17 @@ class OGRChecker(TableChecker):
                 tmp_name = os.path.basename(self.file.GetName())
                 layer_name = os.path.splitext(tmp_name)[0]
 
-            self.layer = self.file.GetLayerByName(str(layer_name))
+            self.layer = self.file.GetLayerByName(layer_name)
 
             if not isinstance(self.layer, ogr.Layer):
-                return str('Shapefile must have a layer called ' + layer_name)
+                return 'Shapefile must have a layer called ' + layer_name
 
             if 'projection' in layer_dict:
                 reference = self.layer.GetSpatialRef()
 
                 # Validate projection units if the user specifies it.
                 if 'units' in layer_dict['projection']:
-                    linear_units = str(reference.GetLinearUnitsName()).lower()
+                    linear_units = reference.GetLinearUnitsName().lower()
 
                     # This dictionary maps IUI-defined projection strings to the
                     # WKT unit name strings that OGR recognizes.
@@ -768,14 +768,15 @@ class OGRChecker(TableChecker):
                     try:
                         expected_units = known_units[required_unit]
                     except:
-                        return str('Expected projection units must be '
+                        return ('Expected projection units must be '
                             'one of %s, not %s' % (known_units.keys(),
                             required_unit))
 
                     if linear_units not in expected_units:
-                        return str('Shapefile layer %s must be projected '
-                            'in %s (one of %s, case-insensitive). \'%s\' found.'
-                            % (layer_name, required_unit, expected_units, linear_units))
+                        return ('Shapefile layer %s must be projected '
+                            'in %s (one of %s, case-insensitive). \'%s\' '
+                            'found.') % (layer_name, required_unit,
+                                expected_units, linear_units)
 
                 # Validate whether the layer should be projected
                 projection = reference.GetAttrValue('PROJECTION')
@@ -786,21 +787,21 @@ class OGRChecker(TableChecker):
                             negate_string = 'not'
                         else:
                             negate_string = ''
-                        return str('Shapefile layer %s should %s be ' +
+                        return ('Shapefile layer %s should %s be ' +
                                    'projected') % (layer_name, negate_string)
 
                 # Validate whether the layer's projection matches the
                 # specified projection
                 if 'name' in layer_dict['projection']:
                     if projection != layer_dict['projection']['name']:
-                        return str('Shapefile layer ' + layer_name + ' must be ' +
+                        return ('Shapefile layer ' + layer_name + ' must be ' +
                             'projected as ' + layer_dict['projection']['name'])
 
             if 'datum' in layer_dict:
                 reference = self.layer.GetSpatialRef()
                 datum = reference.GetAttrValue('DATUM')
                 if datum != layer_dict['datum']:
-                    return str('Shapefile layer ' + layer_name + ' must ' +
+                    return ('Shapefile layer ' + layer_name + ' must ' +
                         'have the datum ' + layer_dict['datum'])
 
     def _check_layer_type(self, type_string):
@@ -809,7 +810,7 @@ class OGRChecker(TableChecker):
             geom_type = geometry.GetGeometryType()
 
             if geom_type != self.layer_types[type_string]:
-                return str('Not all features are ' + type_string)
+                return 'Not all features are ' + type_string
 
     def _get_fieldnames(self):
         layer_def = self.layer.GetLayerDefn()
@@ -835,7 +836,7 @@ class DBFChecker(TableChecker):
 
         #Passing in the value of readOnly, because we might only need to
         #check to see if it's available for reading
-        self.file = dbf.Dbf(str(self.uri), readOnly = read_only)
+        self.file = dbf.Dbf(self.uri, readOnly = read_only)
 
         if not isinstance(self.file, dbf.Dbf):
             return str('Must be a DBF file')

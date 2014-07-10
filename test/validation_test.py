@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """This file contains test cases for classes contained within the module
 invest_natcap.iui.palisades.validation."""
 
@@ -5,8 +6,10 @@ import unittest
 import os
 import pdb
 import platform
+import shutil
 
 import palisades
+from palisades import validation
 
 TEST_DATA = os.path.join(os.path.dirname(__file__), 'data')
 VALIDATION_DATA = os.path.join(TEST_DATA, 'validation')
@@ -63,9 +66,11 @@ class CheckerTester(unittest.TestCase):
 class FileCheckerTester(CheckerTester):
     """Test the class palisades.validation.FileChecker"""
     def setUp(self):
-        self.validate_as = {'type': 'file',
-                            'value': os.path.join(VALIDATION_DATA, 'text_test.txt')}
-        self.checker = palisades.validation.FileChecker()
+        self.validate_as = {
+            'type': 'file',
+            'value': os.path.join(VALIDATION_DATA, u'text_test_кибо.txt')
+        }
+        self.checker = validation.FileChecker()
 
     def test_uri_exists(self):
         """Assert that the FileChecker can open a file."""
@@ -99,9 +104,11 @@ class FileCheckerTester(CheckerTester):
 class FolderCheckerTester(CheckerTester):
     """Test the class palisades.validation.FileChecker"""
     def setUp(self):
-        self.validate_as = {'type': 'folder',
-                            'value': VALIDATION_DATA}
-        self.checker = palisades.validation.FolderChecker()
+        self.validate_as = {
+            'type': 'folder',
+            'value': VALIDATION_DATA
+        }
+        self.checker = validation.FolderChecker()
 
     def test_folder_exists(self):
         """Assert that the FolderChecker can verify a folder exists."""
@@ -158,13 +165,30 @@ class FolderCheckerTester(CheckerTester):
         self.validate_as['value'] = VALIDATION_DATA
         self.assertNoError()
 
+class UnicodeFolderCheckerTester(FolderCheckerTester):
+    def setUp(self):
+        self.unicode_dir = u'folder_тамквюам'
+        self.validate_as = {
+            'type': 'folder',
+            'value': self.unicode_dir,
+        }
+        self.checker = validation.FolderChecker()
+
+        # copy the whole validation data dir to the new folder for this suite
+        # of tests.
+        if os.path.exists(self.unicode_dir):
+            shutil.rmtree(self.unicode_dir)
+        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.unicode_dir)
 
 class GDALCheckerTester(CheckerTester):
     """Test the class iui_validate.GDALChecker"""
     def setUp(self):
         self.validate_as = {'type': 'GDAL',
                             'value': os.path.join(VALIDATION_DATA, 'lulc_samp_cur')}
-        self.checker = palisades.validation.GDALChecker()
+        self.checker = validation.GDALChecker()
 
     def test_opens(self):
         """Assert that GDALChecker can open a file."""
@@ -175,12 +199,30 @@ class GDALCheckerTester(CheckerTester):
         self.validate_as['value'] += 'aaa'
         self.assertError()
 
+class UnicodeGDALCheckerTester(GDALCheckerTester):
+    def setUp(self):
+        self.unicode_dir = u'folder_тамквюам'
+        self.validate_as = {
+            'type': 'GDAL',
+            'value': os.path.join(self.unicode_dir, 'lulc_samp_cur'),
+        }
+        self.checker = validation.GDALChecker()
+
+        # copy the whole validation data dir to the new folder for this suite
+        # of tests.
+        if os.path.exists(self.unicode_dir):
+            shutil.rmtree(self.unicode_dir)
+        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.unicode_dir)
+
 class OGRCheckerTester(CheckerTester):
     """Test the class palisades.validation.OGRChecker"""
     def setUp(self):
         self.validate_as = {'type':'OGR',
                             'value': os.path.join(VALIDATION_DATA, 'AOI_WCVI')}
-        self.checker = palisades.validation.OGRChecker()
+        self.checker = validation.OGRChecker()
 
     def test_file_layers(self):
         """Assert tha OGRChecker can validate layer restrictions."""
@@ -318,6 +360,23 @@ class OGRCheckerTester(CheckerTester):
         self.validate_as.update(updates)
         self.assertNoError()
 
+class UnicodeOGRCheckerTester(OGRCheckerTester):
+    def setUp(self):
+        self.unicode_dir = u'folder_тамквюам'
+        self.validate_as = {'type':'OGR',
+                            'value': os.path.join(self.unicode_dir, 'AOI_WCVI')}
+        self.checker = validation.OGRChecker()
+
+        # copy the whole validation data dir to the new folder for this suite
+        # of tests.
+        if os.path.exists(self.unicode_dir):
+            shutil.rmtree(self.unicode_dir)
+        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.unicode_dir)
+
+
 class DBFCheckerTester(CheckerTester):
         """Test the class palisades.validation.DBFChecker"""
         def setUp(self):
@@ -325,7 +384,7 @@ class DBFCheckerTester(CheckerTester):
                                 'value': os.path.join(VALIDATION_DATA,
                                 'harv_samp_cur.dbf'),
                                 'fieldsExist': []}
-            self.checker = palisades.validation.DBFChecker()
+            self.checker = validation.DBFChecker()
 
         def test_fields_exist(self):
             """Assert that DBFChecker can verify fields exist."""
@@ -364,6 +423,26 @@ class DBFCheckerTester(CheckerTester):
                                                 str_restriction]
             self.assertNoError()
 
+class UnicodeDBFCheckerTester(DBFCheckerTester):
+    """Test the class palisades.validation.DBFChecker"""
+    def setUp(self):
+        self.unicode_dir = u'folder_тамквюам'
+        self.validate_as = {
+            'type': 'DBF',
+            'value': os.path.join(self.unicode_dir, 'harv_samp_cur.dbf'),
+            'fieldsExist': [],
+        }
+        self.checker = validation.DBFChecker()
+
+        # copy the whole validation data dir to the new folder for this suite
+        # of tests.
+        if os.path.exists(self.unicode_dir):
+            shutil.rmtree(self.unicode_dir)
+        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.unicode_dir)
+
 class CSVCheckerTester(CheckerTester):
         """Test the class palisades.validation.CSVChecker"""
         def setUp(self):
@@ -371,7 +450,7 @@ class CSVCheckerTester(CheckerTester):
                                 'value': os.path.join(VALIDATION_DATA,
                                 'Machine_PelamisParamCSV.csv'),
                                 'fieldsExist': []}
-            self.checker = palisades.validation.CSVChecker()
+            self.checker = validation.CSVChecker()
 
         def test_fields_exist(self):
             """Assert that CSVChecker can verify fields exist"""
@@ -471,12 +550,32 @@ class CSVCheckerTester(CheckerTester):
             self.validate_as['restrictions'][0]['validateAs'] = {'type': 'number'}
             self.assertNoError()
 
+class UnicodeCSVCheckerTester(CSVCheckerTester):
+    """Test the class palisades.validation.CSVChecker"""
+    def setUp(self):
+        self.unicode_dir = u'folder_тамквюам'
+        self.validate_as = {
+            'type': 'CSV',
+            'value': os.path.join(self.unicode_dir, 'Machine_PelamisParamCSV.csv'),
+            'fieldsExist': [],
+        }
+        self.checker = validation.CSVChecker()
+
+        # copy the whole validation data dir to the new folder for this suite
+        # of tests.
+        if os.path.exists(self.unicode_dir):
+            shutil.rmtree(self.unicode_dir)
+        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.unicode_dir)
+
 class FlexibleTableCheckerTester(CheckerTester):
     """Test the class palisades.validation.FlexibleTableChecker"""
     def setUp(self):
         self.validate_as = {'type': 'table',
                             'fieldsExist': []}
-        self.checker = palisades.validation.FlexibleTableChecker()
+        self.checker = validation.FlexibleTableChecker()
 
     def setCSVData(self, include_suffix=True):
         # CSV file. There are two copies of the file, one with a '.csv' suffix and one without.
@@ -594,7 +693,7 @@ class PrimitiveCheckerTester(CheckerTester):
     def setUp(self):
         self.validate_as = {'type': 'string',
                             'allowedValues': {'pattern': '[a-z]+'}}
-        self.checker = palisades.validation.PrimitiveChecker()
+        self.checker = validation.PrimitiveChecker()
 
     def test_unicode(self):
         """Assert that PrimitiveChecker can validate a unicode regex."""
@@ -655,7 +754,7 @@ class NumberCheckerTester(CheckerTester):
     def setUp(self):
         self.validate_as = {'type':'number',
                             'value': 5}
-        self.checker = palisades.validation.NumberChecker()
+        self.checker = validation.NumberChecker()
 
     def test_gt(self):
         """Assert that NumberChecker validates 'greaterThan'"""

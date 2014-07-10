@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unittest
 
 import mock
@@ -63,6 +64,7 @@ class QtTabGroupTest(QtGroupTest):
     def setUp(self):
         self.widget = qt4.TabGroup()
 
+    @unittest.skip('TODO: need a tab object')
     def test_add_widget(self):
         # need to reimplement this, since the TabGroup is a special case of the
         # Group element.
@@ -117,7 +119,7 @@ class QtMultiTest(QtContainerTest):
         self.assertEqual(self.widget.layout().rowCount(), 2)
 
         # add another widget to the toolkit
-        new_element = elements.File({})
+        new_element = elements.File({'type': 'file'})
         new_view = core.FileGUI(new_element)
         self.widget.add_widget(new_view)
         self.assertEqual(self.widget.layout().rowCount(), 3)
@@ -133,7 +135,7 @@ class QtMultiTest(QtContainerTest):
         self.assertEqual(self.widget.layout().rowCount(), 2)
 
         # add a row to verify
-        new_element = elements.File({})
+        new_element = elements.File({'type': 'file'})
         new_view = core.FileGUI(new_element)
         self.widget.add_widget(new_view)
 
@@ -151,7 +153,7 @@ class QtMultiTest(QtContainerTest):
             self.assertEqual(is_visible, False)
 
         # try to create another element the same way and then try to remove it.
-        new_element = elements.File({})
+        new_element = elements.File({'type': 'file'})
         new_view = core.FileGUI(new_element)
         self.widget.add_widget(new_view)
 
@@ -183,6 +185,17 @@ class InformationButtonTest(ButtonTest):
     def test_setup(self):
         self.assertEqual(self.title, self.widget.title())
         self.assertEqual('', self.widget.body())
+
+    def test_unicode(self):
+        unicode_text = u'Но дуо квюач декат, кибо дыкоры альяквюам шэа ку.'
+        self.widget.set_title(unicode_text)
+
+        # some string concatenation when the contents are built.
+        _ = self.widget.build_contents()
+
+        # some string concatenation when the dialog is shown()
+        self.widget.show()
+        self.widget.close()
 
 class ValidationButtonTest(InformationButtonTest):
     def setUp(self):
@@ -289,7 +302,7 @@ class TextFieldTest(QtWidgetTest):
 
 class FileButtonTest(QtWidgetTest):
     def setUp(self):
-        self.widget = qt4.FileButton()
+        self.widget = qt4.FileButton('file')
 
     def test_file_selected(self):
         # can't actually get the file dialog's value programmatically, since the
@@ -298,6 +311,10 @@ class FileButtonTest(QtWidgetTest):
         self.assertEqual(hasattr(self.widget, 'file_selected'), True)
         self.assertEqual(self.widget.file_selected.__class__.__name__,
             'Communicator')
+
+class FolderButtonTest(FileButtonTest):
+    def setUp(self):
+        self.widget = qt4.FileButton('folder')
 
 class DropdownTest(QtWidgetTest):
     def setUp(self):
@@ -354,3 +371,9 @@ class CheckboxTest(QtWidgetTest):
         self.assertEqual(self.widget.is_checked(), False)
         self.widget.set_checked(True)
         self.assertEqual(self.widget.is_checked(), True)
+
+# TODO: fill out this test class.
+class RTMessagesDialogTest(unittest.TestCase):
+    def setUp(self):
+        self.widget = qt4.RealtimeMessagesDialog()
+

@@ -66,8 +66,7 @@ class Application(object):
     def execute(self):
         self.app.exec_()
 
-#class QtWidget(QtGui.QWidget):
-class QtWidget(object):
+class QtWidget(QtGui.QWidget):
     # REQUIRED: subclasses must also be a subclass of QWidget
     def set_visible(self, is_visible):
         self.setVisible(is_visible)
@@ -75,7 +74,7 @@ class QtWidget(object):
     def is_visible(self):
         return self.isVisible()
 
-class Empty(QtGui.QWidget, QtWidget):
+class Empty(QtWidget):
     pass
 
 class Group(QtGui.QGroupBox, QtWidget):
@@ -313,7 +312,7 @@ class InformationButton(Button):
         title = '<h3 style="color:black">%s</h3><br/>' % (self.title())
         body = '<div style="color:black">%s</div>' % (self.body())
 
-        return str(title + body + width_table)
+        return title + body + width_table
 
 class ValidationButton(InformationButton):
     _error_icon = ICON_ERROR
@@ -396,7 +395,7 @@ class ValidationButton(InformationButton):
 
         body = '<div style="color:black">%s</div>' % (self.body())
 
-        return str(title + message + body + width_table)
+        return title + message + body + width_table
 
 class Label(QtGui.QLabel, QtWidget):
     def __init__(self, label_text):
@@ -730,8 +729,8 @@ class ErrorDialog(InfoDialog):
         else:
             num_error_string = _('are %s errors') % num_messages
 
-        self.body.setText(_(str("There %s that must be resolved" +
-            " before this tool can be run:%s")) % (num_error_string, label_string))
+        self.body.setText(_("There %s that must be resolved" +
+            " before this tool can be run:%s") % (num_error_string, label_string))
         self.body.setMinimumSize(self.body.sizeHint())
         InfoDialog.showEvent(self, event)
 
@@ -903,9 +902,9 @@ class RealtimeMessagesDialog(QtGui.QDialog):
 
         self.stop_buttons()
         if exception_found:
-            self.messageArea.setText(str('<b>%s</b> encountered: <em>%s</em> <br/>' +
+            self.messageArea.setText((u'<b>%s</b> encountered: <em>%s</em> <br/>' +
                 'See the log for details.') % (thread_exception.__class__.__name__,
-                str(thread_exception)))
+                unicode(thread_exception, 'utf-8')))
         else:
             self.messageArea.setText('Model completed successfully.')
         self.error_changed.emit(exception_found)

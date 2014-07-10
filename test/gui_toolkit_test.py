@@ -366,3 +366,9 @@ class CheckboxTest(QtWidgetTest):
         self.assertEqual(self.widget.is_checked(), False)
         self.widget.set_checked(True)
         self.assertEqual(self.widget.is_checked(), True)
+
+# TODO: fill out this test class.
+class RTMessagesDialogTest(unittest.TestCase):
+    def setUp(self):
+        self.widget = qt4.RealtimeMessagesDialog()
+

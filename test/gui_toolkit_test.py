@@ -186,9 +186,9 @@ class InformationButtonTest(ButtonTest):
         self.assertEqual(self.title, self.widget.title())
         self.assertEqual('', self.widget.body())
 
-#    def test_unicode(self):
-#        unicode_text = u'Но дуо квюач декат, кибо дыкоры альяквюам шэа ку.'
-#        self.widget.set_title(unicode_text)
+    def test_unicode(self):
+        unicode_text = u'Но дуо квюач декат, кибо дыкоры альяквюам шэа ку.'
+        self.widget.set_title(unicode_text)
 
 class ValidationButtonTest(InformationButtonTest):
     def setUp(self):

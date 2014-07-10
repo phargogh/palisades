@@ -64,6 +64,7 @@ class QtTabGroupTest(QtGroupTest):
     def setUp(self):
         self.widget = qt4.TabGroup()
 
+    @unittest.skip('TODO: need a tab object')
     def test_add_widget(self):
         # need to reimplement this, since the TabGroup is a special case of the
         # Group element.

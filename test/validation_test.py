@@ -7,6 +7,7 @@ import pdb
 import platform
 
 import palisades
+from palisades import validation
 
 TEST_DATA = os.path.join(os.path.dirname(__file__), 'data')
 VALIDATION_DATA = os.path.join(TEST_DATA, 'validation')
@@ -101,7 +102,7 @@ class FolderCheckerTester(CheckerTester):
     def setUp(self):
         self.validate_as = {'type': 'folder',
                             'value': VALIDATION_DATA}
-        self.checker = palisades.validation.FolderChecker()
+        self.checker = validation.FolderChecker()
 
     def test_folder_exists(self):
         """Assert that the FolderChecker can verify a folder exists."""
@@ -164,7 +165,7 @@ class GDALCheckerTester(CheckerTester):
     def setUp(self):
         self.validate_as = {'type': 'GDAL',
                             'value': os.path.join(VALIDATION_DATA, 'lulc_samp_cur')}
-        self.checker = palisades.validation.GDALChecker()
+        self.checker = validation.GDALChecker()
 
     def test_opens(self):
         """Assert that GDALChecker can open a file."""
@@ -180,7 +181,7 @@ class OGRCheckerTester(CheckerTester):
     def setUp(self):
         self.validate_as = {'type':'OGR',
                             'value': os.path.join(VALIDATION_DATA, 'AOI_WCVI')}
-        self.checker = palisades.validation.OGRChecker()
+        self.checker = validation.OGRChecker()
 
     def test_file_layers(self):
         """Assert tha OGRChecker can validate layer restrictions."""
@@ -325,7 +326,7 @@ class DBFCheckerTester(CheckerTester):
                                 'value': os.path.join(VALIDATION_DATA,
                                 'harv_samp_cur.dbf'),
                                 'fieldsExist': []}
-            self.checker = palisades.validation.DBFChecker()
+            self.checker = validation.DBFChecker()
 
         def test_fields_exist(self):
             """Assert that DBFChecker can verify fields exist."""
@@ -371,7 +372,7 @@ class CSVCheckerTester(CheckerTester):
                                 'value': os.path.join(VALIDATION_DATA,
                                 'Machine_PelamisParamCSV.csv'),
                                 'fieldsExist': []}
-            self.checker = palisades.validation.CSVChecker()
+            self.checker = validation.CSVChecker()
 
         def test_fields_exist(self):
             """Assert that CSVChecker can verify fields exist"""
@@ -476,7 +477,7 @@ class FlexibleTableCheckerTester(CheckerTester):
     def setUp(self):
         self.validate_as = {'type': 'table',
                             'fieldsExist': []}
-        self.checker = palisades.validation.FlexibleTableChecker()
+        self.checker = validation.FlexibleTableChecker()
 
     def setCSVData(self, include_suffix=True):
         # CSV file. There are two copies of the file, one with a '.csv' suffix and one without.
@@ -594,7 +595,7 @@ class PrimitiveCheckerTester(CheckerTester):
     def setUp(self):
         self.validate_as = {'type': 'string',
                             'allowedValues': {'pattern': '[a-z]+'}}
-        self.checker = palisades.validation.PrimitiveChecker()
+        self.checker = validation.PrimitiveChecker()
 
     def test_unicode(self):
         """Assert that PrimitiveChecker can validate a unicode regex."""
@@ -655,7 +656,7 @@ class NumberCheckerTester(CheckerTester):
     def setUp(self):
         self.validate_as = {'type':'number',
                             'value': 5}
-        self.checker = palisades.validation.NumberChecker()
+        self.checker = validation.NumberChecker()
 
     def test_gt(self):
         """Assert that NumberChecker validates 'greaterThan'"""

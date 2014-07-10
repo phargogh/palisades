@@ -190,7 +190,12 @@ class InformationButtonTest(ButtonTest):
         unicode_text = u'Но дуо квюач декат, кибо дыкоры альяквюам шэа ку.'
         self.widget.set_title(unicode_text)
 
-        self.widget.build_contents()
+        # some string concatenation when the contents are built.
+        _ = self.widget.build_contents()
+
+        # some string concatenation when the dialog is shown()
+        self.widget.show()
+        self.widget.close()
 
 class ValidationButtonTest(InformationButtonTest):
     def setUp(self):

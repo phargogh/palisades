@@ -179,7 +179,7 @@ def write_build_info(source_file_uri):
     source_file = open(os.path.abspath(source_file_uri))
     for line in source_file:
         if line == "__version__ = 'dev'\n":
-            temp_file.write("__version__ = '%s'\n" % REPO.version())
+            temp_file.write("__version__ = '%s'\n" % REPO.version)
         elif line == "build_data = None\n":
             build_information = build_data()
             temp_file.write("build_data = %s\n" % str(build_information.keys()))

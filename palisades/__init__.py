@@ -11,7 +11,7 @@ __version__ = 'dev'
 build_data = None
 
 if __version__ == 'dev' and build_data == None:
-    __version__ = versioning.version()
+    __version__ = versioning.REPO.version
     build_data = versioning.build_data()
     for key, value in sorted(build_data.iteritems()):
         setattr(sys.modules[__name__], key, value)

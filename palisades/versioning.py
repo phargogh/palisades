@@ -24,7 +24,7 @@ class VCSQuerier(object):
         Returns a python bytestring of the output of the input command."""
         p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        return p.stdout.read()
+        return p.stdout.read().replace('\n', '')
 
     @property
     def tag_distance(self):
@@ -99,7 +99,66 @@ class HgRepo(VCSQuerier):
         cmd = self.HG_CALL + ' --template "{latesttag}"'
         return self._run_command(cmd)
 
-REPO = HgRepo()
+class GitRepo(VCSQuerier):
+    def __init__(self):
+        VCSQuerier.__init__(self)
+        self._tag_distance = None
+        self._latest_tag = None
+        self._commit_hash = None
+
+    def _describe_current_rev(self):
+        self._tag_distance = None
+        self._latest_tag = None
+        self._commit_hash = None
+
+        cmd = 'git describe --abbrev=0 --all'
+        data = self._run_command(cmd).replace('tags/', '')
+
+        branch_cmd = 'git rev-parse --abbrev-ref HEAD'
+        current_branch = self._run_command(branch_cmd)
+
+        # assume that the tag has no dashes in it
+        if data == 'heads/%s' % current_branch:
+            # when there are no tags
+            self._latest_tag = 'null'
+
+            num_commits_cmd = 'git rev-list %s --count' % current_branch
+            self._tag_distance = self._run_command(num_commits_cmd)
+
+            commit_hash_cmd = 'git log -1 --pretty="format:%h"'
+            self._commit_hash = self._run_command(commit_hash_cmd)
+        elif '-' not in data:
+            # then we're at a tag
+            self._latest_tag = str(data)
+            self._tag_distance = 0
+
+            commit_hash_cmd = 'git log -1 --pretty="format:%h"'
+            self._commit_hash = self._run_command(commit_hash_cmd)
+        else:
+            # we're not at a tag, so data has the format:
+            # data = tagname-tagdistange-commit_hash
+            tagname, tag_dist, commit_hash = data.split('-')
+            self._tag_distance = tagname
+            self._latest_tag = tagname
+            self._commit_hash = commit_hash
+
+    @property
+    def build_id(self):
+        self._describe_current_rev()
+        return "%s:%s [%s]" % (self._tag_distance, self._latest_tag,
+            self._commit_hash)
+
+    @property
+    def tag_distance(self):
+        self._describe_current_rev()
+        return self._tag_distance
+
+    @property
+    def latest_tag(self):
+        self._describe_current_rev()
+        return self._latest_tag
+
+REPO = GitRepo()
 
 def build_data():
     """Returns a dictionary of relevant build data."""

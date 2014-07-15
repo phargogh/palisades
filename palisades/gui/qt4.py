@@ -904,7 +904,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         if exception_found:
             self.messageArea.setText((u'<b>%s</b> encountered: <em>%s</em> <br/>' +
                 'See the log for details.') % (thread_exception.__class__.__name__,
-                unicode(thread_exception, 'utf-8')))
+                thread_exception))
         else:
             self.messageArea.setText('Model completed successfully.')
         self.error_changed.emit(exception_found)

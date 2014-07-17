@@ -988,14 +988,14 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.quit_button = QtGui.QPushButton(_(' Quit'))
         self.quit_button.setIcon(QtGui.QIcon(os.path.join(ICON_CLOSE)))
 
-        self.reset_button = QtGui.QPushButton(_(' Reset'))
-        self.reset_button.setIcon(QtGui.QIcon(os.path.join(ICON_UNDO)))
+#        self.reset_button = QtGui.QPushButton(_(' Reset'))
+#        self.reset_button.setIcon(QtGui.QIcon(os.path.join(ICON_UNDO)))
 
         #create the buttonBox (a container for buttons)
         self.button_box = QtGui.QDialogButtonBox()
         self.button_box.addButton(self.run_button, QtGui.QDialogButtonBox.AcceptRole)
         self.button_box.addButton(self.quit_button, QtGui.QDialogButtonBox.RejectRole)
-        self.button_box.addButton(self.reset_button, QtGui.QDialogButtonBox.ResetRole)
+#        self.button_box.addButton(self.reset_button, QtGui.QDialogButtonBox.ResetRole)
 
         #connect the buttons to their functions.
         self.run_button.clicked.connect(self._run_pressed)

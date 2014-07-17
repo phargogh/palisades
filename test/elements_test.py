@@ -1475,3 +1475,14 @@ class FormTest(unittest.TestCase):
         self.assertEqual(self.form.elements[2].is_valid(), False)
         self.assertEqual(self.form.form_is_valid(), False)
 
+    def test_form_errors(self):
+        self.assertEqual(self.form.form_is_valid(), True)
+        self.assertEqual(self.form.form_errors(), [])
+
+        # make one of the elements fail.
+        self.form.elements[2].set_value('lkjahdflg')
+        self.assertEqual(self.form.elements[2].is_valid(), False)
+        self.assertEqual(len(self.form.form_errors()), 1)
+
+
+

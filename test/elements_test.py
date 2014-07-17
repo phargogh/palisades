@@ -1484,5 +1484,11 @@ class FormTest(unittest.TestCase):
         self.assertEqual(self.form.elements[2].is_valid(), False)
         self.assertEqual(len(self.form.form_errors()), 1)
 
+    def test_save_to_python_smoke(self):
+        # just verify that the function will run with the correct attributes.
+        out_file = 'test.txt'
+        self.form.save_to_python(out_file)
+        os.remove(out_file)
+
 
 

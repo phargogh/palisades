@@ -1069,6 +1069,20 @@ class Form():
                 invalid_inputs.append((element.config['args_id'], element.value()))
         return invalid_inputs
 
+    def save_to_python(self, filename):
+        """Save the form's data to an exacuteable python file at filename"""
+        if not self.form_is_valid():
+            raise InvalidData(self.form_errors())
+        else:
+            try:
+                function_name = self._ui.config['targetFunction']
+            except KeyError:
+                function_name = 'execute'
+            file_path = self._ui.config['targetScript']
+
+            fileio.save_model_run(self.collect_arguments(), file_path,
+                    filename, function_name)
+
     def submit(self, event=None):
         LOGGER.debug('Starting the form submission process')
 

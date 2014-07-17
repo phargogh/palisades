@@ -82,7 +82,7 @@ def get_free_space(folder='/', unit='auto'):
     # Format the return string.
     return str('%s %s' % (space_avail, unit))
 
-def save_model_run(arguments, module, out_file):
+def save_model_run(arguments, module, out_file, func_name='execute'):
     """Save an arguments list and module to a new python file that can be
     executed on its own.
 
@@ -91,6 +91,7 @@ def save_model_run(arguments, module, out_file):
             invest_natcap.pollination.pollination)
         out_file - the file to which the output file should be written.  If the
             file exists, it will be overwritten.
+        func_name='execute' - the function name to call in the target script.
 
     This function returns nothing."""
 
@@ -214,7 +215,7 @@ def save_model_run(arguments, module, out_file):
     current_time = datetime.datetime.now()
     metadata = [
         '""""',
-        'This is a saved model run from %s.' % module,
+        'This is a saved model run for %s.' % module,
         'Generated: %s' % current_time.strftime('%c'),
         'Palisades version: %s' % palisades.__version__,
         '"""'
@@ -227,8 +228,16 @@ def save_model_run(arguments, module, out_file):
 
     # Enforce that we have at least a certain version of InVEST installed?
 
-    # Print the import statement
-    _write('import %s' % module)
+    # print imp and source imports if needed.
+    if module.endswith('.py'):
+        module_varname = 'target_script'
+        _write('import imp')
+        _write("%s = imp.load_source('%s', '%s')" % (module_varname,
+            module_varname, module))
+    else:
+        # Print the import statement
+        _write('import %s' % module)
+        module_varname = module
     _empty_lines(2)
 
     # Print the arguements in sorted order.
@@ -236,7 +245,7 @@ def save_model_run(arguments, module, out_file):
     _empty_lines(1)
 
     # print the line to call the module.
-    _write('%s.execute(args)' % module)
+    _write('%s.%s(args)' % (module_varname, func_name))
 
     model_script.flush()
     model_script.close()

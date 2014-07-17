@@ -576,11 +576,12 @@ class CheckBox(QtGui.QCheckBox, QtWidget):
 class FileButton(Button):
     _icon = ICON_FOLDER
 
-    def __init__(self, dialog_type):
+    def __init__(self, dialog_type, text_widget):
         Button.__init__(self)
 
         assert dialog_type in ['file', 'folder']
         self.dialog_type = dialog_type
+        self.text_field = text_widget
 
         self.file_dialog = FileDialog()
 
@@ -589,10 +590,17 @@ class FileButton(Button):
         self.file_selected = Communicator()
 
     def _get_file(self):
-        if self.dialog_type == 'file':
-            filename = self.file_dialog.get_file(self.dialog_type)
+        if len(self.text_field.text()) == 0:
+            start_dir = DATA['last_dir']
         else:
-            filename = self.file_dialog.get_folder(self.dialog_type)
+            start_dir = os.path.dirname(unicode(self.text_field.text(), 'utf-8'))
+
+        if self.dialog_type == 'file':
+            filename = self.file_dialog.get_file(self.dialog_type,
+                start_dir=start_dir)
+        else:
+            filename = self.file_dialog.get_folder(self.dialog_type,
+                start_dir=start_dir)
         if filename != '':
             self.file_selected.emit(filename)
 
@@ -613,8 +621,11 @@ class FileDialog(QtGui.QFileDialog):
         self.last_filter = QtCore.QString()
         self.last_folder = '~'
 
-    def get_file(self, title, save=False):
-        default_folder = os.path.expanduser(self.last_folder)
+    def get_file(self, title, save=False, start_dir=None):
+        if start_dir is None:
+            default_folder = os.path.expanduser(self.last_folder)
+        else:
+            default_folder = start_dir
         dialog_title = _('Select ') + title
 
         if save:
@@ -630,7 +641,7 @@ class FileDialog(QtGui.QFileDialog):
 
         return filename
 
-    def get_folder(self, title):
+    def get_folder(self, title, start_dir=None):
         default_folder = os.path.expanduser(self.last_folder)
         dialog_title = _('Select ') + title
 

@@ -265,7 +265,8 @@ class FileGUI(TextGUI):
 
         # create the FileButton using the 'type' attribute, one of file or
         # folder
-        self._file_button = toolkit.FileButton(self.element.config['type'])
+        self._file_button = toolkit.FileButton(self.element.config['type'],
+            self._text_field)
         self._file_button.file_selected.register(self._file_selected)
         self.set_widget(3, self._file_button)
 

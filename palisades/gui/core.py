@@ -322,10 +322,18 @@ class FormGUI():
 
         #TODO: Add more communicators here ... menu item actions?
         self.window.load_params_request.register(self._load_params)
+        self.window.save_params_request.register(self._save_params)
 
     def _load_params(self, event=None):
         file_dialog = toolkit.FileDialog()
-        param_file = file_dialog.get_file('Select parameter file')
+        param_file = file_dialog.get_file('parameter file')
+
+        if param_file != '':
+            self.element.save_state(param_file)
+
+    def _save_params(self, event=None):
+        file_dialog = toolkit.FileDialog()
+        param_file = file_dialog.get_file('parameter file', save=True)
 
         if param_file != '':
             self.element.load_state(param_file)

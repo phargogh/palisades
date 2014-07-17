@@ -324,6 +324,7 @@ class FormGUI():
         #TODO: Add more communicators here ... menu item actions?
         self.window.load_params_request.register(self._load_params)
         self.window.save_params_request.register(self._save_params)
+        self.window.save_python_request.register(self._save_python)
 
     def _load_params(self, event=None):
         param_file = self.file_dialog.get_file('parameter file')
@@ -336,6 +337,17 @@ class FormGUI():
 
         if param_file != '':
             self.element.load_state(param_file)
+
+    def _save_python(self, event=None):
+        # get the errors that exist from the underlying form
+        # only save the python file if there are no errors.
+        if not self.element.form_is_valid():
+            self.errors_dialog.set_messages(self.element.form_errors())
+            self.errors_dialog.show()
+        else:
+            python_file = self.file_dialog.get_file('new python file', save=True)
+            if python_file != '':
+                self.element.save_to_python(python_file)
 
     def submit(self, event=None):
         try:

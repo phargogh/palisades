@@ -310,6 +310,7 @@ class FormGUI():
         self.quit_confirm = toolkit.ConfirmQuitDialog()
         self.errors_dialog = toolkit.ErrorDialog()
         self.messages_dialog = toolkit.RealtimeMessagesDialog()
+        self.file_dialog = toolkit.FileDialog()
 
         self.messages_handler = logging.StreamHandler(self.messages_dialog)
         self.messages_formatter = logging.Formatter(self.LOG_FMT, self.DATE_FMT)
@@ -325,15 +326,13 @@ class FormGUI():
         self.window.save_params_request.register(self._save_params)
 
     def _load_params(self, event=None):
-        file_dialog = toolkit.FileDialog()
-        param_file = file_dialog.get_file('parameter file')
+        param_file = self.file_dialog.get_file('parameter file')
 
         if param_file != '':
             self.element.save_state(param_file)
 
     def _save_params(self, event=None):
-        file_dialog = toolkit.FileDialog()
-        param_file = file_dialog.get_file('parameter file', save=True)
+        param_file = self.file_dialog.get_file('parameter file', save=True)
 
         if param_file != '':
             self.element.load_state(param_file)

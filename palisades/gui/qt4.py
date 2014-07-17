@@ -38,6 +38,28 @@ LAYOUTS = {
 }
 ICONS = os.path.join(os.path.dirname(__file__), 'icons')
 
+class ThreadSafeDataManager(object):
+    """A thread-safe data management object for saving data across the multiple
+    threads of the Qt GUI."""
+    def __init__(self):
+        self.data = {
+            'last_dir': '',
+        }
+        self.lock = threading.Lock()
+
+    def __getitem__(self, key):
+        self.lock.acquire()
+        data = self.data[key]
+        self.lock.release()
+        return data
+
+    def __setitem__(self, key, value):
+        self.lock.acquire()
+        self.data[key] = value
+        self.lock.release()
+
+DATA = ThreadSafeDataManager()  # common data stored here
+
 def center_window(window_ptr):
     """Center a window on whatever screen it appears.
 
@@ -604,6 +626,7 @@ class FileDialog(QtGui.QFileDialog):
         filename = unicode(filename, 'utf-8')
         self.last_filter = filter
         self.last_folder = os.path.dirname(filename)
+        DATA['last_dir'] = self.last_folder
 
         return filename
 
@@ -615,6 +638,7 @@ class FileDialog(QtGui.QFileDialog):
                 default_folder)
         dirname = unicode(dirname, 'utf-8')
         self.last_folder = dirname
+        DATA['last_dir'] = self.last_folder
 
         return dirname
 

@@ -954,9 +954,10 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.menu_bar.addMenu(self.dev_menu)
         self.layout().setMenuBar(self.menu_bar)
 
+        self.load_params_request = Communicator()
 #        self.exit_action.triggered.connect(self.ui.closeWindow)
 #        self.save_file_action.triggered.connect(self.ui.save_parameters_to_file)
-#        self.load_file_action.triggered.connect(self.ui.load_parameters_from_file)
+        self.load_file_action.triggered.connect(self.load_params_request.emit)
 #        self.remove_lastrun.triggered.connect(self.ui.remove_lastrun)
 #        self.save_to_python.triggered.connect(self.ui.save_to_python)
 #        self.save_to_json.triggered.connect(self.ui.save_to_json)

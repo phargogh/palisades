@@ -319,7 +319,16 @@ class FormGUI():
         self.window.quit_requested.register(self.close)
         self.element.submitted.register(self.messages_dialog.start)
         self.element.submitted.register(self._open_messages_window)
+
         #TODO: Add more communicators here ... menu item actions?
+        self.window.load_params_request.register(self._load_params)
+
+    def _load_params(self, event=None):
+        file_dialog = toolkit.FileDialog()
+        param_file = file_dialog.get_file('Select parameter file')
+
+        if param_file != '':
+            self.element.load_state(param_file)
 
     def submit(self, event=None):
         try:

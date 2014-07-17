@@ -954,7 +954,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
 
         self.dev_menu = QtGui.QMenu('&Development')
         self.save_to_python = self.dev_menu.addAction('Save to &python script...')
-        self.save_to_json = self.dev_menu.addAction('Save to archivable &JSON...')
+#        self.save_to_json = self.dev_menu.addAction('Save to archivable &JSON...')
         self.menu_bar.addMenu(self.dev_menu)
         self.layout().setMenuBar(self.menu_bar)
 

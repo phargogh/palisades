@@ -1042,8 +1042,9 @@ class Form():
         LOGGER.debug('Lastrun URI: %s', lastrun_uri)
         return lastrun_uri
 
-    def submit(self, event=None):
-        LOGGER.debug('Starting the form submission process')
+    def form_is_valid(self):
+        """Check if all the inputs in this form are valid.  Returns True if so,
+        a list of tuples if not.  Tuples indicate failed"""
         # Check the validity of all inputs
         form_data = []
         for element in self.elements:
@@ -1057,17 +1058,24 @@ class Form():
         for element in form_data:
             print element
 
-        form_is_invalid = False in [e[1] for e in form_data]
+        return not False in [e[1] for e in form_data]
+
+    def form_errors(self):
+        """Return a list of tuples containing (args_id, value) that are invalid
+        values."""
+        invalid_inputs = []
+        for element in self.elements:
+            if not element.is_valid():
+                invalid_inputs.append((element.config['args_id'], element.value()))
+        return invalid_inputs
+
+    def submit(self, event=None):
+        LOGGER.debug('Starting the form submission process')
 
         # if success, assemble the arguments dictionary and send it off to the
         # base Application
-        if form_is_invalid:
-            invalid_inputs = []
-            for args_id, is_valid, value in form_data:
-                if not is_valid:
-                    invalid_inputs.append((args_id, value))
-
-            raise InvalidData(invalid_inputs)
+        if not self.form_is_valid():
+            raise InvalidData(self.form_errors())
         else:
             # save the current state of the UI to the lastrun location.
             self.save_state(self.lastrun_uri())

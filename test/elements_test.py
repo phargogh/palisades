@@ -1466,3 +1466,12 @@ class FormTest(unittest.TestCase):
         form.submit()
         form.runner.executor.join()
 
+    def test_form_is_valid(self):
+        # form should be valid by default.
+        self.assertEqual(self.form.form_is_valid(), True)
+
+        # make one of the elements fail.
+        self.form.elements[2].set_value('lkjahdflg')
+        self.assertEqual(self.form.elements[2].is_valid(), False)
+        self.assertEqual(self.form.form_is_valid(), False)
+

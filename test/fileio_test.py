@@ -21,6 +21,12 @@ class ConfigTest(unittest.TestCase):
         self.assertRaises(ValueError, fileio.read_config, config_file)
 
 class PythonSavingTest(unittest.TestCase):
+    def setUp(self):
+        self.out_file = os.path.join(FILEIO_DATA, 'test_model_save.py')
+
+    def tearDown(self):
+        os.remove(self.out_file)
+
     def test_save_model_run_from_path(self):
         """Assert a model saves correctly."""
         test_dictionary = {
@@ -33,13 +39,12 @@ class PythonSavingTest(unittest.TestCase):
             1: 'hello',
             5.5: 'world'
         }
-        output_file = os.path.join(FILEIO_DATA, 'test_model_save.py')
         module = 'hello.world'
-        fileio.save_model_run(test_dictionary, module, output_file)
+        fileio.save_model_run(test_dictionary, module, self.out_file)
 
         regression_file = os.path.join(FILEIO_DATA, 'simple_model_save.py')
         lines = lambda f: [l for l in open(f)]
-        for index, (out_msg, reg_msg) in enumerate(zip(lines(output_file),
+        for index, (out_msg, reg_msg) in enumerate(zip(lines(self.out_file),
             lines(regression_file))):
 
             # Skip the first couple lines which include date and version info
@@ -61,13 +66,12 @@ class PythonSavingTest(unittest.TestCase):
             1: 'hello',
             5.5: 'world'
         }
-        output_file = os.path.join(FILEIO_DATA, 'test_model_save_file.py')
         module = 'hello_world.py'
-        fileio.save_model_run(test_dictionary, module, output_file)
+        fileio.save_model_run(test_dictionary, module, self.out_file)
 
         regression_file = os.path.join(FILEIO_DATA, 'simple_model_save_file.py')
         lines = lambda f: [l for l in open(f)]
-        for index, (out_msg, reg_msg) in enumerate(zip(lines(output_file),
+        for index, (out_msg, reg_msg) in enumerate(zip(lines(self.out_file),
             lines(regression_file))):
 
             # Skip the first couple lines which include date and version info

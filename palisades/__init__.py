@@ -75,9 +75,48 @@ def launch(json_uri, splash_img=None):
             possible_paths)
     print found_json
 
-    # get the language code from the language dialect code.
-    os_lang = locale.getdefaultlocale()[0].split('_')[0].lower()
-
-    ui = elements.Application(found_json, os_lang)
+    ui = elements.Application(found_json, locate_dist_config()['lang'])
     gui = palisades.gui.build(ui._window)
     gui.execute()
+
+def locate_dist_config():
+    """Locate the distribution configration.  If the distribution does not have
+    a configuration file in a known location, make reasonable assumptions for
+    default values and return those.  Returns a dictionary of values:
+        lang - the lowercase, 2-character ISO language code.
+
+    This function looks in sys._MEIPASS (if we're in a pyinstaller frozen
+    build) and in CWD for a file called dist_config.json.  If no JSON object
+    can be decoded from a discovered configuration file, an error is printed
+    to stdout and we try the next option.
+    """
+
+    # possible places:
+    #    - sys._MEIPASS
+    #    - CWD
+    possible_paths = []
+    config_filename = 'dist_config.json'
+
+    if getattr(sys, 'frozen', False):
+        dist_config_path = os.path.join(sys._MEIPASS, config_filename)
+        possible_paths.append(dist_config_path)
+
+    possible_paths.append(os.path.join(os.getcwd(), config_filename))
+
+    config = None
+    for possible_json_path in possible_paths:
+        if os.path.exists(possible_json_path):
+            try:
+                config = json.load(open(possible_json_path))
+            except Exception as error:
+                print 'File %s exists, but an error was encountered: %s' %
+                    (possible_json_path, str(error))
+
+    # if we can't find the distribution JSON configuration file, make
+    # reasonable assumptions about default values and return the dictionary.
+    if config is None:
+        config = {
+            'lang': palisades.i18n.os_default_lang(),
+        }
+
+    return config

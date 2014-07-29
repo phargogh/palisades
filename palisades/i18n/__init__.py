@@ -88,4 +88,6 @@ def current_lang():
     """Return the string language code of the currently-active language."""
     return language.info()['language']
 
-
+def os_default_lang():
+    """Return the OS default language."""
+    return locale.getdefaultlocale()[0].split('_')[0].lower()

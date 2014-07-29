@@ -2,6 +2,7 @@ import versioning
 import sys
 import glob
 import os
+import locale
 
 # The __version__ attribute MUST be set to 'dev'.  It is changed automatically
 # when the package is built.  The build_attrs attribute is set at the same time,
@@ -74,6 +75,9 @@ def launch(json_uri, splash_img=None):
             possible_paths)
     print found_json
 
-    ui = elements.Application(found_json)
+    # get the language code from the language dialect code.
+    os_lang = locale.getdefaultlocale()[0].split('_')[0].lower()
+
+    ui = elements.Application(found_json, os_lang)
     gui = palisades.gui.build(ui._window)
     gui.execute()

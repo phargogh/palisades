@@ -15,20 +15,20 @@ PALISADES_CONFIG = os.path.join(TEST_DIR, 'data', 'palisades_config')
 
 @unittest.skip('no X')
 class ApplicationTest(unittest.TestCase):
+    def setUp(self):
+        self.timber_json = os.path.join(PALISADES_CONFIG, 'timber_clean.json')
+
     def test_build_application_no_gui(self):
-        ui = elements.Application(os.path.join(PALISADES_CONFIG,
-            'timber_clean.json'))
+        ui = elements.Application(self.timber_json)
         self.assertRaises(elements.InvalidData, ui._window.submit)
 
     def test_build_application_qt_gui_timber(self):
-        ui = elements.Application(os.path.join(PALISADES_CONFIG,
-            'timber_clean.json'))
+        ui = elements.Application(self.timber_json)
         gui = palisades.gui.build(ui._window)
         gui.execute()
 
     def test_build_application_qt_gui_timber_de(self):
-        ui = elements.Application(os.path.join(PALISADES_CONFIG,
-            'timber_clean.json'), 'de')
+        ui = elements.Application(self.timber_json, 'de')
         gui = palisades.gui.build(ui._window)
         gui.execute()
 
@@ -38,6 +38,9 @@ class ApplicationTest(unittest.TestCase):
             'all_elements.json'))
         gui = palisades.gui.build(ui._window)
         gui.execute()
+
+    def test_launch_en(self):
+        palisades.launch(self.timber_json)
 
 def assert_utf8(string):
     """Assert that the input string is unicode, formatted as UTF-8."""

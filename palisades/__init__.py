@@ -3,6 +3,9 @@ import sys
 import glob
 import os
 import locale
+import json
+
+import palisades.i18n
 
 # The __version__ attribute MUST be set to 'dev'.  It is changed automatically
 # when the package is built.  The build_attrs attribute is set at the same time,
@@ -109,8 +112,8 @@ def locate_dist_config():
             try:
                 config = json.load(open(possible_json_path))
             except Exception as error:
-                print 'File %s exists, but an error was encountered: %s' %
-                    (possible_json_path, str(error))
+                print ('File %s exists, but an error was encountered: %s' %
+                    (possible_json_path, str(error)))
 
     # if we can't find the distribution JSON configuration file, make
     # reasonable assumptions about default values and return the dictionary.

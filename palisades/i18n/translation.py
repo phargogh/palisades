@@ -134,10 +134,35 @@ def translate_config(config, lang_code, extra_keys=[]):
 
     return translated_config
 
-
-
-
 def translate_json(json_uri, lang_code):
     user_config = palisades.utils.load_json(json_uri)
     return translate_config(user_config, lang_code)
+
+def extract_languages(config):
+    """Returns a list of language codes found in this configuration object."""
+
+    max_key_len = lambda y: max(map(lambda x: len(x), y))
+    min_key_len = lambda y: min(map(lambda x: len(x), y))
+    language_sets = []
+
+    def recurse(dict_config):
+        # check if this is a language dict.
+        keys = dict_config.keys()
+        if max_key_len(keys) == 2 and min_key_len(keys) == 2:
+            langauge_sets.append(dict_config.keys())
+        else:
+            for key, value in dict_config.iteritems():
+                if type(value) is DictType:
+                    recurse(value)
+
+    # start the recursion to get the list of language keys.
+    recurse(config)
+
+    # get max and min element len.
+    if max_key_len(language_sets) == min_key_len(language_sets):
+        return language_sets[0]
+    else:
+        # we need to determine the minimal subset that are in all of the
+        # translation dictionaries.
+        raise Exception "Not yet implemented!"
 

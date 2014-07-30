@@ -164,5 +164,5 @@ def extract_languages(config):
     else:
         # we need to determine the minimal subset that are in all of the
         # translation dictionaries.
-        raise Exception "Not yet implemented!"
+        raise Exception("Not yet implemented!")
 

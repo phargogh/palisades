@@ -221,6 +221,7 @@ class CheckBoxGUI(LabeledPrimitiveGUI):
         # LabeledPrimitiveGUI class.
         self._checkbox = toolkit.CheckBox('')
         self.set_widget(2, self._checkbox)
+        self._checkbox.set_checked(self.element.value())
 
         # when the checkbox is checked by the user, set the value of the
         # underlying element object.

@@ -187,10 +187,11 @@ def write_build_info(source_file_uri):
                 temp_file.write("%s = '%s'\n" % (key, value))
         else:
             temp_file.write(line)
+    source_file.close()
+
     temp_file.flush()
     temp_file.close()
 
-    source_file.close()
     source_file_removed = False
     for index in range(10):
         try:

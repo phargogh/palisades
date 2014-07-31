@@ -7,6 +7,7 @@ from distutils.command.build_py import build_py as _build_py
 from distutils.command.sdist import sdist as _sdist
 import os
 import glob
+import traceback
 
 import palisades
 import palisades.i18n.msgfmt
@@ -66,7 +67,10 @@ class CustomPythonBuilder(_build_py):
         # source tree) to the build folder's copy of adept.__init__.
         filename = os.path.join(self.build_lib, 'palisades', '__init__.py')
         print 'Writing version data to %s' % filename
-        palisades.versioning.write_build_info(filename)
+        try:
+            palisades.versioning.write_build_info(filename)
+        except Exception as error:
+            traceback.print_exc()
         print 'Finished writing version data'
 
 class CustomSdist(_sdist):

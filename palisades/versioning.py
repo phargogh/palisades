@@ -199,6 +199,10 @@ def write_build_info(source_file_uri):
             source_file_removed = True
         except WindowsError:
             time.sleep(0.25)
+        except OSError:
+            print 'Not removing existing file, file not found.'
+            source_file_removed = True
+            break
     if not source_file_removed:
         raise IOError('Could not remove %s' % source_file_uri)
 

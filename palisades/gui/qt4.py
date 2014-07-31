@@ -2,6 +2,7 @@ import os
 import traceback
 import threading
 from types import BooleanType
+import platform
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -526,6 +527,26 @@ class TextField(QtGui.QLineEdit, QtWidget):
         refresh_action.triggered.connect(self._value_changed)
         menu.addAction(refresh_action)
         menu.exec_(event.globalPos())
+
+class FileField(TextField):
+    def __init__(self, starting_value):
+        TextField.__init__(self, starting_value)
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event=None):
+        """Overriding the default dragEnterEvent function for when a file is
+        dragged and dropped onto this qlineedit.  This reimplementation is
+        necessary for the dropEvent function to work on Windows."""
+        event.accept()
+
+    def dropEvent(self, event=None):
+         """Overriding the default Qt DropEvent function when a file is
+         dragged and dropped onto this qlineedit."""
+         path = event.mimeData().urls()[0].path()
+         if platform.system() == 'Windows':
+             path = path[1:]  # Remove the '/' ahead of disk letter
+         self.setText(path)
+         event.acceptProposedAction()
 
 class CheckBox(QtGui.QCheckBox, QtWidget):
     error_changed = Signal(bool)

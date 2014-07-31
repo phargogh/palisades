@@ -191,7 +191,15 @@ def write_build_info(source_file_uri):
     temp_file.close()
 
     source_file.close()
-    os.remove(source_file_uri)
+    source_file_removed = False
+    for index in range(10):
+        try:
+            os.remove(source_file_uri)
+            source_file_removed = True
+        except WindowsError:
+            time.sleep(0.25)
+    if not source_file_removed:
+        raise IOError('Could not remove %s' % source_file_uri)
 
     # This whole block of try/except logic is an attempt to mitigate a problem
     # we've experienced on Windows, where a file had not quite been deleted

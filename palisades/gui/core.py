@@ -262,6 +262,8 @@ class FileGUI(TextGUI):
     def __init__(self, core_element):
         TextGUI.__init__(self, core_element)
 
+        self._text_field = toolkit.FileField(self.element.value())
+        self.set_widget(2, self._text_field)
         self._text_field.clicked.register(self._file_requested)
 
         # create the FileButton using the 'type' attribute, one of file or

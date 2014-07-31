@@ -71,6 +71,7 @@ class CustomPythonBuilder(_build_py):
             palisades.versioning.write_build_info(filename)
         except Exception as error:
             traceback.print_exc()
+            raise error
         print 'Finished writing version data'
 
 class CustomSdist(_sdist):

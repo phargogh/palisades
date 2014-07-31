@@ -67,6 +67,7 @@ class CustomPythonBuilder(_build_py):
         filename = os.path.join(self.build_lib, 'palisades', '__init__.py')
         print 'Writing version data to %s' % filename
         palisades.versioning.write_build_info(filename)
+        print 'Finished writing version data'
 
 class CustomSdist(_sdist):
     """Custom source distribution builder.  Builds a source distribution via the

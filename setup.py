@@ -67,12 +67,7 @@ class CustomPythonBuilder(_build_py):
         # source tree) to the build folder's copy of adept.__init__.
         filename = os.path.join(self.build_lib, 'palisades', '__init__.py')
         print 'Writing version data to %s' % filename
-        try:
-            palisades.versioning.write_build_info(filename)
-        except Exception as error:
-            traceback.print_exc()
-            raise error
-        print 'Finished writing version data'
+        palisades.versioning.write_build_info(filename)
 
 class CustomSdist(_sdist):
     """Custom source distribution builder.  Builds a source distribution via the

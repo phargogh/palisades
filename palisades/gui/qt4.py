@@ -789,8 +789,8 @@ class ErrorDialog(InfoDialog):
         else:
             num_error_string = _('are %s errors') % num_messages
 
-        self.body.setText(_("There %s that must be resolved" +
-            " before this tool can be run:%s") % (num_error_string, label_string))
+        self.body.setText(_("There %s that must be resolved") +
+            _(" before this tool can be run:%s")) % (num_error_string, label_string))
         self.body.setMinimumSize(self.body.sizeHint())
         InfoDialog.showEvent(self, event)
 

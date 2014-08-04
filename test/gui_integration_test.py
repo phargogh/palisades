@@ -81,6 +81,7 @@ class LabeledPrimitiveIntegrationTest(PrimitiveIntegrationTest):
         # when hideable, self.view._label is a checkbox that can be checked on
         # and off using the set_checked() function.  When the checkbox is
         # checked, verify that the other widgets are toggled correctly
+        self.view._label.set_checked(False)
         self.assertEqual(self.view._label.is_checked(), False)
 
         self.assertEqual(self.view._label.is_visible(), True)

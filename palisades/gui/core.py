@@ -268,6 +268,10 @@ class FileGUI(TextGUI):
         self.set_widget(2, self._text_field)
         self._text_field.clicked.register(self._file_requested)
 
+        # when the text is modified in the textfield, call down to the element
+        # to set the text
+        self._text_field.value_changed.register(self.element.set_value)
+
         # create the FileButton using the 'type' attribute, one of file or
         # folder
         self._file_button = toolkit.FileButton(self.element.config['type'],

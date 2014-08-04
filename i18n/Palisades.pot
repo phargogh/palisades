@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-25 15:31-0800\n"
+"POT-Creation-Date: 2014-08-04 11:54-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,116 +17,122 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: palisades/gui/qt4.py:374
+#: palisades/gui/qt4.py:408
 msgid "WARNING:"
 msgstr ""
 
-#: palisades/gui/qt4.py:377
+#: palisades/gui/qt4.py:411
 msgid "ERROR:"
 msgstr ""
 
-#: palisades/gui/qt4.py:380
+#: palisades/gui/qt4.py:414
 msgid "Validation successful"
 msgstr ""
 
-#: palisades/gui/qt4.py:484
+#: palisades/gui/qt4.py:525
 msgid "Refresh"
 msgstr ""
 
-#: palisades/gui/qt4.py:527 palisades/gui/qt4.py:528
+#: palisades/gui/qt4.py:630 palisades/gui/qt4.py:631
 msgid "All files (* *.*)"
 msgstr ""
 
-#: palisades/gui/qt4.py:529
+#: palisades/gui/qt4.py:632
 msgid "Comma separated value file (*.csv *.CSV)"
 msgstr ""
 
-#: palisades/gui/qt4.py:530
+#: palisades/gui/qt4.py:633
 msgid "[GDAL] Arc/Info Binary Grid (hdr.adf HDR.ADF hdr.ADF)"
 msgstr ""
 
-#: palisades/gui/qt4.py:531
+#: palisades/gui/qt4.py:634
 msgid "[GDAL] Arc/Info ASCII Grid (*.asc *.ASC)"
 msgstr ""
 
-#: palisades/gui/qt4.py:532
+#: palisades/gui/qt4.py:635
 msgid "[GDAL] GeoTiff (*.tif *.tiff *.TIF *.TIFF)"
 msgstr ""
 
-#: palisades/gui/qt4.py:533
+#: palisades/gui/qt4.py:636
 msgid "[OGR] ESRI Shapefiles (*.shp *.SHP)"
 msgstr ""
 
-#: palisades/gui/qt4.py:534
+#: palisades/gui/qt4.py:637
 msgid "[DBF] dBase legacy file (*dbf *.DBF)"
 msgstr ""
 
-#: palisades/gui/qt4.py:543
+#: palisades/gui/qt4.py:650 palisades/gui/qt4.py:667
 msgid "Select "
 msgstr ""
 
-#: palisades/gui/qt4.py:578
+#: palisades/gui/qt4.py:705
 msgid "Errors exist!"
 msgstr ""
 
-#: palisades/gui/qt4.py:586 palisades/gui/qt4.py:650
+#: palisades/gui/qt4.py:713 palisades/gui/qt4.py:778
 msgid "Whoops!"
 msgstr ""
 
-#: palisades/gui/qt4.py:590
+#: palisades/gui/qt4.py:717
 msgid "OK"
 msgstr ""
 
-#: palisades/gui/qt4.py:630
+#: palisades/gui/qt4.py:758
 msgid "Warning..."
 msgstr ""
 
-#: palisades/gui/qt4.py:632
+#: palisades/gui/qt4.py:760
 msgid "Some inputs cannot be validated and may cause "
 msgstr ""
 
-#: palisades/gui/qt4.py:634
+#: palisades/gui/qt4.py:762
 msgid "Back"
 msgstr ""
 
-#: palisades/gui/qt4.py:641
+#: palisades/gui/qt4.py:769
 msgid "Are you sure you want to quit?"
 msgstr ""
 
-#: palisades/gui/qt4.py:642
+#: palisades/gui/qt4.py:770
 msgid "Really quit?"
 msgstr ""
 
-#: palisades/gui/qt4.py:644
+#: palisades/gui/qt4.py:772
 msgid "You will lose any changes to your parameter fields."
 msgstr ""
 
-#: palisades/gui/qt4.py:645
+#: palisades/gui/qt4.py:773
 msgid "Quit"
 msgstr ""
 
-#: palisades/gui/qt4.py:660
+#: palisades/gui/qt4.py:788
 msgid "is 1 error"
 msgstr ""
 
-#: palisades/gui/qt4.py:662
+#: palisades/gui/qt4.py:790
 #, python-format
 msgid "are %s errors"
 msgstr ""
 
-#: palisades/gui/qt4.py:678
+#: palisades/gui/qt4.py:792
+#, python-format
+msgid "There %s that must be resolved"
+msgstr ""
+
+#: palisades/gui/qt4.py:793
+#, python-format
+msgid " before this tool can be run:%s"
+msgstr ""
+
+#: palisades/gui/qt4.py:806
 #, python-format
 msgid "Tab %s"
 msgstr ""
 
-#: palisades/gui/qt4.py:712
+#: palisades/gui/qt4.py:1041
 msgid " Run"
 msgstr ""
 
-#: palisades/gui/qt4.py:715
+#: palisades/gui/qt4.py:1044
 msgid " Quit"
-msgstr ""
-
-#: palisades/gui/qt4.py:718
-msgid " Reset"
 msgstr ""

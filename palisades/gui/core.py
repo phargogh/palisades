@@ -236,7 +236,7 @@ class TextGUI(LabeledPrimitiveGUI):
 
         # If element.value() is not True, set to False.  Could be True, False
         # or None.
-        self._text_field = toolkit.TextField(self.element.value() == True)
+        self._text_field = toolkit.TextField(self.element.value())
         self.set_widget(2, self._text_field)
 
         # when the text is modified in the textfield, call down to the element

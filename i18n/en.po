@@ -117,12 +117,12 @@ msgstr "are %s errors"
 #: palisades/gui/qt4.py:792
 #, python-format
 msgid "There %s that must be resolved"
-msgstr ""
+msgstr "There %s that must be resolved"
 
 #: palisades/gui/qt4.py:793
 #, python-format
 msgid " before this tool can be run:%s"
-msgstr ""
+msgstr " before this tool can be run:%s"
 
 #: palisades/gui/qt4.py:806
 #, python-format

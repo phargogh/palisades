@@ -155,7 +155,7 @@ class TextIntegrationTest(LabeledPrimitiveIntegrationTest):
 
 class FileIntegrationTest(TextIntegrationTest):
     def setUp(self):
-        self.element = elements.File({})
+        self.element = elements.File({'type': 'file'})
         self.view = core.FileGUI(self.element)
         self.sample_value = __file__
 

@@ -267,6 +267,7 @@ class FileGUI(TextGUI):
         self._text_field = toolkit.FileField(self.element.value())
         self.set_widget(2, self._text_field)
         self._text_field.clicked.register(self._file_requested)
+        self._text_field.value_changed.register(self.element.set_value)
 
         # when the text is modified in the textfield, call down to the element
         # to set the text

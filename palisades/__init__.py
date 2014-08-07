@@ -78,9 +78,13 @@ def launch(json_uri, splash_img=None):
             possible_paths)
     print found_json
 
+    gui_app = palisades.gui.get_application()
+    gui_app.show_splash(splash_img)
+    gui_app.set_splash_message('Building core application')
     ui = elements.Application(found_json, locate_dist_config()['lang'])
-    gui = palisades.gui.build(ui._window)
-    gui.execute()
+    gui_app.set_splash_message('Building graphical interface')
+    gui_app.add_window(ui._window)
+    gui_app.execute()
 
 def locate_dist_config():
     """Locate the distribution configration.  If the distribution does not have

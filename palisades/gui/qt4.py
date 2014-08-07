@@ -85,9 +85,33 @@ class Application(object):
         self.translator.load("qt_%s" % lang,
             QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath))
         self.app.installTranslator(self.translator)
+        self.splashscreen = None
+
+    def process_events(self):
+        self.app.processEvents()
 
     def execute(self):
         self.app.exec_()
+
+class SplashScreen(QtGui.QSplashScreen):
+    def __init__(self, img_uri):
+        img = QtGui.QPixmap(img_uri)
+        QtGui.QSplashScreen.__init__(self, img, QtCore.Qt.WindowStaysOnTopHint)
+        self.setMask(img.mask())
+
+        self.img_uri = img_uri
+
+    def show(self):
+        QtGui.QSplashScreen.show(self)
+
+    def finish(self, widget):
+        QtGui.QSplashScreen.finish(self, widget)
+
+    def clear_message(self):
+        QtGui.QSplashScreen.clearMessage(self)
+
+    def show_message(self, message):
+        QtGui.QSplashScreen.showMessage(self, message)
 
 class QtWidget(QtGui.QWidget):
     # REQUIRED: subclasses must also be a subclass of QWidget

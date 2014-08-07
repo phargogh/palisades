@@ -1,6 +1,8 @@
 import logging
 from types import *
+import time
 
+import palisades.gui
 from palisades.gui import qt4 as toolkit
 from palisades.validation import V_ERROR
 from palisades.validation import V_PASS
@@ -16,6 +18,7 @@ class ApplicationGUI(object):
         self.app = toolkit.Application()
         self.windows = []
         self.window = None
+        self.splashscreen = None
 
     def add_window(self, form_ptr):
         """Add a window with the appropriate structure of elements.  Assume it's
@@ -23,9 +26,24 @@ class ApplicationGUI(object):
         self.window = FormGUI(form_ptr)
         self.windows.append(self.window)
 
+    def show_splash(self, img_uri):
+        self.splashscreen = toolkit.SplashScreen(img_uri)
+        self.splashscreen.show()
+        self.splashscreen.showMessage('Starting ...')
+
+    def set_splash_message(self, splash_msg):
+        self.splashscreen.clear_message()
+        self.splashscreen.show_message(splash_msg)
+
     def execute(self):
+        self.app.process_events()
         for window in self.windows:
             window.show()
+            self.app.process_events()
+
+        if self.splashscreen is not None:
+            self.splashscreen.finish(self.windows[0].window)
+
         self.app.execute()
 
 class UIObject(object):
@@ -281,7 +299,7 @@ class FileGUI(TextGUI):
         self.set_widget(3, self._file_button)
 
     def _file_requested(self, event=None):
-        if len(self._text_field.text()) == 0:
+        if len(self.element.value()) == 0:
             self._file_button._get_file()
 
     def _file_selected(self, new_value):

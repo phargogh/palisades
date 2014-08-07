@@ -40,3 +40,7 @@ def build(form_ptr):
     app = core.ApplicationGUI()
     app.add_window(form_ptr)
     return app
+
+def get_application():
+    from palisades.gui import core
+    return core.ApplicationGUI()

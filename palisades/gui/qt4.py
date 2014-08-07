@@ -111,7 +111,8 @@ class SplashScreen(QtGui.QSplashScreen):
         QtGui.QSplashScreen.clearMessage(self)
 
     def show_message(self, message):
-        QtGui.QSplashScreen.showMessage(self, message)
+        QtGui.QSplashScreen.showMessage(self, message,
+            QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom, QtCore.Qt.white)
 
 class QtWidget(QtGui.QWidget):
     # REQUIRED: subclasses must also be a subclass of QWidget

@@ -80,6 +80,7 @@ def launch(json_uri, splash_img=None):
 
     gui_app = palisades.gui.get_application()
     if splash_img is not None:
+        print 'Showing splash %s' % splash_img
         gui_app.show_splash(splash_img)
         gui_app.set_splash_message('Building core application')
     ui = elements.Application(found_json, locate_dist_config()['lang'])
@@ -88,6 +89,8 @@ def launch(json_uri, splash_img=None):
         gui_app.set_splash_message('Building graphical interface')
 
     gui_app.add_window(ui._window)
+
+    print 'Starting application'
     gui_app.execute()
 
 def locate_dist_config():

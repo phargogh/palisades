@@ -104,8 +104,21 @@ class SplashScreen(QtGui.QSplashScreen):
     def show(self):
         QtGui.QSplashScreen.show(self)
 
-    def finish(self, widget):
-        QtGui.QSplashScreen.finish(self, widget)
+    def finish(self, widget, timeout):
+        # close the splashscreen after `timeout` seconds.
+
+        self._timeout_widget = widget
+        if timeout == 0:
+            self._finish_on_timeout()
+        else:
+            self.timer = QtCore.QTimer()
+            self.timer.setInterval(timeout * 1000)  # qtimer interval in ms
+            self.timer.setSingleShot(True)
+            self.timer.timeout.connect(self._finish_on_timeout)
+            self.timer.start()
+
+    def _finish_on_timeout(self):
+        QtGui.QSplashScreen.finish(self, self._timeout_widget)
 
     def clear_message(self):
         QtGui.QSplashScreen.clearMessage(self)

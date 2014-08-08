@@ -29,7 +29,7 @@ class ApplicationGUI(object):
     def show_splash(self, img_uri):
         self.splashscreen = toolkit.SplashScreen(img_uri)
         self.splashscreen.show()
-        self.splashscreen.showMessage('Starting ...')
+        self.splashscreen.show_message('Starting ...')
 
     def set_splash_message(self, splash_msg):
         self.splashscreen.clear_message()
@@ -42,7 +42,8 @@ class ApplicationGUI(object):
             self.app.process_events()
 
         if self.splashscreen is not None:
-            self.splashscreen.finish(self.windows[0].window)
+            self.splashscreen.show_message('Ready')
+            self.splashscreen.finish(self.windows[0].window, 1)
 
         self.app.execute()
 

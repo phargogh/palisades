@@ -6,6 +6,7 @@ import locale
 import json
 
 import palisades.i18n
+_ = palisades.i18n.language.ugettext
 
 # The __version__ attribute MUST be set to 'dev'.  It is changed automatically
 # when the package is built.  The build_attrs attribute is set at the same time,
@@ -74,23 +75,23 @@ def launch(json_uri, splash_img=None):
             found_json = possible_path
 
     if found_json is None:
-        raise IOError('Configuration file %s could not be found in %s',
+        raise IOError(_('Configuration file %s could not be found in %s'),
             possible_paths)
     print found_json
 
     gui_app = palisades.gui.get_application()
     if splash_img is not None:
-        print 'Showing splash %s' % splash_img
+        print _('Showing splash %s') % splash_img
         gui_app.show_splash(splash_img)
-        gui_app.set_splash_message('Building core application')
+        gui_app.set_splash_message(_('Building core application'))
     ui = elements.Application(found_json, locate_dist_config()['lang'])
 
     if splash_img is not None:
-        gui_app.set_splash_message('Building graphical interface')
+        gui_app.set_splash_message(_('Building graphical interface'))
 
     gui_app.add_window(ui._window)
 
-    print 'Starting application'
+    print _('Starting application')
     gui_app.execute()
 
 def locate_dist_config():

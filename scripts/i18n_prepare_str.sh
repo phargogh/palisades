@@ -1,6 +1,11 @@
+
+# Write the palisades translation information to Palisades.pot.
+
+find palisades -name "*.py" | xargs xgettext -d Palisades -o i18n/Palisades.pot --language=Python
+
+
 # Convert Palisades.pot to the language-specific .po files, merging them with
 # the older versions of the same file.
-
 pushd i18n
 mkdir merged_po
 

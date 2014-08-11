@@ -336,7 +336,7 @@ class FormGUI():
         self.element = core_element
 
         self.group = GroupGUI(self.element._ui)
-        self.window = toolkit.FormWindow(self.group.widgets)
+        self.window = toolkit.FormWindow(self.group.widgets, self.element.title())
         self.quit_confirm = toolkit.ConfirmQuitDialog()
         self.errors_dialog = toolkit.ErrorDialog()
         self.messages_dialog = toolkit.RealtimeMessagesDialog()

@@ -940,6 +940,15 @@ class Form():
             LOGGER.warn('No lastrun file found at %s.  Skipping.',
                 self.lastrun_uri())
 
+    def title(self):
+        """Return the title string, if it's defined in the configuration.
+        Returns None if no title is defined."""
+        try:
+            return self._ui.config['label']
+        except KeyError:
+            LOGGER.debug('No form title defined')
+            return None
+
     def find_elements(self):
         """Recurse through all elements in this Form's UI and locate all Element
         objects.

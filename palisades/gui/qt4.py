@@ -1022,7 +1022,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
 class FormWindow(QtWidget, QtGui.QWidget):
     """A Form is a window where you have a set of inputs that the user fills in
     or configures and then presses 'submit'."""
-    def __init__(self, input_pane):
+    def __init__(self, input_pane, window_title=None):
         QtWidget.__init__(self)
         QtGui.QWidget.__init__(self)
 
@@ -1033,6 +1033,11 @@ class FormWindow(QtWidget, QtGui.QWidget):
         # create communicators.
         self.submit_pressed = Communicator()
         self.quit_requested = Communicator()
+
+        # set the window title
+        if window_title is None:
+            window_title = ''
+        self.setWindowTitle(window_title)
 
         self.menu_bar = QtGui.QMenuBar()
 

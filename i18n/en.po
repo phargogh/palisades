@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: jadoug 06\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-08-11 15:36-0700\n"
+"POT-Creation-Date: 2014-08-11 15:47-0700\n"
 "PO-Revision-Date: 2013-11-26 12:36-0800\n"
 "Last-Translator: James Douglass <jdouglass@stanford.edu>\n"
 "Language-Team: English\n"
@@ -38,6 +38,14 @@ msgstr "Building graphical interface"
 #: palisades/__init__.py:95
 msgid "Starting application"
 msgstr "Starting application"
+
+#: palisades/gui/core.py:32
+msgid "Starting ..."
+msgstr "Starting ..."
+
+#: palisades/gui/core.py:45
+msgid "Ready!"
+msgstr "Ready!"
 
 #: palisades/gui/qt4.py:446
 msgid "WARNING:"

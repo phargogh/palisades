@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-08-11 15:36-0700\n"
+"POT-Creation-Date: 2014-08-11 15:47-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,6 +37,14 @@ msgstr ""
 
 #: palisades/__init__.py:95
 msgid "Starting application"
+msgstr ""
+
+#: palisades/gui/core.py:32
+msgid "Starting ..."
+msgstr ""
+
+#: palisades/gui/core.py:45
+msgid "Ready!"
 msgstr ""
 
 #: palisades/gui/qt4.py:446

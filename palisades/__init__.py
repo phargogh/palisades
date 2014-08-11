@@ -75,8 +75,9 @@ def launch(json_uri, splash_img=None):
             found_json = possible_path
 
     if found_json is None:
-        raise IOError(_('Configuration file %s could not be found in %s'),
-            possible_paths)
+        raise IOError(
+            _('Configuration file %s could not be found in %s') % (json_uri,
+                possible_paths))
     print found_json
 
     gui_app = palisades.gui.get_application()

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: jadoug 06\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-08-11 15:47-0700\n"
+"POT-Creation-Date: 2014-08-13 11:37-0700\n"
 "PO-Revision-Date: 2013-11-26 12:45-0800\n"
 "Last-Translator: James Douglass <jdouglass@stanford.edu>\n"
 "Language-Team: Spanish\n"
@@ -112,7 +112,10 @@ msgid "Warning..."
 msgstr "Advertencia ..."
 
 #: palisades/gui/qt4.py:798
-msgid "Some inputs cannot be validated and may cause "
+#, fuzzy
+msgid ""
+"Some inputs cannot be validated and may cause this program to fail.  "
+"Continue anyways?"
 msgstr "Algunas entradas no se pueden validar y pueden causar"
 
 #: palisades/gui/qt4.py:800
@@ -158,6 +161,30 @@ msgstr " que esta herramienta se puede ejecutar:%s"
 #, python-format
 msgid "Tab %s"
 msgstr "Lengüeta %s"
+
+#: palisades/gui/qt4.py:1045
+msgid "&File"
+msgstr "&Archivo"
+
+#: palisades/gui/qt4.py:1046
+msgid "&Load parameters from file ..."
+msgstr "&Cargar parámetros de archivo ..."
+
+#: palisades/gui/qt4.py:1048
+msgid "&Save parameters ..."
+msgstr "&Guardar parámetros ..."
+
+#: palisades/gui/qt4.py:1051
+msgid "Exit"
+msgstr "Dejar"
+
+#: palisades/gui/qt4.py:1055
+msgid "&Development"
+msgstr "&Desarollo"
+
+#: palisades/gui/qt4.py:1056
+msgid "Save to &python script..."
+msgstr "Ahorra al script en &Python"
 
 #: palisades/gui/qt4.py:1085
 msgid " Run"

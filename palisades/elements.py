@@ -928,6 +928,7 @@ class Form():
 
         self.elements = self.find_elements()
         self.runner = None
+        self._runner_class = execution.PythonRunner
 
         self.submitted = Communicator()
 
@@ -1091,6 +1092,12 @@ class Form():
             fileio.save_model_run(self.collect_arguments(), file_path,
                     filename, function_name)
 
+    def set_runner(self, runner_class):
+        """Set the runner class that should be used for this form.
+        Runner_class should provide the same interface as and similar
+        functionality to execution.PythonRunner."""
+        self._runner_class = runner_class
+
     def submit(self, event=None):
         LOGGER.debug('Starting the form submission process')
 
@@ -1111,7 +1118,7 @@ class Form():
                 except KeyError:
                     function_name = 'execute'
 
-                self.runner = execution.PythonRunner(self._ui.config['targetScript'],
+                self.runner = self._runner_class(self._ui.config['targetScript'],
                     args_dict, function_name)
                 self.submitted.emit(True)
             except ImportError as error:

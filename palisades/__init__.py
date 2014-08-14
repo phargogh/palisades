@@ -38,7 +38,7 @@ def get_py2exe_datafiles():
     icons = map(os.path.abspath, glob.glob(local_icon_path + '/*'))
     return [(icon_path, icons)]
 
-def launch(json_uri, splash_img=None):
+def launch(json_uri, splash_img=None, runner=None):
     """Construct a core application instance based on the user-defined
     configuration file and then build a GUI instance off of that core
     application.  Once this latter component has been constructed, call its
@@ -48,6 +48,8 @@ def launch(json_uri, splash_img=None):
         splash_img=None - a URI to a raster graphic to use for a splash image
             while the program is loading.  If None, no splash image will be
             used.
+        runner=None - a subclass of execution.PythonRunner class to use to run
+            the application.  If None, execution.PythonRunner will be used.
 
     Returns nothing."""
     from palisades import elements
@@ -86,6 +88,10 @@ def launch(json_uri, splash_img=None):
         gui_app.show_splash(splash_img)
         gui_app.set_splash_message(_('Building core application'))
     ui = elements.Application(found_json, locate_dist_config()['lang'])
+
+    if runner is not None:
+        print _('Setting runner class to %s') % runner.__class__.__name__
+        ui._window.set_runner(runner)
 
     if splash_img is not None:
         gui_app.set_splash_message(_('Building graphical interface'))

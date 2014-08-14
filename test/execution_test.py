@@ -66,7 +66,7 @@ class ExecutorTest(unittest.TestCase):
         # space).
         LOGGER.debug('hello.  This should not appear in the log file.')
 
-        self.assertEqual(count_lines(temp_file_uri), 5)
+        self.assertEqual(count_lines(temp_file_uri), 9)
         os.remove(temp_file_uri)
 
 class LogManagerTest(unittest.TestCase):
@@ -93,12 +93,14 @@ class LogManagerTest(unittest.TestCase):
     def test_print_args_dict(self):
         """Verify that argument printing is correct."""
         log_file = os.path.join(DATA_DIR, 'sample_log.txt')
+        if os.path.exists(log_file):
+            os.remove(log_file)
         self.assertEqual(os.path.exists(log_file), False)
         manager = execution.LogManager('MainThread', log_file)
 
         args = {}
         manager.print_args(args)
-        self.assertEqual(count_lines(log_file), 2)
+        self.assertEqual(count_lines(log_file), 4)
         os.remove(log_file)
 
     def test_print_args_dict_full(self):

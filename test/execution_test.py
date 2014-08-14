@@ -131,8 +131,9 @@ class LogManagerTest(unittest.TestCase):
         for index, (log_msg, reg_msg) in enumerate(zip(lines(log_file), lines(regression_file))):
             if index == 0:
                 continue  # skip a logging line with the date/time
-
             self.assertEqual(log_msg, reg_msg)
+
+        os.remove(log_file_uri)
 
 class PythonRunnerTest(unittest.TestCase):
     def test_smoke(self):

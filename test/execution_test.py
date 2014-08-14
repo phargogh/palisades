@@ -104,6 +104,8 @@ class LogManagerTest(unittest.TestCase):
     def test_print_args_dict_full(self):
         """Verify that argument printing happens correctly with an args dict."""
         log_file_uri = os.path.join(DATA_DIR, 'sample_log.txt')
+        if os.path.exists(log_file_uri):
+            os.remove(log_file_uri)
         self.assertEqual(os.path.exists(log_file_uri), False)
         manager = execution.LogManager('MainThread', log_file_uri)
 
@@ -115,7 +117,7 @@ class LogManagerTest(unittest.TestCase):
             'list': range(4)
         }
         manager.print_args(args)
-        self.assertEqual(count_lines(log_file_uri), 7)
+        self.assertEqual(count_lines(log_file_uri), 8)
 
         regression_file_uri = os.path.join(DATA_DIR, 'execution',
             'arguments_only.txt')
@@ -124,7 +126,10 @@ class LogManagerTest(unittest.TestCase):
 
         # Loop through all the lines in both files, assert they're equal.
         lines = lambda f: [l for l in f]
-        for log_msg, reg_msg in zip(lines(log_file), lines(regression_file)):
+        for index, (log_msg, reg_msg) in enumerate(zip(lines(log_file), lines(regression_file))):
+            if index == 0:
+                continue  # skip a logging line with the date/time
+
             self.assertEqual(log_msg, reg_msg)
 
 class PythonRunnerTest(unittest.TestCase):

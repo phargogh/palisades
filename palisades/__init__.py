@@ -90,7 +90,7 @@ def launch(json_uri, splash_img=None, runner=None):
     ui = elements.Application(found_json, locate_dist_config()['lang'])
 
     if runner is not None:
-        print _('Setting runner class to %s') % runner.__class__.__name__
+        print _('Setting runner class to %s') % runner
         ui._window.set_runner(runner)
 
     if splash_img is not None:

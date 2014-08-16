@@ -155,7 +155,9 @@ class Group(QtGui.QGroupBox, QtWidget):
             for col_index, qt_widget in enumerate(gui_object.widgets, start_index):
                 if qt_widget is None:
                     qt_widget = Empty()
-                qt_widget.setMinimumSize(qt_widget.sizeHint())
+                size_hint = qt_widget.sizeHint()
+                if size_hint.isValid():
+                    qt_widget.setMinimumSize(size_hint)
                 self.layout().addWidget(qt_widget, current_row, col_index)
         # If the item's widgets attribute is not a list (it's assumed to be a
         # toolkit widget), then we want to add that widget to span the whole of
@@ -165,7 +167,9 @@ class Group(QtGui.QGroupBox, QtWidget):
             # it is, then there would not be any columns, which throws off the
             # rest of the layout.
             num_cols = max(5 + start_index, layout.columnCount())
-            gui_object.widgets.setMinimumSize(gui_object.widgets.sizeHint())
+            size_hint = gui_object.widgets.sizeHint()
+            if size_hint.isValid():
+                gui_object.widgets.setMinimumSize(size_hint)
             self.layout().addWidget(gui_object.widgets, current_row, 0 +
                     start_index, 1, num_cols)
         self.layout().setRowStretch(current_row, 0)
@@ -181,7 +185,8 @@ class Container(Group):
     def _container_toggled(self):
         # returns whether the container is collapsed.
         self.checkbox_toggled.emit(self.is_collapsed())
-        self.setMinimumSize(self.sizeHint())
+        if self.sizeHint().isValid():
+            self.setMinimumSize(self.sizeHint())
         self.update()
 
     def set_collapsible(self, is_collapsible):
@@ -256,7 +261,8 @@ class Multi(Container):
         self.layout().addWidget(self.add_element_link,
             self.layout().rowCount(), 2)
 
-        self.setMinimumSize(self.sizeHint())
+        if self.sizeHint().isValid():
+            self.setMinimumSize(self.sizeHint())
         self.update()
         self._active_elements = []
 
@@ -280,7 +286,8 @@ class Multi(Container):
                 sub_widget.hide()
 
         self.layout().setRowMinimumHeight(layout_row_num, 0)
-        self.setMinimumSize(self.sizeHint())
+        if self.sizeHint().isValid():
+            self.setMinimumSize(self.sizeHint())
         self.update()
         self.element_removed.emit(element_index)
 
@@ -302,7 +309,8 @@ class Multi(Container):
         self._active_elements.append(row_number)
 
         # readjust the minimum size to accommodate the new elements.
-        self.setMinimumSize(self.sizeHint())
+        if self.sizeHint().isValid():
+            self.setMinimumSize(self.sizeHint())
         self.update()
 
 class InformationButton(Button):
@@ -830,7 +838,8 @@ class ErrorDialog(InfoDialog):
         self.body.setText(_("There %s that must be resolved") +
             _(" before this tool can be run:%s") % (num_error_string,
             label_string))
-        self.body.setMinimumSize(self.body.sizeHint())
+        if self.body.sizeHint().isValid():
+            self.body.setMinimumSize(self.body.sizeHint())
         InfoDialog.showEvent(self, event)
 
 class TabGroup(QtGui.QTabWidget, Group):

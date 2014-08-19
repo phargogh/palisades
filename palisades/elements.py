@@ -969,7 +969,7 @@ class Form():
                 LOGGER.error(('Signal name %s is not defined for elements of'
                     ' type %s (id %s) and will be ignored.'),
                     signal_config['signal_name'], element.config['type'],
-                    element.get_id())
+                    element.get_id('user'))
                 continue
             requested_signals.append(signal_config)
 

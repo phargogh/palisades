@@ -1469,6 +1469,7 @@ class FormTest(unittest.TestCase):
             'targetScript': os.path.join(TEST_DIR, 'data', 'sample_scripts.py'),
             'elements': [
                 {
+                    'id': 'workspace',
                     'type': 'folder',
                     'validateAs': {'type': 'folder'},
                     'args_id': 'workspace_dir',
@@ -1561,6 +1562,33 @@ class FormTest(unittest.TestCase):
         out_file = 'test.txt'
         self.form.save_to_python(out_file)
         os.remove(out_file)
+
+    def test_element_communication_json(self):
+        # build up a form with the appropriate communication JSON
+        pass
+
+    def test_element_communication_python(self):
+        # build a form, add two elements with communication rules.
+        # make sure that the elements with communication rules communicate as
+        # expected.
+        new_element_A = elements.Element({
+            'id': 'element_A',
+            'type': 'folder',
+            'validateAs': {'type': 'folder'},
+            'args_id': 'temp_dir',
+            'default_value': '/tmp',
+            'signals': [
+                {
+                    'signal_name': 'visibility_changed',
+                    'target': 'element_B.set_enabled',
+                },
+            ]
+        })
+
+        self.form.add_element(new_element_A)
+
+        # verify that 
+
 
 
 

@@ -953,6 +953,27 @@ class Form():
             LOGGER.warn('No lastrun file found at %s.  Skipping.',
                 self.lastrun_uri())
 
+    def add_element(self, element):
+        """Add an element to this form, registering all element callbacks and
+        inter-element communication as necessary.
+
+            element - an element instance to add to this form
+
+        Returns nothing."""
+
+        for signal_config in element.config['signals']:
+            # If the signal is malformed, warn and skip.
+            if signal_config['signal_name'] not in element.signals:
+                LOGGER.warn(('Signal name %s is not defined for elements of'
+                    ' type %s (id %s) and will be ignored.'),
+                    signal_config['signal_name'], element.config['type'],
+                    element.get_id())
+                continue
+
+
+
+        self._ui._add_element(element)
+
     def title(self):
         """Return the title string, if it's defined in the configuration.
         Returns None if no title is defined."""

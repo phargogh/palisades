@@ -953,15 +953,14 @@ class Form():
             LOGGER.warn('No lastrun file found at %s.  Skipping.',
                 self.lastrun_uri())
 
-    def add_element(self, element):
-        """Add an element to this form, registering all element callbacks and
-        inter-element communication as necessary.
+    def setup_communication(self, elements_list):
+        """Set up communication between elements for all elements in the
+        elements_list.  Returns nothing."""
+        for element in elements_list:
+            if 'signals' in element.config:
+                self._setup_element_communication(element)
 
-            element - an element instance to add to this form
-
-        Returns nothing."""
-        LOGGER.debug('Ading element "%s" to the form', element.get_id('user'))
-
+    def _setup_element_communication(self, element):
         requested_signals = []
         for signal_config in element.config['signals']:
             # If the signal is malformed or unknown, warn and skip.
@@ -1029,6 +1028,16 @@ class Form():
             # connect the target signal.
             # TODO: specify what data should be passed as an argument?
             getattr(element, signal_config['signal_name']).register(target_func)
+
+
+    def add_element(self, element):
+        """Add an element to this form, registering all element callbacks and
+        inter-element communication as necessary.
+
+            element - an element instance to add to this form
+
+        Returns nothing."""
+        LOGGER.debug('Ading element "%s" to the form', element.get_id('user'))
 
         self._ui._add_element(element)
 

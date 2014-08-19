@@ -198,6 +198,7 @@ class PrimitiveTest(ElementTest):
             'hidden_toggled',
             'interactivity_changed',
             'validation_completed',
+            'validity_changed',
             'value_changed',
             'visibility_changed'
         ]
@@ -436,17 +437,6 @@ class TextTest(LabeledPrimitiveTest):
             'hideable': False,
         }
         self.assertEqual(self.element.config, expected_defaults)
-
-    def test_signals(self):
-        expected_signals = [
-            'config_changed',
-            'hidden_toggled',
-            'interactivity_changed',
-            'validation_completed',
-            'value_changed',
-            'visibility_changed'
-        ]
-        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
 
     def test_set_label(self):
         # check that the configuration-defined label is set.
@@ -1063,6 +1053,7 @@ class StaticTest(ElementTest):
             'hidden_toggled',
             'interactivity_changed',
             'validation_completed',
+            'validity_changed',
             'value_changed',
             'visibility_changed'
         ]
@@ -1125,6 +1116,7 @@ class LabelTest(ElementTest):
             'hidden_toggled',
             'interactivity_changed',
             'validation_completed',
+            'validity_changed',
             'value_changed',
             'visibility_changed'
         ]

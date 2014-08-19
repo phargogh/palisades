@@ -52,9 +52,14 @@ class UIObject(object):
         self.element = core_element
 
         self.element.visibility_changed.register(self.set_visible)
+        self.element.interactivity_changed.register(self.set_enabled)
 
     def set_visible(self, is_visible):
         """Update the element's visibility in the toolkit."""
+        raise NotYetImplemented
+
+    def set_enabled(self, is_enabled):
+        """Update the element's interactivity in the toolkit"""
         raise NotYetImplemented
 
 class GroupGUI(UIObject):

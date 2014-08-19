@@ -1597,6 +1597,18 @@ class FormTest(unittest.TestCase):
         # workspace.set_enabled in its registry.
         self.assertTrue(target_func in affected_communicator.callbacks)
 
+        # now, assert that the visibility_changed communicator properly changes
+        # the target_element.
+        workspace_element = self.form.elements[0]
+        self.assertTrue(workspace_element.is_visible())
+        new_element_A.set_visible(False)
+
+        self.assertFalse(workspace_element.is_enabled())
+
+        # And if we switch the visibility back, verify the switch went through.
+        new_element_A.set_visible(True)
+        self.assertTrue(workspace_element.is_enabled())
+
 
 
 

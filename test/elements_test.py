@@ -86,6 +86,12 @@ class ElementTest(unittest.TestCase):
 
         self.assertEqual(self.element.is_enabled(), True)
 
+    def test_signals(self):
+        # assert that the signals property works as expected.
+        expected_signals = ['config_changed', 'interactivity_changed',
+            'visibility_changed']
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
+
     def test_default_config(self):
         def check_config_signal(test_arg):
             """A function to register with the config_changed communicator."""

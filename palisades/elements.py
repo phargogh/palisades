@@ -97,6 +97,18 @@ class Element(object):
         # Render the configuration and save to self.config
         self.config = utils.apply_defaults(configuration, self.defaults)
 
+    @property
+    def signals(self):
+        """Return a list of string names of all attributes of this class that
+        are Communicator instances."""
+
+        signals = []
+        for attr_name, attr_obj in self.__dict__.iteritems():
+            if isinstance(attr_obj, Communicator):
+                signals.append(attr_name)
+
+        return signals
+
     def set_default_config(self, new_defaults):
         """Add default configuration options to this Element instance's default
         config dictionary.  If this function is called after the element's UI

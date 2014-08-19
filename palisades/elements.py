@@ -262,6 +262,7 @@ class Primitive(Element):
         self.value_changed = Communicator()
         self.validation_completed = Communicator()
         self.hidden_toggled = Communicator()
+        self.validity_changed = Communicator()
 
         # update the default configuration and set defaults based on the config.
         self.set_default_config(self.defaults)
@@ -334,11 +335,20 @@ class Primitive(Element):
         error - a tuple of (error_msg, error_state)."""
         error_msg, state = error
 
+        old_validity = self._valid
+
         if state == validation.V_PASS:
             self._valid = True
         else:
             self._valid = False
 
+        # if validity changed, emit the validity_changed signal
+        if old_validity != self._valid:
+            LOGGER.debug('Validity of "%s" changed from %s to %s',
+                self.get_id('user'), old_validity, self._valid)
+            self.validity_changed.emit(self._valid)
+
+        LOGGER.debug('Emitting validation_completed')
         self._validation_error = error_msg
         self.validation_completed.emit(error)
 

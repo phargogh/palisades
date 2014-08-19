@@ -1580,14 +1580,22 @@ class FormTest(unittest.TestCase):
             'signals': [
                 {
                     'signal_name': 'visibility_changed',
-                    'target': 'element_B.set_enabled',
+                    'target': 'workspace.set_enabled',
                 },
             ]
         })
 
+        # Verify that the target signal is not already in the affected
+        # communicator.
+        target_func = self.form.elements[0].set_enabled
+        affected_communicator = new_element_A.visibility_changed
+        self.assertFalse(target_func in affected_communicator.callbacks)
+
         self.form.add_element(new_element_A)
 
-        # verify that 
+        # verify that the visibility_changed communicator has the function at
+        # workspace.set_enabled in its registry.
+        self.assertTrue(target_func in affected_communicator.callbacks)
 
 
 

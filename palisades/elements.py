@@ -960,17 +960,50 @@ class Form():
             element - an element instance to add to this form
 
         Returns nothing."""
+        LOGGER.debug('Ading element "%s" to the form', element.get_id('user'))
 
+        requested_signals = []
         for signal_config in element.config['signals']:
-            # If the signal is malformed, warn and skip.
+            # If the signal is malformed or unknown, warn and skip.
             if signal_config['signal_name'] not in element.signals:
-                LOGGER.warn(('Signal name %s is not defined for elements of'
+                LOGGER.error(('Signal name %s is not defined for elements of'
                     ' type %s (id %s) and will be ignored.'),
                     signal_config['signal_name'], element.config['type'],
                     element.get_id())
                 continue
+            requested_signals.append(signal_config)
 
+        # having asserted that all signals in requested_signals are known, we
+        # can try to connect the communicators to their targets.
+        # TARGET FORMS:
+        #    element notation: <element_id>.func_name
 
+        element_index = dict((e.get_id('user'), e) for e in self.elements)
+
+        for signal_config in requested_signals:
+            LOGGER.debug('Setting up signal %s.%s -> %s', element.get_id('user'),
+                signal_config['signal_name'], signal_config['target'])
+            # assume element notation for now.  TODO: support more notations?
+            element_id, element_funcname = signal_config['target'].split('.')
+
+            try:
+                target_element = element_index[element_id]
+                element_func = getattr(target_element, element_funcname)
+            except KeyError:
+                # When there's no element known by that ID
+                LOGGER.error(('Signal %s.%s could not find element with ID %s, '
+                    'skipping'), target_element.get_id('user'),
+                    signal_config['signal_name'], element_id)
+                continue
+            except AttributeError:
+                # When there's no function with the desired name in the target
+                # element.
+                LOGGER.error('Element "%s" has no function "%s".  Skipping.',
+                    element_id, element_funcname)
+                continue
+
+            # connect the target signal.
+            getattr(element, signal_config['signal_name']).register(element_func)
 
         self._ui._add_element(element)
 
@@ -1002,7 +1035,6 @@ class Form():
 
         append_elements(self._ui._elements)
         return all_elements
-
 
     def collect_arguments(self):
         """Collect arguments from all elements in this form into a single

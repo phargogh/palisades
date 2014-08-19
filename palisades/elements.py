@@ -942,6 +942,8 @@ class Form():
         self.runner = None
         self._runner_class = execution.PythonRunner
 
+        self.setup_communication(self.elements)
+
         self.submitted = Communicator()
 
         # now that the form has been created, load the lastrun state, if

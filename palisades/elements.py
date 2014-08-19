@@ -1029,8 +1029,6 @@ class Form():
                     target_func = globals()[target]
                 else:
                     # assume it's a python package path package.module.func
-                    LOGGER.debug('globals: %s', globals())
-                    LOGGER.debug('closure: %s', self.add_element.func_closure)
                     path_list = target.split('.')
                     target_module = execution.locate_module('.'.join(path_list[:-1]))
                     target_func = getattr(target_module, path_list[-1])

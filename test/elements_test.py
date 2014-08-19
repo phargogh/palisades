@@ -188,10 +188,20 @@ class ElementTest(unittest.TestCase):
         element_id = self.element.get_id()
         self.assertEqual(element_id, 'dce4f711d1bc0b86ada3d5a7cfdc77f6')
 
-
 class PrimitiveTest(ElementTest):
     def setUp(self):
         self.element = elements.Primitive({})
+
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'hidden_toggled',
+            'interactivity_changed',
+            'validation_completed',
+            'value_changed',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
 
     def test_default_config(self):
         expected_defaults = {
@@ -426,6 +436,17 @@ class TextTest(LabeledPrimitiveTest):
             'hideable': False,
         }
         self.assertEqual(self.element.config, expected_defaults)
+
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'hidden_toggled',
+            'interactivity_changed',
+            'validation_completed',
+            'value_changed',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
 
     def test_set_label(self):
         # check that the configuration-defined label is set.
@@ -797,6 +818,15 @@ class ContainerTest(GroupTest):
             },
         ]
 
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'interactivity_changed',
+            'toggled',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
+
     def test_default_config(self):
         # Override from ElementTest.test_default_config
         expected_defaults = {
@@ -913,6 +943,17 @@ class MultiTest(ContainerTest):
         ]
         self.element = elements.Multi({})
 
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'element_added',
+            'element_removed',
+            'interactivity_changed',
+            'toggled',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
+
     def test_default_config(self):
         expected_defaults = {
             'label': '',
@@ -1016,6 +1057,17 @@ class StaticTest(ElementTest):
     def setUp(self):
         self.element = elements.Static({})
 
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'hidden_toggled',
+            'interactivity_changed',
+            'validation_completed',
+            'value_changed',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
+
     def test_default_config(self):
         expected_defaults = {
             'returnValue': None,
@@ -1066,6 +1118,17 @@ class StaticTest(ElementTest):
 class LabelTest(ElementTest):
     def setUp(self):
         self.element = elements.Label({})
+
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'hidden_toggled',
+            'interactivity_changed',
+            'validation_completed',
+            'value_changed',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
 
     def test_default_config(self):
         expected_defaults = {

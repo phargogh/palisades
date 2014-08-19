@@ -1027,6 +1027,7 @@ class Form():
                 target_func = target  # just use the user-defined target
 
             # connect the target signal.
+            # TODO: specify what data should be passed as an argument?
             getattr(element, signal_config['signal_name']).register(target_func)
 
         self._ui._add_element(element)

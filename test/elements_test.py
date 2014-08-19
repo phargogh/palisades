@@ -1638,5 +1638,5 @@ class FormTest(unittest.TestCase):
         self.assertFalse(test_closure.touched)  # should not have been called yet
 
         new_element_A.validate()
-        time.sleep(.1)
+        time.sleep(.1)  # sleep until validation is complete.
         self.assertTrue(test_closure.touched)

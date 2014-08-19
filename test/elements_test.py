@@ -1580,7 +1580,7 @@ class FormTest(unittest.TestCase):
             'signals': [
                 {
                     'signal_name': 'visibility_changed',
-                    'target': 'workspace.set_enabled',
+                    'target': 'Element:workspace.set_enabled',
                 },
             ]
         })

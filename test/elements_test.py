@@ -1609,6 +1609,34 @@ class FormTest(unittest.TestCase):
         new_element_A.set_visible(True)
         self.assertTrue(workspace_element.is_enabled())
 
+    def test_python_callback(self):
+        def test_closure(a):
+            print a
+            test_closure.touched = True
+        test_closure.touched = False  # initialize to False
 
+        new_element_A = elements.File({
+            'id': 'element_A',
+            'type': 'folder',
+            'validateAs': {'type': 'folder'},
+            'args_id': 'temp_dir',
+            'default_value': '/tmp',
+            'signals': [
+                {
+                    'signal_name': 'validation_completed',
+                    'target': test_closure,
+                },
+            ]
+        })
+        affected_communicator = new_element_A.validation_completed
+        self.assertFalse(test_closure in affected_communicator.callbacks)
+        self.assertFalse(test_closure.touched)
 
+        self.form.add_element(new_element_A)
 
+        self.assertTrue(test_closure in affected_communicator.callbacks)
+        self.assertFalse(test_closure.touched)  # should not have been called yet
+
+        new_element_A.validate()
+        time.sleep(.1)
+        self.assertTrue(test_closure.touched)

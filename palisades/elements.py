@@ -966,6 +966,7 @@ class Form():
         for signal_config in element.config['signals']:
             # If the signal is malformed or unknown, warn and skip.
             if signal_config['signal_name'] not in element.signals:
+                LOGGER.debug('Known signals of %s: %s', element, element.signals)
                 LOGGER.error(('Signal name %s is not defined for elements of'
                     ' type %s (id %s) and will be ignored.'),
                     signal_config['signal_name'], element.config['type'],
@@ -985,8 +986,12 @@ class Form():
             LOGGER.debug('Setting up signal %s.%s -> %s', element.get_id('user'),
                 signal_config['signal_name'], signal_config['target'])
 
-            target_type = signal_config['target'].split(':')[0]
-            target = signal_config['target'].replace(target_type + ':', '')
+            if type(signal_config['target']) in [StringType, UnicodeType]:
+                target_type = signal_config['target'].split(':')[0]
+                target = signal_config['target'].replace(target_type + ':', '')
+            else:  # assume that type(target) is FunctionType
+                target_type = '_function'
+                target = signal_config['target']  # just use the func given
 
             if target_type == 'Element':
                 # assume element notation for now.  TODO: support more notations?
@@ -1013,9 +1018,13 @@ class Form():
                     target_func = globals()[target]
                 else:
                     # assume it's a python package path package.module.func
+                    LOGGER.debug('globals: %s', globals())
+                    LOGGER.debug('closure: %s', self.add_element.func_closure)
                     path_list = target.split('.')
-                    target_module = execution.locate_module(path_list[:-1])
+                    target_module = execution.locate_module('.'.join(path_list[:-1]))
                     target_func = getattr(target_module, path_list[-1])
+            elif target_type == '_function':
+                target_func = target  # just use the user-defined target
 
             # connect the target signal.
             getattr(element, signal_config['signal_name']).register(target_func)

@@ -1038,7 +1038,9 @@ class Form():
             # connect the target signal.
             # TODO: specify what data should be passed as an argument?
             getattr(element, signal_config['signal_name']).register(target_func)
-
+            LOGGER.debug('Element %s has signal %s connected to %s',
+                element.get_id('user'), signal_config['signal_name'],
+                target_func)
 
     def add_element(self, element):
         """Add an element to this form, registering all element callbacks and

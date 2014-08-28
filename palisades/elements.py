@@ -152,10 +152,13 @@ class Element(object):
 
         Returns nothing."""
 
+        LOGGER.debug('Calling set_enabled with %s', new_state)
         new_state = bool(new_state)
 
         if new_state != self._enabled:
             self._enabled = new_state
+            LOGGER.debug('element %s emitting interactivity_changed',
+                self.get_id('user'))
             self.interactivity_changed.emit(new_state)
 
     def is_visible(self):
@@ -263,12 +266,14 @@ class Primitive(Element):
         self.validation_completed = Communicator()
         self.hidden_toggled = Communicator()
         self.validity_changed = Communicator()
+        self.satisfaction_changed = Communicator()
 
         # update the default configuration and set defaults based on the config.
         self.set_default_config(self.defaults)
         self._hidden = self.config['hideable']
         self._hideable = self.config['hideable']
         self._required = self.config['required']
+        self._satisfied = False
 
         # Set up our validator
         self._validator = validation.Validator(
@@ -335,12 +340,16 @@ class Primitive(Element):
         error - a tuple of (error_msg, error_state)."""
         error_msg, state = error
 
+        prev_satisfaction = self._satisfied
+        LOGGER.debug('prev_satisfaction: %s', prev_satisfaction)
         old_validity = self._valid
 
         if state == validation.V_PASS:
             self._valid = True
+            self._satisfied = True
         else:
             self._valid = False
+            self._satisfied = False
 
         # if validity changed, emit the validity_changed signal
         if old_validity != self._valid:
@@ -351,6 +360,11 @@ class Primitive(Element):
         LOGGER.debug('Emitting validation_completed')
         self._validation_error = error_msg
         self.validation_completed.emit(error)
+
+        LOGGER.debug('current satisfaction: %s', self.is_satisfied())
+        if self.is_satisfied() != prev_satisfaction:
+            LOGGER.debug('Satisfaction changed for %s', self.get_id('user'))
+            self.satisfaction_changed.emit(self.is_satisfied())
 
     def is_hideable(self):
         return self._hideable
@@ -365,6 +379,16 @@ class Primitive(Element):
 
     def is_hidden(self):
         return self._hidden
+
+    def is_satisfied(self):
+        """Determine if this element has satisfactory input.  An element is
+        satisfied if both these requirements are met:
+            - The element must have input
+            - The element's validation must pass (if it has validation)
+        Returns a boolean with the satisfaction state."""
+        if self.has_input() and self._valid:
+            return True
+        return False
 
     def state(self):
         """Return a python dictionary describing the state of this element."""

@@ -286,7 +286,7 @@ class Primitive(Element):
 
         Returns nothing."""
 
-        LOGGER.debug('%s setting value to %s', self.get_id('user'), self._value)
+        LOGGER.debug('%s setting value to %s', self.get_id('user'), new_value)
         if not self.is_enabled():
             return
 
@@ -358,6 +358,14 @@ class Primitive(Element):
             self.validity_changed.emit(self._valid)
 
         LOGGER.debug('Emitting validation_completed')
+        try:
+            if len(error_msg) > 0:
+                LOGGER.debug('Validation error: %s', error_msg)
+        except TypeError:
+            # when error_msg is None, there's no len().
+            # Error_msg of None means no validation error.
+            pass
+
         self._validation_error = error_msg
         self.validation_completed.emit(error)
 

@@ -2,6 +2,7 @@ import unittest
 import os
 import time
 import shutil
+import tempfile
 
 import mock
 
@@ -254,6 +255,21 @@ class PrimitiveTest(ElementTest):
 
         # check that validation completed by checking the validity of the input.
         self.assertEqual(self.element.is_valid(), True)
+
+    def test_satisfied(self):
+        # Verify that an element is satisfied when it should be.
+        # Element is not satisfied to start out.
+        self.assertFalse(self.element.is_satisfied())
+        self.assertFalse(self.element.has_input())
+
+        # when I set the value to something that will cause validation to pass,
+        # the element should be satisfied.
+        self.element.set_value('111')
+        self.element._validator.join()  # wait until validator finishes
+        self.assertTrue(self.element.is_valid())
+        self.assertTrue(self.element.has_input())
+        self.assertTrue(self.element.is_satisfied())
+        self.assertTrue(self.element._satisfied)
 
     def test_is_valid(self):
         #Verify that element validity works and makes sense.
@@ -537,6 +553,27 @@ class FileTest(TextTest):
         self.element.set_value(new_value)
         self.element._validator.join()
         self.assertEqual(self.element.is_valid(), True)
+
+    def test_satisfied(self):
+        # Verify that an element is satisfied when it should be.
+        # Element is not satisfied to start out.
+        self.assertFalse(self.element.is_satisfied())
+        self.assertTrue(self.element.is_enabled())
+
+        # when I set the value to something that will cause validation to pass,
+        # the element should be satisfied.
+        file_handle, tempfile_uri = tempfile.mkstemp()
+        try:
+            file_handle.close()
+        except:
+            pass
+
+        self.element.set_value(tempfile_uri)
+        self.element._validator.join()  # wait until validator finishes
+        self.assertTrue(self.element.is_valid())
+        self.assertTrue(self.element.has_input())
+        self.assertTrue(self.element.is_satisfied())
+        self.assertTrue(self.element._satisfied)
 
     def test_default_value(self):
         # verify the default value is set correctly
@@ -1252,6 +1289,20 @@ class DropdownTest(LabeledPrimitiveTest):
         self.assertEqual(dropdown._value, 0)
         self.assertEqual(dropdown.value(), default_options['options'][0])
 
+    def test_satisfied(self):
+        # Verify that an element is satisfied when it should be.
+        # Element is not satisfied to start out.
+        self.assertFalse(self.element.is_satisfied())
+
+        # when I set the value to something that will cause validation to pass,
+        # the element should be satisfied.
+        self.element.set_value(0)
+        self.element._validator.join()  # wait until validator finishes
+        self.assertTrue(self.element.is_valid())
+        self.assertTrue(self.element.has_input())
+        self.assertTrue(self.element.is_satisfied())
+        self.assertTrue(self.element._satisfied)
+
     def test_set_value(self):
         """Assert that the correct restrictions are in place on inputs."""
         config = {
@@ -1376,6 +1427,20 @@ class DropdownTest(LabeledPrimitiveTest):
 class CheckBoxTest(LabeledPrimitiveTest):
     def setUp(self):
         self.element = elements.CheckBox({})
+
+    def test_satisfied(self):
+        # Verify that an element is satisfied when it should be.
+        # Element is not satisfied to start out.
+        self.assertFalse(self.element.is_satisfied())
+
+        # when I set the value to something that will cause validation to pass,
+        # the element should be satisfied.
+        self.element.set_value(True)
+        self.element._validator.join()  # wait until validator finishes
+        self.assertTrue(self.element.is_valid())
+        self.assertTrue(self.element.has_input())
+        self.assertTrue(self.element.is_satisfied())
+        self.assertTrue(self.element._satisfied)
 
     def test_set_value(self):
         # overridden from PrimitiveTest.set_value(), since the values for a

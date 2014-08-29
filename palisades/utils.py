@@ -207,6 +207,38 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
 
     assert current_lang in lang_codes
 
+    # before we start rebuilding all elements, search through the iui_config
+    # and extract all of the enabledBy/disabledBy data.  This needs to be
+    # extracted here, because IUI and palisades have very different
+    # implementations of inter-element communication.
+
+    # TODO: make this SAFE for OGRDropdown elements.
+    connections = {}  # dict mapping {trigger_id: [(operation, target_id)]}
+
+    iui_ops = {  # dict mapping IUI ops to palisades equivalents
+        'enabledBy': 'enables',
+        'disabledBy': 'disables',
+    }
+
+    def _locate_interactivity(element):
+        if 'elements' in element:
+            for element_config in element['elements']:
+                _locate_interactivity(element_config)
+        else:
+            for connectivity_op in ['enabledBy', 'disabledBy']:
+                if connectivity_op in element:
+                    palisades_op = iui_ops[connectivity_op]
+                    trigger_id = element[connectivity_op]
+                    target_id = element['id']
+
+                    op_tuple = (palisades_op, target_id)
+                    try:
+                        connections[trigger_id].append(op_tuple)
+                    except KeyError:
+                        connections[trigger_id] = [op_tuple]
+
+    _locate_interactivity(iui_config)
+
     def recurse_through_element(element):
         new_config = add_translations_to_iui(element.copy(), lang_codes,
             current_lang)
@@ -215,6 +247,26 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
             element_type = new_config['type']
         except KeyError:
             element_type = None
+
+        try:
+            signals = []
+            element_ops = connections[new_config['id']]
+            for operation, target_id in element_ops:
+                signals.append("%s:%s" % (operation, target_id))
+            new_config['signals'] = signals
+        except KeyError:
+            # If no connections were found for this IUI element, just pass.
+            # Connections/inter-element connectivity is optional.
+            pass
+
+        # If enabledBy/disabledBy keys are found in the dictionary, delete
+        # them.
+        for interactivity_key in ['enabledBy', 'disabledBy']:
+            try:
+                del new_config[interactivity_key]
+            except KeyError:
+                # when the key is not there to be deleted, just skip.
+                pass
 
         # If we have a hideableFileEntry, replace it with a file element that
         # has the hideable flag enabled.

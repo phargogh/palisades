@@ -170,14 +170,17 @@ class CoreTest(unittest.TestCase):
                     'type': 'list',
                     'elements': [
                         {
+                            'id': 'label_1',
                             'type': 'label',
                             'label': 'label 1',
-                            'helpText': 'helptext 1'
+                            'helpText': 'helptext 1',
                         },
                         {
+                            'id': 'label_2',
                             'type': 'hideableFileEntry',
                             'label': 'label 2',
                             'helpText': 'helptext 2',
+                            'enabledBy': 'label_1',
                         },
                     ]
                 }
@@ -190,11 +193,14 @@ class CoreTest(unittest.TestCase):
             'helpText': {'en': 'some help text'},
             'elements': [
                 {
+                    'id': 'label_1',
                     'type': 'label',
                     'label': {'en': 'label 1'},
-                    'helpText': {'en': 'helptext 1'}
+                    'helpText': {'en': 'helptext 1'},
+                    'signals': ['enables:label_2'],
                 },
                 {
+                    'id': 'label_2',
                     'type': 'file',
                     'hideable': True,
                     'label': {'en': 'label 2'},
@@ -202,7 +208,6 @@ class CoreTest(unittest.TestCase):
                 },
             ]
         }
-
         self.assertEqual(utils.convert_iui(sample_config), expected_config)
 
     def test_add_translations_defaults(self):

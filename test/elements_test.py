@@ -1778,7 +1778,66 @@ class FormTest(unittest.TestCase):
     def test_enabledby_cascading(self):
         # Verify that IUI-style enabledBy works as exepcted AND that this can
         # cascade through multiple elements.
-        pass
+        form_config = {
+            "modelName": "Example form",
+            "targetScript": os.path.join(TEST_DIR, 'data',
+                'sample_scripts.py'),
+            "elements": [
+                {
+                    "id": "checkbox_1",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["enables:checkbox_2"]
+                },
+                {
+                    "id": "checkbox_2",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "enabled": False,
+                    "signals": ["enables:checkbox_3"]
+                },
+                {
+                    "id": "checkbox_3",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "enabled": False,
+                },
+            ]
+        }
+        form = elements.Form(form_config)
+        checkbox_1 = form.elements[0]
+        checkbox_2 = form.elements[1]
+        checkbox_3 = form.elements[2]
+
+        # Verify that checkbox 1 is enabled by default, but checkbox 2 is not
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertFalse(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_3.is_enabled())
+
+        # Check checkbox_1, verify that checkbox_2 has been enabled.
+        checkbox_1.set_value(True)
+        checkbox_1._validator.join()
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertTrue(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_3.is_enabled())
+
+        # now, check the second checkbox and verify that the 3rd has been
+        # enabled
+        checkbox_2.set_value(True)
+        checkbox_2._validator.join()
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertTrue(checkbox_2.is_enabled())
+        self.assertTrue(checkbox_3.is_enabled())
+
+        # disable the first checkbox and checkboxes 2, 3 should be disabled.
+        print 'test 3'
+        checkbox_1.set_value(False)
+        checkbox_1._validator.join()
+        checkbox_2._validator.join()
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertFalse(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_3.is_enabled())
+
 
     def test_disabledby(self):
         # Verify that IUI-style disabledBy works.

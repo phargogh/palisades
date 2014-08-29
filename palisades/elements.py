@@ -170,6 +170,11 @@ class Element(object):
                 self.get_id('user'))
             self.interactivity_changed.emit(new_state)
 
+        if prev_satisfaction != self.is_satisfied():
+            LOGGER.debug('Element %s has updated satisfaction to %s, emitting',
+                self.get_id('user'), self.is_satisfied())
+            self.satisfaction_changed.emit(self.is_satisfied())
+
     def is_visible(self):
         """Query whether this element is visible and return the visibility
         state.
@@ -411,8 +416,10 @@ class Primitive(Element):
         satisfied if both these requirements are met:
             - The element must have input
             - The element's validation must pass (if it has validation)
+            - The element must be enabled.
         Returns a boolean with the satisfaction state."""
-        if self.has_input() and self._valid:
+
+        if self.has_input() and self._valid and self.is_enabled():
             return True
         return False
 

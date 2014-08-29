@@ -1716,3 +1716,52 @@ class FormTest(unittest.TestCase):
         new_element_A.validate()
         time.sleep(.1)  # sleep until validation is complete.
         self.assertTrue(test_closure.touched)
+
+    def test_enabledby(self):
+        # Verify that IUI-style enabledBy works.
+        form_config = {
+            "modelName": "Example form",
+            "targetScript": os.path.join(TEST_DIR, 'data',
+                'sample_scripts.py'),
+            "elements": [
+                {
+                    "id": "checkbox_1",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["enables:checkbox_2"]
+                },
+                {
+                    "id": "checkbox_2",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "enabled": False,
+                },
+            ]
+        }
+        form = elements.Form(form_config)
+        checkbox_1 = form.elements[0]
+        checkbox_2 = form.elements[1]
+
+        # Verify that checkbox 1 is enabled by default, but checkbox 2 is not
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertFalse(checkbox_2.is_enabled())
+
+        # Check checkbox 1, and verify that checkbox 2 is enabled.
+        checkbox_1.set_value(True)
+        checkbox_1._validator.join()  # wait for the validator to finish.
+        self.assertTrue(checkbox_2.is_enabled())
+
+
+    def test_enabledBy_cascading(self):
+        # Verify that IUI-style enabledBy works as exepcted AND that this can
+        # cascade through multiple elements.
+        pass
+
+    def test_disabledby(self):
+        # Verify that IUI-style disabledBy works.
+        pass
+
+    def test_disabledby_cascading(self):
+        # Verify that IUI-style disabledBy works AND that this can cascade
+        # through multiple elements.
+        pass

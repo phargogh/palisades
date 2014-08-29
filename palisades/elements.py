@@ -1022,14 +1022,61 @@ class Form():
     def _setup_element_communication(self, element):
         requested_signals = []
         for signal_config in element.config['signals']:
+            # Two varieties of signal are permitted:
+            # 
+            # Short-form signals are strings in the form:
+            #    <simplified_signalname>:<target_element_id>
+            # Implemented shortform signals:
+            #  "enables" - indicates that the target element should be enabled
+            #       when this element's satisfied.
+            #
+            # Long-form signals are dictionaries in this form:
+            # {
+            #   "signal_name": "<string name of the signal>",
+            #   "target": one of several target forms, documented below.
+            # }
+            #
+
             # If the signal is malformed or unknown, warn and skip.
-            if signal_config['signal_name'] not in element.signals:
-                LOGGER.debug('Known signals of %s: %s', element, element.signals)
-                LOGGER.error(('Signal name %s is not defined for elements of'
-                    ' type %s (id %s) and will be ignored.'),
-                    signal_config['signal_name'], element.config['type'],
-                    element.get_id('user'))
-                continue
+
+            # first, check if the signal is short-form or long-form
+            # Short-form is a string
+            if type(signal_config) in [StringType, UnicodeType]:
+                short_signal, element_id = signal_config.split(':')
+
+                # tuples are (signal_name, target_function)
+                _short_signals = {
+                    "enables": ("satisfaction_changed", "set_enabled")
+                }
+
+                try:
+                    signal_name, target_func = _short_signals[short_signal]
+                except KeyError:
+                    LOGGER.error('Short-form signal %s is not known.',
+                        short_signal)
+                    continue
+
+                signal_config = {
+                    "signal_name": signal_name,
+                    "target": "Element:%s.%s" % (element_id, target_func),
+                }
+
+            # If the user provided the long-form signal configuration, ensure
+            # that the signal is known.  Log an error and skip if it isn't
+            # known.
+            elif type(signal_config) is DictType:
+                if signal_config['signal_name'] not in element.signals:
+                    LOGGER.debug('Known signals of %s: %s', element, element.signals)
+                    LOGGER.error(('Signal name %s is not defined for elements of'
+                        ' type %s (id %s) and will be ignored.'),
+                        signal_config['signal_name'], element.config['type'],
+                        element.get_id('user'))
+                    continue
+            else:
+                # catch-all condition where the signal is not of a form
+                # that we understand.
+                LOGGER.error('Signal configuration is not understood: %s',
+                    signal_config)
             requested_signals.append(signal_config)
 
         # having asserted that all signals in requested_signals are known, we

@@ -374,6 +374,12 @@ def setup_signal(signal_config, element_index):
     """Take a signal configuration object and set up the appropriate
     connections."""
 
+    # having asserted that all signals in requested_signals are known, we
+    # can try to connect the communicators to their targets.
+    # TARGET FORMS:
+    #    element notation: Element:<element_id>.func_name
+    #    python notation: Python:package.module.function
+    #
     # If the signal configuration's target is a formatted target string (see
     # above for permitted formats), we need to know the target type.
     # Otherwise, we assume that the target is a python callable.

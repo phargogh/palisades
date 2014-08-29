@@ -255,3 +255,29 @@ class CoreTest(unittest.TestCase):
         self.assertEqual(utils.add_translations_to_iui(sample_config,
             lang_codes, current_lang), expected_result)
 
+    def test_expand_shortform_enable(self):
+        shortform_enable = "enables:element_1"
+        expected_longform = {
+            "signal_name": "satisfaction_changed",
+            "target": "Element:element_1.set_enabled",
+        }
+        expanded = utils.expand_signal(shortform_enable)
+        self.assertEqual(expanded, expected_longform)
+
+    def test_expand_shortform_disable(self):
+        shortform_disable = "disables:element_1"
+        expected_longform = {
+            "signal_name": "satisfaction_changed",
+            "target": "Element:element_1.set_disabled",
+        }
+        expanded = utils.expand_signal(shortform_disable)
+        self.assertEqual(expanded, expected_longform)
+
+    def test_expand_shortform_typeerror(self):
+        invalid_shortform = []
+        self.assertRaises(TypeError, utils.expand_signal, invalid_shortform)
+
+    def test_expand_shortform_runtimeerror(self):
+        unknown_shortform = "bad_signal:element"
+        self.assertRaises(RuntimeError, utils.expand_signal, unknown_shortform)
+

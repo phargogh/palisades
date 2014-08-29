@@ -7,6 +7,8 @@ import logging
 import hashlib
 import platform
 from types import DictType
+from types import StringType
+from types import UnicodeType
 import tempfile
 
 import palisades.i18n.translation
@@ -306,4 +308,38 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
         return new_config
 
     return recurse_through_element(iui_config)
+
+def expand_signal(shortform_signal):
+    """Expand a signal from short-form to long-form.
+
+    shortform_signal - a shortform signal string.
+
+    Returns a longform signal dictionary."""
+
+    if type(shortform_signal) not in [StringType, UnicodeType]:
+        raise TypeError('shortform signal must be a string, %s found',
+            type(shortform_signal))
+
+    short_signal, element_id = shortform_signal.split(':')
+
+    # tuples are (signal_name, target_function)
+    _short_signals = {
+        "enables": ("satisfaction_changed", "set_enabled"),
+        "disables": ("satisfaction_changed", "set_disabled"),
+    }
+
+    try:
+        signal_name, target_func = _short_signals[short_signal]
+    except KeyError:
+        LOGGER.error('Short-form signal %s is not known.',
+            short_signal)
+        raise RuntimeError('Short-form signal %s is not known' % short_signal)
+
+    signal_config = {
+        "signal_name": signal_name,
+        "target": "Element:%s.%s" % (element_id, target_func),
+    }
+
+    return signal_config
+
 

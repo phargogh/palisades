@@ -1897,4 +1897,69 @@ class FormTest(unittest.TestCase):
     def test_disabledby_cascading(self):
         # Verify that IUI-style disabledBy works AND that this can cascade
         # through multiple elements.
-        pass
+        form_config = {
+            "modelName": "Example form",
+            "targetScript": os.path.join(TEST_DIR, 'data',
+                'sample_scripts.py'),
+            "elements": [
+                {
+                    "id": "checkbox_1",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["disables:checkbox_2"]
+                },
+                {
+                    "id": "checkbox_2",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["disables:checkbox_3"],
+                    "enabled": True,
+                },
+                {
+                    "id": "checkbox_3",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "enabled": True,
+                },
+            ]
+        }
+        form = elements.Form(form_config)
+        checkbox_1 = form.elements[0]
+        checkbox_2 = form.elements[1]
+        checkbox_3 = form.elements[2]
+
+        # Verify that checkboxes 1, 2, 3 are enabled by default
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertTrue(checkbox_2.is_enabled())
+        self.assertTrue(checkbox_3.is_enabled())
+
+        self.assertFalse(checkbox_1.value())  # unchecked by default
+        self.assertFalse(checkbox_2.value())  # unchecked by default
+        self.assertFalse(checkbox_3.value())  # unchecked by default
+
+        # For this test, all checkboxes start out enabled and unchecked
+        # Check checkbox 2, and checkbox 3 should disable.
+        # Check checkbox 1 and checkbox 2 should disable.
+        checkbox_2.set_value(True)
+        checkbox_2._validator.join()
+        self.assertTrue(checkbox_2.value())
+        self.assertTrue(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_3.is_enabled())
+
+        checkbox_1.set_value(True)
+        checkbox_1._validator.join()
+        checkbox_2._validator.join()
+        self.assertTrue(checkbox_1.value())
+        self.assertTrue(checkbox_2.value())  # value should still be True
+        self.assertFalse(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_2.is_enabled())
+
+        # now, unchecking checkbox_1 should enable both checkbox 2, but leave
+        # checkbox 3 disabled.
+        checkbox_1.set_value(False)
+        checkbox_1._validator.join()
+        checkbox_2._validator.join()
+        self.assertFalse(checkbox_1.value())
+        self.assertTrue(checkbox_2.value())
+        self.assertTrue(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_3.is_enabled())

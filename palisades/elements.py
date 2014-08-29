@@ -157,7 +157,8 @@ class Element(object):
 
         Returns nothing."""
 
-        LOGGER.debug('Calling set_enabled with %s', new_state)
+        LOGGER.debug('Calling set_enabled with %s (current=%s)', new_state,
+            self._enabled)
         new_state = bool(new_state)
 
         if new_state != self._enabled:
@@ -352,10 +353,8 @@ class Primitive(Element):
 
         if state == validation.V_PASS:
             self._valid = True
-            self._satisfied = True
         else:
             self._valid = False
-            self._satisfied = False
 
         # if validity changed, emit the validity_changed signal
         if old_validity != self._valid:
@@ -376,6 +375,7 @@ class Primitive(Element):
         self.validation_completed.emit(error)
 
         LOGGER.debug('current satisfaction: %s', self.is_satisfied())
+        self._satisfied = self.is_satisfied()
         if self.is_satisfied() != prev_satisfaction:
             LOGGER.debug('Satisfaction changed for %s', self.get_id('user'))
             self.satisfaction_changed.emit(self.is_satisfied())
@@ -727,6 +727,9 @@ class CheckBox(LabeledPrimitive):
         assert type(new_value) is BooleanType, ('new_value must be either True'
             ' or False, %s found' % type(new_value))
         LabeledPrimitive.set_value(self, new_value)
+
+    def has_input(self):
+        return self.value()
 
 class Group(Element):
     def __init__(self, configuration, new_elements=None):

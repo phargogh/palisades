@@ -1751,6 +1751,27 @@ class FormTest(unittest.TestCase):
         checkbox_1._validator.join()  # wait for the validator to finish.
         self.assertTrue(checkbox_2.is_enabled())
 
+        # now, uncheck checkbox_1 and ensure that checkbox_2 is disabled
+        checkbox_1.set_value(False)
+        checkbox_1._validator.join()
+        self.assertFalse(checkbox_2.is_enabled())
+
+        # check it back, just for fun
+        # Check checkbox 1, and verify that checkbox 2 is enabled.
+        checkbox_1.set_value(True)
+        checkbox_1._validator.join()  # wait for the validator to finish.
+        self.assertTrue(checkbox_2.is_enabled())
+
+        # check it yet again, for even more fun
+        checkbox_1.set_value(False)
+        checkbox_1._validator.join()
+        self.assertFalse(checkbox_2.is_enabled())
+
+        # if I set the value to its current state, there should be no change.
+        checkbox_1.set_value(checkbox_1.value())
+        checkbox_1._validator.join()
+        self.assertFalse(checkbox_2.is_enabled())
+
 
     def test_enabledBy_cascading(self):
         # Verify that IUI-style enabledBy works as exepcted AND that this can

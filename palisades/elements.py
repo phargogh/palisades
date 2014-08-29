@@ -1111,6 +1111,7 @@ class Form():
             self._setup_element_communication(element)
 
         self._ui._add_element(element)
+        self.elements.append(element)
 
     def title(self):
         """Return the title string, if it's defined in the configuration.

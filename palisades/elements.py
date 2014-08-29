@@ -1030,6 +1030,7 @@ class Form():
         self.elements = self.find_elements()
         self.runner = None
         self._runner_class = execution.PythonRunner
+        self._unknown_signals = set([])  # track signals we might setup later
 
         self.setup_communication(self.elements)
 
@@ -1081,15 +1082,20 @@ class Form():
             LOGGER.debug('Setting up signal %s.%s -> %s', element.get_id('user'),
                 signal_config['signal_name'], signal_config['target'])
 
-            signal_name, target_func = utils.setup_signal(signal_config,
-                element_index)
+            try:
+                signal_name, target_func = utils.setup_signal(signal_config,
+                    element_index)
 
-            # connect the target signal.
-            # TODO: specify what data should be passed as an argument?
-            getattr(element, signal_config['signal_name']).register(target_func)
-            LOGGER.debug('Element %s has signal %s connected to %s',
-                element.get_id('user'), signal_config['signal_name'],
-                target_func)
+                # connect the target signal.
+                # TODO: specify what data should be passed as an argument?
+                getattr(element, signal_config['signal_name']).register(target_func)
+                LOGGER.debug('Element %s has signal %s connected to %s',
+                    element.get_id('user'), signal_config['signal_name'],
+                    target_func)
+            except KeyError:
+                # when the target element is not known, add the element's
+                # config to the config_later set so we can try them out later.
+                self._unknown_signals.add(signal_config)
 
     def add_element(self, element):
         """Add an element to this form, registering all element callbacks and

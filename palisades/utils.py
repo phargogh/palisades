@@ -402,7 +402,7 @@ def setup_signal(signal_config, element_index):
             LOGGER.error(('Signal %s.%s could not find element with ID %s, '
                 'skipping'), target_element.get_id('user'),
                 signal_config['signal_name'], element_id)
-            raise RuntimeError('Could not find element with id %s',
+            raise KeyError('Could not find element with id %s',
                 element_id)
         except AttributeError as error:
             # When there's no function with the desired name in the target

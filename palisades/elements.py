@@ -1106,7 +1106,9 @@ class Form():
 
         Returns nothing."""
         LOGGER.debug('Ading element "%s" to the form', element.get_id('user'))
-        self._setup_element_communication(element)
+
+        if 'signals' in element.config:
+            self._setup_element_communication(element)
 
         self._ui._add_element(element)
 

@@ -147,6 +147,16 @@ class Element(object):
             return self._enabled
         return False
 
+    def set_disabled(self, new_state):
+        """Enable or disable this element.
+
+        new_state - A boolean.  If True, disable this element.  If False,
+            enable this element.
+
+        NOTE: this is an inverted wrapper around set_enabled()."""
+
+        self.set_enabled(not new_state)
+
     def set_enabled(self, new_state):
         """Enable or disable this element.
 
@@ -1068,7 +1078,8 @@ class Form():
 
                 # tuples are (signal_name, target_function)
                 _short_signals = {
-                    "enables": ("satisfaction_changed", "set_enabled")
+                    "enables": ("satisfaction_changed", "set_enabled"),
+                    "disables": ("satisfaction_changed", "set_disabled"),
                 }
 
                 try:

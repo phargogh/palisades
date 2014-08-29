@@ -78,11 +78,12 @@ class Element(object):
         self._default_config - a dictionary containing default configuration
             options.
     """
-    defaults = {}
+    defaults = {
+        "enabled": True,
+    }
 
     def __init__(self, configuration, parent=None):
         object.__init__(self)
-        self._enabled = True
         self._visible = True
 
         self._parent_ui = parent
@@ -93,9 +94,26 @@ class Element(object):
         self.config_changed = Communicator()
         self.interactivity_changed = Communicator()
         self.visibility_changed = Communicator()
+        self.satisfaction_changed = Communicator()
 
         # Render the configuration and save to self.config
         self.config = utils.apply_defaults(configuration, self.defaults)
+
+        # set element attributes
+        LOGGER.debug('config = %s', self.config)
+        self._enabled = self.config['enabled']
+
+    @property
+    def signals(self):
+        """Return a list of string names of all attributes of this class that
+        are Communicator instances."""
+
+        signals = []
+        for attr_name, attr_obj in self.__dict__.iteritems():
+            if isinstance(attr_obj, Communicator):
+                signals.append(attr_name)
+
+        return signals
 
     def set_default_config(self, new_defaults):
         """Add default configuration options to this Element instance's default
@@ -129,6 +147,16 @@ class Element(object):
             return self._enabled
         return False
 
+    def set_disabled(self, new_state):
+        """Enable or disable this element.
+
+        new_state - A boolean.  If True, disable this element.  If False,
+            enable this element.
+
+        NOTE: this is an inverted wrapper around set_enabled()."""
+
+        self.set_enabled(not new_state)
+
     def set_enabled(self, new_state):
         """Enable or disable this element.
 
@@ -140,11 +168,22 @@ class Element(object):
 
         Returns nothing."""
 
+        prev_satisfaction = self.is_satisfied()
+
+        LOGGER.debug('Calling set_enabled with %s (current=%s)', new_state,
+            self._enabled)
         new_state = bool(new_state)
 
         if new_state != self._enabled:
             self._enabled = new_state
+            LOGGER.debug('element %s emitting interactivity_changed',
+                self.get_id('user'))
             self.interactivity_changed.emit(new_state)
+
+        if prev_satisfaction != self.is_satisfied():
+            LOGGER.debug('Element %s has updated satisfaction to %s, emitting',
+                self.get_id('user'), self.is_satisfied())
+            self.satisfaction_changed.emit(self.is_satisfied())
 
     def is_visible(self):
         """Query whether this element is visible and return the visibility
@@ -218,12 +257,23 @@ class Element(object):
                 # when this happens, get the md5sum ID instead.
                 return self.get_id('md5sum')
 
+    def is_satisfied(self):
+        """Basic function to test whether this element is satisfied.
+        Subclasses may override this to provide input-specific satisfaction
+        requireents.
+
+        An element, at its most simplistic, is satisfied when it is enabled,
+        and not satisfied when it is not.  Returns a boolean."""
+        return self.is_enabled()
+
+
 class Primitive(Element):
     """Primitive represents the simplest input element."""
     defaults = {
         'validateAs': {'type': 'disabled'},
         'hideable': False,
         'required': False,
+        'enabled': True,
         'helpText': "",
         'returns': {
             'ifDisabled': False,
@@ -250,12 +300,14 @@ class Primitive(Element):
         self.value_changed = Communicator()
         self.validation_completed = Communicator()
         self.hidden_toggled = Communicator()
+        self.validity_changed = Communicator()
 
         # update the default configuration and set defaults based on the config.
         self.set_default_config(self.defaults)
         self._hidden = self.config['hideable']
         self._hideable = self.config['hideable']
         self._required = self.config['required']
+        self._satisfied = False
 
         # Set up our validator
         self._validator = validation.Validator(
@@ -268,7 +320,7 @@ class Primitive(Element):
 
         Returns nothing."""
 
-        LOGGER.debug('%s setting value to %s', self.get_id('user'), self._value)
+        LOGGER.debug('%s setting value to %s', self.get_id('user'), new_value)
         if not self.is_enabled():
             return
 
@@ -322,13 +374,38 @@ class Primitive(Element):
         error - a tuple of (error_msg, error_state)."""
         error_msg, state = error
 
+        prev_satisfaction = self._satisfied
+        LOGGER.debug('prev_satisfaction: %s', prev_satisfaction)
+        old_validity = self._valid
+
         if state == validation.V_PASS:
             self._valid = True
         else:
             self._valid = False
 
+        # if validity changed, emit the validity_changed signal
+        if old_validity != self._valid:
+            LOGGER.debug('Validity of "%s" changed from %s to %s',
+                self.get_id('user'), old_validity, self._valid)
+            self.validity_changed.emit(self._valid)
+
+        LOGGER.debug('Emitting validation_completed')
+        try:
+            if len(error_msg) > 0:
+                LOGGER.debug('Validation error: %s', error_msg)
+        except TypeError:
+            # when error_msg is None, there's no len().
+            # Error_msg of None means no validation error.
+            pass
+
         self._validation_error = error_msg
         self.validation_completed.emit(error)
+
+        LOGGER.debug('current satisfaction: %s', self.is_satisfied())
+        self._satisfied = self.is_satisfied()
+        if self.is_satisfied() != prev_satisfaction:
+            LOGGER.debug('Satisfaction changed for %s', self.get_id('user'))
+            self.satisfaction_changed.emit(self.is_satisfied())
 
     def is_hideable(self):
         return self._hideable
@@ -343,6 +420,18 @@ class Primitive(Element):
 
     def is_hidden(self):
         return self._hidden
+
+    def is_satisfied(self):
+        """Determine if this element has satisfactory input.  An element is
+        satisfied if both these requirements are met:
+            - The element must have input
+            - The element's validation must pass (if it has validation)
+            - The element must be enabled.
+        Returns a boolean with the satisfaction state."""
+
+        if self.has_input() and self._valid and self.is_enabled():
+            return True
+        return False
 
     def state(self):
         """Return a python dictionary describing the state of this element."""
@@ -414,6 +503,7 @@ class LabeledPrimitive(Primitive):
         'label': u'',
         'helpText': '',
         'validateAs': {'type': 'disabled'},
+        'enabled': True,
         'hideable': False,
         'required': False,
         'returns': {
@@ -442,6 +532,7 @@ class Dropdown(LabeledPrimitive):
         'options': ['No options specified'],
         'defaultValue': 0,
         'validateAs': {'type': 'disabled'},
+        'enabled': True,
         'label': u'',
         'hideable': False,
         'required': False,
@@ -503,6 +594,7 @@ class Text(LabeledPrimitive):
         'width': 60,
         'defaultValue': '',
         'validateAs': {'type': 'string'},
+        'enabled': True,
         'label': u'',
         'hideable': False,
         'required': False,
@@ -543,6 +635,7 @@ class File(Text):
         'validateAs': {'type': 'file'},
         'defaultValue': u'',
         'width': 60,
+        'enabled': True,
         'label': u'',
         'hideable': False,
         'required': False,
@@ -645,6 +738,7 @@ class CheckBox(LabeledPrimitive):
         'label': u'',
         'validateAs': {'type': 'disabled'},
         'hideable': False,
+        'enabled': True,
         'required': False,
         'helpText': "",
         'returns': {
@@ -662,6 +756,9 @@ class CheckBox(LabeledPrimitive):
         assert type(new_value) is BooleanType, ('new_value must be either True'
             ' or False, %s found' % type(new_value))
         LabeledPrimitive.set_value(self, new_value)
+
+    def has_input(self):
+        return self.value()
 
 class Group(Element):
     def __init__(self, configuration, new_elements=None):
@@ -687,6 +784,7 @@ class Group(Element):
         self._registrar = element_registry
         self._elements = []
         new_defaults = {
+            'enabled': True,
             'elements': [],
         }
         self.set_default_config(new_defaults)
@@ -779,6 +877,7 @@ class Container(Group):
     def __init__(self, configuration, new_elements=None):
         Group.__init__(self, configuration, new_elements)
         new_defaults = {
+            'enabled': True,
             'label': '',
             'collapsible': False,
         }
@@ -841,6 +940,7 @@ class Multi(Container):
         Container.__init__(self, configuration, new_elements)
         new_defaults = {
             'label': '',
+            'enabled': True,
             'collapsible': False,
             'link_text': 'Add another',
             'helpText': "",
@@ -908,6 +1008,7 @@ class Tab(Group):
     def __init__(self, configuration, new_elements=None):
         Group.__init__(self, configuration, new_elements)
         new_defaults = {
+            'enabled': True,
             'label': '',
         }
         self.set_default_config(new_defaults)
@@ -929,6 +1030,9 @@ class Form():
         self.elements = self.find_elements()
         self.runner = None
         self._runner_class = execution.PythonRunner
+        self._unknown_signals = []  # track signals we might setup later
+
+        self.setup_communication(self.elements)
 
         self.submitted = Communicator()
 
@@ -940,6 +1044,92 @@ class Form():
             # when no lastrun file exists for this version
             LOGGER.warn('No lastrun file found at %s.  Skipping.',
                 self.lastrun_uri())
+    @property
+    def element_index(self):
+        return dict((e.get_id('user'), e) for e in self.elements)
+
+    def setup_communication(self, elements_list):
+        """Set up communication between elements for all elements in the
+        elements_list.  Returns nothing."""
+        for element in elements_list:
+            if 'signals' in element.config:
+                self._setup_element_communication(element)
+
+    def _setup_element_communication(self, element):
+        # Two varieties of signal are permitted:
+        # 
+        # Short-form signals are strings in the form:
+        #    <simplified_signalname>:<target_element_id>
+        # Implemented shortform signals:
+        #  "enables" - indicates that the target element should be enabled
+        #       when this element's satisfied.
+        #
+        # Long-form signals are dictionaries in this form:
+        # {
+        #   "signal_name": "<string name of the signal>",
+        #   "target": one of several target forms, documented below.
+        # }
+        #
+        requested_signals = utils.get_valid_signals(element.config['signals'],
+            element.signals)
+
+        # having asserted that all signals in requested_signals are known, we
+        # can try to connect the communicators to their targets.
+        # TARGET FORMS:
+        #    element notation: Element:<element_id>.func_name
+        #    python notation: Python:package.module.function
+
+        for signal_config in requested_signals:
+            self._setup_signal(signal_config, element)
+
+    def _setup_signal(self, signal_config, src_element):
+        LOGGER.debug('Setting up signal %s.%s -> %s',src_element.get_id('user'),
+            signal_config['signal_name'], signal_config['target'])
+        try:
+            signal_name, target_func = utils.setup_signal(signal_config,
+                self.element_index)
+
+            # connect the target signal.
+            # TODO: specify what data should be passed as an argument?
+            getattr(src_element, signal_config['signal_name']).register(target_func)
+        except KeyError:
+            # when the target element is not known, add the element's
+            # config to the config_later set so we can try them out later.
+            LOGGER.debug('Signal %s.%s -> %s failed.  Element %s not known',
+                src_element.get_id('user'), signal_config['signal_name'],
+                signal_config['target'])
+            self._unknown_signals.append((signal_config, src_element))
+
+    def add_element(self, element):
+        """Add an element to this form, registering all element callbacks and
+        inter-element communication as necessary.
+
+            element - an element instance to add to this form
+
+        Returns nothing."""
+        LOGGER.debug('Ading element "%s" to the form', element.get_id('user'))
+
+        if 'signals' in element.config:
+            self._setup_element_communication(element)
+
+        self._ui._add_element(element)
+        self.elements.append(element)
+
+        # attempt to process unknown signals.
+        self._process_unknown_signals()
+
+    def _process_unknown_signals(self):
+        """check if there are any signals that need to be processed and set
+        them up accordingly."""
+
+        # make a copy of the currently unknown signals, and reset the local
+        # attribute to be empty so that we process the current state of signals
+        # and not mix up the two.
+        currently_unknown_signals = self._unknown_signals
+        self._unknown_signals = []
+
+        for unknown_signal, src_element in currently_unknown_signals:
+            self._setup_signal(unknown_signal, src_element)
 
     def title(self):
         """Return the title string, if it's defined in the configuration.
@@ -969,7 +1159,6 @@ class Form():
 
         append_elements(self._ui._elements)
         return all_elements
-
 
     def collect_arguments(self):
         """Collect arguments from all elements in this form into a single

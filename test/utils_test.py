@@ -170,14 +170,17 @@ class CoreTest(unittest.TestCase):
                     'type': 'list',
                     'elements': [
                         {
+                            'id': 'label_1',
                             'type': 'label',
                             'label': 'label 1',
-                            'helpText': 'helptext 1'
+                            'helpText': 'helptext 1',
                         },
                         {
+                            'id': 'label_2',
                             'type': 'hideableFileEntry',
                             'label': 'label 2',
                             'helpText': 'helptext 2',
+                            'enabledBy': 'label_1',
                         },
                     ]
                 }
@@ -190,11 +193,14 @@ class CoreTest(unittest.TestCase):
             'helpText': {'en': 'some help text'},
             'elements': [
                 {
+                    'id': 'label_1',
                     'type': 'label',
                     'label': {'en': 'label 1'},
-                    'helpText': {'en': 'helptext 1'}
+                    'helpText': {'en': 'helptext 1'},
+                    'signals': ['enables:label_2'],
                 },
                 {
+                    'id': 'label_2',
                     'type': 'file',
                     'hideable': True,
                     'label': {'en': 'label 2'},
@@ -202,7 +208,6 @@ class CoreTest(unittest.TestCase):
                 },
             ]
         }
-
         self.assertEqual(utils.convert_iui(sample_config), expected_config)
 
     def test_add_translations_defaults(self):
@@ -249,4 +254,53 @@ class CoreTest(unittest.TestCase):
         }
         self.assertEqual(utils.add_translations_to_iui(sample_config,
             lang_codes, current_lang), expected_result)
+
+    def test_expand_shortform_enable(self):
+        shortform_enable = "enables:element_1"
+        expected_longform = {
+            "signal_name": "satisfaction_changed",
+            "target": "Element:element_1.set_enabled",
+        }
+        expanded = utils.expand_signal(shortform_enable)
+        self.assertEqual(expanded, expected_longform)
+
+    def test_expand_shortform_disable(self):
+        shortform_disable = "disables:element_1"
+        expected_longform = {
+            "signal_name": "satisfaction_changed",
+            "target": "Element:element_1.set_disabled",
+        }
+        expanded = utils.expand_signal(shortform_disable)
+        self.assertEqual(expanded, expected_longform)
+
+    def test_expand_shortform_typeerror(self):
+        invalid_shortform = []
+        self.assertRaises(TypeError, utils.expand_signal, invalid_shortform)
+
+    def test_expand_shortform_runtimeerror(self):
+        unknown_shortform = "bad_signal:element"
+        self.assertRaises(RuntimeError, utils.expand_signal, unknown_shortform)
+
+    def test_get_valid_signals(self):
+        signals_list = [
+            "enables:element",
+            {
+                "signal_name": "aaa",
+                "target": "Element:some_target.set_enabled",
+            },
+        ]
+        known_signals = ["satisfaction_changed", "aaa"]
+
+        expected_signals = [
+            {
+                "signal_name": "satisfaction_changed",
+                "target": "Element:element.set_enabled",
+            },
+            {
+                "signal_name": "aaa",
+                "target": "Element:some_target.set_enabled",
+            },
+        ]
+        self.assertEqual(utils.get_valid_signals(signals_list, known_signals),
+            expected_signals)
 

@@ -7,6 +7,8 @@ import logging
 import hashlib
 import platform
 from types import DictType
+from types import StringType
+from types import UnicodeType
 import tempfile
 
 import palisades.i18n.translation
@@ -207,6 +209,38 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
 
     assert current_lang in lang_codes
 
+    # before we start rebuilding all elements, search through the iui_config
+    # and extract all of the enabledBy/disabledBy data.  This needs to be
+    # extracted here, because IUI and palisades have very different
+    # implementations of inter-element communication.
+
+    # TODO: make this SAFE for OGRDropdown elements.
+    connections = {}  # dict mapping {trigger_id: [(operation, target_id)]}
+
+    iui_ops = {  # dict mapping IUI ops to palisades equivalents
+        'enabledBy': 'enables',
+        'disabledBy': 'disables',
+    }
+
+    def _locate_interactivity(element):
+        if 'elements' in element:
+            for element_config in element['elements']:
+                _locate_interactivity(element_config)
+        else:
+            for connectivity_op in ['enabledBy', 'disabledBy']:
+                if connectivity_op in element:
+                    palisades_op = iui_ops[connectivity_op]
+                    trigger_id = element[connectivity_op]
+                    target_id = element['id']
+
+                    op_tuple = (palisades_op, target_id)
+                    try:
+                        connections[trigger_id].append(op_tuple)
+                    except KeyError:
+                        connections[trigger_id] = [op_tuple]
+
+    _locate_interactivity(iui_config)
+
     def recurse_through_element(element):
         new_config = add_translations_to_iui(element.copy(), lang_codes,
             current_lang)
@@ -215,6 +249,26 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
             element_type = new_config['type']
         except KeyError:
             element_type = None
+
+        try:
+            signals = []
+            element_ops = connections[new_config['id']]
+            for operation, target_id in element_ops:
+                signals.append("%s:%s" % (operation, target_id))
+            new_config['signals'] = signals
+        except KeyError:
+            # If no connections were found for this IUI element, just pass.
+            # Connections/inter-element connectivity is optional.
+            pass
+
+        # If enabledBy/disabledBy keys are found in the dictionary, delete
+        # them.
+        for interactivity_key in ['enabledBy', 'disabledBy']:
+            try:
+                del new_config[interactivity_key]
+            except KeyError:
+                # when the key is not there to be deleted, just skip.
+                pass
 
         # If we have a hideableFileEntry, replace it with a file element that
         # has the hideable flag enabled.
@@ -255,3 +309,120 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
 
     return recurse_through_element(iui_config)
 
+def expand_signal(shortform_signal):
+    """Expand a signal from short-form to long-form.
+
+    shortform_signal - a shortform signal string.
+
+    Returns a longform signal dictionary."""
+
+    if type(shortform_signal) not in [StringType, UnicodeType]:
+        raise TypeError('shortform signal must be a string, %s found',
+            type(shortform_signal))
+
+    short_signal, element_id = shortform_signal.split(':')
+
+    # tuples are (signal_name, target_function)
+    _short_signals = {
+        "enables": ("satisfaction_changed", "set_enabled"),
+        "disables": ("satisfaction_changed", "set_disabled"),
+    }
+
+    try:
+        signal_name, target_func = _short_signals[short_signal]
+    except KeyError:
+        LOGGER.error('Short-form signal %s is not known.',
+            short_signal)
+        raise RuntimeError('Short-form signal %s is not known' % short_signal)
+
+    signal_config = {
+        "signal_name": signal_name,
+        "target": "Element:%s.%s" % (element_id, target_func),
+    }
+
+    return signal_config
+
+def get_valid_signals(signal_config_list, known_signals):
+    """Loop through signal configuration objects (whether short-form or
+        long-form) and return a list of valid signal configuration options.
+
+    signal_config_list - a list of long-or-short-form signal configuration
+        objects. If a shortform configuration object is in this list, it will
+        be expanded to a long-form object.  If a signal configuration object
+        points to a signal that is not known, it will be skipped.
+    known_signals - a list of signal strings that are known to the element in
+        question.
+
+    Returns a list of long-form signals that are valid for this element."""
+
+    valid_signals = []
+    for signal_config in signal_config_list:
+        if type(signal_config) in [StringType, UnicodeType]:
+            valid_signals.append(expand_signal(signal_config))
+
+        elif type(signal_config) is DictType:
+            if signal_config['signal_name'] not in known_signals:
+                LOGGER.debug('Signal %s not in %s',
+                    signal_config['signal_name'], known_signals)
+                continue
+            else:
+                valid_signals.append(signal_config)
+
+    return valid_signals
+
+def setup_signal(signal_config, element_index):
+    """Take a signal configuration object and set up the appropriate
+    connections."""
+
+    # having asserted that all signals in requested_signals are known, we
+    # can try to connect the communicators to their targets.
+    # TARGET FORMS:
+    #    element notation: Element:<element_id>.func_name
+    #    python notation: Python:package.module.function
+    #
+    # If the signal configuration's target is a formatted target string (see
+    # above for permitted formats), we need to know the target type.
+    # Otherwise, we assume that the target is a python callable.
+    if type(signal_config['target']) in [StringType, UnicodeType]:
+        target_type = signal_config['target'].split(':')[0]
+        target = signal_config['target'].replace(target_type + ':', '')
+
+    else:  # assume that type(target) is FunctionType
+        target_type = '_function'
+        target = signal_config['target']  # just use the func given
+
+    if target_type == 'Element':
+        # assume element notation for now.  TODO: support more notations?
+        element_id, element_funcname = target.split('.')
+        try:
+            target_element = element_index[element_id]
+            target_func = getattr(target_element, element_funcname)
+        except KeyError:
+            # When there's no element known by that ID
+            LOGGER.error(('Signal %s could not find element with ID %s, '
+                'skipping'), signal_config['signal_name'], element_id)
+            raise KeyError('Could not find element with id %s',
+                element_id)
+        except AttributeError as error:
+            # When there's no function with the desired name in the target
+            # element.
+            LOGGER.error('Element "%s" has no function "%s".  Skipping.',
+                element_id, element_funcname)
+            raise error
+
+    elif target_type == 'Python':
+        # If the target type is Python, see if the target function is
+        # in global first.
+        if target in globals():
+            target_func = globals()[target]
+        else:
+            # assume it's a python package path package.module.func
+            path_list = target.split('.')
+            target_module = execution.locate_module('.'.join(path_list[:-1]))
+            target_func = getattr(target_module, path_list[-1])
+
+    elif target_type == '_function':
+        target_func = target  # just use the user-defined target
+
+
+    return (signal_config['signal_name'], target_func)

@@ -52,9 +52,14 @@ class UIObject(object):
         self.element = core_element
 
         self.element.visibility_changed.register(self.set_visible)
+        self.element.interactivity_changed.register(self.set_enabled)
 
     def set_visible(self, is_visible):
         """Update the element's visibility in the toolkit."""
+        raise NotYetImplemented
+
+    def set_enabled(self, is_enabled):
+        """Update the element's interactivity in the toolkit"""
         raise NotYetImplemented
 
 class GroupGUI(UIObject):
@@ -130,6 +135,10 @@ class GroupGUI(UIObject):
         self.widgets.set_visible(is_visible)
         UIObject.set_visible(self, is_visible)
 
+    def set_enabled(self, is_enabled):
+        """Set the interactivity of this element."""
+        self.widgets.set_enabled(is_enabled)
+
 class TabGroupGUI(GroupGUI):
     def __init__(self, core_element, registrar=None):
         if not hasattr(self, 'widgets'):
@@ -190,6 +199,11 @@ class PrimitiveGUI(UIObject):
     def set_visible(self, is_visible):
         for widget in self.widgets:
             widget.set_visible(is_visible)
+
+    def set_enabled(self, is_enabled):
+        print is_enabled
+        for widget in self.widgets:
+            widget.set_enabled(is_enabled)
 
 class LabeledPrimitiveGUI(PrimitiveGUI):
     def __init__(self, core_element):

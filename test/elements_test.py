@@ -2,6 +2,7 @@ import unittest
 import os
 import time
 import shutil
+import tempfile
 
 import mock
 
@@ -86,6 +87,12 @@ class ElementTest(unittest.TestCase):
 
         self.assertEqual(self.element.is_enabled(), True)
 
+    def test_signals(self):
+        # assert that the signals property works as expected.
+        expected_signals = ['config_changed', 'interactivity_changed',
+            'satisfaction_changed', 'visibility_changed']
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
+
     def test_default_config(self):
         def check_config_signal(test_arg):
             """A function to register with the config_changed communicator."""
@@ -93,11 +100,12 @@ class ElementTest(unittest.TestCase):
 
         self.element.config_changed.register(check_config_signal)
         self.assertEqual(self.element._default_config, {})
-        self.assertEqual(self.element.config, {})
+        self.assertEqual(self.element.config, {"enabled": True})
 
         new_defaults = {
             'a': 'aaa',
             'b': 'bbb',
+            'enabled': True,
         }
 
         try:
@@ -120,8 +128,10 @@ class ElementTest(unittest.TestCase):
             # If the valueError in check_config_signal was raised, this is good!
             # So we continue on to the next assertion.
             pass
-        self.assertEqual(self.element._default_config, {'a': 'ccc', 'b': 'bbb'})
-        self.assertEqual(self.element.config, {'a': 'ccc', 'b': 'bbb'})
+        self.assertEqual(self.element._default_config, {'a': 'ccc', 'b': 'bbb',
+            "enabled": True})
+        self.assertEqual(self.element.config, {'a': 'ccc', 'b': 'bbb',
+            "enabled": True})
 
     def test_visibility(self):
         # verify that this element is visible and enabled by default.
@@ -182,15 +192,28 @@ class ElementTest(unittest.TestCase):
         element_id = self.element.get_id()
         self.assertEqual(element_id, 'dce4f711d1bc0b86ada3d5a7cfdc77f6')
 
-
 class PrimitiveTest(ElementTest):
     def setUp(self):
         self.element = elements.Primitive({})
+
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'hidden_toggled',
+            'interactivity_changed',
+            'satisfaction_changed',
+            'validation_completed',
+            'validity_changed',
+            'value_changed',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
 
     def test_default_config(self):
         expected_defaults = {
             'validateAs': {'type': 'disabled'},
             'hideable': False,
+            'enabled': True,
             'required': False,
             'helpText': "",
             'returns': {
@@ -236,6 +259,21 @@ class PrimitiveTest(ElementTest):
 
         # check that validation completed by checking the validity of the input.
         self.assertEqual(self.element.is_valid(), True)
+
+    def test_satisfied(self):
+        # Verify that an element is satisfied when it should be.
+        # Element is not satisfied to start out.
+        self.assertFalse(self.element.is_satisfied())
+        self.assertFalse(self.element.has_input())
+
+        # when I set the value to something that will cause validation to pass,
+        # the element should be satisfied.
+        self.element.set_value('111')
+        self.element._validator.join()  # wait until validator finishes
+        self.assertTrue(self.element.is_valid())
+        self.assertTrue(self.element.has_input())
+        self.assertTrue(self.element.is_satisfied())
+        self.assertTrue(self.element._satisfied)
 
     def test_is_valid(self):
         #Verify that element validity works and makes sense.
@@ -293,6 +331,7 @@ class HideablePrimitiveTest(PrimitiveTest):
         expected_defaults = {
             'validateAs': {'type': 'disabled'},
             'helpText': '',
+            'enabled': True,
             'required': False,
             'hideable': True,
             'returns': {
@@ -346,6 +385,7 @@ class LabeledPrimitiveTest(PrimitiveTest):
             'label': u'',
             'required': False,
             'helpText': '',
+            'enabled': True,
             'returns': {
                 'ifDisabled': False,
                 'ifEmpty': False,
@@ -409,6 +449,7 @@ class TextTest(LabeledPrimitiveTest):
             'width': 60,
             'defaultValue': '',
             'validateAs': {'type': 'string'},
+            'enabled': True,
             'label': u'',
             'helpText': '',
             'required': False,
@@ -491,6 +532,7 @@ class FileTest(TextTest):
             'width': 60,
             'helpText': '',
             'defaultValue': u'',
+            'enabled': True,
             'required': False,
             'returns': {
                 'ifDisabled': False,
@@ -519,6 +561,27 @@ class FileTest(TextTest):
         self.element.set_value(new_value)
         self.element._validator.join()
         self.assertEqual(self.element.is_valid(), True)
+
+    def test_satisfied(self):
+        # Verify that an element is satisfied when it should be.
+        # Element is not satisfied to start out.
+        self.assertFalse(self.element.is_satisfied())
+        self.assertTrue(self.element.is_enabled())
+
+        # when I set the value to something that will cause validation to pass,
+        # the element should be satisfied.
+        file_handle, tempfile_uri = tempfile.mkstemp()
+        try:
+            file_handle.close()
+        except:
+            pass
+
+        self.element.set_value(tempfile_uri)
+        self.element._validator.join()  # wait until validator finishes
+        self.assertTrue(self.element.is_valid())
+        self.assertTrue(self.element.has_input())
+        self.assertTrue(self.element.is_satisfied())
+        self.assertTrue(self.element._satisfied)
 
     def test_default_value(self):
         # verify the default value is set correctly
@@ -613,6 +676,7 @@ class GroupTest(ElementTest):
 
     def test_default_config(self):
         expected_defaults = {
+            'enabled': True,
             'elements': [],
         }
         self.assertEqual(self.element.config, expected_defaults)
@@ -738,6 +802,7 @@ class TabTest(GroupTest):
 
     def test_default_config(self):
         expected_defaults = {
+            'enabled': True,
             'elements': [],
             'label': '',
         }
@@ -791,11 +856,22 @@ class ContainerTest(GroupTest):
             },
         ]
 
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'interactivity_changed',
+            'satisfaction_changed',
+            'toggled',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
+
     def test_default_config(self):
         # Override from ElementTest.test_default_config
         expected_defaults = {
             'elements': [],
             'collapsible': False,
+            'enabled': True,
             'label': '',
         }
         self.assertEqual(self.element.config, expected_defaults)
@@ -907,10 +983,23 @@ class MultiTest(ContainerTest):
         ]
         self.element = elements.Multi({})
 
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'element_added',
+            'element_removed',
+            'interactivity_changed',
+            'satisfaction_changed',
+            'toggled',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
+
     def test_default_config(self):
         expected_defaults = {
             'label': '',
             'helpText': '',
+            'enabled': True,
             'collapsible': False,
             'elements': [],
             'link_text': 'Add another',
@@ -1010,10 +1099,24 @@ class StaticTest(ElementTest):
     def setUp(self):
         self.element = elements.Static({})
 
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'hidden_toggled',
+            'interactivity_changed',
+            'satisfaction_changed',
+            'validation_completed',
+            'validity_changed',
+            'value_changed',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
+
     def test_default_config(self):
         expected_defaults = {
             'returnValue': None,
             'helpText': '',
+            'enabled': True,
             'hideable': False,
             'required': False,
             'returns': {
@@ -1061,6 +1164,19 @@ class LabelTest(ElementTest):
     def setUp(self):
         self.element = elements.Label({})
 
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'hidden_toggled',
+            'interactivity_changed',
+            'satisfaction_changed',
+            'validation_completed',
+            'validity_changed',
+            'value_changed',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
+
     def test_default_config(self):
         expected_defaults = {
             'label': '',
@@ -1075,6 +1191,7 @@ class LabelTest(ElementTest):
             'label': '',
             'helpText': '',
             'returnValue': None,
+            'enabled': True,
             'hideable': False,
             'required': False,
             'validateAs': {'type': 'disabled'},
@@ -1161,6 +1278,7 @@ class DropdownTest(LabeledPrimitiveTest):
             'required': False,
             'helpText': '',
             'validateAs': {'type': 'disabled'},
+            'enabled': True,
             'hideable': False,
         }
         self.assertEqual(self.element.config, expected_defaults)
@@ -1181,12 +1299,27 @@ class DropdownTest(LabeledPrimitiveTest):
             },
             'required': False,
             'validateAs': {'type': 'disabled'},
+            'enabled': True,
             'hideable': False,
         }
         self.assertEqual(dropdown._default_config, default_options)
         self.assertEqual(dropdown.options, default_options['options'])
         self.assertEqual(dropdown._value, 0)
         self.assertEqual(dropdown.value(), default_options['options'][0])
+
+    def test_satisfied(self):
+        # Verify that an element is satisfied when it should be.
+        # Element is not satisfied to start out.
+        self.assertFalse(self.element.is_satisfied())
+
+        # when I set the value to something that will cause validation to pass,
+        # the element should be satisfied.
+        self.element.set_value(0)
+        self.element._validator.join()  # wait until validator finishes
+        self.assertTrue(self.element.is_valid())
+        self.assertTrue(self.element.has_input())
+        self.assertTrue(self.element.is_satisfied())
+        self.assertTrue(self.element._satisfied)
 
     def test_set_value(self):
         """Assert that the correct restrictions are in place on inputs."""
@@ -1313,6 +1446,20 @@ class CheckBoxTest(LabeledPrimitiveTest):
     def setUp(self):
         self.element = elements.CheckBox({})
 
+    def test_satisfied(self):
+        # Verify that an element is satisfied when it should be.
+        # Element is not satisfied to start out.
+        self.assertFalse(self.element.is_satisfied())
+
+        # when I set the value to something that will cause validation to pass,
+        # the element should be satisfied.
+        self.element.set_value(True)
+        self.element._validator.join()  # wait until validator finishes
+        self.assertTrue(self.element.is_valid())
+        self.assertTrue(self.element.has_input())
+        self.assertTrue(self.element.is_satisfied())
+        self.assertTrue(self.element._satisfied)
+
     def test_set_value(self):
         # overridden from PrimitiveTest.set_value(), since the values for a
         # checkbox are boolean.
@@ -1400,6 +1547,7 @@ class FormTest(unittest.TestCase):
             'targetScript': os.path.join(TEST_DIR, 'data', 'sample_scripts.py'),
             'elements': [
                 {
+                    'id': 'workspace',
                     'type': 'folder',
                     'validateAs': {'type': 'folder'},
                     'args_id': 'workspace_dir',
@@ -1493,5 +1641,395 @@ class FormTest(unittest.TestCase):
         self.form.save_to_python(out_file)
         os.remove(out_file)
 
+    def test_element_communication_json(self):
+        # build up a form with the appropriate communication JSON
+        pass
 
+    def test_element_communication_python(self):
+        # build a form, add two elements with communication rules.
+        # make sure that the elements with communication rules communicate as
+        # expected.
+        new_element_A = elements.Element({
+            'id': 'element_A',
+            'type': 'folder',
+            'validateAs': {'type': 'folder'},
+            'args_id': 'temp_dir',
+            'default_value': '/tmp',
+            'signals': [
+                {
+                    'signal_name': 'visibility_changed',
+                    'target': 'Element:workspace.set_enabled',
+                },
+            ]
+        })
+
+        # Verify that the target signal is not already in the affected
+        # communicator.
+        target_func = self.form.elements[0].set_enabled
+        affected_communicator = new_element_A.visibility_changed
+        self.assertFalse(target_func in affected_communicator.callbacks)
+
+        self.form.add_element(new_element_A)
+
+        # verify that the visibility_changed communicator has the function at
+        # workspace.set_enabled in its registry.
+        self.assertTrue(target_func in affected_communicator.callbacks)
+
+        # now, assert that the visibility_changed communicator properly changes
+        # the target_element.
+        workspace_element = self.form.elements[0]
+        self.assertTrue(workspace_element.is_visible())
+        new_element_A.set_visible(False)
+
+        self.assertFalse(workspace_element.is_enabled())
+
+        # And if we switch the visibility back, verify the switch went through.
+        new_element_A.set_visible(True)
+        self.assertTrue(workspace_element.is_enabled())
+
+    def test_python_callback(self):
+        def test_closure(a):
+            print a
+            test_closure.touched = True
+        test_closure.touched = False  # initialize to False
+
+        new_element_A = elements.File({
+            'id': 'element_A',
+            'type': 'folder',
+            'validateAs': {'type': 'folder'},
+            'args_id': 'temp_dir',
+            'default_value': '/tmp',
+            'signals': [
+                {
+                    'signal_name': 'validation_completed',
+                    'target': test_closure,
+                },
+            ]
+        })
+        affected_communicator = new_element_A.validation_completed
+        self.assertFalse(test_closure in affected_communicator.callbacks)
+        self.assertFalse(test_closure.touched)
+
+        self.form.add_element(new_element_A)
+
+        self.assertTrue(test_closure in affected_communicator.callbacks)
+        self.assertFalse(test_closure.touched)  # should not have been called yet
+
+        new_element_A.validate()
+        time.sleep(.1)  # sleep until validation is complete.
+        self.assertTrue(test_closure.touched)
+
+    def test_enabledby(self):
+        # Verify that IUI-style enabledBy works.
+        form_config = {
+            "modelName": "Example form",
+            "targetScript": os.path.join(TEST_DIR, 'data',
+                'sample_scripts.py'),
+            "elements": [
+                {
+                    "id": "checkbox_1",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["enables:checkbox_2"]
+                },
+                {
+                    "id": "checkbox_2",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "enabled": False,
+                },
+            ]
+        }
+        form = elements.Form(form_config)
+        checkbox_1 = form.elements[0]
+        checkbox_2 = form.elements[1]
+
+        # Verify that checkbox 1 is enabled by default, but checkbox 2 is not
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertFalse(checkbox_2.is_enabled())
+
+        # Check checkbox 1, and verify that checkbox 2 is enabled.
+        checkbox_1.set_value(True)
+        checkbox_1._validator.join()  # wait for the validator to finish.
+        self.assertTrue(checkbox_2.is_enabled())
+
+        # now, uncheck checkbox_1 and ensure that checkbox_2 is disabled
+        checkbox_1.set_value(False)
+        checkbox_1._validator.join()
+        self.assertFalse(checkbox_2.is_enabled())
+
+        # check it back, just for fun
+        # Check checkbox 1, and verify that checkbox 2 is enabled.
+        checkbox_1.set_value(True)
+        checkbox_1._validator.join()  # wait for the validator to finish.
+        self.assertTrue(checkbox_2.is_enabled())
+
+        # check it yet again, for even more fun
+        checkbox_1.set_value(False)
+        checkbox_1._validator.join()
+        self.assertFalse(checkbox_2.is_enabled())
+
+        # if I set the value to its current state, there should be no change.
+        checkbox_1.set_value(checkbox_1.value())
+        checkbox_1._validator.join()
+        self.assertFalse(checkbox_2.is_enabled())
+
+
+    def test_enabledby_cascading(self):
+        # Verify that IUI-style enabledBy works as exepcted AND that this can
+        # cascade through multiple elements.
+        form_config = {
+            "modelName": "Example form",
+            "targetScript": os.path.join(TEST_DIR, 'data',
+                'sample_scripts.py'),
+            "elements": [
+                {
+                    "id": "checkbox_1",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["enables:checkbox_2"]
+                },
+                {
+                    "id": "checkbox_2",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "enabled": False,
+                    "signals": ["enables:checkbox_3"]
+                },
+                {
+                    "id": "checkbox_3",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "enabled": False,
+                },
+            ]
+        }
+        form = elements.Form(form_config)
+        checkbox_1 = form.elements[0]
+        checkbox_2 = form.elements[1]
+        checkbox_3 = form.elements[2]
+
+        # Verify that checkbox 1 is enabled by default, but checkbox 2 is not
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertFalse(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_3.is_enabled())
+
+        # Check checkbox_1, verify that checkbox_2 has been enabled.
+        checkbox_1.set_value(True)
+        checkbox_1._validator.join()
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertTrue(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_3.is_enabled())
+
+        # now, check the second checkbox and verify that the 3rd has been
+        # enabled
+        checkbox_2.set_value(True)
+        checkbox_2._validator.join()
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertTrue(checkbox_2.is_enabled())
+        self.assertTrue(checkbox_3.is_enabled())
+
+        # disable the first checkbox and checkboxes 2, 3 should be disabled.
+        print 'test 3'
+        checkbox_1.set_value(False)
+        checkbox_1._validator.join()
+        checkbox_2._validator.join()
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertFalse(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_3.is_enabled())
+
+
+    def test_disabledby(self):
+        # Verify that IUI-style disabledBy works.
+        form_config = {
+            "modelName": "Example form",
+            "targetScript": os.path.join(TEST_DIR, 'data',
+                'sample_scripts.py'),
+            "elements": [
+                {
+                    "id": "checkbox_1",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["disables:checkbox_2"]
+                },
+                {
+                    "id": "checkbox_2",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "enabled": True,
+                },
+            ]
+        }
+        form = elements.Form(form_config)
+        checkbox_1 = form.elements[0]
+        checkbox_2 = form.elements[1]
+
+        # Verify that checkboxes 1, 2 is enabled by default
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertTrue(checkbox_2.is_enabled())
+
+        # Check checkbox 1, and verify that checkbox 2 is disabled.
+        checkbox_1.set_value(True)
+        checkbox_1._validator.join()  # wait for the validator to finish.
+        self.assertFalse(checkbox_2.is_enabled())
+
+        # now, uncheck checkbox_1 and ensure that checkbox_2 is enabled
+        checkbox_1.set_value(False)
+        checkbox_1._validator.join()
+        self.assertTrue(checkbox_2.is_enabled())
+
+        # check it back, just for fun
+        # Check checkbox 1, and verify that checkbox 2 is disabled.
+        checkbox_1.set_value(True)
+        checkbox_1._validator.join()  # wait for the validator to finish.
+        self.assertFalse(checkbox_2.is_enabled())
+
+        # check it yet again, for even more fun
+        checkbox_1.set_value(False)
+        checkbox_1._validator.join()
+        self.assertTrue(checkbox_2.is_enabled())
+
+        # if I set the value to its current state, there should be no change.
+        checkbox_1.set_value(checkbox_1.value())
+        checkbox_1._validator.join()
+        self.assertTrue(checkbox_2.is_enabled())
+
+    def test_disabledby_cascading(self):
+        # Verify that IUI-style disabledBy works AND that this can cascade
+        # through multiple elements.
+        form_config = {
+            "modelName": "Example form",
+            "targetScript": os.path.join(TEST_DIR, 'data',
+                'sample_scripts.py'),
+            "elements": [
+                {
+                    "id": "checkbox_1",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["disables:checkbox_2"]
+                },
+                {
+                    "id": "checkbox_2",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["disables:checkbox_3"],
+                    "enabled": True,
+                },
+                {
+                    "id": "checkbox_3",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "enabled": True,
+                },
+            ]
+        }
+        form = elements.Form(form_config)
+        checkbox_1 = form.elements[0]
+        checkbox_2 = form.elements[1]
+        checkbox_3 = form.elements[2]
+
+        # Verify that checkboxes 1, 2, 3 are enabled by default
+        self.assertTrue(checkbox_1.is_enabled())
+        self.assertTrue(checkbox_2.is_enabled())
+        self.assertTrue(checkbox_3.is_enabled())
+
+        self.assertFalse(checkbox_1.value())  # unchecked by default
+        self.assertFalse(checkbox_2.value())  # unchecked by default
+        self.assertFalse(checkbox_3.value())  # unchecked by default
+
+        # For this test, all checkboxes start out enabled and unchecked
+        # Check checkbox 2, and checkbox 3 should disable.
+        # Check checkbox 1 and checkbox 2 should disable.
+        checkbox_2.set_value(True)
+        checkbox_2._validator.join()
+        self.assertTrue(checkbox_2.value())
+        self.assertTrue(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_3.is_enabled())
+
+        checkbox_1.set_value(True)
+        checkbox_1._validator.join()
+        checkbox_2._validator.join()
+        self.assertTrue(checkbox_1.value())
+        self.assertTrue(checkbox_2.value())  # value should still be True
+        self.assertFalse(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_2.is_enabled())
+
+        # now, unchecking checkbox_1 should enable both checkbox 2, but leave
+        # checkbox 3 disabled.
+        checkbox_1.set_value(False)
+        checkbox_1._validator.join()
+        checkbox_2._validator.join()
+        self.assertFalse(checkbox_1.value())
+        self.assertTrue(checkbox_2.value())
+        self.assertTrue(checkbox_2.is_enabled())
+        self.assertFalse(checkbox_3.is_enabled())
+
+    def test_element_index(self):
+        expected_element_index = [
+            '1c332e257cd2cc294681f128f254e69f',
+            '3e18dd2a15b188c00a1f8d9af1ee1f2e',
+            'bbae303758e1b65cbf2fcf312416c616',
+            'cbc4d60d477c32883a589588fdfd4ac9',
+            'workspace',
+        ]
+
+        self.assertEqual(sorted(self.form.element_index),
+            expected_element_index)
+        self.assertEqual(len(self.form.element_index), 5)
+
+        # If I add an element, I need to see that element in the element index.
+        new_element = elements.File({
+            "label": "hello",
+            "type": "file",
+            "defaultValue": "something",
+        })
+        self.form.add_element(new_element)
+        self.assertEqual(len(self.form.element_index), 6)
+        self.assertTrue(new_element.get_id('user') in self.form.element_index)
+
+    def test_expostfacto_signals(self):
+        form_config = {
+            "modelName": "Example form",
+            "targetScript": os.path.join(TEST_DIR, 'data',
+                'sample_scripts.py'),
+            "elements": [
+                {
+                    "id": "checkbox_1",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["disables:checkbox_2"]
+                },
+                {
+                    "id": "checkbox_2",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["disables:checkbox_3"],
+                    "enabled": True,
+                },
+            ]
+        }
+        form = elements.Form(form_config)
+
+        # now that the form has been set up, checkbox_2 has a signal that
+        # could not evaluate, so it should be in the form._unknown_signals set.
+        # Verify that this is the case.
+        self.assertEqual(len(form._unknown_signals), 1)
+
+
+
+        checkbox_3 = elements.CheckBox({
+            "id": "checkbox_3",
+            "type": "checkbox",
+            "defaultValue": False,
+            "enabled": True,
+        })
+        # before we add the checkbox, assert that there aren't any connections
+        # in the checkbox_3 satisfaction_changed signal callbacks list.
+        self.assertEqual(len(checkbox_3.satisfaction_changed.callbacks), 0)
+
+        form.add_element(checkbox_3)
+        self.assertEqual(len(form._unknown_signals), 0)
+        self.assertEqual(len(form.elements[1].satisfaction_changed.callbacks), 1)
+        self.assertTrue(checkbox_3.set_disabled in
+            form.elements[1].satisfaction_changed.callbacks)
 

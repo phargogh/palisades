@@ -31,7 +31,13 @@
             "validateAs": {"type": "OGR"},
             "required": true,
             "defaultValue": "../timber/input/plantation.shp",
-            "helpText": "A required polygon shapefile that is projected in meters. This shapefile should have polygons that represent the timber parcles and every polygon should have a unique ID under the field 'Parcl_ID'." 
+            "helpText": "A required polygon shapefile that is projected in meters. This shapefile should have polygons that represent the timber parcles and every polygon should have a unique ID under the field 'Parcl_ID'." ,
+            "signals": [
+                {
+                    "signal_name": "satisfaction_changed", 
+                    "target": "Element:attr_table.set_enabled"
+                }
+            ]
         },
         {
             "id": "attr_table",

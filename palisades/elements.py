@@ -94,6 +94,7 @@ class Element(object):
         self.config_changed = Communicator()
         self.interactivity_changed = Communicator()
         self.visibility_changed = Communicator()
+        self.satisfaction_changed = Communicator()
 
         # Render the configuration and save to self.config
         self.config = utils.apply_defaults(configuration, self.defaults)
@@ -156,6 +157,8 @@ class Element(object):
         signal is emitted with the new state.
 
         Returns nothing."""
+
+        prev_satisfaction = self.is_satisfied()
 
         LOGGER.debug('Calling set_enabled with %s (current=%s)', new_state,
             self._enabled)
@@ -239,6 +242,16 @@ class Element(object):
                 # when this happens, get the md5sum ID instead.
                 return self.get_id('md5sum')
 
+    def is_satisfied(self):
+        """Basic function to test whether this element is satisfied.
+        Subclasses may override this to provide input-specific satisfaction
+        requireents.
+
+        An element, at its most simplistic, is satisfied when it is enabled,
+        and not satisfied when it is not.  Returns a boolean."""
+        return self.is_enabled()
+
+
 class Primitive(Element):
     """Primitive represents the simplest input element."""
     defaults = {
@@ -273,7 +286,6 @@ class Primitive(Element):
         self.validation_completed = Communicator()
         self.hidden_toggled = Communicator()
         self.validity_changed = Communicator()
-        self.satisfaction_changed = Communicator()
 
         # update the default configuration and set defaults based on the config.
         self.set_default_config(self.defaults)

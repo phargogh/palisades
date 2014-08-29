@@ -90,7 +90,7 @@ class ElementTest(unittest.TestCase):
     def test_signals(self):
         # assert that the signals property works as expected.
         expected_signals = ['config_changed', 'interactivity_changed',
-            'visibility_changed']
+            'satisfaction_changed', 'visibility_changed']
         self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
 
     def test_default_config(self):
@@ -860,6 +860,7 @@ class ContainerTest(GroupTest):
         expected_signals = [
             'config_changed',
             'interactivity_changed',
+            'satisfaction_changed',
             'toggled',
             'visibility_changed'
         ]
@@ -988,6 +989,7 @@ class MultiTest(ContainerTest):
             'element_added',
             'element_removed',
             'interactivity_changed',
+            'satisfaction_changed',
             'toggled',
             'visibility_changed'
         ]

@@ -78,11 +78,12 @@ class Element(object):
         self._default_config - a dictionary containing default configuration
             options.
     """
-    defaults = {}
+    defaults = {
+        "enabled": True,
+    }
 
     def __init__(self, configuration, parent=None):
         object.__init__(self)
-        self._enabled = True
         self._visible = True
 
         self._parent_ui = parent
@@ -96,6 +97,10 @@ class Element(object):
 
         # Render the configuration and save to self.config
         self.config = utils.apply_defaults(configuration, self.defaults)
+
+        # set element attributes
+        LOGGER.debug('config = %s', self.config)
+        self._enabled = self.config['enabled']
 
     @property
     def signals(self):
@@ -239,6 +244,7 @@ class Primitive(Element):
         'validateAs': {'type': 'disabled'},
         'hideable': False,
         'required': False,
+        'enabled': True,
         'helpText': "",
         'returns': {
             'ifDisabled': False,
@@ -468,6 +474,7 @@ class LabeledPrimitive(Primitive):
         'label': u'',
         'helpText': '',
         'validateAs': {'type': 'disabled'},
+        'enabled': True,
         'hideable': False,
         'required': False,
         'returns': {
@@ -496,6 +503,7 @@ class Dropdown(LabeledPrimitive):
         'options': ['No options specified'],
         'defaultValue': 0,
         'validateAs': {'type': 'disabled'},
+        'enabled': True,
         'label': u'',
         'hideable': False,
         'required': False,
@@ -557,6 +565,7 @@ class Text(LabeledPrimitive):
         'width': 60,
         'defaultValue': '',
         'validateAs': {'type': 'string'},
+        'enabled': True,
         'label': u'',
         'hideable': False,
         'required': False,
@@ -597,6 +606,7 @@ class File(Text):
         'validateAs': {'type': 'file'},
         'defaultValue': u'',
         'width': 60,
+        'enabled': True,
         'label': u'',
         'hideable': False,
         'required': False,
@@ -699,6 +709,7 @@ class CheckBox(LabeledPrimitive):
         'label': u'',
         'validateAs': {'type': 'disabled'},
         'hideable': False,
+        'enabled': True,
         'required': False,
         'helpText': "",
         'returns': {
@@ -741,6 +752,7 @@ class Group(Element):
         self._registrar = element_registry
         self._elements = []
         new_defaults = {
+            'enabled': True,
             'elements': [],
         }
         self.set_default_config(new_defaults)
@@ -833,6 +845,7 @@ class Container(Group):
     def __init__(self, configuration, new_elements=None):
         Group.__init__(self, configuration, new_elements)
         new_defaults = {
+            'enabled': True,
             'label': '',
             'collapsible': False,
         }
@@ -895,6 +908,7 @@ class Multi(Container):
         Container.__init__(self, configuration, new_elements)
         new_defaults = {
             'label': '',
+            'enabled': True,
             'collapsible': False,
             'link_text': 'Add another',
             'helpText': "",
@@ -962,6 +976,7 @@ class Tab(Group):
     def __init__(self, configuration, new_elements=None):
         Group.__init__(self, configuration, new_elements)
         new_defaults = {
+            'enabled': True,
             'label': '',
         }
         self.set_default_config(new_defaults)

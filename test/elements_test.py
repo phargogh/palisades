@@ -100,11 +100,12 @@ class ElementTest(unittest.TestCase):
 
         self.element.config_changed.register(check_config_signal)
         self.assertEqual(self.element._default_config, {})
-        self.assertEqual(self.element.config, {})
+        self.assertEqual(self.element.config, {"enabled": True})
 
         new_defaults = {
             'a': 'aaa',
             'b': 'bbb',
+            'enabled': True,
         }
 
         try:
@@ -127,8 +128,10 @@ class ElementTest(unittest.TestCase):
             # If the valueError in check_config_signal was raised, this is good!
             # So we continue on to the next assertion.
             pass
-        self.assertEqual(self.element._default_config, {'a': 'ccc', 'b': 'bbb'})
-        self.assertEqual(self.element.config, {'a': 'ccc', 'b': 'bbb'})
+        self.assertEqual(self.element._default_config, {'a': 'ccc', 'b': 'bbb',
+            "enabled": True})
+        self.assertEqual(self.element.config, {'a': 'ccc', 'b': 'bbb',
+            "enabled": True})
 
     def test_visibility(self):
         # verify that this element is visible and enabled by default.
@@ -210,6 +213,7 @@ class PrimitiveTest(ElementTest):
         expected_defaults = {
             'validateAs': {'type': 'disabled'},
             'hideable': False,
+            'enabled': True,
             'required': False,
             'helpText': "",
             'returns': {
@@ -327,6 +331,7 @@ class HideablePrimitiveTest(PrimitiveTest):
         expected_defaults = {
             'validateAs': {'type': 'disabled'},
             'helpText': '',
+            'enabled': True,
             'required': False,
             'hideable': True,
             'returns': {
@@ -380,6 +385,7 @@ class LabeledPrimitiveTest(PrimitiveTest):
             'label': u'',
             'required': False,
             'helpText': '',
+            'enabled': True,
             'returns': {
                 'ifDisabled': False,
                 'ifEmpty': False,
@@ -443,6 +449,7 @@ class TextTest(LabeledPrimitiveTest):
             'width': 60,
             'defaultValue': '',
             'validateAs': {'type': 'string'},
+            'enabled': True,
             'label': u'',
             'helpText': '',
             'required': False,
@@ -525,6 +532,7 @@ class FileTest(TextTest):
             'width': 60,
             'helpText': '',
             'defaultValue': u'',
+            'enabled': True,
             'required': False,
             'returns': {
                 'ifDisabled': False,
@@ -668,6 +676,7 @@ class GroupTest(ElementTest):
 
     def test_default_config(self):
         expected_defaults = {
+            'enabled': True,
             'elements': [],
         }
         self.assertEqual(self.element.config, expected_defaults)
@@ -793,6 +802,7 @@ class TabTest(GroupTest):
 
     def test_default_config(self):
         expected_defaults = {
+            'enabled': True,
             'elements': [],
             'label': '',
         }
@@ -860,6 +870,7 @@ class ContainerTest(GroupTest):
         expected_defaults = {
             'elements': [],
             'collapsible': False,
+            'enabled': True,
             'label': '',
         }
         self.assertEqual(self.element.config, expected_defaults)
@@ -986,6 +997,7 @@ class MultiTest(ContainerTest):
         expected_defaults = {
             'label': '',
             'helpText': '',
+            'enabled': True,
             'collapsible': False,
             'elements': [],
             'link_text': 'Add another',
@@ -1102,6 +1114,7 @@ class StaticTest(ElementTest):
         expected_defaults = {
             'returnValue': None,
             'helpText': '',
+            'enabled': True,
             'hideable': False,
             'required': False,
             'returns': {
@@ -1176,6 +1189,7 @@ class LabelTest(ElementTest):
             'label': '',
             'helpText': '',
             'returnValue': None,
+            'enabled': True,
             'hideable': False,
             'required': False,
             'validateAs': {'type': 'disabled'},
@@ -1262,6 +1276,7 @@ class DropdownTest(LabeledPrimitiveTest):
             'required': False,
             'helpText': '',
             'validateAs': {'type': 'disabled'},
+            'enabled': True,
             'hideable': False,
         }
         self.assertEqual(self.element.config, expected_defaults)
@@ -1282,6 +1297,7 @@ class DropdownTest(LabeledPrimitiveTest):
             },
             'required': False,
             'validateAs': {'type': 'disabled'},
+            'enabled': True,
             'hideable': False,
         }
         self.assertEqual(dropdown._default_config, default_options)

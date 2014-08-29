@@ -1775,7 +1775,7 @@ class FormTest(unittest.TestCase):
         self.assertFalse(checkbox_2.is_enabled())
 
 
-    def test_enabledBy_cascading(self):
+    def test_enabledby_cascading(self):
         # Verify that IUI-style enabledBy works as exepcted AND that this can
         # cascade through multiple elements.
         pass

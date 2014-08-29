@@ -281,3 +281,26 @@ class CoreTest(unittest.TestCase):
         unknown_shortform = "bad_signal:element"
         self.assertRaises(RuntimeError, utils.expand_signal, unknown_shortform)
 
+    def test_get_valid_signals(self):
+        signals_list = [
+            "enables:element",
+            {
+                "signal_name": "aaa",
+                "target": "Element:some_target.set_enabled",
+            },
+        ]
+        known_signals = ["satisfaction_changed", "aaa"]
+
+        expected_signals = [
+            {
+                "signal_name": "satisfaction_changed",
+                "target": "Element:element.set_enabled",
+            },
+            {
+                "signal_name": "aaa",
+                "target": "Element:some_target.set_enabled",
+            },
+        ]
+        self.assertEqual(utils.get_valid_signals(signals_list, known_signals),
+            expected_signals)
+

@@ -342,4 +342,31 @@ def expand_signal(shortform_signal):
 
     return signal_config
 
+def get_valid_signals(signal_config_list, known_signals):
+    """Loop through signal configuration objects (whether short-form or
+        long-form) and return a list of valid signal configuration options.
+
+    signal_config_list - a list of long-or-short-form signal configuration
+        objects. If a shortform configuration object is in this list, it will
+        be expanded to a long-form object.  If a signal configuration object
+        points to a signal that is not known, it will be skipped.
+    known_signals - a list of signal strings that are known to the element in
+        question.
+
+    Returns a list of long-form signals that are valid for this element."""
+
+    valid_signals = []
+    for signal_config in signal_config_list:
+        if type(signal_config) in [StringType, UnicodeType]:
+            valid_signals.append(expand_signal(signal_config))
+
+        elif type(signal_config) is DictType:
+            if signal_config['signal_name'] not in known_signals:
+                LOGGER.debug('Signal %s not in %s',
+                    signal_config['signal_name'], known_signals)
+                continue
+            else:
+                valid_signals.append(signal_config)
+
+    return valid_signals
 

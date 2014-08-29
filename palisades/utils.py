@@ -399,9 +399,8 @@ def setup_signal(signal_config, element_index):
             target_func = getattr(target_element, element_funcname)
         except KeyError:
             # When there's no element known by that ID
-            LOGGER.error(('Signal %s.%s could not find element with ID %s, '
-                'skipping'), target_element.get_id('user'),
-                signal_config['signal_name'], element_id)
+            LOGGER.error(('Signal %s could not find element with ID %s, '
+                'skipping'), signal_config['signal_name'], element_id)
             raise KeyError('Could not find element with id %s',
                 element_id)
         except AttributeError as error:

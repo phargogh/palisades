@@ -1986,3 +1986,50 @@ class FormTest(unittest.TestCase):
         self.form.add_element(new_element)
         self.assertEqual(len(self.form.element_index), 6)
         self.assertTrue(new_element.get_id('user') in self.form.element_index)
+
+    def test_expostfacto_signals(self):
+        form_config = {
+            "modelName": "Example form",
+            "targetScript": os.path.join(TEST_DIR, 'data',
+                'sample_scripts.py'),
+            "elements": [
+                {
+                    "id": "checkbox_1",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["disables:checkbox_2"]
+                },
+                {
+                    "id": "checkbox_2",
+                    "type": "checkbox",
+                    "defaultValue": False,
+                    "signals": ["disables:checkbox_3"],
+                    "enabled": True,
+                },
+            ]
+        }
+        form = elements.Form(form_config)
+
+        # now that the form has been set up, checkbox_2 has a signal that
+        # could not evaluate, so it should be in the form._unknown_signals set.
+        # Verify that this is the case.
+        self.assertEqual(len(form._unknown_signals), 1)
+
+
+
+        checkbox_3 = elements.CheckBox({
+            "id": "checkbox_3",
+            "type": "checkbox",
+            "defaultValue": False,
+            "enabled": True,
+        })
+        # before we add the checkbox, assert that there aren't any connections
+        # in the checkbox_3 satisfaction_changed signal callbacks list.
+        self.assertEqual(len(checkbox_3.satisfaction_changed.callbacks), 0)
+
+        form.add_element(checkbox_3)
+        self.assertEqual(len(form._unknown_signals), 0)
+        self.assertEqual(len(form.elements[1].satisfaction_changed.callbacks), 1)
+        self.assertTrue(checkbox_3.set_disabled in
+            form.elements[1].satisfaction_changed.callbacks)
+

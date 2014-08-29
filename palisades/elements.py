@@ -1030,7 +1030,7 @@ class Form():
         self.elements = self.find_elements()
         self.runner = None
         self._runner_class = execution.PythonRunner
-        self._unknown_signals = set([])  # track signals we might setup later
+        self._unknown_signals = []  # track signals we might setup later
 
         self.setup_communication(self.elements)
 
@@ -1080,23 +1080,25 @@ class Form():
         #    python notation: Python:package.module.function
 
         for signal_config in requested_signals:
-            LOGGER.debug('Setting up signal %s.%s -> %s', element.get_id('user'),
-                signal_config['signal_name'], signal_config['target'])
+            self._setup_signal(signal_config, element)
 
-            try:
-                signal_name, target_func = utils.setup_signal(signal_config,
-                    self.element_index)
+    def _setup_signal(self, signal_config, src_element):
+        LOGGER.debug('Setting up signal %s.%s -> %s',src_element.get_id('user'),
+            signal_config['signal_name'], signal_config['target'])
+        try:
+            signal_name, target_func = utils.setup_signal(signal_config,
+                self.element_index)
 
-                # connect the target signal.
-                # TODO: specify what data should be passed as an argument?
-                getattr(element, signal_config['signal_name']).register(target_func)
-                LOGGER.debug('Element %s has signal %s connected to %s',
-                    element.get_id('user'), signal_config['signal_name'],
-                    target_func)
-            except KeyError:
-                # when the target element is not known, add the element's
-                # config to the config_later set so we can try them out later.
-                self._unknown_signals.add(signal_config)
+            # connect the target signal.
+            # TODO: specify what data should be passed as an argument?
+            getattr(src_element, signal_config['signal_name']).register(target_func)
+        except KeyError:
+            # when the target element is not known, add the element's
+            # config to the config_later set so we can try them out later.
+            LOGGER.debug('Signal %s.%s -> %s failed.  Element %s not known',
+                src_element.get_id('user'), signal_config['signal_name'],
+                signal_config['target'])
+            self._unknown_signals.append((signal_config, src_element))
 
     def add_element(self, element):
         """Add an element to this form, registering all element callbacks and
@@ -1112,6 +1114,22 @@ class Form():
 
         self._ui._add_element(element)
         self.elements.append(element)
+
+        # attempt to process unknown signals.
+        self._process_unknown_signals()
+
+    def _process_unknown_signals(self):
+        """check if there are any signals that need to be processed and set
+        them up accordingly."""
+
+        # make a copy of the currently unknown signals, and reset the local
+        # attribute to be empty so that we process the current state of signals
+        # and not mix up the two.
+        currently_unknown_signals = self._unknown_signals
+        self._unknown_signals = []
+
+        for unknown_signal, src_element in currently_unknown_signals:
+            self._setup_signal(unknown_signal, src_element)
 
     def title(self):
         """Return the title string, if it's defined in the configuration.

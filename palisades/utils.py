@@ -370,3 +370,54 @@ def get_valid_signals(signal_config_list, known_signals):
 
     return valid_signals
 
+def setup_signal(signal_config, element_index):
+    """Take a signal configuration object and set up the appropriate
+    connections."""
+
+    # If the signal configuration's target is a formatted target string (see
+    # above for permitted formats), we need to know the target type.
+    # Otherwise, we assume that the target is a python callable.
+    if type(signal_config['target']) in [StringType, UnicodeType]:
+        target_type = signal_config['target'].split(':')[0]
+        target = signal_config['target'].replace(target_type + ':', '')
+
+    else:  # assume that type(target) is FunctionType
+        target_type = '_function'
+        target = signal_config['target']  # just use the func given
+
+    if target_type == 'Element':
+        # assume element notation for now.  TODO: support more notations?
+        element_id, element_funcname = target.split('.')
+        try:
+            target_element = element_index[element_id]
+            target_func = getattr(target_element, element_funcname)
+        except KeyError:
+            # When there's no element known by that ID
+            LOGGER.error(('Signal %s.%s could not find element with ID %s, '
+                'skipping'), target_element.get_id('user'),
+                signal_config['signal_name'], element_id)
+            raise RuntimeError('Could not find element with id %s',
+                element_id)
+        except AttributeError as error:
+            # When there's no function with the desired name in the target
+            # element.
+            LOGGER.error('Element "%s" has no function "%s".  Skipping.',
+                element_id, element_funcname)
+            raise error
+
+    elif target_type == 'Python':
+        # If the target type is Python, see if the target function is
+        # in global first.
+        if target in globals():
+            target_func = globals()[target]
+        else:
+            # assume it's a python package path package.module.func
+            path_list = target.split('.')
+            target_module = execution.locate_module('.'.join(path_list[:-1]))
+            target_func = getattr(target_module, path_list[-1])
+
+    elif target_type == '_function':
+        target_func = target  # just use the user-defined target
+
+
+    return (signal_config['signal_name'], target_func)

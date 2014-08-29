@@ -1963,3 +1963,26 @@ class FormTest(unittest.TestCase):
         self.assertTrue(checkbox_2.value())
         self.assertTrue(checkbox_2.is_enabled())
         self.assertFalse(checkbox_3.is_enabled())
+
+    def test_element_index(self):
+        expected_element_index = [
+            '1c332e257cd2cc294681f128f254e69f',
+            '3e18dd2a15b188c00a1f8d9af1ee1f2e',
+            'bbae303758e1b65cbf2fcf312416c616',
+            'cbc4d60d477c32883a589588fdfd4ac9',
+            'workspace',
+        ]
+
+        self.assertEqual(sorted(self.form.element_index),
+            expected_element_index)
+        self.assertEqual(len(self.form.element_index), 5)
+
+        # If I add an element, I need to see that element in the element index.
+        new_element = elements.File({
+            "label": "hello",
+            "type": "file",
+            "defaultValue": "something",
+        })
+        self.form.add_element(new_element)
+        self.assertEqual(len(self.form.element_index), 6)
+        self.assertTrue(new_element.get_id('user') in self.form.element_index)

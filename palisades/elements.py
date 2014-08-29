@@ -1044,6 +1044,9 @@ class Form():
             # when no lastrun file exists for this version
             LOGGER.warn('No lastrun file found at %s.  Skipping.',
                 self.lastrun_uri())
+    @property
+    def element_index(self):
+        return dict((e.get_id('user'), e) for e in self.elements)
 
     def setup_communication(self, elements_list):
         """Set up communication between elements for all elements in the
@@ -1070,13 +1073,11 @@ class Form():
         requested_signals = utils.get_valid_signals(element.config['signals'],
             element.signals)
 
-
         # having asserted that all signals in requested_signals are known, we
         # can try to connect the communicators to their targets.
         # TARGET FORMS:
         #    element notation: Element:<element_id>.func_name
         #    python notation: Python:package.module.function
-        element_index = dict((e.get_id('user'), e) for e in self.elements)
 
         for signal_config in requested_signals:
             LOGGER.debug('Setting up signal %s.%s -> %s', element.get_id('user'),
@@ -1084,7 +1085,7 @@ class Form():
 
             try:
                 signal_name, target_func = utils.setup_signal(signal_config,
-                    element_index)
+                    self.element_index)
 
                 # connect the target signal.
                 # TODO: specify what data should be passed as an argument?

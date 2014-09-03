@@ -395,6 +395,7 @@ class Executor(threading.Thread):
             self.log_manager.print_errors()
             elapsed_time = round(time.time() - start_time, 2)
             LOGGER.info('Elapsed time: %s', format_time(elapsed_time))
+            LOGGER.info('Execution finished')
             self.log_manager.close()
 
 def format_time(seconds):

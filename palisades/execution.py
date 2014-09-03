@@ -294,7 +294,7 @@ class LogManager():
         error_records = self.error_queue_filter.get_errors()
         if len(error_records) > 0:
             self.logfile_handler.removeFilter(self.error_queue_filter)
-            LOGGER.warn('\n\nErrors encountered while processing:')
+            LOGGER.warn('\n\nNon-critical warnings found during execution:')
             for error_record in self.error_queue_filter.get_errors():
                 LOGGER.handle(error_record)
             self.logfile_handler.addFilter(self.error_queue_filter)
@@ -392,9 +392,9 @@ class Executor(threading.Thread):
             self.failed = True
             self.exception = error
         finally:
+            self.log_manager.print_errors()
             elapsed_time = round(time.time() - start_time, 2)
             LOGGER.info('Elapsed time: %s', format_time(elapsed_time))
-            self.log_manager.print_errors()
             self.log_manager.close()
 
 def format_time(seconds):

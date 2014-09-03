@@ -1145,6 +1145,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
     def showEvent(self, event):
         center_window(self)
         QtGui.QWidget.showEvent(self, event)
+        self.raise_()
 
     def _quit_pressed(self):
         if not self.close_confirmed:

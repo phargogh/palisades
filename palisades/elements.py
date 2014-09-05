@@ -944,6 +944,7 @@ class Multi(Container):
             'collapsible': False,
             'link_text': 'Add another',
             'helpText': "",
+            'return_type': 'list',
             'template': {
                 'type': 'text',
                 'label': 'Input a number',

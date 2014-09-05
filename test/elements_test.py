@@ -1003,6 +1003,7 @@ class MultiTest(ContainerTest):
             'collapsible': False,
             'elements': [],
             'link_text': 'Add another',
+            'return_type': 'list',
             'template': {
                 'type': 'text',
                 'label': 'Input a number',

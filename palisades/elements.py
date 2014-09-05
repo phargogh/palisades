@@ -984,7 +984,17 @@ class Multi(Container):
             self.elements()[-1].set_value(value)
 
     def value(self):
-        return [e.value() for e in self.elements()]
+        def _recursive_value(element):
+            """Recurse through a nested set of elements and return a list of
+            values and lists of values for the elements contained within this
+            multi."""
+            if isinstance(element, Container):
+                value = [_recursive_value(c_e) for c_e in element._elements]
+            else:
+                value = element.value()
+            return value
+
+        return [_recursive_value(e) for e in self.elements()]
 
     def state(self):
         state_dict = Container.state(self)

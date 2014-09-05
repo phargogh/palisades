@@ -1072,6 +1072,38 @@ class MultiTest(ContainerTest):
         self.element._elements[1].set_value('bbb')
         self.assertEqual(self.element.value(), ['aaa', 'bbb'])
 
+    def test_value_nested_containers(self):
+        nested_multi = elements.Multi({
+            "type": "multi",
+            "template":{
+                "type": "container",
+                "elements": [
+                    {
+                        "type": "text",
+                        "defaultValue": "aaa",
+                    },
+                    {
+                        "type": "container",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "defaultValue": "bbb",
+                            },
+                        ]
+                    }
+                ]
+            }
+        })
+
+        nested_multi.add_element()
+        self.assertEqual(len(nested_multi._elements), 1)
+        self.assertEqual(nested_multi.value(), [['aaa', ['bbb']]])
+
+        nested_multi.add_element()
+        self.assertEqual(len(nested_multi._elements), 2)
+        self.assertEqual(nested_multi.value(), [['aaa', ['bbb']], ['aaa',
+            ['bbb']]])
+
     def test_get_state(self):
         expected_state = {
             'enabled': self.element.is_enabled(),

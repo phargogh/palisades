@@ -306,6 +306,21 @@ class Multi(Container):
         if isinstance(gui_object.widgets, list):
             gui_object.widgets.insert(0, minus_button)
             Container.add_widget(self, gui_object)
+        elif isinstance(gui_object.widgets, Container):
+            # we need a special case to add a container to the Multi, since the
+            # container will span all columns EXCEPT for the first one, where
+            # the minus button will reside.
+            # TODO: roll this into Container.add_widget()??
+            current_row = self.layout().rowCount()
+            num_cols = self.layout().columnCount()
+
+            # add the minus button
+            self.layout().addWidget(minus_button, current_row, 0)
+
+            # add the container
+            self.layout().addWidget(gui_object.widgets, current_row, 1, 1,
+                    num_cols - 1)  # one less column than max, b/c minus button
+
 
         # keep track of the row that we're adding so we can more easily access
         # the widget later on

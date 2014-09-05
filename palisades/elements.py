@@ -985,12 +985,23 @@ class Multi(Container):
             self.elements()[-1].set_value(value)
 
     def value(self):
+
+        return_type = self.config['return_type']
+        return_values = {
+            'list': lambda elem_list: [_recursive_value(e) for e in elem_list],
+            'dict': lambda elem_list: dict((e.config['args_id'],
+                _recursive_value(e)) for e in elem_list),
+        }
+
         def _recursive_value(element):
             """Recurse through a nested set of elements and return a list of
             values and lists of values for the elements contained within this
             multi."""
             if isinstance(element, Container):
-                value = [_recursive_value(c_e) for c_e in element._elements]
+                # may raise KeyError in either of two circumstances:
+                #  - args_id is missing from any of the contained elements
+                #  - return_value is not in ['list', 'dict']
+                value = return_values[return_type](element.elements())
             else:
                 value = element.value()
             return value

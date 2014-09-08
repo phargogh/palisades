@@ -294,9 +294,11 @@ class LogManager():
         error_records = self.error_queue_filter.get_errors()
         if len(error_records) > 0:
             self.logfile_handler.removeFilter(self.error_queue_filter)
-            LOGGER.warn('\n\nNon-critical warnings found during execution:')
+            LOGGER.info('\n\n')
+            LOGGER.warn('Non-critical warnings found during execution:')
             for error_record in self.error_queue_filter.get_errors():
                 LOGGER.handle(error_record)
+            LOGGER.info('\n\n')
             self.logfile_handler.addFilter(self.error_queue_filter)
 
     def add_log_handler(self, handler):

@@ -1270,15 +1270,29 @@ class Form():
         for element in self.elements:
             try:
                 form_data.append((element.config['args_id'], element.is_valid(),
-                    element.value()))
+                    element.should_return(), element.value()))
             except KeyError:
                 # no attribute args_id, so skip.
                 pass
 
-        for element in form_data:
-            print element
 
-        return not False in [e[1] for e in form_data]
+        def element_ok_for_submission(args_id, is_valid, should_return, value):
+            """Check that this element is ok for submission.  Returns a
+            boolean."""
+            if not should_return:
+                return True
+            if is_valid:
+                return True
+
+            return False
+
+        element_validity = map(lambda x: element_ok_for_submission(*x),
+            form_data)
+
+        for element, valid in zip(form_data, element_validity):
+            print valid, element
+
+        return not False in element_validity
 
     def form_errors(self):
         """Return a list of tuples containing (args_id, value) that are invalid

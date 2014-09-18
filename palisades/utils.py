@@ -269,9 +269,9 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
             # Connections/inter-element connectivity is optional.
             pass
 
-        # If enabledBy/disabledBy keys are found in the dictionary, delete
-        # them.
-        for interactivity_key in ['enabledBy', 'disabledBy']:
+        # If interactivity keys are found in the dictionary, delete
+        # them.  They have been replaced by signal configurations.
+        for interactivity_key in iui_ops.keys():
             try:
                 del new_config[interactivity_key]
             except KeyError:

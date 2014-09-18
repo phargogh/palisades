@@ -70,6 +70,7 @@ class UIObject(object):
 
     def set_enabled(self, is_enabled):
         """Update the element's interactivity in the toolkit"""
+        _print_obj_debug(self)
         raise NotYetImplemented
 
 class GroupGUI(UIObject):
@@ -354,6 +355,9 @@ class LabelGUI(UIObject):
 
     def set_visible(self, is_visible):
         self.widgets.set_visible(is_visible)
+
+    def set_enabled(self, is_enabled):
+        self.widgets.set_enabled(is_enabled)
 
 class FormGUI():
     LOG_FMT = "%(asctime)s %(name)-18s %(levelname)-8s %(message)s"

@@ -143,7 +143,6 @@ class GroupGUI(UIObject):
     def set_visible(self, is_visible):
         """Set the visibility of this element."""
         self.widgets.set_visible(is_visible)
-        UIObject.set_visible(self, is_visible)
 
     def set_enabled(self, is_enabled):
         """Set the interactivity of this element."""

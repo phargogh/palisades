@@ -567,7 +567,9 @@ class Dropdown(LabeledPrimitive):
 
     def current_index(self):
         """Return the current index (an int) of the dropdown."""
-        return self._value
+        if type(self._value) is IntType:
+            return self._value
+        return self.options.index(self._value)
 
     def value(self):
         # if there are no options to select or the user has not selected an

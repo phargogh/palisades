@@ -1121,7 +1121,7 @@ class Form():
         except KeyError:
             # when the target element is not known, add the element's
             # config to the config_later set so we can try them out later.
-            LOGGER.debug('Signal %s.%s -> %s failed.  Element %s not known',
+            LOGGER.debug('Signal %s.%s -> %s failed.  Element not known',
                 src_element.get_id('user'), signal_config['signal_name'],
                 signal_config['target'])
             self._unknown_signals.append((signal_config, src_element))

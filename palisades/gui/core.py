@@ -12,6 +12,15 @@ class NotYetImplemented(Exception): pass
 
 LOGGER = logging.getLogger('gui.core')
 
+def _print_obj_debug(obj):
+    print '#' * 40
+    print 'Debug:'
+    print '-' * 12
+    print ''
+    print 'class %20s' % str(obj)
+    print 'classname %20s' % obj.__class__.__name__
+    print ''
+
 class ApplicationGUI(object):
     def __init__(self):
         object.__init__(self)
@@ -56,6 +65,7 @@ class UIObject(object):
 
     def set_visible(self, is_visible):
         """Update the element's visibility in the toolkit."""
+        _print_obj_debug(self)
         raise NotYetImplemented
 
     def set_enabled(self, is_enabled):

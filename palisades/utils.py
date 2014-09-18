@@ -330,6 +330,7 @@ def expand_signal(shortform_signal):
     _short_signals = {
         "enables": ("satisfaction_changed", "set_enabled"),
         "disables": ("satisfaction_changed", "set_disabled"),
+        "set_required": ("satisfaction_changed", "set_required"),
     }
 
     try:

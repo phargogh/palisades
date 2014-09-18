@@ -174,7 +174,7 @@ class CoreTest(unittest.TestCase):
                             'type': 'label',
                             'label': 'label 1',
                             'helpText': 'helptext 1',
-                            'requiredIf': ['label_2'],
+                            'requiredIf': ['label_2', 'label_3'],
                         },
                         {
                             'id': 'label_2',
@@ -182,6 +182,12 @@ class CoreTest(unittest.TestCase):
                             'label': 'label 2',
                             'helpText': 'helptext 2',
                             'enabledBy': 'label_1',
+                        },
+                        {
+                            'id': 'label_3',
+                            'type': 'hideableFileEntry',
+                            'label': 'label 3',
+                            'helpText': 'helptext 3',
                         },
                     ]
                 }
@@ -206,6 +212,14 @@ class CoreTest(unittest.TestCase):
                     'hideable': True,
                     'label': {'en': 'label 2'},
                     'helpText': {'en': 'helptext 2'},
+                    'signals': ['set_required:label_1'],
+                },
+                {
+                    'id': 'label_3',
+                    'type': 'file',
+                    'hideable': True,
+                    'label': {'en': 'label 3'},
+                    'helpText': {'en': 'helptext 3'},
                     'signals': ['set_required:label_1'],
                 },
             ]

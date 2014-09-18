@@ -184,6 +184,8 @@ class Container(Group):
 
         self.checkbox_toggled = Communicator()
         self.toggled.connect(self._container_toggled)
+        self.setSizePolicy(QtGui.QSizePolicy.Minimum,
+            QtGui.QSizePolicy.Maximum)
 
     def _container_toggled(self):
         # returns whether the container is collapsed.

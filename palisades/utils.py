@@ -220,6 +220,7 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
     iui_ops = {  # dict mapping IUI ops to palisades equivalents
         'enabledBy': 'enables',
         'disabledBy': 'disables',
+        'requiredIf': 'set_required',
     }
 
     def _locate_interactivity(element):
@@ -227,17 +228,24 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
             for element_config in element['elements']:
                 _locate_interactivity(element_config)
         else:
-            for connectivity_op in ['enabledBy', 'disabledBy']:
+            for connectivity_op in iui_ops.keys():
                 if connectivity_op in element:
                     palisades_op = iui_ops[connectivity_op]
                     trigger_id = element[connectivity_op]
                     target_id = element['id']
 
-                    op_tuple = (palisades_op, target_id)
-                    try:
-                        connections[trigger_id].append(op_tuple)
-                    except KeyError:
-                        connections[trigger_id] = [op_tuple]
+                    # requiredIf triggers are a list.  Conform to this.
+                    if connectivity_op not in ['requiredIf']:
+                        trigger_id_list = [trigger_id]
+                    else:
+                        trigger_id_list = trigger_id
+
+                    for trigger in trigger_id_list:
+                        op_tuple = (palisades_op, target_id)
+                        try:
+                            connections[trigger].append(op_tuple)
+                        except KeyError:
+                            connections[trigger] = [op_tuple]
 
     _locate_interactivity(iui_config)
 

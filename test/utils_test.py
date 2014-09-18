@@ -174,6 +174,7 @@ class CoreTest(unittest.TestCase):
                             'type': 'label',
                             'label': 'label 1',
                             'helpText': 'helptext 1',
+                            'requiredIf': ['label_2'],
                         },
                         {
                             'id': 'label_2',
@@ -205,6 +206,7 @@ class CoreTest(unittest.TestCase):
                     'hideable': True,
                     'label': {'en': 'label 2'},
                     'helpText': {'en': 'helptext 2'},
+                    'signals': ['set_required:label_1'],
                 },
             ]
         }

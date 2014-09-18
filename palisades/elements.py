@@ -580,7 +580,9 @@ class Dropdown(LabeledPrimitive):
         # get the value of the currently selected option.
         return_option = self.config['returns']['type']
         if return_option == 'strings':
-            return self.options[self._value]
+            if type(self._value) is IntType:
+                return self.options[self._value]
+            return self._value
         else:  # return option is 'ordinals'
             return self._value
 

@@ -276,6 +276,10 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
             new_config['type'] = 'file'
             new_config['hideable'] = True
 
+        # rename the tabbedGroup element, as needed.
+        if element_type == 'tabbedGroup':
+            new_config['type'] = 'tabGroup'
+
         # If we have a dropdown menu, the 'returns' options have changed
         # slightly.  If the user has not defined return configuration options,
         # skip the tweaking since defaults are assumed internally.

@@ -323,6 +323,21 @@ class PrimitiveTest(ElementTest):
         time.sleep(.1)
         self.assertEqual(element_id, '9cba20199e30dca32349e4964271a224')
 
+    def test_required(self):
+        self.assertFalse(self.element.is_required())
+        self.assertFalse(self.element._conditionally_required)
+
+        # let's artificially set the element to be required
+        self.element._required = True
+        self.assertTrue(self.element.is_required())
+
+        # now, make the element optional, but set it to be conditionally
+        # required
+        self.element._required = False
+        self.assertFalse(self.element.is_required())
+        self.element._conditionally_required = True
+        self.assertTrue(self.element.is_required())
+
 class HideablePrimitiveTest(PrimitiveTest):
     def setUp(self):
         self.element = elements.Primitive({'hideable': True})

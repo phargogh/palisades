@@ -307,6 +307,7 @@ class Primitive(Element):
         self._hidden = self.config['hideable']
         self._hideable = self.config['hideable']
         self._required = self.config['required']
+        self._conditionally_required = False
         self._satisfied = False
 
         # Set up our validator
@@ -453,7 +454,12 @@ class Primitive(Element):
         self.set_hidden(state['is_hidden'])
 
     def is_required(self):
-        return self._required
+        if self._required:
+            return self._required
+        return self._conditionally_required
+
+    def set_conditionally_required(self, cond_require):
+        self._conditionally_required = cond_require
 
     def has_input(self):
         if self.value() != None:

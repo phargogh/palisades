@@ -246,6 +246,10 @@ class LabeledPrimitiveGUI(PrimitiveGUI):
 
         self.element.set_hidden(not show)
 
+        if not show:
+            # clear the error state of the label 
+            self._label.set_error(False)
+
 class CheckBoxGUI(LabeledPrimitiveGUI):
     def __init__(self, core_element):
         LabeledPrimitiveGUI.__init__(self, core_element)

@@ -2120,3 +2120,45 @@ class FormTest(unittest.TestCase):
         self.assertTrue(checkbox_3.set_disabled in
             form.elements[1].satisfaction_changed.callbacks)
 
+    def test_conditional_requirements(self):
+        # Build a Form instance with all of the needed elements to test
+        # conditional requirements.
+        # Assert that conditional requirements are initialized correctly
+        # Assert that conditional requirements change as expected when
+        # satsifaction changes.
+        form = elements.Form({
+            'modelName': 'Example',
+            "targetScript": os.path.join(TEST_DIR, 'data',
+                'sample_scripts.py'),
+            "elements": [
+                {
+                    "id": "text_1",
+                    "type": "text",
+                    "defaultValue": False,
+                    "signals": ["set_required:text_2"]
+                },
+                {
+                    "id": "text_2",
+                    "type": "text",
+                    "defaultValue": "",
+                    "required": False
+                },
+            ]
+        })
+        text_1 = form.elements[0]
+        text_2 = form.elements[1]
+        self.assertFalse(text_1.is_required())
+        self.assertFalse(text_2.is_required())
+
+        # set the first text field so that it is satisfied.  When it is
+        # satisfied, it should trigger the set_required signal, causing text_2
+        # to be required.
+        self.assertFalse(text_1.is_required())
+        self.assertFalse(text_2.is_required())
+        text_1.set_value('aaa')
+        time.sleep(0.5)  # allow validation to pass.
+        self.assertTrue(text_1.is_satisfied())
+        self.assertFalse(text_1.is_required())
+        self.assertTrue(text_2.is_required())
+
+

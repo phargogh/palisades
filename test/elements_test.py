@@ -537,6 +537,33 @@ class TextTest(LabeledPrimitiveTest):
         self.element._validator.join()
         self.assertEqual(element_id, 'cbc4d60d477c32883a589588fdfd4ac9')
 
+    def test_validation_state(self):
+        # verify that if we have a validation defn that fails on input, when
+        # input is removed, its validity should be cleared as well.
+        element = elements.Text({
+            'type': 'text',
+            'required': False,
+            'defaultValue': '',
+            'validateAs': {
+                'type': 'file',
+                'mustExist': True
+            },
+        })
+
+        # wait until element's validator finishes.
+        element._validator.join()
+        self.assertTrue(element.is_valid())
+
+        # give the element a file on disk.
+        element.set_value(__file__)
+        element._validator.join()
+        self.assertTrue(element.is_valid())
+
+        # give the element a uri that doesn't exist
+        element.set_value('sdfgsd')
+        element._validator.join()
+        self.assertFalse(element.is_valid())
+
 class FileTest(TextTest):
     def setUp(self):
         self.element = elements.File({})

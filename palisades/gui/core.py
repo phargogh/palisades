@@ -407,13 +407,13 @@ class FormGUI():
         param_file = self.file_dialog.get_file('parameter file')
 
         if param_file != '':
-            self.element.save_state(param_file)
+            self.element.load_state(param_file)
 
     def _save_params(self, event=None):
         param_file = self.file_dialog.get_file('parameter file', save=True)
 
         if param_file != '':
-            self.element.load_state(param_file)
+            self.element.save_state(param_file)
 
     def _save_python(self, event=None):
         # get the errors that exist from the underlying form

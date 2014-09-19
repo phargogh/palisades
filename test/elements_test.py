@@ -2161,4 +2161,51 @@ class FormTest(unittest.TestCase):
         self.assertFalse(text_1.is_required())
         self.assertTrue(text_2.is_required())
 
+    def test_conditional_requirements_initial(self):
+        # verify that if satisfaction is initialized to a particular state, the
+        # triggered elements should react appropriately
+        form = elements.Form({
+            'modelName': 'Example',
+            "targetScript": os.path.join(TEST_DIR, 'data',
+                'sample_scripts.py'),
+            "elements": [
+                {
+                    "id": "text_1",
+                    "type": "text",
+                    "defaultValue": 'aaa',
+                    "signals": ["set_required:text_2"]
+                },
+                {
+                    "id": "text_2",
+                    "type": "text",
+                    "defaultValue": "",
+                    "required": False
+                },
+            ]
+        })
+        text_1 = form.elements[0]
+        text_2 = form.elements[1]
+        text_1._validator.join()  # join in case validation not done.
+        text_2._validator.join()
+
+        # verify initial required/satisfied states.
+        self.assertFalse(text_1.is_required())
+        self.assertTrue(text_1.is_satisfied())  # has input, is valid
+        self.assertTrue(text_2.is_required())  # b/c text_1 is satisfied
+
+        # set the value of text_1 again and verify that the same satisfaction
+        # and requirement is retained.
+        text_1.set_value('bbb')
+        text_1._validator.join()
+        self.assertFalse(text_1.is_required())
+        self.assertTrue(text_1.is_satisfied())
+        self.assertTrue(text_2.is_required())
+
+        # now, set the text_1 value to "".  Text_1 won't be satisfied so it
+        # should trigger text_2 to no longer be required.
+        text_1.set_value('')
+        text_1._validator.join()
+        self.assertFalse(text_1.is_required())
+        self.assertFalse(text_1.is_satisfied())  # no longer satisfied
+        self.assertFalse(text_2.is_required())  # b/c text_1 not satisfied.
 

@@ -295,14 +295,30 @@ class TextGUI(LabeledPrimitiveGUI):
         self.element.validation_completed.register(self._update_validation)
 
     def _update_validation(self, error_state):
-        # error_state is a tuple of (error_state, error_msg)
-        error_msg, error = error_state
+        """Update the visual validation state.  The validation result is
+        ignored if the element is optional and has no input.  Otherwise, the
+        element's validation satate is observed."""
+        observe_validation = False
+        if self.element.has_input():
+            error_msg, error = error_state
+            active = True
+        else:
+            if self.element.is_required():
+                error = V_ERROR
+                error_msg = _('Element is required')
+                active = True
+            else:
+                error = V_PASS
+                error_msg = _('(Element is optional)')
+                active = False
+
         if error == None:
             error = 'pass'
 
         if error_msg == None:
             error_msg = ''
 
+        self._validation_button.set_active(active)
         self._validation_button.set_error(error_msg, error)
         self._text_field.set_error(error == V_ERROR)
         self._label.set_error(error == V_ERROR)

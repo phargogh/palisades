@@ -403,6 +403,21 @@ class FormGUI():
         self.window.save_params_request.register(self._save_params)
         self.window.save_python_request.register(self._save_python)
 
+    def find_input(self, id):
+        """Recurse through all inputs in this form and locate the GUI object
+        that is linked to the element with `id` as the element id.  Returns a
+        GUI element, or raises a KeyError if not found."""
+        known_elements = {}
+        def _locate(element):
+            if isinstance(element, GroupGUI):
+                for contained_element in element.elements:
+                    _locate(contained_element)
+            else:
+                known_elements[element.element.get_id('user')] = element
+
+        _locate(self.group)
+        return known_elements[id]
+
     def _load_params(self, event=None):
         param_file = self.file_dialog.get_file('parameter file')
 

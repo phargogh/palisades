@@ -449,6 +449,7 @@ class WindEnergyRegressionTest(unittest.TestCase):
         self.form = elements.Form(self.translated_config)
         self.gui = palisades.gui.get_application()
         self.gui.add_window(self.form)
+        self.form.emit_signals()
 
     def test_setup(self):
         pass

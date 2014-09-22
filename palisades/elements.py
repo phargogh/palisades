@@ -115,6 +115,13 @@ class Element(object):
 
         return signals
 
+    def emit_signals(self):
+        """Emit all signals with their appropriate value.  Returns nothing."""
+        self.config_changed.emit(self.config)
+        self.interactivity_changed.emit(self.is_enabled())
+        self.visibility_changed.emit(self.is_visible())
+        self.satisfaction_changed.emit(self.is_satisfied())
+
     def set_default_config(self, new_defaults):
         """Add default configuration options to this Element instance's default
         config dictionary.  If this function is called after the element's UI
@@ -314,6 +321,15 @@ class Primitive(Element):
         self._validator = validation.Validator(
             self.config['validateAs']['type'])
         self._validator.finished.register(self._get_validation_result)
+
+    def emit_signals(self):
+        self.value_changed.emit(self.value())
+        self.hidden_toggled.emit(self.is_hidden())
+        self.validity_changed.emit(self._valid)
+
+        #TODO: not sure if this should even be emitted.  Skipping for now.
+        #self.validation_completed.emit(self._valid)
+        Element.emit_signals(self)
 
     def set_value(self, new_value):
         """Set the value of this element.  If the element's value changes, all
@@ -898,6 +914,9 @@ class Container(Group):
 
         self.toggled = Communicator()
 
+    def emit_signals(self):
+        self.toggled.emit(self.is_collapsed())
+
     def set_display_label(self, display):
         assert type(display) is BooleanType, 'display must be True or False'
         self._display_label = display
@@ -976,6 +995,10 @@ class Multi(Container):
 
         self.element_added = Communicator()
         self.element_removed = Communicator()
+
+    def emit_signals(self):
+        for element_index in range(len(self._elements)):
+            self.element_added.emit(new_index)
 
     def add_element(self, index=None):
         # need an optional argument for when an element is added by the
@@ -1079,6 +1102,10 @@ class Form():
     @property
     def element_index(self):
         return dict((e.get_id('user'), e) for e in self.elements)
+
+    def emit_signals(self):
+        for element in self.elements:
+            element.emit_signals()
 
     def setup_communication(self, elements_list):
         """Set up communication between elements for all elements in the

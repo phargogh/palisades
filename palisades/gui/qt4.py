@@ -138,6 +138,9 @@ class QtWidget(QtGui.QWidget):
     def set_enabled(self, is_enabled):
         self.setEnabled(is_enabled)
 
+    def is_enabled(self):
+        return self.isEnabled()
+
 class Empty(QtWidget):
     pass
 

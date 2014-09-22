@@ -454,8 +454,16 @@ class WindEnergyRegressionTest(unittest.TestCase):
         pass
 
     def test_aoi_enables_land_polygon(self):
-        # get the AOI element
+        # The AOI element should be enabled.
         aoi_element = self.form.find_element('aoi')
         aoi_gui = self.gui.find_input('aoi')
+        self.assertTrue(aoi_element.is_enabled())
+        self.assertTrue(aoi_gui._text_field.is_enabled())  # proxy for input
 
+        # AOI element enables the land_polygon input.  Should be disabled until
+        # triggered by the AOI.  Therefore, should start disabled.
+        land_poly_element = self.form.find_element('land_polygon')
+        land_poly_gui = self.gui.find_input('land_polygon')
+        self.assertFalse(land_poly_element.is_enabled())
+        self.assertFalse(land_poly_gui._text_field.is_enabled())
 

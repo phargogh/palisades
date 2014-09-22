@@ -456,6 +456,6 @@ class WindEnergyRegressionTest(unittest.TestCase):
     def test_aoi_enables_land_polygon(self):
         # get the AOI element
         aoi_element = self.form.find_element('aoi')
-        aoi_gui = self.gui.windows[0].find_input('aoi')
+        aoi_gui = self.gui.find_input('aoi')
 
 

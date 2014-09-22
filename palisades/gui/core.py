@@ -44,6 +44,17 @@ class ApplicationGUI(object):
         self.splashscreen.clear_message()
         self.splashscreen.show_message(splash_msg)
 
+    def find_input(self, id):
+        """Locate an element in any of the windows in this application that has
+        a core element ID matching `id`.  Raises a KeyError if none are found.
+        Returns an object pointer to the GUI object of the first match found."""
+        for window in self.windows:
+            try:
+                return window.find_input(id)
+            except KeyError:
+                pass
+        raise KeyError(id)
+
     def execute(self):
         self.app.process_events()
         for window in self.windows:

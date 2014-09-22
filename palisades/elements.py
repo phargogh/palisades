@@ -1087,8 +1087,8 @@ class Form():
             if 'signals' in element.config:
                 self._setup_element_communication(element)
 
-    def find_element(id):
-        return self.element_index['id']
+    def find_element(self, id):
+        return self.element_index[id]
 
     def _setup_element_communication(self, element):
         # Two varieties of signal are permitted:

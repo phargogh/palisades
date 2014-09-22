@@ -447,8 +447,8 @@ class WindEnergyRegressionTest(unittest.TestCase):
         }
         self.translated_config = translation.translate_config(self.config, 'en')
         self.form = elements.Form(self.translated_config)
-        self.gui_application = palisades.gui.get_application()
-        self.gui_application.add_window(self.form)
+        self.gui = palisades.gui.get_application()
+        self.gui.add_window(self.form)
 
     def test_setup(self):
         pass
@@ -456,4 +456,6 @@ class WindEnergyRegressionTest(unittest.TestCase):
     def test_aoi_enables_land_polygon(self):
         # get the AOI element
         aoi_element = self.form.find_element('aoi')
+        aoi_gui = self.gui.windows[0].find_input('aoi')
+
 

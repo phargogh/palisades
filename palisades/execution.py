@@ -237,6 +237,8 @@ class PythonRunner():
         if not self.executor.is_alive():
             self._checker.cancel()
             self.finished.emit(self.executor.name)
+            del self.executor
+            self.executor = None
 
 class LogManager():
     LOG_FMT = "%(asctime)s %(name)-18s %(levelname)-8s %(message)s"

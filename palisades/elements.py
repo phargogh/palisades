@@ -331,6 +331,14 @@ class Primitive(Element):
         #self.validation_completed.emit(self._valid)
         Element.emit_signals(self)
 
+    def reset_value(self):
+        """Reset the element's value to its default value, as defined in the
+        configuration.
+
+        Returns nothing."""
+        default_value = self.config['defaultValue']
+        self.set_value(default_value)
+
     def set_value(self, new_value):
         """Set the value of this element.  If the element's value changes, all
         registered callbacks will be emitted.

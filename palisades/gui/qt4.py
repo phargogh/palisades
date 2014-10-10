@@ -541,6 +541,7 @@ class TextField(QtGui.QLineEdit, QtWidget):
         # set up my communicator instances and connect them to the correct Qt
         # signals.
         self.value_changed = Communicator()
+        self.reset_requested = Communicator()
         self.clicked = Communicator()
         self.textChanged.connect(self._value_changed)
         self.error_changed.connect(self._set_error)
@@ -585,6 +586,9 @@ class TextField(QtGui.QLineEdit, QtWidget):
     def set_text(self, new_value):
         self.setText(new_value)
 
+    def _reset_requested(self, qstring_value):
+        self.reset_requested.emit(True)
+
     def contextMenuEvent(self, event=None):
         """Reimplemented from QtGui.QLineEdit.contextMenuEvent.
 
@@ -595,6 +599,11 @@ class TextField(QtGui.QLineEdit, QtWidget):
         refresh_action.setIcon(QtGui.QIcon(ICON_REFRESH))
         refresh_action.triggered.connect(self._value_changed)
         menu.addAction(refresh_action)
+
+        reset_default = QtGui.QAction(_('Reset to default'), menu)
+        reset_default.triggered.connect(self.reset_requested.emit)
+        menu.addAction(reset_default)
+
         menu.exec_(event.globalPos())
 
 class FileField(TextField):

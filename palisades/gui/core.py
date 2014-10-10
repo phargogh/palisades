@@ -300,10 +300,18 @@ class TextGUI(LabeledPrimitiveGUI):
         # when the text is modified in the textfield, call down to the element
         # to set the text
         self._text_field.value_changed.register(self.element.set_value)
-        # I'm deliberately deciding to not care about when the core's value is
-        # changed programmatically while a UI is active.
+
+        # when the core element's value is changed, update the value of the
+        # gui element.
+        self.element.value_changed.register(self._text_field.set_text)
+
+        # when the user requests a reset on the value, oblige.
+        self._text_field.reset_requested.register(self._reset_value)
 
         self.element.validation_completed.register(self._update_validation)
+
+    def _reset_value(self, event=None):
+        self.element.reset_value()
 
     def _update_validation(self, error_state):
         """Update the visual validation state.  The validation result is
@@ -346,6 +354,13 @@ class FileGUI(TextGUI):
         # when the text is modified in the textfield, call down to the element
         # to set the text
         self._text_field.value_changed.register(self.element.set_value)
+
+        # when the user requests a reset on the value, oblige.
+        self._text_field.reset_requested.register(self._reset_value)
+
+        # when the element's core value is changed, update the value of the gui
+        # element.
+        self.element.value_changed.register(self._text_field.set_text)
 
         # create the FileButton using the 'type' attribute, one of file or
         # folder

@@ -522,11 +522,12 @@ class Primitive(Element):
                     self)
                 return False
 
-
         # if the element is empty and we're not supposed to return if it's
-        # empty, return False.
+        # empty, return False.  This is only the case when element is not
+        # required.
         return_if_empty = self.config['returns']['ifEmpty']
-        if not return_if_empty and not self.has_input():
+        required = self.config['required']
+        if (not return_if_empty and not self.has_input()) and not required:
             LOGGER.debug('Element %s (%s) is empty', self,
                     self.config['args_id'])
             return False

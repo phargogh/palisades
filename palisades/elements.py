@@ -387,6 +387,13 @@ class Primitive(Element):
         while not self._validator.thread_finished():
             pass
 
+        if self.config['required'] and not self.has_input():
+            LOGGER.debug('Element %s is required' % self)
+            elem_req_msg = _('Element is required')
+            elem_req_state = validation.V_FAIL
+            self._get_validation_result((elem_req_msg, elem_req_state))
+            return
+
         validation_dict = self.config['validateAs'].copy()
         validation_dict['value'] = self.value()
         self._validator.validate(validation_dict)  # this starts the thread

@@ -149,9 +149,14 @@ class Validator(Registrar):
     def join(self):
         """Block until all worker threads managed by Validator have finished.
             Returns nothing."""
-        self.thread.join()
-        self.timer.join()
-        time.sleep(0.01)  # sleep so timer definitely finishes executing.
+        if self.thread is not None:
+            self.thread.join()
+            self.timer.join()
+            time.sleep(0.01)  # sleep so timer definitely finishes executing.
+        else:
+            # in the case that validation has not been started, there's nothing
+            # to join!
+            return
 
     def thread_finished(self):
         """Check to see whether the validator has finished.  This is done by

@@ -371,6 +371,9 @@ class Primitive(Element):
         if self._valid == None and self._validator.thread_finished() == True:
             self.validate()
 
+        if self._validator.thread is None:
+            self.validate()
+
         self._validator.join()
 
         # Return whether validation passed (a boolean).

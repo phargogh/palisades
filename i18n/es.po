@@ -189,13 +189,12 @@ msgid "Messages:"
 msgstr "Mensajes:"
 
 #: palisades/gui/qt4.py:982
-#, fuzzy
 msgid " Back"
-msgstr "Regresar"
+msgstr " Regresar"
 
 #: palisades/gui/qt4.py:983
 msgid "Return to parameter list"
-msgstr ""
+msgstr "Regresar a la lista de parámetros"
 
 #: palisades/gui/qt4.py:1009
 msgid "Initializing...\n"

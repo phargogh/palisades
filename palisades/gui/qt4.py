@@ -945,7 +945,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
 
         #set window attributes
         self.setLayout(QtGui.QVBoxLayout())
-        self.setWindowTitle("Running the model")
+        self.setWindowTitle(_("Running the model"))
         self.resize(700, 400)
         center_window(self)
         self.setModal(True)
@@ -953,7 +953,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.cancel = False
 
         #create statusArea-related widgets for the window.        
-        self.statusAreaLabel = QtGui.QLabel('Messages:')
+        self.statusAreaLabel = QtGui.QLabel(_('Messages:'))
         self.statusArea = QtGui.QPlainTextEdit()
         self.statusArea.setReadOnly(True)
         self.cursor = self.statusArea.textCursor()
@@ -979,8 +979,8 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.layout().addWidget(self.progressBar)
 
 
-        self.backButton = QtGui.QPushButton(' Back')
-        self.backButton.setToolTip('Return to parameter list')
+        self.backButton = QtGui.QPushButton(_(' Back'))
+        self.backButton.setToolTip(_('Return to parameter list'))
 
         #add button icons
         self.backButton.setIcon(QtGui.QIcon(ICON_ENTER))
@@ -1006,7 +1006,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.statusArea.clear()
         self.start_buttons()
 
-        self.write('Initializing...\n')
+        self.write(_('Initializing...\n'))
 
     def start_buttons(self):
         self.progressBar.setMaximum(0) #start the progressbar.
@@ -1043,10 +1043,10 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.stop_buttons()
         if exception_found:
             self.messageArea.setText((u'<b>%s</b> encountered: <em>%s</em> <br/>' +
-                'See the log for details.') % (thread_exception.__class__.__name__,
+                _('See the log for details.')) % (thread_exception.__class__.__name__,
                 thread_exception))
         else:
-            self.messageArea.setText('Model completed successfully.')
+            self.messageArea.setText(_('Model completed successfully.'))
         self.error_changed.emit(exception_found)
         self.cursor.movePosition(QtGui.QTextCursor.End)
         self.statusArea.setTextCursor(self.cursor)

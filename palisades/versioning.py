@@ -10,7 +10,7 @@ import time
 if platform.system() != 'Windows':
     from shutil import WindowsError
 
-LOGGER = logging.getLogger('versioning')
+LOGGER = logging.getLogger('palisades.versioning')
 LOGGER.setLevel(logging.ERROR)
 
 class VCSQuerier(object):

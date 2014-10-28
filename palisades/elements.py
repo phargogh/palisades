@@ -12,7 +12,7 @@ from palisades.i18n import translation
 import palisades.gui
 import palisades.i18n
 
-LOGGER = logging.getLogger('elements')
+LOGGER = logging.getLogger('palisades.elements')
 
 class InvalidData(ValueError):
     def __init__(self, problem_data):

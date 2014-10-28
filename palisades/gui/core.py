@@ -10,7 +10,7 @@ from palisades.elements import InvalidData
 
 class NotYetImplemented(Exception): pass
 
-LOGGER = logging.getLogger('gui.core')
+LOGGER = logging.getLogger('palisades.gui.core')
 
 def _print_obj_debug(obj):
     print '#' * 40

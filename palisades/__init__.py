@@ -38,23 +38,8 @@ def get_py2exe_datafiles():
     icons = map(os.path.abspath, glob.glob(local_icon_path + '/*'))
     return [(icon_path, icons)]
 
-def launch(json_uri, splash_img=None, runner=None):
-    """Construct a core application instance based on the user-defined
-    configuration file and then build a GUI instance off of that core
-    application.  Once this latter component has been constructed, call its
-    execute() function.
-
-        json_uri - a URI to a palisades JSON configuration file.
-        splash_img=None - a URI to a raster graphic to use for a splash image
-            while the program is loading.  If None, no splash image will be
-            used.
-        runner=None - a subclass of execution.PythonRunner class to use to run
-            the application.  If None, execution.PythonRunner will be used.
-
-    Returns nothing."""
-    from palisades import elements
-    import palisades.gui
-
+def locate_config(expected_uri):
+    json_uri = expected_uri
     # if the user provided a relative path to the configuration file, it's
     # possible that we're in a frozen environment.  If this is the case, we
     # should check out the possible locations of the file.
@@ -76,6 +61,26 @@ def launch(json_uri, splash_img=None, runner=None):
         if os.path.exists(possible_path):
             found_json = possible_path
 
+    return found_json
+
+def launch(json_uri, splash_img=None, runner=None):
+    """Construct a core application instance based on the user-defined
+    configuration file and then build a GUI instance off of that core
+    application.  Once this latter component has been constructed, call its
+    execute() function.
+
+        json_uri - a URI to a palisades JSON configuration file.
+        splash_img=None - a URI to a raster graphic to use for a splash image
+            while the program is loading.  If None, no splash image will be
+            used.
+        runner=None - a subclass of execution.PythonRunner class to use to run
+            the application.  If None, execution.PythonRunner will be used.
+
+    Returns nothing."""
+    from palisades import elements
+    import palisades.gui
+
+    found_json = locate_config(json_uri)
     if found_json is None:
         raise IOError(
             _('Configuration file %s could not be found in %s') % (json_uri,

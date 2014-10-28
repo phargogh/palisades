@@ -945,6 +945,9 @@ class Container(Group):
             return self.config['label']
         return ''
 
+    def value(self):
+        return not self._collapsed
+
     def set_collapsed(self, is_collapsed):
         assert type(is_collapsed) is BooleanType
 
@@ -982,6 +985,21 @@ class Container(Group):
         if self.is_collapsible():
             self.set_collapsed(self.is_collapsed())
         Group.set_state(self, state)
+
+    def is_valid(self):
+        """A group is always valid."""
+        return True
+
+    def should_return(self):
+        LOGGER.debug('Checking whether should return: %s', self)
+        # if element does not have an args_id, we're not supposed to return.
+        # Therefore, return False.
+        if 'args_id' not in self.config:
+            LOGGER.debug('Element %s does not have an args_id', self)
+            return False
+
+        # If none of the previous conditions have been met, return True.
+        return True
 
 class Multi(Container):
     def __init__(self, configuration, new_elements=None):
@@ -1234,6 +1252,8 @@ class Form():
         def append_elements(element_list):
             for element in element_list:
                 if isinstance(element, Group):
+                    if isinstance(element, Container):
+                        all_elements.append(element)
                     append_elements(element._elements)
                 else:
                     all_elements.append(element)

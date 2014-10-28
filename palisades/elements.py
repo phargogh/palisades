@@ -1001,6 +1001,11 @@ class Container(Group):
         # If none of the previous conditions have been met, return True.
         return True
 
+    def is_required(self):
+        # containers are never reauired.
+        return False
+
+
 class Multi(Container):
     def __init__(self, configuration, new_elements=None):
         Container.__init__(self, configuration, new_elements)
@@ -1349,21 +1354,24 @@ class Form():
         for element in self.elements:
             try:
                 form_data.append((element.config['args_id'], element.is_valid(),
-                    element.should_return(), element.value()))
+                    element.should_return(), element.is_required(),
+                    element.value()))
             except KeyError:
                 # no attribute args_id, so skip.
                 pass
 
 
-        def element_ok_for_submission(args_id, is_valid, should_return, value):
+        def element_ok_for_submission(args_id, is_valid, should_return,
+                is_required, value):
             """Check that this element is ok for submission.  Returns a
             boolean."""
-            if not should_return:
+            if not is_valid and is_required:
+                return False
+            if not should_return:  # element should not return, so ignore
                 return True
-            if is_valid:
+            if is_valid and should_return is True: # is valid, should return
                 return True
-
-            return False
+            return False  # otherwise, element should not return
 
         element_validity = map(lambda x: element_ok_for_submission(*x),
             form_data)

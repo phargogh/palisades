@@ -30,6 +30,10 @@ LAYOUT_VERTICAL = 1
 LAYOUT_HORIZONTAL = 2
 LAYOUT_GRID = 3
 
+# splash strings
+SPLASH_MSG_CORE_APP = _('Building core application')
+SPLASH_MSG_GUI = _('Building graphical interface')
+
 def get_py2exe_datafiles():
     """Return a list of tuples of data required for a py2exe installation of
     palisades."""
@@ -91,7 +95,7 @@ def launch(json_uri, splash_img=None, runner=None):
     if splash_img is not None:
         print _('Showing splash %s') % splash_img
         gui_app.show_splash(splash_img)
-        gui_app.set_splash_message(_('Building core application'))
+        gui_app.set_splash_message(SPLASH_MSG_CORE_APP)
     ui = elements.Application(found_json, locate_dist_config()['lang'])
 
     if runner is not None:
@@ -99,7 +103,7 @@ def launch(json_uri, splash_img=None, runner=None):
         ui._window.set_runner(runner)
 
     if splash_img is not None:
-        gui_app.set_splash_message(_('Building graphical interface'))
+        gui_app.set_splash_message(SPLASH_MSG_GUI)
 
     gui_app.add_window(ui._window)
 

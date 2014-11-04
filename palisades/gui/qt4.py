@@ -838,6 +838,7 @@ class WarningDialog(InfoDialog):
         self.body.setText(_('Some inputs cannot be validated and may cause ' +
            'this program to fail.  Continue anyways?'))
         self.no_button = QtGui.QPushButton(_('Back'))
+        self.no_button.setIcon(QtGui.QIcon(ICON_ENTER))
         self.no_button.clicked.connect(self.reject)
         self.button_box.addButton(self.no_button, QtGui.QDialogButtonBox.RejectRole)
 
@@ -849,6 +850,7 @@ class ConfirmQuitDialog(WarningDialog):
         self.set_icon(ICON_BULB_BIG)
         self.body.setText(_('You will lose any changes to your parameter fields.'))
         self.ok_button.setText(_('Quit'))
+        self.ok_button.setIcon(QtGui.QIcon(ICON_CLOSE))
 
 class ErrorDialog(InfoDialog):
     def __init__(self):

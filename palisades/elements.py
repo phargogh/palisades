@@ -1355,16 +1355,18 @@ class Form():
             try:
                 form_data.append((element.config['args_id'], element.is_valid(),
                     element.should_return(), element.is_required(),
-                    element.value()))
+                    element.is_visible(), element.value()))
             except KeyError:
                 # no attribute args_id, so skip.
                 pass
 
 
         def element_ok_for_submission(args_id, is_valid, should_return,
-                is_required, value):
+                is_required, is_visible, value):
             """Check that this element is ok for submission.  Returns a
             boolean."""
+            if not is_visible:
+                return True
             if not is_valid and is_required:
                 return False
             if not should_return:  # element should not return, so ignore
@@ -1376,6 +1378,7 @@ class Form():
         element_validity = map(lambda x: element_ok_for_submission(*x),
             form_data)
 
+        print "VALID | args_id, is_valid, should_return, is_required, is_visible"
         for element, valid in zip(form_data, element_validity):
             print valid, element
 
@@ -1386,6 +1389,9 @@ class Form():
         values."""
         invalid_inputs = []
         for element in self.elements:
+            if not element.is_visible():
+                continue  # skip elements that are hidden from view.
+
             if not element.is_valid():
                 invalid_inputs.append((element.config['args_id'], element.value()))
         return invalid_inputs

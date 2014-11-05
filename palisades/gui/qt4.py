@@ -1093,6 +1093,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
 #        self.remove_lastrun = self.file_menu.addAction('&Clear cached runs ...')
         self.exit_action = self.file_menu.addAction(_('Exit'))
         self.exit_action.setShortcut(QtGui.QKeySequence("Ctrl+Q"))
+        self.about_app_action = self.file_menu.addAction('About %s' % window_title)
         self.menu_bar.addMenu(self.file_menu)
 
         self.dev_menu = QtGui.QMenu(_('&Development'))
@@ -1104,12 +1105,14 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.load_params_request = Communicator()
         self.save_params_request = Communicator()
         self.save_python_request = Communicator()
+        self.app_info_dialog = InfoDialog()
 #        self.exit_action.triggered.connect(self.ui.closeWindow)
         self.save_file_action.triggered.connect(self.save_params_request.emit)
         self.load_file_action.triggered.connect(self.load_params_request.emit)
 #        self.remove_lastrun.triggered.connect(self.ui.remove_lastrun)
         self.save_to_python.triggered.connect(self.save_python_request.emit)
 #        self.save_to_json.triggered.connect(self.ui.save_to_json)
+        self.about_app_action.triggered.connect(self.app_info_dialog.show)
 
 
         # Create the QWidget pane for the inputs and add it to the layout.

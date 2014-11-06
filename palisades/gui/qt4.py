@@ -815,8 +815,13 @@ class InfoDialog(QtGui.QDialog):
         QtGui.QDialog.showEvent(self, event)
         center_window(self)
 
-    def set_icon(self, uri):
-        self.icon.setPixmap(QtGui.QPixmap(uri))
+    def set_icon(self, uri, scale=False):
+        if scale is True:
+            scaled_img = QtGui.QPixmap(uri).scaled(150, 150,
+                QtCore.Qt.KeepAspectRatio)
+        else:
+            scaled_img = QtGui.QPixmap(uri)
+        self.icon.setPixmap(scaled_img)
 
     def set_title(self, title):
         self.title.setText(title)

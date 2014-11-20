@@ -1202,6 +1202,11 @@ class FormWindow(QtWidget, QtGui.QWidget):
     def closeEvent(self, event=None):
         self._quit_pressed()
 
+        if self.close_confirmed:
+            event.accept()
+        else:
+            event.ignore()
+
     def add_widget(self, gui_object):
         self.input_pane.add_widget(gui_object)
 

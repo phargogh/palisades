@@ -1111,7 +1111,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.save_params_request = Communicator()
         self.save_python_request = Communicator()
         self.app_info_dialog = InfoDialog()
-#        self.exit_action.triggered.connect(self.ui.closeWindow)
+        self.exit_action.triggered.connect(self._quit_pressed)
         self.save_file_action.triggered.connect(self.save_params_request.emit)
         self.load_file_action.triggered.connect(self.load_params_request.emit)
 #        self.remove_lastrun.triggered.connect(self.ui.remove_lastrun)

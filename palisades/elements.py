@@ -1135,12 +1135,15 @@ class Form():
 
         # now that the form has been created, load the lastrun state, if
         # appliccable.
+        lastrun_uri = self.lastrun_uri()
         try:
-            self.load_state(self.lastrun_uri())
+            self.load_state(lastrun_uri)
+            LOGGER.info('Successfully loaded lastrun from %s',
+                lastrun_uri)
         except IOError:
             # when no lastrun file exists for this version
             LOGGER.warn('No lastrun file found at %s.  Skipping.',
-                self.lastrun_uri())
+                lastrun_uri)
     @property
     def element_index(self):
         return dict((e.get_id('user'), e) for e in self.elements)

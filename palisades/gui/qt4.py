@@ -545,6 +545,9 @@ class TextField(QtGui.QLineEdit, QtWidget):
         self.clicked = Communicator()
         self.textChanged.connect(self._value_changed)
         self.error_changed.connect(self._set_error)
+        self.editingFinished.connect(self._editing_finished)
+
+        self._is_editing = False
 
     def mousePressEvent(self, event=None):
         if event.button() == QtCore.Qt.LeftButton:
@@ -554,9 +557,15 @@ class TextField(QtGui.QLineEdit, QtWidget):
     def _value_changed(self, qstring_value):
         """Callback for the TextChanged signal.  Casts to a python string anc
         emits the value_changed communicator signal."""
+        self._is_editing = True
         qstring_value = self.text()
         new_value = unicode(qstring_value, 'utf-8')
         self.value_changed.emit(new_value)
+
+    def _editing_finished(self, value=None):
+        """Callback for the editingFinished signal.  Sets the local variable
+        tracking whether the textfield is being edited by the user."""
+        self._is_editing = False
 
     def showEvent(self, event=None):
         if len(self.text()) > 0:
@@ -585,7 +594,7 @@ class TextField(QtGui.QLineEdit, QtWidget):
 
     def set_text(self, new_value):
         # only set the new text if the user is not editing the text.
-        if self.cursorPosition() == 0:
+        if not self._is_editing:
             self.setText(new_value)
 
     def _reset_requested(self, qstring_value):

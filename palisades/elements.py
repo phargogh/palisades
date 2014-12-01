@@ -983,7 +983,7 @@ class Container(Group):
                 'collapsed' -> a boolean
         """
         if self.is_collapsible():
-            self.set_collapsed(self.is_collapsed())
+            self.set_collapsed(state['collapsed'])
         Group.set_state(self, state)
 
     def is_valid(self):

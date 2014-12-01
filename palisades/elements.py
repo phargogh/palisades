@@ -232,7 +232,7 @@ class Element(object):
     def _get_hashable_config(self):
         """Get the hashable configuration dictionary."""
         hashable_obj = {}
-        for config_key, value in self.config.iteritems():
+        for config_key, value in self._default_config.iteritems():
             if config_key in self._hashable_config:
                 hashable_obj[config_key] = value
 
@@ -1333,8 +1333,8 @@ class Form():
                 # an element or else changed the element enough for it to not be
                 # recognizeable to palisades.  When this happens, we can't set
                 # the state, so log a warning and proceed.
-                LOGGER.warn('Element ID %s does not have a saved state.',
-                        missing_key)
+                LOGGER.warn('Element ID %s (%s) does not have a saved state.',
+                    missing_key, element.get_id('user'))
 
     def lastrun_uri(self):
         """Fetch the URI for the internal lastrun save file."""

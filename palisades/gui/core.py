@@ -187,6 +187,16 @@ class ContainerGUI(GroupGUI):
         # element to be collapsed
         self.widgets.checkbox_toggled.register(self.element.set_collapsed)
 
+        # when the container is collapsed by the python core, collapse the GUI
+        # container
+        self.element.toggled.register(self._set_collapsed)
+
+    def _set_collapsed(self, event=None):
+        self.widgets.set_collapsed(self.element.is_collapsed())
+
+        for element in self.element.elements():
+            element.set_visible(self.element.is_collapsed())
+
 class MultiGUI(ContainerGUI):
     def __init__(self, core_element, registrar=None):
         # TODO: find a better way to specify the toolkit widget.

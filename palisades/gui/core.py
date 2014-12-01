@@ -451,7 +451,14 @@ class FormGUI():
             self.element.load_state(param_file)
 
     def _save_params(self, event=None):
-        param_file = self.file_dialog.get_file('parameter file', save=True)
+        try:
+            model_name = self.element._ui.config['modelName']
+            model_name += '_saved.json'
+        except KeyError:
+            model_name = 'saved_run.json'
+
+        param_file = self.file_dialog.get_file('parameter file', save=True,
+            savefile=model_name)
 
         if param_file != '':
             self.element.save_state(param_file)

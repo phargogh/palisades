@@ -731,14 +731,20 @@ class FileDialog(QtGui.QFileDialog):
         self.last_filter = QtCore.QString()
         self.last_folder = '~'
 
-    def get_file(self, title, save=False, start_dir=None):
+    def get_file(self, title, save=False, start_dir=None, default_file=None,
+            savefile=None):
         if start_dir is None:
             default_folder = os.path.expanduser(self.last_folder)
         else:
             default_folder = start_dir
         dialog_title = _('Select ') + title
 
+
         if save:
+            if savefile is not None:
+                default_folder = os.path.join(default_folder, savefile)
+
+            print 'DEFAULT_DIR', default_folder
             filename, filter = self.getSaveFileNameAndFilter(
                 self, dialog_title, default_folder, initialFilter=self.last_filter)
         else:

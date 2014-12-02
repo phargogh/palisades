@@ -11,4 +11,4 @@ install:
     - pip install --allow-external dbfpy
     - python setup.py install
 
-script: nosetests palisades
+script: nosetests test/validation_test.py

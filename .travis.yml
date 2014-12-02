@@ -11,7 +11,7 @@ before_install:
     - sudo apt-get install gdal-bin libgdal1h python-gdal
 
 install:
-    - pip install --allow-external dbfpy
+    - pip install --allow-all-external dbfpy
     - python setup.py install
 
 script: nosetests test/validation_test.py

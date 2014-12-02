@@ -592,9 +592,9 @@ class TextField(QtGui.QLineEdit, QtWidget):
     def text(self):
         return QtGui.QLineEdit.text(self)
 
-    def set_text(self, new_value):
+    def set_text(self, new_value, force=False):
         # only set the new text if the user is not editing the text.
-        if not self._is_editing:
+        if not self._is_editing or force is True:
             self.setText(new_value)
 
     def _reset_requested(self, qstring_value):

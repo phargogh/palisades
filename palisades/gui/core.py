@@ -390,7 +390,7 @@ class FileGUI(TextGUI):
 
     def _file_selected(self, new_value):
         # set the textfield's value
-        self._text_field.set_text(new_value)
+        self._text_field.set_text(new_value, force=True)
 
         # set the core element's value
         self.element.set_value(new_value)

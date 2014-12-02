@@ -9,7 +9,7 @@ dependencies:
         - sudo apt-get install python-qt4
 
         - pip install --allow-external dbfpy
-        - pip install osgeo
+        - pip install gdal
         - python setup.py install
 
 test:

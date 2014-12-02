@@ -183,6 +183,11 @@ class ContainerGUI(GroupGUI):
         GroupGUI.__init__(self, core_element, registrar)
         self.widgets.set_collapsible(self.element.is_collapsible())
 
+        # initialize the collapsed state to mirror the state of the UI.
+        self.widgets.set_collapsed(not self.element.is_collapsed())
+        for element in self.element.elements():
+            element.set_visible(self.element.is_collapsed())
+
         # when the container is collapsed by the GUI user, set the underlying
         # element to be collapsed
         self.widgets.checkbox_toggled.register(self.element.set_collapsed)
@@ -191,11 +196,13 @@ class ContainerGUI(GroupGUI):
         # container
         self.element.toggled.register(self._set_collapsed)
 
+        self._set_collapsed()  # initialize the collapsed state
+
     def _set_collapsed(self, event=None):
         self.widgets.set_collapsed(self.element.is_collapsed())
 
         for element in self.element.elements():
-            element.set_visible(self.element.is_collapsed())
+            element.set_visible(not self.element.is_collapsed())
 
 class MultiGUI(ContainerGUI):
     def __init__(self, core_element, registrar=None):

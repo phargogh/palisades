@@ -11,7 +11,8 @@ before_install:
     - sudo apt-get install gdal-bin libgdal1h python-gdal
 
 install:
-    - pip install --allow-all-external --allow-unverified dbfpy dbfpy
+    - wget http://ncp-yamato.stanford.edu/~jdouglass/dbfpy-2.3.0.tar.gz
+    - pip install dbfpy-2.3.0.tar.gz 
     - python setup.py install
 
 script: nosetests test/validation_test.py

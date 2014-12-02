@@ -7,6 +7,7 @@ dependencies:
         - sudo apt-get update
         - sudo apt-get install gdal-bin libgdal-dev
         - sudo apt-get install python-qt4
+        - sudo apt-get install gcc
 
         - pip install --allow-external dbfpy
         - pip install gdal

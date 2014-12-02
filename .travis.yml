@@ -8,7 +8,9 @@ before_install:
     - sudo apt-get install python-qt4
 
 install:
+    - which pip
     - pip install --allow-external dbfpy
+    - which python
     - python setup.py install
 
 script: nosetests test/validation_test.py

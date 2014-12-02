@@ -11,11 +11,7 @@ before_install:
     - sudo apt-get install gdal-bin libgdal1h python-gdal
 
 install:
-    - which pip
     - pip install --allow-external dbfpy
-    - export CPLUS_INCLUDE_PATH=/usr/include/gdal; export C_INCLUDE_PATH=/usr/include/gdal; pip install gdal
-    - pip install http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt-x11-gpl-4.11.3.tar.gz
-    - which python
     - python setup.py install
 
 script: nosetests test/validation_test.py

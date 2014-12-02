@@ -11,7 +11,7 @@ before_install:
     - sudo apt-get install gdal-bin libgdal1h python-gdal
 
 install:
-    - wget http://ncp-yamato.stanford.edu/~jdouglass/dbfpy-2.3.0.tar.gz
+    - wget http://ncp-dev.stanford.edu/~jdouglass/dbfpy-2.3.0.tar.gz
     - pip install dbfpy-2.3.0.tar.gz 
     - python setup.py install
 

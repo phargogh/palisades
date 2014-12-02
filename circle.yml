@@ -12,6 +12,7 @@ dependencies:
         - virtualenv palisades_env --system-site-packages
         - source palisades_env/bin/activate
         - pip install --allow-external dbfpy
+        - pip install gdal
         - python setup.py install
 
 test:

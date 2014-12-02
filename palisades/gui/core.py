@@ -196,8 +196,6 @@ class ContainerGUI(GroupGUI):
         # container
         self.element.toggled.register(self._set_collapsed)
 
-        self._set_collapsed()  # initialize the collapsed state
-
     def _set_collapsed(self, event=None):
         self.widgets.set_collapsed(self.element.is_collapsed())
 

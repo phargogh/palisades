@@ -4,12 +4,14 @@ python:
 
 before_install:
     - sudo apt-get update
-    - sudo apt-get install gdal-bin libgdal1h python-gdal
     - sudo apt-get install python-qt4
+    - sudo apt-get install gdal-bin libgdal1h
 
 install:
     - which pip
     - pip install --allow-external dbfpy
+    - export CPLUS_INCLUDE_PATH=/usr/include/gdal; export C_INCLUDE_PATH=/usr/include/gdal; pip install gdal
+    - pip install http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt-x11-gpl-4.11.3.tar.gz
     - which python
     - python setup.py install
 

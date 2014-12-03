@@ -231,13 +231,22 @@ class PrimitiveGUI(UIObject):
     def __init__(self, core_element):
         UIObject.__init__(self, core_element)
         self.widgets = []
+        self._visible = True
+        self._enabled = True
 
     def set_visible(self, is_visible):
+        self._visible = is_visible
         for widget in self.widgets:
             widget.set_visible(is_visible)
 
+    def is_visible(self):
+        return self._visible
+
+    def is_enabled(self):
+        return self._enabled
+
     def set_enabled(self, is_enabled):
-        print is_enabled
+        self._enabled = is_enabled
         for widget in self.widgets:
             widget.set_enabled(is_enabled)
 

@@ -557,7 +557,6 @@ class TextField(QtGui.QLineEdit, QtWidget):
     def _value_changed(self, qstring_value):
         """Callback for the TextChanged signal.  Casts to a python string anc
         emits the value_changed communicator signal."""
-        self._is_editing = True
         qstring_value = self.text()
         new_value = unicode(qstring_value, 'utf-8')
         self.value_changed.emit(new_value)
@@ -570,6 +569,12 @@ class TextField(QtGui.QLineEdit, QtWidget):
     def showEvent(self, event=None):
         if len(self.text()) > 0:
             self._value_changed(self.text())
+
+    def focusInEvent(self, event=None):
+        self._is_editing = True
+
+    def focusOutEvent(self, event=None):
+        self._is_editing = False
 
     def set_error(self, is_error):
         """Change the styling of this textfield according to is_error.

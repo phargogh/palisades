@@ -253,6 +253,49 @@ class ContainerIntegrationTest(GroupIntegrationTest):
         self.assertEqual(self.element.is_collapsed(), True)
         self.assertEqual(self.view.widgets.is_collapsed(), True)
 
+        # now, set the state of the element to be uncollapsed and verify this
+        # is reflected in the UI.
+        self.element.set_state({'collapsed': False, 'enabled': True})
+        self.assertFalse(self.element.is_collapsed())
+        self.assertFalse(self.view.widgets.is_collapsed())
+
+        self.element.set_state({'collapsed': True, 'enabled': True})
+        self.assertTrue(self.element.is_collapsed())
+        self.assertTrue(self.view.widgets.is_collapsed())
+
+    def test_default_expanded(self):
+        new_config = {'elements': self.contained_elements, 'collapsible': True,
+            'defaultValue': False}
+        element = elements.Container(new_config)
+        view = core.ContainerGUI(element)
+
+        # verify that the element and GUI both default to what's specified.
+        self.assertFalse(element.is_collapsed())
+        self.assertFalse(view.widgets.is_collapsed())
+        self.assertTrue(element.is_collapsible())
+        self.assertTrue(element.is_collapsible())
+
+        def _check_interactivity(obj_list, expected):
+            for contained_obj in obj_list:
+                self.assertEqual(contained_obj.is_enabled(), expected)
+                self.assertTrue(contained_obj.is_visible(), expected)
+
+        # verify contained elements are enabled, since the contained is not
+        # collapsed.
+        _check_interactivity(element.elements(), True)
+
+        # verify contained elements in the GUI are enabled, since the contained
+        # is not collapsed.
+        _check_interactivity(view.elements, True)
+
+        # set the element state, have the change reflected in the GUI.
+        element.set_state({'enabled': True, 'collapsed': True})
+        _check_interactivity(element.elements(), False)
+        _check_interactivity(view.elements, False)
+
+
+
+
 class MultiIntegrationTest(ContainerIntegrationTest):
     def setUp(self):
         self.contained_elements = [

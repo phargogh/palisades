@@ -925,11 +925,12 @@ class Container(Group):
             'enabled': True,
             'label': '',
             'collapsible': False,
+            'defaultValue': True,
         }
         self.set_default_config(new_defaults)
 
         self._collapsible = self.config['collapsible']
-        self._collapsed = False
+        self._collapsed = self.config['defaultValue']
 
         self.toggled = Communicator()
 

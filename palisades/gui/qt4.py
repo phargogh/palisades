@@ -846,6 +846,9 @@ class InfoDialog(QtGui.QDialog):
     def set_messages(self, message_list):
         self.messages = message_list
 
+    def set_body_text(self, text):
+        self.body.setText(text)
+
     def confirm(self):
         exit_code = self.exec_()
         if exit_code != 0:

@@ -184,9 +184,12 @@ class ContainerGUI(GroupGUI):
         self.widgets.set_collapsible(self.element.is_collapsible())
 
         # initialize the collapsed state to mirror the state of the UI.
-        self.widgets.set_collapsed(not self.element.is_collapsed())
+        self.widgets.set_collapsed(self.element.is_collapsed())
         for element in self.element.elements():
-            element.set_visible(self.element.is_collapsed())
+            element.set_visible(not self.element.is_collapsed())
+
+        for gui_elem in self.elements:
+            gui_elem.set_visible(not self.element.is_collapsed())
 
         # when the container is collapsed by the GUI user, set the underlying
         # element to be collapsed

@@ -5,7 +5,7 @@ machine:
 dependencies:
     pre:
         - sudo apt-get update
-        - sudo apt-get install gdal-bin libgdal1-dev python-gdal
+        - sudo apt-get install gdal-bin libgdal1-dev
         - sudo apt-get install python-qt4
 
         - deactivate

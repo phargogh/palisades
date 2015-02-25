@@ -149,5 +149,6 @@ def locate_dist_config():
         config = {
             'lang': palisades.i18n.os_default_lang(),
         }
+        print "Defaulting to OS language: %s" % config['lang']
 
     return config

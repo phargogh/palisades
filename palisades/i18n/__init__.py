@@ -28,6 +28,9 @@ DEFAULT_LANGUAGES += ['en_US', 'de']
 lc, encoding = locale.getdefaultlocale()
 if lc:
     languages = [lc]
+else:
+    languages= []
+
 
 # Concat all languages (env + default locale),
 #  and here we have the languages and location of the translations

@@ -1185,7 +1185,8 @@ class FormWindow(QtWidget, QtGui.QWidget):
         # adjust the window size.
         screen_geometry = QtGui.QDesktopWidget().availableGeometry()
         screen_width = screen_geometry.width()
-        min_width = 800
+        # 100 pads the width for the scrollbar and a little more.
+        min_width = self.input_pane.minimumSizeHint().width() + 100
         if min_width > screen_width:
             width = screen_width - 50
         else:

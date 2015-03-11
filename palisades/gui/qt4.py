@@ -1192,7 +1192,8 @@ class FormWindow(QtWidget, QtGui.QWidget):
             width = min_width
 
         screen_height = screen_geometry.height() * 0.95
-        min_height = self.input_pane.minimumSizeHint().height()
+        # 100 pads the height for buttons, menu bars.
+        min_height = self.input_pane.minimumSizeHint().height() + 100
         if min_height > screen_height:
             height = screen_height
         else:

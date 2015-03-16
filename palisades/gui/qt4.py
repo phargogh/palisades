@@ -744,6 +744,8 @@ class FileDialog(QtGui.QFileDialog):
             default_folder = start_dir
         dialog_title = _('Select ') + title
 
+        # Be able to open default folders with spaces in them
+        default_folder = os.path.normpath(default_folder)
 
         if save:
             if savefile is not None:

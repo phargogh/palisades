@@ -65,7 +65,6 @@ def locate_module(module):
         Returns a tuple of (executeable module, module name)"""
 
     LOGGER.debug('Trying to import %s', module)
-    LOGGER.debug('Existing modules: %s', sys.modules.keys())
 
     if module in sys.modules:
         model = sys.modules[module]

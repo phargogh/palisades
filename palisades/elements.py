@@ -1165,7 +1165,7 @@ class Form():
 
     def _setup_element_communication(self, element):
         # Two varieties of signal are permitted:
-        # 
+        #
         # Short-form signals are strings in the form:
         #    <simplified_signalname>:<target_element_id>
         # Implemented shortform signals:
@@ -1382,9 +1382,9 @@ class Form():
         element_validity = map(lambda x: element_ok_for_submission(*x),
             form_data)
 
-        print "VALID | args_id, is_valid, should_return, is_required, is_visible"
-        for element, valid in zip(form_data, element_validity):
-            print valid, element
+        #print "VALID | args_id, is_valid, should_return, is_required, is_visible"
+        #for element, valid in zip(form_data, element_validity):
+        #    print valid, element
 
         return not False in element_validity
 

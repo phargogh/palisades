@@ -65,6 +65,11 @@ def locate_config(expected_uri):
         if os.path.exists(possible_path):
             found_json = possible_path
 
+    if found_json is None:
+        raise IOError(
+            _('Configuration file %s could not be found in %s') % (json_uri,
+                possible_paths))
+    print found_json
     return found_json
 
 def launch(json_uri, splash_img=None, runner=None):
@@ -85,11 +90,6 @@ def launch(json_uri, splash_img=None, runner=None):
     import palisades.gui
 
     found_json = locate_config(json_uri)
-    if found_json is None:
-        raise IOError(
-            _('Configuration file %s could not be found in %s') % (json_uri,
-                possible_paths))
-    print found_json
 
     gui_app = palisades.gui.get_application()
     if splash_img is not None:

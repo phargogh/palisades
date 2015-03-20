@@ -968,6 +968,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         This window is not configurable through the JSON configuration file."""
     error_changed = Signal(bool)
     message_added = Signal(unicode)
+    _finished = Signal(bool)
 
     def __init__(self):
         """Constructor for the ModelDialog class.
@@ -1008,7 +1009,13 @@ class RealtimeMessagesDialog(QtGui.QDialog):
             self.progressBar.setMinimumSize(progress_sizehint)
 
         self.openWorkspaceCB = QtGui.QCheckBox(_('Open workspace after success'))
-        self.openWorkspaceCB.stateChanged.connect(self._emit_workspace_cb)
+        self.openWorkspaceCB.stateChanged.connect(self._emit_workspace)
+        self.openWorkspaceButton = QtGui.QPushButton(_('Open workspace'))
+        self.openWorkspaceButton.pressed.connect(self._emit_workspace)
+        self.openWorkspaceButton.setSizePolicy(QtGui.QSizePolicy.Minimum,
+            QtGui.QSizePolicy.Minimum)
+        self.openWorkspaceButton.setMaximumWidth(150)
+        self.openWorkspaceButton.setVisible(False)
         self.messageArea = MessageArea()
         self.messageArea.clear()
 
@@ -1018,6 +1025,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.layout().addWidget(self.messageArea)
         self.layout().addWidget(self.progressBar)
         self.layout().addWidget(self.openWorkspaceCB)
+        self.layout().addWidget(self.openWorkspaceButton)
 
         self.backButton = QtGui.QPushButton(_(' Back'))
         self.backButton.setToolTip(_('Return to parameter list'))
@@ -1041,10 +1049,16 @@ class RealtimeMessagesDialog(QtGui.QDialog):
 
         self.error_changed.connect(self.messageArea.set_error)
         self.message_added.connect(self._write)
+        self._finished.connect(self._threadsafe_finish)
 
-    def _emit_workspace_cb(self, event=None):
-        print 'emitting'
-        self.dir_open_requested.emit(self.workspace_open_requested())
+    def _emit_workspace(self, event=None):
+        print 'emit!'
+        if not self.openWorkspaceCB.isVisible():
+            print 'button visible'
+            requested = True
+        else:
+            requested = self.workspace_open_requested()
+        self.dir_open_requested.emit(requested)
 
     def start(self, event=None):
         self.statusArea.clear()
@@ -1094,13 +1108,20 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.error_changed.emit(exception_found)
         self.cursor.movePosition(QtGui.QTextCursor.End)
         self.statusArea.setTextCursor(self.cursor)
+        self._finished.emit(True)
+
+    def _threadsafe_finish(self, event=None):
+        self.openWorkspaceCB.setVisible(False)
+        self.openWorkspaceButton.setVisible(True)
 
 
     def workspace_open_requested(self):
         """Returns a boolean of whether the user requested the workspace be opened
         on model success.
         """
-        return self.openWorkspaceCB.isChecked()
+        if self.openWorkspaceCB.isVisible():
+            return self.openWorkspaceCB.isChecked()
+        return True
 
     def closeWindow(self):
         """Close the window and ensure the modelProcess has completed.

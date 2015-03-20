@@ -229,6 +229,14 @@ class PythonRunner():
         self._checker.start()
         self.started.emit(self.executor.name)
 
+    def is_finished(self):
+        """Check whether the current executor thread is active.
+        Returns a boolean."""
+        if self.executor is None:
+            return True
+        else:
+            return self.executor.is_alive()
+
     def _check_executor(self):
         """Check if the executor thread has finished.  If it has finished, emit
         the finished signal.  Returns nothing."""

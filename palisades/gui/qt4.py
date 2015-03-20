@@ -518,7 +518,7 @@ class ElementLabel(QtGui.QLabel, QtWidget):
         assert type(is_error) is BooleanType, ('is_error must be boolean, '
             '%s found instead' % type(is_error))
 
-        # For some reason, usin this sometimes prints an error message saying 
+        # For some reason, usin this sometimes prints an error message saying
         # "QPixmap: It is not safe to use pixmaps outside the GUI thread"
         # I'm leaving it alone for now, since the application seems to work ok
         # without it.
@@ -672,7 +672,7 @@ class CheckBox(QtGui.QCheckBox, QtWidget):
     def set_error(self, is_error):
         assert type(is_error) is BooleanType, ('is_error must be boolean, '
             '%s found instead' % type(is_error))
-        # For some reason, usin this sometimes prints an error message saying 
+        # For some reason, usin this sometimes prints an error message saying
         # "QPixmap: It is not safe to use pixmaps outside the GUI thread"
         # I'm leaving it alone for now, since the application seems to work ok
         # without it.
@@ -980,13 +980,14 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         #set window attributes
         self.setLayout(QtGui.QVBoxLayout())
         self.setWindowTitle(_("Running the model"))
-        self.resize(700, 400)
+        self.resize(700, 500)
         center_window(self)
         self.setModal(True)
 
         self.cancel = False
+        self.dir_open_requested = Communicator()
 
-        #create statusArea-related widgets for the window.        
+        #create statusArea-related widgets for the window.
         self.statusAreaLabel = QtGui.QLabel(_('Messages:'))
         self.statusArea = QtGui.QPlainTextEdit()
         self.statusArea.setReadOnly(True)
@@ -995,14 +996,19 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         #set the background color of the statusArea widget to be white.
         self.statusArea.setStyleSheet("QWidget { background-color: White }")
 
-        #create an indeterminate progress bar.  According to the Qt 
-        #documentation, an indeterminate progress bar is created when a 
+        #create an indeterminate progress bar.  According to the Qt
+        #documentation, an indeterminate progress bar is created when a
         #QProgressBar's minimum and maximum are both set to 0.
         self.progressBar = QtGui.QProgressBar()
         self.progressBar.setMinimum(0)
         self.progressBar.setMaximum(0)
         self.progressBar.setTextVisible(False)
+        progress_sizehint = self.progressBar.sizeHint()
+        if progress_sizehint.isValid():
+            self.progressBar.setMinimumSize(progress_sizehint)
 
+        self.openWorkspaceCB = QtGui.QCheckBox(_('Open workspace after success'))
+        self.openWorkspaceCB.stateChanged.connect(self._emit_workspace_cb)
         self.messageArea = MessageArea()
         self.messageArea.clear()
 
@@ -1011,7 +1017,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.layout().addWidget(self.statusArea)
         self.layout().addWidget(self.messageArea)
         self.layout().addWidget(self.progressBar)
-
+        self.layout().addWidget(self.openWorkspaceCB)
 
         self.backButton = QtGui.QPushButton(_(' Back'))
         self.backButton.setToolTip(_('Return to parameter list'))
@@ -1030,11 +1036,15 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         #connect the buttons to their callback functions.
         self.backButton.clicked.connect(self.closeWindow)
 
-        #add the buttonBox to the window.        
+        #add the buttonBox to the window.
         self.layout().addWidget(self.buttonBox)
 
         self.error_changed.connect(self.messageArea.set_error)
         self.message_added.connect(self._write)
+
+    def _emit_workspace_cb(self, event=None):
+        print 'emitting'
+        self.dir_open_requested.emit(self.workspace_open_requested())
 
     def start(self, event=None):
         self.statusArea.clear()
@@ -1084,6 +1094,13 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.error_changed.emit(exception_found)
         self.cursor.movePosition(QtGui.QTextCursor.End)
         self.statusArea.setTextCursor(self.cursor)
+
+
+    def workspace_open_requested(self):
+        """Returns a boolean of whether the user requested the workspace be opened
+        on model success.
+        """
+        return self.openWorkspaceCB.isChecked()
 
     def closeWindow(self):
         """Close the window and ensure the modelProcess has completed.

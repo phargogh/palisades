@@ -1145,6 +1145,35 @@ class Form():
             # when no lastrun file exists for this version
             LOGGER.warn('No lastrun file found at %s.  Skipping.',
                 lastrun_uri)
+
+    def get_target_workspace(self):
+        """Fetch the folder that should be opened for the user once the model
+        finishes execution.
+
+        There are multiple ways that this value is set (in order of priority):
+            1. If config['openDirOnComplete'] is set and formatted properly
+            2. There is an element with an args_id of 'workspace_dir'
+            3. If none of the above are satisfied, returns the user's home dir.
+        """
+        try:
+            # does openDirOnComplete exist?
+            user_dirconfig = self._ui.config['openDirOnComplete']
+            if user_dirconfig['type'] == 'element':
+                elem_id = user_dirconfig['id']
+                workspace_dir_elem = self._ui.element_index[elem_id]
+                return workspace_dir_elem.value()
+            else:
+                # assume type is folder, which should be set by the user
+                return user_dirconfig['path']
+        except KeyError:
+            # Check if an element with args_id workspace_dir exists
+            for elem_id, element in self.element_index.iteritems():
+                if element.config['args_id'] == 'workspace_dir':
+                    return element.value()
+
+        # Base case: return home dir.
+        return os.path.expandpath('~')
+
     @property
     def element_index(self):
         return dict((e.get_id('user'), e) for e in self.elements)

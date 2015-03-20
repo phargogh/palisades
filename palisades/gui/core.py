@@ -1,6 +1,9 @@
 import logging
 from types import *
 import time
+import platform
+import subprocess
+import os
 
 import palisades.gui
 from palisades.gui import qt4 as toolkit
@@ -20,6 +23,36 @@ def _print_obj_debug(obj):
     print 'class %20s' % str(obj)
     print 'classname %20s' % obj.__class__.__name__
     print ''
+
+def explore_folder(dirname):
+    """Open a folder in the user's operating system's native file explorer.
+
+    Returns nothing."""
+
+    LOGGER.debug("Opening dirname %s", dirname)
+    #Try opening up a file explorer to see the results.
+    try:
+        LOGGER.info('Opening file explorer to workspace directory')
+        if platform.system() == 'Windows':
+            # Try to launch a windows file explorer to visit the workspace
+            # directory now that the operation has finished executing.
+            LOGGER.info('Using windows explorer to view files')
+            subprocess.Popen('explorer "%s"' % os.path.normpath(dirname))
+        elif platform.system() == 'Darwin':
+            LOGGER.info('Using mac finder to view files')
+            subprocess.Popen('open %s' % os.path.normpath(dirname), shell=True)
+        else:
+            # Assume we're on linux.  No biggie, just use xdg-open to use the
+            # default file opening scheme.
+            LOGGER.info('Not on windows or mac, using default file browser')
+            subprocess.Popen(['xdg-open', dirname])
+    except OSError as error:
+        # OSError is thrown if the given file browser program (whether
+        # explorer or xdg-open) cannot be found.  No biggie, just pass.
+        LOGGER.error(error)
+        LOGGER.error('Cannot find default file browser. Platform: %s |' +
+            ' folder: %s', platform.system(), dirname)
+
 
 class ApplicationGUI(object):
     def __init__(self):
@@ -295,7 +328,7 @@ class LabeledPrimitiveGUI(PrimitiveGUI):
         self.element.set_hidden(not show)
 
         if not show:
-            # clear the error state of the label 
+            # clear the error state of the label
             self._label.set_error(False)
 
 class CheckBoxGUI(LabeledPrimitiveGUI):
@@ -455,6 +488,8 @@ class FormGUI():
         self.window.load_params_request.register(self._load_params)
         self.window.save_params_request.register(self._save_params)
         self.window.save_python_request.register(self._save_python)
+        self.messages_dialog.dir_open_requested.register(
+            self._open_workspace_if_finished)
 
     def find_input(self, id):
         """Recurse through all inputs in this form and locate the GUI object
@@ -524,8 +559,15 @@ class FormGUI():
                 self.element.runner.executor.exception)
         else:
             self.messages_dialog.finish(False)
+            if self.messages_dialog.workspace_open_requested():
+                explore_folder(self.element.get_target_workspace())
+
         self.element.runner.executor.log_manager.remove_log_handler(self.messages_handler)
 
+    def _open_workspace_if_finished(self, event=None):
+        if self.element.runner.is_finished():
+            if self.messages_dialog.workspace_open_requested():
+                explore_folder(self.element.get_target_workspace())
 
     def show(self):
         self.window.show()

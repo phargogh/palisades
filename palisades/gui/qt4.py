@@ -1052,7 +1052,6 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self._finished.connect(self._threadsafe_finish)
 
     def _emit_workspace(self, event=None):
-        print 'emit!'
         if not self.openWorkspaceCB.isVisible():
             print 'button visible'
             requested = True
@@ -1128,6 +1127,8 @@ class RealtimeMessagesDialog(QtGui.QDialog):
 
             returns nothing."""
 
+        self.openWorkspaceCB.setVisible(True)
+        self.openWorkspaceButton.setVisible(False)
         self.messageArea.clear()
         self.cancel = False
         self.done(0)

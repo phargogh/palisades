@@ -235,7 +235,7 @@ class PythonRunner():
         if self.executor is None:
             return True
         else:
-            return self.executor.is_alive()
+            return not self.executor.is_alive()
 
     def _check_executor(self):
         """Check if the executor thread has finished.  If it has finished, emit

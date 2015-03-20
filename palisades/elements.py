@@ -1160,7 +1160,7 @@ class Form():
             user_dirconfig = self._ui.config['openDirOnComplete']
             if user_dirconfig['type'] == 'element':
                 elem_id = user_dirconfig['id']
-                workspace_dir_elem = self._ui.element_index[elem_id]
+                workspace_dir_elem = self.element_index[elem_id]
                 return workspace_dir_elem.value()
             else:
                 # assume type is folder, which should be set by the user

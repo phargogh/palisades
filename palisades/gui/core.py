@@ -174,7 +174,7 @@ class GroupGUI(UIObject):
         except TypeError as error:
             # Happens when the element's GUI representation in registry is
             # None, meaning that there should not be a GUI display.
-            LOGGER.critical('Error when creating the view for a %s: %s',
+            LOGGER.exception('Error when creating the view for a %s: %s',
                 element_classname, error)
             new_element = None
 

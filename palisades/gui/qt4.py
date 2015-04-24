@@ -691,12 +691,13 @@ class CheckBox(QtGui.QCheckBox, QtWidget):
 class FileButton(Button):
     _icon = ICON_FOLDER
 
-    def __init__(self, dialog_type, text_widget):
+    def __init__(self, dialog_type, text_widget, dialog_title):
         Button.__init__(self)
 
         assert dialog_type in ['file', 'folder']
         self.dialog_type = dialog_type
         self.text_field = text_widget
+        self.dialog_title = dialog_title
 
         self.file_dialog = FileDialog()
 
@@ -711,10 +712,10 @@ class FileButton(Button):
             start_dir = os.path.dirname(unicode(self.text_field.text(), 'utf-8'))
 
         if self.dialog_type == 'file':
-            filename = self.file_dialog.get_file(self.dialog_type,
+            filename = self.file_dialog.get_file(self.dialog_title,
                 start_dir=start_dir)
         else:
-            filename = self.file_dialog.get_folder(self.dialog_type,
+            filename = self.file_dialog.get_folder(self.dialog_title,
                 start_dir=start_dir)
         if filename != '':
             self.file_selected.emit(filename)
@@ -742,7 +743,7 @@ class FileDialog(QtGui.QFileDialog):
             default_folder = os.path.expanduser(self.last_folder)
         else:
             default_folder = start_dir
-        dialog_title = _('Select ') + title
+        dialog_title = _('Select file: ') + title
 
         # Be able to open default folders with spaces in them
         default_folder = os.path.normpath(default_folder)
@@ -766,7 +767,7 @@ class FileDialog(QtGui.QFileDialog):
 
     def get_folder(self, title, start_dir=None):
         default_folder = os.path.expanduser(self.last_folder)
-        dialog_title = _('Select ') + title
+        dialog_title = _('Select folder: ') + title
 
         dirname = self.getExistingDirectory(self, dialog_title,
                 default_folder)

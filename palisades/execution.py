@@ -226,7 +226,11 @@ class PythonRunner():
         Returns nothing."""
 
         self.executor.start()
+        LOGGER.debug('Started executor thread')
+
         self._checker.start()
+        LOGGER.debug('Started checker thread')
+
         self.started.emit(self.executor.name)
 
     def is_finished(self):

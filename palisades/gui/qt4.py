@@ -572,9 +572,11 @@ class TextField(QtGui.QLineEdit, QtWidget):
 
     def focusInEvent(self, event=None):
         self._is_editing = True
+        QtGui.QLineEdit.focusInEvent(self, event)
 
     def focusOutEvent(self, event=None):
         self._is_editing = False
+        QtGui.QLineEdit.focusOutEvent(self, event)
 
     def set_error(self, is_error):
         """Change the styling of this textfield according to is_error.

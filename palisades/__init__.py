@@ -67,8 +67,11 @@ def locate_config(expected_uri):
 
     if found_json is None:
         raise IOError(
-            _('Configuration file %s could not be found in %s') % (json_uri,
-                possible_paths))
+            _(('Configuration file %(json_uri)s could not be found '
+                   'in %(possible_paths)s')) % {
+                "json_uri": json_uri,
+                "possible_paths": possible_paths
+            })
     print found_json
     return found_json
 

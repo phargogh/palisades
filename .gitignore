@@ -20,6 +20,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+test_env
 
 # Installer logs
 pip-log.txt
@@ -47,3 +48,7 @@ docs/_build/
 *.swp
 *.swo
 *.swn
+
+# IDE noise
+.idea/*
+.ropeproject/*

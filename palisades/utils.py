@@ -10,6 +10,7 @@ from types import DictType
 from types import StringType
 from types import UnicodeType
 import tempfile
+import locale
 
 import palisades.i18n.translation
 
@@ -90,6 +91,20 @@ class Communicator(object):
             # implementation details in this class.
             raise SignalNotFound(('Signal %s ' % str(target),
                 'was not found or was previously removed'))
+
+def decode_string(bytestring):
+    """
+    Decode the input bytestring to one of a couple of possible known encodings.
+
+    """
+
+    for codec in [locale.getpreferredencoding(), 'utf-8', 'latin-1', 'ascii']:
+        try:
+            return bytestring.decode(codec)
+        except UnicodeDecodeError:
+            pass
+    LOGGER.warn("Wasn't able to decode string %s" % bytestring)
+    return bytestring
 
 def apply_defaults(configuration, defaults, skip_duplicates=True,
         cleanup=False, old_defaults=None):

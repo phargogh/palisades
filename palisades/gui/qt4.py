@@ -15,6 +15,7 @@ Signal = QtCore.pyqtSignal
 
 import palisades
 import palisades.gui
+from palisades import utils
 from palisades.gui import ICON_BULB_BIG
 from palisades.gui import ICON_CHECKMARK
 from palisades.gui import ICON_CLOSE
@@ -558,7 +559,7 @@ class TextField(QtGui.QLineEdit, QtWidget):
         """Callback for the TextChanged signal.  Casts to a python string anc
         emits the value_changed communicator signal."""
         qstring_value = self.text()
-        new_value = unicode(qstring_value, 'utf-8')
+        new_value = utils.decode_string(qstring_value)
         self.value_changed.emit(new_value)
 
     def _editing_finished(self, value=None):
@@ -711,7 +712,8 @@ class FileButton(Button):
         if len(self.text_field.text()) == 0:
             start_dir = DATA['last_dir']
         else:
-            start_dir = os.path.dirname(unicode(self.text_field.text(), 'utf-8'))
+            field_text = utils.decode_string(self.text_field.text())
+            start_dir = os.path.dirname(field_text)
 
         if self.dialog_type == 'file':
             filename = self.file_dialog.get_file(self.dialog_title,
@@ -760,7 +762,7 @@ class FileDialog(QtGui.QFileDialog):
         else:
             filename, filter = self.getOpenFileNameAndFilter(
                 self, dialog_title, default_folder, initialFilter=self.last_filter)
-        filename = unicode(filename, 'utf-8')
+        filename = utils.decode_string(filename)
         self.last_filter = filter
         self.last_folder = os.path.dirname(filename)
         DATA['last_dir'] = self.last_folder
@@ -773,7 +775,7 @@ class FileDialog(QtGui.QFileDialog):
 
         dirname = self.getExistingDirectory(self, dialog_title,
                 default_folder)
-        dirname = unicode(dirname, 'utf-8')
+        dirname = utils.decode_string(dirname)
         self.last_folder = dirname
         DATA['last_dir'] = self.last_folder
 

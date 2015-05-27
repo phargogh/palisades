@@ -723,6 +723,8 @@ class File(Text):
             'be either a bytestring or a unicode string, '
             '%s found.' % type(new_value))
 
+        new_value = utils.decode_string(new_value)
+
         if new_value == '':
             # os.path.abspath('') is the same as os.getcwd(),
             # so I need to have a special case here.  If the user enters '.',

@@ -92,6 +92,7 @@ class Communicator(object):
             raise SignalNotFound(('Signal %s ' % str(target),
                 'was not found or was previously removed'))
 
+
 def decode_string(bytestring):
     """
     Decode the input bytestring to one of a couple of possible known encodings.

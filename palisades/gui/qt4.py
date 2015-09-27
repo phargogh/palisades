@@ -4,9 +4,21 @@ import threading
 from types import BooleanType
 import platform
 
+# Setting API here.  Required for Qtawesome to work
+import sip
+sip.setapi('QString', 2)
+sip.setapi('QVariant', 2)
+
+import PyQt4
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 Signal = QtCore.pyqtSignal
+
+# API Update for QString now that QString has been replaced by unicode()
+try:
+    QString = QtCore.QString
+except AttributeError:
+    QString = unicode
 
 #from PySide import QtGui
 #from PySide import QtCore
@@ -738,7 +750,7 @@ class FileDialog(QtGui.QFileDialog):
 
     def __init__(self):
         QtGui.QFileDialog.__init__(self)
-        self.last_filter = QtCore.QString()
+        self.last_filter = QString()
         self.last_folder = '~'
 
     def get_file(self, title, save=False, start_dir=None, default_file=None,
@@ -1090,7 +1102,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.message_added.emit(text)
 
     def _write(self, text):
-        self.statusArea.insertPlainText(QtCore.QString(text))
+        self.statusArea.insertPlainText(QString(text))
         self.cursor.movePosition(QtGui.QTextCursor.End)
         self.statusArea.setTextCursor(self.cursor)
 

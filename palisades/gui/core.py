@@ -5,6 +5,8 @@ import platform
 import subprocess
 import os
 
+os.environ['QT_API'] = 'PyQt4'
+
 import palisades.gui
 from palisades.gui import qt4 as toolkit
 from palisades.validation import V_ERROR

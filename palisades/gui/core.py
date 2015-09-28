@@ -379,7 +379,6 @@ class TextGUI(LabeledPrimitiveGUI):
         """Update the visual validation state.  The validation result is
         ignored if the element is optional and has no input.  Otherwise, the
         element's validation satate is observed."""
-        observe_validation = False
         if self.element.has_input():
             error_msg, error = error_state
             active = True
@@ -399,8 +398,8 @@ class TextGUI(LabeledPrimitiveGUI):
         if error_msg == None:
             error_msg = ''
 
-        self._validation_button.set_active(active)
         self._validation_button.set_error(error_msg, error)
+        self._validation_button.set_active(active)
         self._text_field.set_error(error == V_ERROR)
         self._label.set_error(error == V_ERROR)
 

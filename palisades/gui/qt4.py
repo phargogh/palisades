@@ -4,11 +4,6 @@ import threading
 from types import BooleanType
 import platform
 
-# Setting API here.  Required for Qtawesome to work
-import sip
-sip.setapi('QString', 2)
-sip.setapi('QVariant', 2)
-
 import PyQt4
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -571,7 +566,7 @@ class TextField(QtGui.QLineEdit, QtWidget):
         """Callback for the TextChanged signal.  Casts to a python string anc
         emits the value_changed communicator signal."""
         qstring_value = self.text()
-        new_value = utils.decode_string(qstring_value)
+        new_value = utils.decode_string(unicode(qstring_value))
         self.value_changed.emit(new_value)
 
     def _editing_finished(self, value=None):
@@ -724,7 +719,7 @@ class FileButton(Button):
         if len(self.text_field.text()) == 0:
             start_dir = DATA['last_dir']
         else:
-            field_text = utils.decode_string(self.text_field.text())
+            field_text = utils.decode_string(unicode(self.text_field.text()))
             start_dir = os.path.dirname(field_text)
 
         if self.dialog_type == 'file':
@@ -774,7 +769,7 @@ class FileDialog(QtGui.QFileDialog):
         else:
             filename, filter = self.getOpenFileNameAndFilter(
                 self, dialog_title, default_folder, initialFilter=self.last_filter)
-        filename = utils.decode_string(filename)
+        filename = utils.decode_string(unicode(filename))
         self.last_filter = filter
         self.last_folder = os.path.dirname(filename)
         DATA['last_dir'] = self.last_folder
@@ -787,7 +782,7 @@ class FileDialog(QtGui.QFileDialog):
 
         dirname = self.getExistingDirectory(self, dialog_title,
                 default_folder)
-        dirname = utils.decode_string(dirname)
+        dirname = utils.decode_string(unicode(dirname))
         self.last_folder = dirname
         DATA['last_dir'] = self.last_folder
 

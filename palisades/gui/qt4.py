@@ -997,6 +997,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         center_window(self)
         self.setModal(True)
 
+        self.is_executing = False
         self.cancel = False
         self.dir_open_requested = Communicator()
 
@@ -1063,6 +1064,10 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.message_added.connect(self._write)
         self._finished.connect(self._threadsafe_finish)
 
+        # Customize the window title bar to disable the close/minimize/mazimize
+        # buttons, just showing the title of the modal dialog.
+        self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
+
     def _emit_workspace(self, event=None):
         if not self.openWorkspaceCB.isVisible():
             print 'button visible'
@@ -1072,6 +1077,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.dir_open_requested.emit(requested)
 
     def start(self, event=None):
+        self.is_executing = True
         self.statusArea.clear()
         self.start_buttons()
 
@@ -1109,6 +1115,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
 
             returns nothing."""
 
+        self.is_executing = False
         self.stop_buttons()
         if exception_found:
             self.messageArea.setText((u'<b>%s</b> encountered: <em>%s</em> <br/>' +
@@ -1144,6 +1151,24 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.messageArea.clear()
         self.cancel = False
         self.done(0)
+
+    def reject(self):
+        """
+        Reject the dialog.  Triggered when the user presses ESC.  Overridden from Qt.
+        """
+        # Called when the user presses ESC.
+        if self.is_executing:
+            # Don't allow the window to close if we're executing.
+            return
+
+    def closeEvent(self, event):
+        """
+        Prevent the user from closing the modal dialog.
+
+        Qt event handler, overridden from QWidget.closeEvent.
+        """
+        if self.is_executing:
+            event.ignore()
 
 class FormWindow(QtWidget, QtGui.QWidget):
     """A Form is a window where you have a set of inputs that the user fills in

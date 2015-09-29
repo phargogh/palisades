@@ -886,6 +886,13 @@ class WarningDialog(InfoDialog):
         self.no_button.clicked.connect(self.reject)
         self.button_box.addButton(self.no_button, QtGui.QDialogButtonBox.RejectRole)
 
+    def show(self):
+        """
+        Overridden from QWidget.show().  exec_() returns a QDialog exit status
+        indicating the button the user selected (accepted or rejected).
+        """
+        return self.exec_()
+
 class ConfirmQuitDialog(WarningDialog):
     def __init__(self):
         WarningDialog.__init__(self)

@@ -475,6 +475,7 @@ class FormGUI():
         self.errors_dialog = toolkit.ErrorDialog()
         self.messages_dialog = toolkit.RealtimeMessagesDialog()
         self.file_dialog = toolkit.FileDialog()
+        self.workspace_confirm_dialog = toolkit.WarningDialog()
 
         self.messages_handler = logging.StreamHandler(self.messages_dialog)
         self.messages_formatter = logging.Formatter(self.LOG_FMT, self.DATE_FMT)
@@ -538,6 +539,27 @@ class FormGUI():
                 self.element.save_to_python(python_file)
 
     def submit(self, event=None):
+        """
+        Callback to check for errors and submit unless there are errors in the
+        form.
+        """
+        workspace_elem = self.element.find_element('workspace')
+        if os.path.exists(workspace_elem.value()):
+            files_in_workspace = os.path.join(workspace_elem.value(), '*')
+            if len(files_in_workspace) > 0:
+                self.workspace_confirm_dialog.set_title(_('Output Exists'))
+                self.workspace_confirm_dialog.body.setText(_(
+                    'The directory {workspace} exists and contains files '
+                    'that may be overwritten.  Continue?').format(
+                        workspace=os.path.basename(workspace_elem.value())))
+
+                # PROMPT FOR USER CONFIRMATION
+                # 1 indicates user acceptance.
+                # 0 indicates rejcection/cancellation.
+                if self.workspace_confirm_dialog.show() == 0:
+                    # Returning will prevent the form from being submitted.
+                    return
+
         try:
             self.element.submit()
             errors = []

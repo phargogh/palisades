@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-07 15:21-0500\n"
+"POT-Creation-Date: 2015-09-30 15:46-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,230 +17,263 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: palisades/__init__.py:34
+#: palisades/__init__.py:35
 msgid "Building core application"
 msgstr ""
 
-#: palisades/__init__.py:35
+#: palisades/__init__.py:36
 msgid "Building graphical interface"
 msgstr ""
 
-#: palisades/__init__.py:99
+#: palisades/__init__.py:101
 #, python-format
 msgid "Showing splash %s"
 msgstr ""
 
-#: palisades/__init__.py:105
+#: palisades/__init__.py:108
 #, python-format
 msgid "Setting runner class to %s"
 msgstr ""
 
-#: palisades/__init__.py:113
+#: palisades/__init__.py:116
 msgid "Starting application"
 msgstr ""
 
-#: palisades/elements.py:395 palisades/gui/core.py:387
+#: palisades/elements.py:397 palisades/gui/core.py:388
 msgid "Element is required"
 msgstr ""
 
-#: palisades/gui/core.py:74
+#: palisades/gui/core.py:76
 msgid "Starting ..."
 msgstr ""
 
-#: palisades/gui/core.py:98
+#: palisades/gui/core.py:100
 msgid "Ready!"
 msgstr ""
 
-#: palisades/gui/core.py:391
+#: palisades/gui/core.py:392
 msgid "(Element is optional)"
 msgstr ""
 
-#: palisades/gui/qt4.py:478
+#: palisades/gui/core.py:553
+msgid "Output Exists"
+msgstr ""
+
+#: palisades/gui/core.py:555
+#, python-brace-format
+msgid ""
+"The directory {workspace} exists and contains files that may be "
+"overwritten.  Continue?"
+msgstr ""
+
+#: palisades/gui/qt4.py:491
 msgid "WARNING:"
 msgstr ""
 
-#: palisades/gui/qt4.py:481
+#: palisades/gui/qt4.py:494
 msgid "ERROR:"
 msgstr ""
 
-#: palisades/gui/qt4.py:484
+#: palisades/gui/qt4.py:497
 msgid "Validation successful"
 msgstr ""
 
-#: palisades/gui/qt4.py:617
+#: palisades/gui/qt4.py:630
 msgid "Refresh"
 msgstr ""
 
-#: palisades/gui/qt4.py:622
+#: palisades/gui/qt4.py:635
 msgid "Reset to default"
 msgstr ""
 
-#: palisades/gui/qt4.py:729 palisades/gui/qt4.py:730
+#: palisades/gui/qt4.py:742 palisades/gui/qt4.py:743
 msgid "All files (* *.*)"
 msgstr ""
 
-#: palisades/gui/qt4.py:731
+#: palisades/gui/qt4.py:744
 msgid "Comma separated value file (*.csv *.CSV)"
 msgstr ""
 
-#: palisades/gui/qt4.py:732
+#: palisades/gui/qt4.py:745
 msgid "[GDAL] Arc/Info Binary Grid (hdr.adf HDR.ADF hdr.ADF)"
 msgstr ""
 
-#: palisades/gui/qt4.py:733
+#: palisades/gui/qt4.py:746
 msgid "[GDAL] Arc/Info ASCII Grid (*.asc *.ASC)"
 msgstr ""
 
-#: palisades/gui/qt4.py:734
+#: palisades/gui/qt4.py:747
 msgid "[GDAL] GeoTiff (*.tif *.tiff *.TIF *.TIFF)"
 msgstr ""
 
-#: palisades/gui/qt4.py:735
+#: palisades/gui/qt4.py:748
 msgid "[OGR] ESRI Shapefiles (*.shp *.SHP)"
 msgstr ""
 
-#: palisades/gui/qt4.py:736
+#: palisades/gui/qt4.py:749
 msgid "[DBF] dBase legacy file (*dbf *.DBF)"
 msgstr ""
 
-#: palisades/gui/qt4.py:750
+#: palisades/gui/qt4.py:763
 msgid "Select file: "
 msgstr ""
 
-#: palisades/gui/qt4.py:774
+#: palisades/gui/qt4.py:787
 msgid "Select folder: "
 msgstr ""
 
-#: palisades/gui/qt4.py:812
+#: palisades/gui/qt4.py:825
 msgid "Errors exist!"
 msgstr ""
 
-#: palisades/gui/qt4.py:820 palisades/gui/qt4.py:895
+#: palisades/gui/qt4.py:833 palisades/gui/qt4.py:915
 msgid "Whoops!"
 msgstr ""
 
-#: palisades/gui/qt4.py:824
+#: palisades/gui/qt4.py:837
 msgid "OK"
 msgstr ""
 
-#: palisades/gui/qt4.py:873
+#: palisades/gui/qt4.py:886
 msgid "Warning..."
 msgstr ""
 
-#: palisades/gui/qt4.py:875
+#: palisades/gui/qt4.py:888
 msgid ""
 "Some inputs cannot be validated and may cause this program to fail.  "
 "Continue anyways?"
 msgstr ""
 
-#: palisades/gui/qt4.py:877
+#: palisades/gui/qt4.py:890
 msgid "Back"
 msgstr ""
 
-#: palisades/gui/qt4.py:885
+#: palisades/gui/qt4.py:905
 msgid "Are you sure you want to quit?"
 msgstr ""
 
-#: palisades/gui/qt4.py:886
+#: palisades/gui/qt4.py:906
 msgid "Really quit?"
 msgstr ""
 
-#: palisades/gui/qt4.py:888
+#: palisades/gui/qt4.py:908
 msgid "You will lose any changes to your parameter fields."
 msgstr ""
 
-#: palisades/gui/qt4.py:889
+#: palisades/gui/qt4.py:909
 msgid "Quit"
 msgstr ""
 
-#: palisades/gui/qt4.py:905
+#: palisades/gui/qt4.py:925
 msgid "is 1 error"
 msgstr ""
 
-#: palisades/gui/qt4.py:907
+#: palisades/gui/qt4.py:927
 #, python-format
 msgid "are %s errors"
 msgstr ""
 
-#: palisades/gui/qt4.py:909
+#: palisades/gui/qt4.py:929
 #, python-format
 msgid "There %s that must be resolved"
 msgstr ""
 
-#: palisades/gui/qt4.py:910
+#: palisades/gui/qt4.py:930
 #, python-format
 msgid " before this tool can be run:%s"
 msgstr ""
 
-#: palisades/gui/qt4.py:925
+#: palisades/gui/qt4.py:946 palisades/gui/qt4.py:1407
+msgid "Select language"
+msgstr ""
+
+#: palisades/gui/qt4.py:988
+msgid "Default"
+msgstr ""
+
+#: palisades/gui/qt4.py:992
+msgid "Current"
+msgstr ""
+
+#: palisades/gui/qt4.py:1034
 #, python-format
 msgid "Tab %s"
 msgstr ""
 
-#: palisades/gui/qt4.py:988
+#: palisades/gui/qt4.py:1097
 msgid "Running the model"
 msgstr ""
 
-#: palisades/gui/qt4.py:997
+#: palisades/gui/qt4.py:1107
 msgid "Messages:"
 msgstr ""
 
-#: palisades/gui/qt4.py:1016
+#: palisades/gui/qt4.py:1126
 msgid "Open workspace after success"
 msgstr ""
 
-#: palisades/gui/qt4.py:1018
+#: palisades/gui/qt4.py:1128
 msgid "Open workspace"
 msgstr ""
 
-#: palisades/gui/qt4.py:1035
+#: palisades/gui/qt4.py:1145
 msgid " Back"
 msgstr ""
 
-#: palisades/gui/qt4.py:1036
+#: palisades/gui/qt4.py:1146
 msgid "Return to parameter list"
 msgstr ""
 
-#: palisades/gui/qt4.py:1071
+#: palisades/gui/qt4.py:1186
 msgid "Initializing...\n"
 msgstr ""
 
-#: palisades/gui/qt4.py:1108
+#: palisades/gui/qt4.py:1224
 msgid "See the log for details."
 msgstr ""
 
-#: palisades/gui/qt4.py:1111
+#: palisades/gui/qt4.py:1227
 msgid "Model completed successfully."
 msgstr ""
 
-#: palisades/gui/qt4.py:1164
+#: palisades/gui/qt4.py:1300
 msgid "&File"
 msgstr ""
 
-#: palisades/gui/qt4.py:1165
+#: palisades/gui/qt4.py:1301
 msgid "&Load parameters from file ..."
 msgstr ""
 
-#: palisades/gui/qt4.py:1167
+#: palisades/gui/qt4.py:1303
 msgid "&Save parameters ..."
 msgstr ""
 
-#: palisades/gui/qt4.py:1170
+#: palisades/gui/qt4.py:1306
+msgid "Set &Language ..."
+msgstr ""
+
+#: palisades/gui/qt4.py:1308
 msgid "Exit"
 msgstr ""
 
-#: palisades/gui/qt4.py:1175
+#: palisades/gui/qt4.py:1313
 msgid "&Development"
 msgstr ""
 
-#: palisades/gui/qt4.py:1176
+#: palisades/gui/qt4.py:1314
 msgid "Save to &python script..."
 msgstr ""
 
-#: palisades/gui/qt4.py:1207
+#: palisades/gui/qt4.py:1346
 msgid " Run"
 msgstr ""
 
-#: palisades/gui/qt4.py:1210
+#: palisades/gui/qt4.py:1349
 msgid " Quit"
+msgstr ""
+
+#: palisades/gui/qt4.py:1405
+msgid ""
+"Select a language.  Changing the application language will restart the "
+"program."
 msgstr ""

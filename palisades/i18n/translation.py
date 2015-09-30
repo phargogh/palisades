@@ -10,9 +10,10 @@ import palisades.utils
 TRANS_KEYS = ['label', 'modelName', 'helpText']
 
 # assume per-attribute translation
-def translate_config(config, lang_code, extra_keys=[]):
-    """Translate a dictionary containing element configuration options.  Any
-        keys that are not translated are left untouched.
+def translate_config(config, lang_code, extra_keys=[], allowed_translations=[]):
+    """Translate a dictionary containing element configuration options.
+
+        Any keys that are not translated are left untouched.
 
         config - a python dictionary contained configuration options
         lang_code - a python language code matching the language to translate
@@ -20,6 +21,8 @@ def translate_config(config, lang_code, extra_keys=[]):
             configuration.  See below for example configuration.
         extra_keys=[] - keys to be translated.  Default keys translated are:
             ['label', 'modelName', 'helpText']
+        allowed_translations=[] - initialize the allowed translations for
+            this run through the configuration dictionary.
 
         ========================
         A simple configuration dictionary such as:
@@ -113,6 +116,9 @@ def translate_config(config, lang_code, extra_keys=[]):
             # if it's not a language dictionary, we just leave the value alone,
             # whatever it may be.
             if type(config_value) is DictType:
+                # track the translations available so we can check which
+                # languages are complete.
+                allowed_translations.append(config_value.keys())
                 translated_string = config_value[lang_code]
             else:
                 translated_string = config_value
@@ -126,17 +132,25 @@ def translate_config(config, lang_code, extra_keys=[]):
     if 'elements' in config:
         translated_elements_list = []
         for element_config in config['elements']:
-            translated_element_config = translate_config(element_config,
-                lang_code, extra_keys)
+            local_translations, translated_element_config = translate_config(
+                element_config, lang_code, extra_keys, allowed_translations)
+            allowed_translations = local_translations
             translated_elements_list.append(translated_element_config)
 
         translated_config['elements'] = translated_elements_list
 
-    return translated_config
+    if len(allowed_translations) > 0:
+        complete_translations = [tuple(reduce(lambda x, y: x.intersection(y),
+                                         [set(z) for z in allowed_translations]))]
+    else:
+        complete_translations = []
+
+    return complete_translations, translated_config
 
 def translate_json(json_uri, lang_code):
     user_config = palisades.utils.load_json(json_uri)
-    return translate_config(user_config, lang_code)
+    translations, translated_config = translate_config(user_config, lang_code)
+    return list(translations[0]), translated_config
 
 def extract_languages(config):
     """Returns a list of language codes found in this configuration object."""

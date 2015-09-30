@@ -953,12 +953,13 @@ class LanguageSelectionDialog(InfoDialog):
         self.set_title(_('Select language'))
         self.set_icon(ICON_BULB_BIG)
         self._language = None
+        self._rejected = False
 
         # Add the dropdown menu and populate it with language codes
         self.lang_dropdown = QtGui.QComboBox()
         self.lang_dropdown.currentIndexChanged.connect(self._lang_changed)
 
-        self.set_allowed_langs(palisades.i18n.language.available_langs())
+        self.set_allowed_langs(palisades.i18n.available_langs())
 
         # Make a decent guess about the user's current language.
         # Use the first two characters from the user's default locale.
@@ -976,8 +977,17 @@ class LanguageSelectionDialog(InfoDialog):
     def set_allowed_langs(self, lang_list):
         self.languages_indices = {}
         self.lang_dropdown.clear()
+        os_lang = palisades.i18n.os_default_lang()
+        current_lang = palisades.i18n.current_lang()
         for lang_index, language in enumerate(lang_list):
-            self.lang_dropdown.addItem(language)
+            language_string = language
+           # if language_string == os_lang:
+           #     language_string  = "%s (%s)" % (language_string, _('Default'))
+
+           # if language_string == current_lang:
+           #     language_string = "%s [%s]" % (language_string, _('Current'))
+
+            self.lang_dropdown.addItem(language_string)
             self.languages_indices[language] = lang_index
 
     def set_default_lang(self, lang):
@@ -986,6 +996,13 @@ class LanguageSelectionDialog(InfoDialog):
 
     def _lang_changed(self, event=None):
         self._language = unicode(self.lang_dropdown.currentText(), 'utf-8')
+
+    def reject(self):
+        InfoDialog.reject(self)
+        self._rejected = True
+
+    def was_rejected(self):
+        return self._rejected
 
     def language(self):
         return self._language
@@ -1246,6 +1263,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
     def __init__(self, input_pane, window_title=None):
         QtWidget.__init__(self)
         QtGui.QWidget.__init__(self)
+        self.langs = palisades.i18n.available_langs()
 
         # The form has two elements arranged vertically: the form window (which
         # may eventually need to be scrollable) and the buttonbox.
@@ -1258,6 +1276,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
         # set the window title
         if window_title is None:
             window_title = ''
+        print 'WINDOW TITLE ' + str(window_title)
         self.setWindowTitle(window_title)
 
         self.menu_bar = QtGui.QMenuBar()
@@ -1269,11 +1288,11 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.save_file_action = self.file_menu.addAction(_('&Save parameters ...'))
         self.save_file_action.setShortcut(QtGui.QKeySequence("Ctrl+S"))
 #        self.remove_lastrun = self.file_menu.addAction('&Clear cached runs ...')
+        self.set_lang_action = self.file_menu.addAction(_('Set &Language ...'))
+        self.set_lang_action.setShortcut(QtGui.QKeySequence("Ctrl+L"))
         self.exit_action = self.file_menu.addAction(_('Exit'))
         self.exit_action.setShortcut(QtGui.QKeySequence("Ctrl+Q"))
 #        self.about_app_action = self.file_menu.addAction('About %s' % window_title)
-        self.set_lang_action = self.file_menu.addAction(_('Set &Language ...'))
-        self.set_lang_action.setShortcut(QtGui.QKeySequence("Ctrl+L"))
         self.menu_bar.addMenu(self.file_menu)
 
         self.dev_menu = QtGui.QMenu(_('&Development'))
@@ -1353,6 +1372,10 @@ class FormWindow(QtWidget, QtGui.QWidget):
 
         self.resize(width, height)
 
+    def set_langs(self, langs):
+        """Set a list of allowed language codes to self.langs."""
+        self.langs = langs
+
     def set_language_request(self, event=None):
         try:
             current_language_pref = utils.get_user_language()
@@ -1366,24 +1389,28 @@ class FormWindow(QtWidget, QtGui.QWidget):
         lang_dialog.body.setText(_(
             'Select a language.  Changing the application language will '
             'restart the program.'))
+        lang_dialog.setWindowTitle(_('Select language'))
+        lang_dialog.resize(400, 250)
+
+        lang_dialog.set_allowed_langs(self.langs)
 
         # set the distribution default from dist_config.
         lang_dialog.set_default_lang(current_language_pref)
 
         lang_dialog.show()
         lang_dialog.exec_()
-        new_language_pref = lang_dialog.language()
+        if not lang_dialog.was_rejected():
+            new_language_pref = lang_dialog.language()
+            utils.save_user_language(new_language_pref)
 
-        utils.save_user_language(new_language_pref)
+            if ((current_language_pref != new_language_pref)
+                    or not user_defined_language):
 
-        if ((current_language_pref != new_language_pref)
-                or not user_defined_language):
-
-            # Need to add an extra parameter here for some reason.
-            # Don't really know why.  If I leave it out, the new python
-            # process appears to ignore the first sys.argv argument (the python
-            # script).
-            os.execv(sys.executable, [''] + sys.argv)
+                # Need to add an extra parameter here for some reason.
+                # Don't really know why.  If I leave it out, the new python
+                # process appears to ignore the first sys.argv argument (the python
+                # script).
+                os.execv(sys.executable, [''] + sys.argv)
 
     def _update_scroll_border(self, min, max):
         if min == 0 and max == 0:

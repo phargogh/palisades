@@ -469,8 +469,11 @@ class FormGUI():
     def __init__(self, core_element):
         self.element = core_element
 
+        self.langs = self.element.langs
+
         self.group = GroupGUI(self.element._ui)
         self.window = toolkit.FormWindow(self.group.widgets, self.element.title())
+        self.window.set_langs(self.langs)
         self.quit_confirm = toolkit.ConfirmQuitDialog()
         self.errors_dialog = toolkit.ErrorDialog()
         self.messages_dialog = toolkit.RealtimeMessagesDialog()

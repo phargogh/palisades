@@ -54,8 +54,10 @@ class Application(object):
         # if GUI is None, have to visual display.
         # install the specified internal language.
         palisades.i18n.language.set(lang_code)
-        configuration = translation.translate_json(config_uri, lang_code)
+        allowed_langs, configuration = translation.translate_json(config_uri, lang_code)
+        self.config_langs = allowed_langs
         self._window = Form(configuration)
+        self._window.set_langs(allowed_langs)
 
 class Element(object):
     """Element contains the core logic and interactivity required by all
@@ -1131,6 +1133,7 @@ class Form():
         self.runner = None
         self._runner_class = execution.PythonRunner
         self._unknown_signals = []  # track signals we might setup later
+        self.langs = []  # initially, available langs are unknown.
 
         self.setup_communication(self.elements)
 
@@ -1147,6 +1150,10 @@ class Form():
             # when no lastrun file exists for this version
             LOGGER.warn('No lastrun file found at %s.  Skipping.',
                 lastrun_uri)
+
+    def set_langs(self, langs):
+        """Set the available languages of the form."""
+        self.langs = langs
 
     def get_target_workspace(self):
         """Fetch the folder that should be opened for the user once the model

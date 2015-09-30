@@ -87,6 +87,10 @@ class Language(object):
 
 language = Language()
 
+def available_langs():
+    """Return a sorted list of 2-character available language codes"""
+    return sorted(language.available_langs.keys())
+
 def current_lang():
     """Return the string language code of the currently-active language."""
     return language.info()['language']

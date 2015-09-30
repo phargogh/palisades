@@ -104,20 +104,6 @@ class Application(object):
         self.app.processEvents()
 
     def execute(self):
-        try:
-            user_lang_choice = utils.get_user_language()
-        except RuntimeError:
-            # IOError when the file doesn't exist yet.
-            # ValueError when a JSON object can't be decoded
-            lang_select_dialog = LanguageSelectionDialog()
-            lang_select_dialog.show()
-            user_lang_choice = lang_select_dialog.language()
-
-            utils.save_user_language(user_lang_choice)
-
-        # Set the UI's language from the user choice.
-        palisades.i18n.language.set(user_lang_choice)
-
         self.app.exec_()
 
 class SplashScreen(QtGui.QSplashScreen):
@@ -947,6 +933,12 @@ class ErrorDialog(InfoDialog):
         InfoDialog.showEvent(self, event)
 
 class LanguageSelectionDialog(InfoDialog):
+    known_languages = {
+        'en': 'English',
+        'es': 'Español',
+        'de': 'Deutsch',
+    }
+
     def __init__(self):
         InfoDialog.__init__(self)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
@@ -981,11 +973,22 @@ class LanguageSelectionDialog(InfoDialog):
         current_lang = palisades.i18n.current_lang()
         for lang_index, language in enumerate(lang_list):
             language_string = language
-           # if language_string == os_lang:
-           #     language_string  = "%s (%s)" % (language_string, _('Default'))
 
-           # if language_string == current_lang:
-           #     language_string = "%s [%s]" % (language_string, _('Current'))
+            # Display the nicely-formatted language string.
+            try:
+                nice_language_name = ' (%s)' % self.known_languages[language]
+            except KeyError:
+                nice_language_name = ''
+            language_string += nice_language_name.decode('utf-8')
+
+            # Note the default language string if it matches the current
+            # language.
+            if language_string == os_lang:
+                language_string  = "%s (%s)" % (language_string, _('Default'))
+
+            # Note the currently-selected language string.
+            if language_string == current_lang:
+                language_string = "%s [%s]" % (language_string, _('Current'))
 
             self.lang_dropdown.addItem(language_string)
             self.languages_indices[language] = lang_index
@@ -995,7 +998,18 @@ class LanguageSelectionDialog(InfoDialog):
         self.lang_dropdown.setCurrentIndex(lang_index)
 
     def _lang_changed(self, event=None):
-        self._language = unicode(self.lang_dropdown.currentText(), 'utf-8')
+        text_string = unicode(self.lang_dropdown.currentText())
+        #print '"%s"' % text_string
+        #print text_string.split()
+        if self.lang_dropdown.count() > 0:
+            lang_code = text_string.split()[0]
+        else:
+            # this slot is sometimes called when there are no options to pick
+            # from.
+            lang_code = None
+
+       # print lang_code
+        self._language = lang_code
 
     def reject(self):
         InfoDialog.reject(self)
@@ -1399,10 +1413,13 @@ class FormWindow(QtWidget, QtGui.QWidget):
 
         lang_dialog.show()
         lang_dialog.exec_()
+
+        # Don't set the language unless the OK button was pressed.
         if not lang_dialog.was_rejected():
             new_language_pref = lang_dialog.language()
             utils.save_user_language(new_language_pref)
 
+            # Don't restart the application unless the language changed.
             if ((current_language_pref != new_language_pref)
                     or not user_defined_language):
 

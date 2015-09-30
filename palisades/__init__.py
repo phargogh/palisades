@@ -6,6 +6,7 @@ import locale
 import json
 
 import palisades.i18n
+from palisades import utils
 _ = palisades.i18n.language.ugettext
 
 # The __version__ attribute MUST be set to 'dev'.  It is changed automatically
@@ -95,10 +96,12 @@ def launch(json_uri, splash_img=None, runner=None):
     found_json = locate_config(json_uri)
 
     gui_app = palisades.gui.get_application()
+
     if splash_img is not None:
         print _('Showing splash %s') % splash_img
         gui_app.show_splash(splash_img)
         gui_app.set_splash_message(SPLASH_MSG_CORE_APP)
+
     ui = elements.Application(found_json, locate_dist_config()['lang'])
 
     if runner is not None:
@@ -149,9 +152,10 @@ def locate_dist_config():
     # if we can't find the distribution JSON configuration file, make
     # reasonable assumptions about default values and return the dictionary.
     if config is None:
+        lang_to_use = palisades.i18n.os_default_lang()
         config = {
-            'lang': palisades.i18n.os_default_lang(),
+            'lang': lang_to_use,
         }
-        print "Defaulting to OS language: %s" % config['lang']
+        print "Defaulting to OS language: %s" % lang_to_use
 
     return config

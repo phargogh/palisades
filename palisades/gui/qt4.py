@@ -1,8 +1,12 @@
+import sys
 import os
 import traceback
 import threading
 from types import BooleanType
 import platform
+import json
+import logging
+import locale
 
 import PyQt4
 from PyQt4 import QtGui
@@ -46,6 +50,7 @@ LAYOUTS = {
     palisades.LAYOUT_GRID: QtGui.QGridLayout,
 }
 ICONS = os.path.join(os.path.dirname(__file__), 'icons')
+LOGGER = logging.getLogger('palisades.gui.qt4')
 
 class ThreadSafeDataManager(object):
     """A thread-safe data management object for saving data across the multiple
@@ -99,6 +104,20 @@ class Application(object):
         self.app.processEvents()
 
     def execute(self):
+        try:
+            user_lang_choice = utils.get_user_language()
+        except RuntimeError:
+            # IOError when the file doesn't exist yet.
+            # ValueError when a JSON object can't be decoded
+            lang_select_dialog = LanguageSelectionDialog()
+            lang_select_dialog.show()
+            user_lang_choice = lang_select_dialog.language()
+
+            utils.save_user_language(user_lang_choice)
+
+        # Set the UI's language from the user choice.
+        palisades.i18n.language.set(user_lang_choice)
+
         self.app.exec_()
 
 class SplashScreen(QtGui.QSplashScreen):
@@ -837,11 +856,11 @@ class InfoDialog(QtGui.QDialog):
         error_widget.layout().addWidget(self.icon)
         self.layout().addWidget(error_widget)
 
-        body_widget = QtGui.QWidget()
-        error_widget.layout().addWidget(body_widget)
-        body_widget.setLayout(QtGui.QVBoxLayout())
-        body_widget.layout().addWidget(self.title)
-        body_widget.layout().addWidget(self.body)
+        self.body_widget = QtGui.QWidget()
+        error_widget.layout().addWidget(self.body_widget)
+        self.body_widget.setLayout(QtGui.QVBoxLayout())
+        self.body_widget.layout().addWidget(self.title)
+        self.body_widget.layout().addWidget(self.body)
 
         self.button_box = QtGui.QDialogButtonBox()
         self.button_box.addButton(self.ok_button, QtGui.QDialogButtonBox.AcceptRole)
@@ -926,6 +945,50 @@ class ErrorDialog(InfoDialog):
         if self.body.sizeHint().isValid():
             self.body.setMinimumSize(self.body.sizeHint())
         InfoDialog.showEvent(self, event)
+
+class LanguageSelectionDialog(InfoDialog):
+    def __init__(self):
+        InfoDialog.__init__(self)
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.set_title(_('Select language'))
+        self.set_icon(ICON_BULB_BIG)
+        self._language = None
+
+        # Add the dropdown menu and populate it with language codes
+        self.lang_dropdown = QtGui.QComboBox()
+        self.lang_dropdown.currentIndexChanged.connect(self._lang_changed)
+
+        self.set_allowed_langs(palisades.i18n.language.available_langs())
+
+        # Make a decent guess about the user's current language.
+        # Use the first two characters from the user's default locale.
+        os_lang = palisades.i18n.os_default_lang()
+        try:
+            self.set_default_lang(os_lang)
+        except KeyError:
+            # default to english if we don't have the user's OS language on
+            # file.
+            self.set_default_lang('en')
+
+        self.body_widget.layout().addWidget(self.lang_dropdown)
+        self.setModal(True)
+
+    def set_allowed_langs(self, lang_list):
+        self.languages_indices = {}
+        self.lang_dropdown.clear()
+        for lang_index, language in enumerate(lang_list):
+            self.lang_dropdown.addItem(language)
+            self.languages_indices[language] = lang_index
+
+    def set_default_lang(self, lang):
+        lang_index = self.languages_indices[lang]
+        self.lang_dropdown.setCurrentIndex(lang_index)
+
+    def _lang_changed(self, event=None):
+        self._language = unicode(self.lang_dropdown.currentText(), 'utf-8')
+
+    def language(self):
+        return self._language
 
 class TabGroup(QtGui.QTabWidget, Group):
     def __init__(self):
@@ -1209,6 +1272,8 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.exit_action = self.file_menu.addAction(_('Exit'))
         self.exit_action.setShortcut(QtGui.QKeySequence("Ctrl+Q"))
 #        self.about_app_action = self.file_menu.addAction('About %s' % window_title)
+        self.set_lang_action = self.file_menu.addAction(_('Set &Language ...'))
+        self.set_lang_action.setShortcut(QtGui.QKeySequence("Ctrl+L"))
         self.menu_bar.addMenu(self.file_menu)
 
         self.dev_menu = QtGui.QMenu(_('&Development'))
@@ -1224,6 +1289,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.exit_action.triggered.connect(self._quit_pressed)
         self.save_file_action.triggered.connect(self.save_params_request.emit)
         self.load_file_action.triggered.connect(self.load_params_request.emit)
+        self.set_lang_action.triggered.connect(self.set_language_request)
 #        self.remove_lastrun.triggered.connect(self.ui.remove_lastrun)
         self.save_to_python.triggered.connect(self.save_python_request.emit)
 #        self.save_to_json.triggered.connect(self.ui.save_to_json)
@@ -1286,6 +1352,38 @@ class FormWindow(QtWidget, QtGui.QWidget):
             height = min_height
 
         self.resize(width, height)
+
+    def set_language_request(self, event=None):
+        try:
+            current_language_pref = utils.get_user_language()
+            user_defined_language = True
+        except RuntimeError:
+            current_language_pref = palisades.i18n.current_lang()
+            user_defined_language = False
+
+        # When the user has not set a language or we can't read the config.
+        lang_dialog = LanguageSelectionDialog()
+        lang_dialog.body.setText(_(
+            'Select a language.  Changing the application language will '
+            'restart the program.'))
+
+        # set the distribution default from dist_config.
+        lang_dialog.set_default_lang(current_language_pref)
+
+        lang_dialog.show()
+        lang_dialog.exec_()
+        new_language_pref = lang_dialog.language()
+
+        utils.save_user_language(new_language_pref)
+
+        if ((current_language_pref != new_language_pref)
+                or not user_defined_language):
+
+            # Need to add an extra parameter here for some reason.
+            # Don't really know why.  If I leave it out, the new python
+            # process appears to ignore the first sys.argv argument (the python
+            # script).
+            os.execv(sys.executable, [''] + sys.argv)
 
     def _update_scroll_border(self, min, max):
         if min == 0 and max == 0:

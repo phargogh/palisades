@@ -455,3 +455,40 @@ def setup_signal(signal_config, element_index):
 
 
     return (signal_config['signal_name'], target_func)
+
+
+def settings_folder():
+    """Return the file location of the user's settings folder.  This folder
+    location is OS-dependent."""
+    if platform.system() == 'Windows':
+        config_folder = os.path.join('~', 'AppData', 'Local', 'NatCap')
+    else:
+        config_folder = os.path.join('~', '.natcap')
+
+    expanded_path = os.path.expanduser(config_folder)
+    return expanded_path
+
+
+def get_user_language():
+    """Fetch the user's preferred language, if the user has defined one.
+
+    If the user has not configured a language or the configuration cannot be
+    parsed, RuntimeError is raised.
+    """
+    config_file_location = os.path.join(settings_folder(),
+                                        'user_config.json')
+    try:
+        return json.load(
+            open(config_file_location))['preferred_lang']
+    except (IOError, ValueError):
+        # IOError when the file doesn't exist yet.
+        # ValueError when a JSON object can't be decoded
+        raise RuntimeError('User language could not be read from config.')
+
+def save_user_language(user_lang_choice):
+    """Save the user's language selection to the config file."""
+    config_file_location = os.path.join(settings_folder(),
+                                        'user_config.json')
+
+    json.dump({'preferred_lang': user_lang_choice},
+                open(config_file_location, 'w'))

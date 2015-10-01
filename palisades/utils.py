@@ -102,6 +102,8 @@ def decode_string(bytestring):
     for codec in [locale.getpreferredencoding(), 'utf-8', 'latin-1', 'ascii']:
         try:
             return bytestring.decode(codec)
+        except UnicodeEncodeError:
+            return bytestring.encode(codec)
         except UnicodeDecodeError:
             pass
     LOGGER.warn("Wasn't able to decode string %s" % bytestring)

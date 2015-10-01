@@ -669,7 +669,15 @@ class Text(LabeledPrimitive):
 
         Returns nothing."""
 
-        cast_value = unicode(new_value).decode('utf-8')
+        if isinstance(new_value, float) or isinstance(new_value, int):
+            cast_value = str(new_value)
+        else:
+            try:
+                cast_value = unicode(new_value, 'utf-8')
+            except TypeError:
+                # For when new_value is already unicode.
+                cast_value = new_value
+
         LabeledPrimitive.set_value(self, cast_value)
 
     def has_input(self):

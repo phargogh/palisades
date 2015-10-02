@@ -49,7 +49,7 @@ msgstr "Comenzando ..."
 
 #: palisades/gui/core.py:100
 msgid "Ready!"
-msgstr "¡Listo!"
+msgstr "Listo"
 
 #: palisades/gui/core.py:392
 msgid "(Element is optional)"

@@ -1428,7 +1428,11 @@ class FormWindow(QtWidget, QtGui.QWidget):
                 # Don't really know why.  If I leave it out, the new python
                 # process appears to ignore the first sys.argv argument (the python
                 # script).
-                os.execv(sys.executable, [''] + sys.argv)
+                new_pid = os.spawnv(os.P_NOWAIT, sys.executable, [''] + sys.argv)
+                LOGGER.info('Spawning new process with PID %s', new_pid)
+                qt_app = QtGui.QApplication.instance()
+                LOGGER.info('Restarting application')
+                qt_app.quit()  # exit the Qt application.
 
     def _update_scroll_border(self, min, max):
         if min == 0 and max == 0:

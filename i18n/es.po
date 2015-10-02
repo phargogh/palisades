@@ -190,9 +190,8 @@ msgid " before this tool can be run:%s"
 msgstr " que esta herramienta se puede ejecutar:%s"
 
 #: palisades/gui/qt4.py:946 palisades/gui/qt4.py:1407
-#, fuzzy
 msgid "Select language"
-msgstr "Seleccionar "
+msgstr "Seleccione idioma"
 
 #: palisades/gui/qt4.py:988
 msgid "Default"

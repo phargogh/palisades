@@ -1,13 +1,11 @@
 # coding=UTF-8
 import sys
 import os
-import traceback
 import threading
 from types import BooleanType
 import platform
-import json
 import logging
-import locale
+import subprocess
 
 import PyQt4
 from PyQt4 import QtGui
@@ -1428,8 +1426,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
                 # Don't really know why.  If I leave it out, the new python
                 # process appears to ignore the first sys.argv argument (the python
                 # script).
-                new_pid = os.spawnv(os.P_NOWAIT, sys.executable, [''] + sys.argv)
-                LOGGER.info('Spawning new process with PID %s', new_pid)
+                subprocess.Popen([sys.executable] + sys.argv)
                 qt_app = QtGui.QApplication.instance()
                 LOGGER.info('Restarting application')
                 qt_app.quit()  # exit the Qt application.

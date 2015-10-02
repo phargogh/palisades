@@ -1422,11 +1422,14 @@ class FormWindow(QtWidget, QtGui.QWidget):
             if ((current_language_pref != new_language_pref)
                     or not user_defined_language):
 
-                # Need to add an extra parameter here for some reason.
-                # Don't really know why.  If I leave it out, the new python
-                # process appears to ignore the first sys.argv argument (the python
-                # script).
-                subprocess.Popen([sys.executable] + sys.argv)
+                if getattr(sys, 'frozen', False):
+                    # only launch from exe if it's frozen.
+                    args = sys.argv
+                else:
+                    # Assume this is a python script if it's not frozen.
+                    args = [sys.executable] + sys.argv
+                LOGGER.debug('Using args %s', args)
+                subprocess.Popen(args)
                 qt_app = QtGui.QApplication.instance()
                 LOGGER.info('Restarting application')
                 qt_app.quit()  # exit the Qt application.

@@ -256,9 +256,8 @@ msgid "&Save parameters ..."
 msgstr "&Guardar parámetros ..."
 
 #: palisades/gui/qt4.py:1306
-#, fuzzy
 msgid "Set &Language ..."
-msgstr "Comenzando ..."
+msgstr "Seleccione idioma ..."
 
 #: palisades/gui/qt4.py:1308
 msgid "Exit"

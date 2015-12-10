@@ -669,16 +669,18 @@ class Text(LabeledPrimitive):
 
         Returns nothing."""
 
+        # Numbers must first be cast to a str before they can be converted to
+        # python unicode objects.
         if isinstance(new_value, float) or isinstance(new_value, int):
-            cast_value = str(new_value)
-        else:
-            try:
-                cast_value = unicode(new_value, 'utf-8')
-            except TypeError:
-                # For when new_value is already unicode.
-                cast_value = new_value
+            new_value = str(new_value)
 
-        LabeledPrimitive.set_value(self, cast_value)
+        try:
+            new_value = unicode(new_value, 'utf-8')
+        except TypeError:
+            # For when new_value is already unicode.
+            pass
+
+        LabeledPrimitive.set_value(self, new_value)
 
     def has_input(self):
         if len(self.value()) > 0:

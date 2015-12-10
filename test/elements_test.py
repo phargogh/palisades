@@ -3,6 +3,7 @@ import os
 import time
 import shutil
 import tempfile
+import logging
 
 import mock
 
@@ -13,6 +14,18 @@ from palisades import validation
 TEST_DIR = os.path.dirname(__file__)
 IUI_CONFIG = os.path.join(TEST_DIR, 'data', 'iui_config')
 PALISADES_CONFIG = os.path.join(TEST_DIR, 'data', 'palisades_config')
+
+class NullHandler(logging.Handler):
+    """A do-nothing handler for logging.
+
+    Very useful for avoiding errors of the 'no handlers could be found for
+    logger palisades.elements' variety.
+    """
+    def emit(self, record):
+        pass
+
+_nullhandler = NullHandler()
+logging.getLogger('palisades').addHandler(_nullhandler)
 
 @unittest.skip('no X')
 class ApplicationTest(unittest.TestCase):
@@ -45,7 +58,7 @@ class ApplicationTest(unittest.TestCase):
 
 def assert_utf8(string):
     """Assert that the input string is unicode, formatted as UTF-8."""
-    if string.__class__ != unicode:
+    if not isinstance(string, unicode):
         raise AssertionError('String is not a unicode object')
     try:
         string.decode('utf-8')
@@ -506,7 +519,7 @@ class TextTest(LabeledPrimitiveTest):
 
         # verify that even a non-string value is cast to a UTF-8 object.
         self.element.set_value(8)
-        self.assertEqual(self.element.value(), '8')
+        self.assertEqual(self.element.value(), u'8')
         assert_utf8(self.element.value())
 
     def test_is_valid(self):
@@ -523,7 +536,7 @@ class TextTest(LabeledPrimitiveTest):
         # When no validation is specified in the input dictionary, the default
         # validation is "type: disabled".  Ensure setting the value validates.
         self.element.set_value(4)
-        self.assertEqual(self.element.value(), unicode(4))
+        self.assertEqual(self.element.value(), u'4')
         self.element._validator.join()
         self.assertEqual(self.element.is_valid(), True)
 
@@ -1042,6 +1055,7 @@ class MultiTest(ContainerTest):
             'label': '',
             'helpText': '',
             'enabled': True,
+            'defaultValue': True,  # Subclass of container, indicates is open.
             'collapsible': False,
             'elements': [],
             'link_text': 'Add another',

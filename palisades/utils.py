@@ -309,6 +309,7 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
         # If we have a dropdown menu, the 'returns' options have changed
         # slightly.  If the user has not defined return configuration options,
         # skip the tweaking since defaults are assumed internally.
+        # Also, 'options' are now translateable.
         if element_type == 'dropdown':
             try:
                 return_type = new_config['returns']

@@ -897,6 +897,20 @@ class WarningDialog(InfoDialog):
         """
         return self.exec_()
 
+    def showEvent(self, event=None):
+        """
+        Overridden from InfoDialog.showEvent().
+
+        Resizes the body of the widget.  Useful when the title or body extends
+        past the default size of the default windows.  This resizes the dialog
+        so the user doesn't have to.
+        """
+        if self.body.sizeHint().isValid():
+            self.body.setMinimumSize(self.body.sizeHint())
+
+        InfoDialog.showEvent(self, event)
+
+
 class ConfirmQuitDialog(WarningDialog):
     def __init__(self):
         WarningDialog.__init__(self)

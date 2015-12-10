@@ -31,9 +31,11 @@ LAYOUT_VERTICAL = 1
 LAYOUT_HORIZONTAL = 2
 LAYOUT_GRID = 3
 
-# splash strings
-SPLASH_MSG_CORE_APP = _('Building core application')
-SPLASH_MSG_GUI = _('Building graphical interface')
+# Splash strings.  Making these anonymous functions isn't exactly kosher, but
+# it allows me to generate the strings AFTER the language has been set and
+# still keep these as module-level attributes.
+SPLASH_MSG_CORE_APP = lambda: _('Building core application')
+SPLASH_MSG_GUI = lambda: _('Building graphical interface')
 
 def get_py2exe_datafiles():
     """Return a list of tuples of data required for a py2exe installation of
@@ -93,23 +95,25 @@ def launch(json_uri, splash_img=None, runner=None):
     from palisades import elements
     import palisades.gui
 
-    found_json = locate_config(json_uri)
+    dist_language = locate_dist_config()['lang']
+    palisades.i18n.language.set(dist_language)
 
+    found_json = locate_config(json_uri)
     gui_app = palisades.gui.get_application()
 
     if splash_img is not None:
         print _('Showing splash %s') % splash_img
         gui_app.show_splash(splash_img)
-        gui_app.set_splash_message(SPLASH_MSG_CORE_APP)
+        gui_app.set_splash_message(SPLASH_MSG_CORE_APP())
 
-    ui = elements.Application(found_json, locate_dist_config()['lang'])
+    ui = elements.Application(found_json, dist_language)
 
     if runner is not None:
         print _('Setting runner class to %s') % runner
         ui._window.set_runner(runner)
 
     if splash_img is not None:
-        gui_app.set_splash_message(SPLASH_MSG_GUI)
+        gui_app.set_splash_message(SPLASH_MSG_GUI())
 
     gui_app.add_window(ui._window)
 

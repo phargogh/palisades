@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
 
-import json
 from types import DictType
-from types import ListType
 
 import palisades.utils
 
+# These are the keys that are known to be translateable.
 TRANS_KEYS = ['label', 'modelName', 'helpText', 'options']
 
 # assume per-attribute translation
@@ -181,7 +180,7 @@ def extract_languages(config):
                 language_sets.add(lang_code)
         else:
             for key, value in dict_config.iteritems():
-                if type(value) is DictType:
+                if isinstance(value, dict):
                     recurse(value)
                 else:
                     for item in value:

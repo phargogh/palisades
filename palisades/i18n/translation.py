@@ -187,8 +187,6 @@ def extract_languages(config):
                     for item in value:
                         recurse(item)
 
-
-
     # start the recursion to get the list of language keys.
     recurse(config)
 

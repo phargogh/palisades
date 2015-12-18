@@ -7,9 +7,9 @@ class TrivialTranslationTest(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
 
-    def test_default_strings(self):
-        import palisades.i18n.translation
-        config = {
+    @staticmethod
+    def _trivial_default_strings():
+        return {
             'id': 'sample_element',
             'label': {
                 'en': 'hello world!',
@@ -17,35 +17,39 @@ class TrivialTranslationTest(unittest.TestCase):
                 'es': u'¡Hola, mundo!',
             },
         }
+
+    def test_default_strings_de(self):
+        from palisades.i18n.translation import translate_config
+        config = TrivialTranslationTest._trivial_default_strings()
 
         expected_german = {
             'id': 'sample_element',
             'label': 'Hallo, Weld!',
         }
-        self.assertEqual(palisades.i18n.translation.translate_config(config, 'de'),
-            expected_german)
+        self.assertEqual(
+            translate_config(config, 'de'),
+            ([('de', 'en', 'es')], expected_german))
+
+    def test_default_strings_es(self):
+        from palisades.i18n.translation import translate_config
+        config = TrivialTranslationTest._trivial_default_strings()
 
         expected_spanish = {
             'id': 'sample_element',
             'label': u'¡Hola, mundo!',
         }
-        self.assertEqual(palisades.i18n.translation.translate_config(config, 'es'),
-            expected_spanish)
+        self.assertEqual(
+            translate_config(config, 'es'),
+            ([('de', 'en', 'es')], expected_spanish))
 
-    def test_extra_keys(self):
-        import palisades.i18n.translation
-        config = {
-            'id': 'sample_element',
-            'label': {
-                'en': 'hello world!',
-                'de': 'Hallo, Weld!',
-                'es': u'¡Hola, mundo!',
-            },
-            'some_attribute': {
-                'en': 'another attribute',
-                'de': 'noch einer Attribut',
-                'es': 'otro atributo',
-            }
+    def test_extra_keys_de(self):
+        from palisades.i18n.translation import translate_config
+        config = TrivialTranslationTest._trivial_default_strings()
+
+        config['some_attribute'] = {
+            'en': 'another attribute',
+            'de': 'noch einer Attribut',
+            'es': 'otro atributo',
         }
 
         expected_german = {
@@ -53,20 +57,31 @@ class TrivialTranslationTest(unittest.TestCase):
             'label': 'Hallo, Weld!',
             'some_attribute': 'noch einer Attribut',
         }
-        self.assertEqual(palisades.i18n.translation.translate_config(config, 'de',
-            ['some_attribute']), expected_german)
+        self.assertEqual(
+            translate_config(config, 'de', ['some_attribute']),
+            ([('de', 'en', 'es')], expected_german))
+
+    def test_extra_keys_es(self):
+        from palisades.i18n.translation import translate_config
+        config = TrivialTranslationTest._trivial_default_strings()
+
+        config['some_attribute'] = {
+            'en': 'another attribute',
+            'de': 'noch einer Attribut',
+            'es': 'otro atributo',
+        }
 
         expected_spanish = {
             'id': 'sample_element',
             'label': u'¡Hola, mundo!',
             'some_attribute': 'otro atributo',
         }
-        self.assertEqual(palisades.i18n.translation.translate_config(config, 'es',
-            ['some_attribute']), expected_spanish)
-
+        self.assertEqual(
+            translate_config(config, 'es', ['some_attribute']),
+            ([('de', 'en', 'es')], expected_spanish))
 
     def test_contained_elements(self):
-        import palisades.i18n.translation
+        from palisades.i18n.translation import translate_config
         config = {
             'id': 'sample_element',
             'label': {
@@ -108,11 +123,12 @@ class TrivialTranslationTest(unittest.TestCase):
                 }
             ]
         }
-        self.assertEqual(palisades.i18n.translation.translate_config(config, 'de'),
-            expected_german)
+        self.assertEqual(
+            translate_config(config, 'de'),
+            ([('de', 'en', 'es')], expected_german))
 
     def test_nested_contained_elements(self):
-        import palisades.i18n.translation
+        from palisades.i18n.translation import translate_config
         config = {
             'id': 'sample_element',
             'label': {
@@ -170,8 +186,9 @@ class TrivialTranslationTest(unittest.TestCase):
                 }
             ]
         }
-        self.assertEqual(palisades.i18n.translation.translate_config(config, 'de'),
-            expected_german)
+        self.assertEqual(
+            translate_config(config, 'de'),
+            ([('de', 'en', 'es')], expected_german))
 
 
 class LanguageExtractionTest(unittest.TestCase):

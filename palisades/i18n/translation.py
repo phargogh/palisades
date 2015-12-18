@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
-from types import DictType
-
 import palisades.utils
 
 # These are the keys that are known to be translateable.
@@ -19,7 +16,7 @@ def translate_config(config, lang_code, extra_keys=[], allowed_translations=[]):
         to.  This absolutely must match the language identifier in the
         configuration.  See below for example configuration.
     extra_keys=[] - keys to be translated.  Default keys translated are:
-        ['label', 'modelName', 'helpText']
+        ['label', 'modelName', 'helpText', 'options']
     allowed_translations=[] - initialize the allowed translations for
         this run through the configuration dictionary.
 
@@ -114,7 +111,7 @@ def translate_config(config, lang_code, extra_keys=[], allowed_translations=[]):
             # dictionary mapping language code to the translated string.
             # if it's not a language dictionary, we just leave the value alone,
             # whatever it may be.
-            if type(config_value) is DictType:
+            if isinstance(config_value, dict):
                 # track the translations available so we can check which
                 # languages are complete.
                 allowed_translations.append(config_value.keys())

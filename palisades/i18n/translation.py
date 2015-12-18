@@ -153,24 +153,46 @@ def translate_json(json_uri, lang_code):
     return list(translations[0]), translated_config
 
 def extract_languages(config):
-    """Returns a list of language codes found in this configuration object."""
+    """Extract language codes from a config dict.
 
-    max_key_len = lambda y: max(map(lambda x: len(x), y))
-    min_key_len = lambda y: min(map(lambda x: len(x), y))
-    language_sets = []
+    Language codes are defined as two-character strings that are keys in a
+    dict.  The intersection of all these sets is returned as a sorted list.
+    Language codes are only considered, however, when all the keys in a dict
+    are two characters long.
+
+    Parameters:
+        config (dict): The palisades configuration dict.
+
+    Returns:
+        A sorted list of two-character language codes.
+    """
+    max_key_len = lambda y: max([len(x) for x in y])
+    min_key_len = lambda y: min([len(x) for x in y])
+    language_sets = set([])
 
     def recurse(dict_config):
         # check if this is a language dict.
+        if type(dict_config) not in [list, dict]:
+            return
+
         keys = dict_config.keys()
         if max_key_len(keys) == 2 and min_key_len(keys) == 2:
-            langauge_sets.append(dict_config.keys())
+            for lang_code in dict_config.iterkeys():
+                language_sets.add(lang_code)
         else:
             for key, value in dict_config.iteritems():
                 if type(value) is DictType:
                     recurse(value)
+                else:
+                    for item in value:
+                        recurse(item)
+
+
 
     # start the recursion to get the list of language keys.
     recurse(config)
+
+    return sorted(language_sets)
 
     # get max and min element len.
     if max_key_len(language_sets) == min_key_len(language_sets):

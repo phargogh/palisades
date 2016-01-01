@@ -223,11 +223,7 @@ class Container(Group):
 
     def set_collapsed(self, is_collapsed):
         # TODO: add a toolkit test for this function.
-        if self.is_collapsible():
-            self.setChecked(not is_collapsed)
-        else:
-            raise RuntimeError('Cannot collapse a container that is not '
-                'collapsible')
+        self.setChecked(not is_collapsed)
 
 class Button(QtGui.QPushButton, QtWidget):
     _icon = None

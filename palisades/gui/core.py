@@ -224,9 +224,6 @@ class ContainerGUI(GroupGUI):
 
         # initialize the collapsed state to mirror the state of the UI.
         self.widgets.set_collapsed(self.element.is_collapsed())
-        for element in self.element.elements():
-            element.set_visible(not self.element.is_collapsed())
-
         for gui_elem in self.elements:
             gui_elem.set_visible(not self.element.is_collapsed())
 
@@ -243,6 +240,9 @@ class ContainerGUI(GroupGUI):
 
         for element in self.element.elements():
             element.set_visible(not self.element.is_collapsed())
+
+        for gui_elem in self.elements:
+            gui_elem.set_visible(not self.element.is_collapsed())
 
 class MultiGUI(ContainerGUI):
     def __init__(self, core_element, registrar=None):

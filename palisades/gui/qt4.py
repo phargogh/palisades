@@ -227,8 +227,6 @@ class Container(Group):
 
     def set_collapsed(self, is_collapsed):
         # TODO: add a toolkit test for this function.
-        print 'IS_COLLAPSED', is_collapsed
-        print 'CHECKED', not is_collapsed
         self.setChecked(not is_collapsed)
 
 class Button(QtGui.QPushButton, QtWidget):

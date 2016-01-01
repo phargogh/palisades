@@ -126,6 +126,7 @@ class GroupGUI(UIObject):
         #TODO: add all the necessary elements here to the form.
         registry = {
             'File': FileGUI,
+            'Folder': FileGUI,
             'Text': TextGUI,
             'Group': GroupGUI,
             'Label': LabelGUI,
@@ -549,7 +550,7 @@ class FormGUI():
         Callback to check for errors and submit unless there are errors in the
         form.
         """
-        workspace_elem = self.element.find_element('workspace')
+        workspace_elem = self.element.find_element('workspace_dir')
         if os.path.exists(workspace_elem.value()):
             files_in_workspace = os.path.join(workspace_elem.value(), '*')
             if len(files_in_workspace) > 0:

@@ -746,6 +746,25 @@ class File(Text):
             absolute_path = os.path.abspath(os.path.expanduser(new_value))
         Text.set_value(self, absolute_path)
 
+
+class Folder(File):
+    defaults = {
+        'validateAs': {'type': 'folder'},
+        'defaultValue': u'',
+        'width': 60,
+        'enabled': True,
+        'label': u'',
+        'hideable': False,
+        'required': False,
+        'helpText': "",
+        'returns': {
+            'ifDisabled': False,
+            'ifEmpty': False,
+            'ifHidden': False,
+        },
+    }
+
+
 class Static(Primitive):
     def __init__(self, configuration):
         Primitive.__init__(self, configuration)
@@ -825,7 +844,7 @@ class Group(Element):
 
         element_registry = {
             'file': File,
-            'folder': File,
+            'folder': Folder,
             'text': Text,
             'hidden': Static,
             'label': Label,

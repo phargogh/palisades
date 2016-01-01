@@ -4,12 +4,13 @@ palisades format)"""
 
 import unittest
 
-from palisades import elements
-from palisades.i18n import translation
-import palisades.gui
 
 class WindEnergyRegressionTest(unittest.TestCase):
     def setUp(self):
+        from palisades import elements
+        from palisades.i18n import translation
+        import palisades.gui
+
         self.config = {
             "height": 900,
             "id": "window",
@@ -445,7 +446,7 @@ class WindEnergyRegressionTest(unittest.TestCase):
                 }
             ],
         }
-        self.translated_config = translation.translate_config(self.config, 'en')
+        languages, self.translated_config = translation.translate_config(self.config, 'en')
         self.form = elements.Form(self.translated_config)
         self.gui = palisades.gui.get_application()
         self.gui.add_window(self.form)

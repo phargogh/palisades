@@ -396,13 +396,14 @@ class HideablePrimitiveTest(PrimitiveTest):
 
     def test_get_id(self):
         element_id = self.element.get_id()
-        self.assertEqual(element_id, 'f93edaf757add9479cb27116584ec16c')
+        expected_id = "9cba20199e30dca32349e4964271a224"
+        self.assertEqual(element_id, expected_id)
 
         # assert that the element's ID has not changed following
         # validation
         self.element.validate()
         self.element._validator.join()
-        self.assertEqual(element_id, 'f93edaf757add9479cb27116584ec16c')
+        self.assertEqual(element_id, expected_id)
 
 class LabeledPrimitiveTest(PrimitiveTest):
     def setUp(self):
@@ -925,6 +926,7 @@ class ContainerTest(GroupTest):
         # Override from ElementTest.test_default_config
         expected_defaults = {
             'elements': [],
+            'defaultValue': True,
             'collapsible': False,
             'enabled': True,
             'label': '',
@@ -1682,18 +1684,21 @@ class FormTest(unittest.TestCase):
                     'defaultValue': os.path.join(TEST_DIR, 'sample_folder')
                 },
                 {
+                    'id': 'file_1',
                     'type': 'file',
                     'validateAs': {'type': 'file', 'mustExist': True},
                     'args_id': 'timber_shape_uri',
                     'defaultValue': self.timber_clean
                 },
                 {
+                    'id': 'file_2',
                     'type': 'file',
                     'validateAs': {'type': 'file', 'mustExist': True},
                     'defaultValue': self.timber_clean,
                     'args_id': 'attr_table_uri',
                 },
                 {
+                    'id': 'text_1',
                     'type': 'text',
                     'defaultValue': '7',
                     'args_id': 'market_disc_rate',
@@ -2094,10 +2099,10 @@ class FormTest(unittest.TestCase):
 
     def test_element_index(self):
         expected_element_index = [
-            '1c332e257cd2cc294681f128f254e69f',
-            '3e18dd2a15b188c00a1f8d9af1ee1f2e',
-            'bbae303758e1b65cbf2fcf312416c616',
             'cbc4d60d477c32883a589588fdfd4ac9',
+            'file_1',
+            'file_2',
+            'text_1',
             'workspace',
         ]
 

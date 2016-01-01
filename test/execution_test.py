@@ -66,7 +66,7 @@ class ExecutorTest(unittest.TestCase):
         # space).
         LOGGER.debug('hello.  This should not appear in the log file.')
 
-        self.assertEqual(count_lines(temp_file_uri), 9)
+        self.assertEqual(count_lines(temp_file_uri), 10)
         os.remove(temp_file_uri)
 
 class LogManagerTest(unittest.TestCase):

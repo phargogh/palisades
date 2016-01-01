@@ -149,7 +149,7 @@ class TextIntegrationTest(LabeledPrimitiveIntegrationTest):
         # verify that when the textfield's text is set, the core element gets
         # the message and updates its value.
         self.view._text_field.set_text(self.sample_value)
-        QTest.qWait(50)  # wait for the qt event loop to detect change.
+        #QTest.qWait(50)  # wait for the qt event loop to detect change.
         self.assertEqual(self.view._text_field.text(), self.sample_value)
         self.assertEqual(self.element.value(), self.sample_value)
 
@@ -264,15 +264,15 @@ class ContainerIntegrationTest(GroupIntegrationTest):
 
     def test_default_expanded(self):
         new_config = {'elements': self.contained_elements, 'collapsible': True,
-            'defaultValue': False}
+                      'defaultValue': True}
         element = elements.Container(new_config)
         view = core.ContainerGUI(element)
 
         # verify that the element and GUI both default to what's specified.
+        self.assertTrue(element.is_collapsible())
+        self.assertTrue(view.widgets.is_collapsible())
         self.assertFalse(element.is_collapsed())
         self.assertFalse(view.widgets.is_collapsed())
-        self.assertTrue(element.is_collapsible())
-        self.assertTrue(element.is_collapsible())
 
         def _check_interactivity(obj_list, expected):
             for contained_obj in obj_list:
@@ -288,7 +288,7 @@ class ContainerIntegrationTest(GroupIntegrationTest):
         _check_interactivity(view.elements, True)
 
         # set the element state, have the change reflected in the GUI.
-        element.set_state({'enabled': True, 'collapsed': True})
+        element.set_state({'enabled': False, 'collapsed': False})
         _check_interactivity(element.elements(), False)
         _check_interactivity(view.elements, False)
 
@@ -303,7 +303,8 @@ class MultiIntegrationTest(ContainerIntegrationTest):
                 'type': 'text',
             },
         ]
-        self.config = {'elements': self.contained_elements}
+        self.config = {'elements': self.contained_elements,
+                       'defaultValue': True, 'collapsible': False}
         self.element = elements.Multi(self.config)
         self.view = core.MultiGUI(self.element)
 
@@ -314,6 +315,7 @@ class MultiIntegrationTest(ContainerIntegrationTest):
 
     def test_default_expanded(self):
         self.assertFalse(self.element.is_collapsed())
+        self.assertFalse(self.view.widgets.is_collapsed())
 
     def test_add_element(self):
         # verify that there are no elements ... yet

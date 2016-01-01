@@ -219,10 +219,16 @@ class Container(Group):
         # When a collapsible container is checked, it's expanded.
         # When a collapsible container is unchecked, it's collapsed.
         # Therefore, return the opposite of the check state.
-        return not self.isChecked()
+        if self.is_collapsible():
+            return not self.isChecked()
+
+        # If the container is not collapsible, it's not collapsed by default.
+        return False
 
     def set_collapsed(self, is_collapsed):
         # TODO: add a toolkit test for this function.
+        print 'IS_COLLAPSED', is_collapsed
+        print 'CHECKED', not is_collapsed
         self.setChecked(not is_collapsed)
 
 class Button(QtGui.QPushButton, QtWidget):

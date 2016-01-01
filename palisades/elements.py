@@ -1028,6 +1028,7 @@ class Multi(Container):
             'label': '',
             'enabled': True,
             'collapsible': False,
+            'defaultValue': True,
             'link_text': 'Add another',
             'helpText': "",
             'return_type': 'list',

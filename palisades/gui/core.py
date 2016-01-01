@@ -201,6 +201,7 @@ class TabGroupGUI(GroupGUI):
             self.widgets = toolkit.TabGroup()
         GroupGUI.__init__(self, core_element, registrar)
 
+
 class TabGUI(GroupGUI):
     def __init__(self, core_element, registrar=None):
         if not hasattr(self, 'widgets'):
@@ -210,11 +211,13 @@ class TabGUI(GroupGUI):
     def label(self):
         return self.element.label()
 
+
 class ContainerGUI(GroupGUI):
     def __init__(self, core_element, registrar=None):
         # TODO: find a better way to specify the toolkit widget.
         if not hasattr(self, 'widgets'):
             self.widgets = toolkit.Container(core_element.label())
+
         GroupGUI.__init__(self, core_element, registrar)
         self.widgets.set_collapsible(self.element.is_collapsible())
 

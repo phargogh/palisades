@@ -1,0 +1,520 @@
+{
+    "elements": [
+        {
+            "args_id": "workspace_dir", 
+            "defaultValue": "~/Documents/carbon_workspace", 
+            "helpText": {
+                "en": "This is a test <br><br>The selected folder is used as the workspace where all intermediate and output files will be written.<br><br>If the selected folder does not exist, it will be created.<br><br><b>If datasets already exist in the selected folder, they will be overwritten.</b>"
+            }, 
+            "id": "workspace_dir", 
+            "label": {
+                "en": "Workspace"
+            }, 
+            "required": true, 
+            "type": "folder"
+        }, 
+        {
+            "args_id": "suffix", 
+            "dataType": "string", 
+            "defaultValue": "", 
+            "helpText": {
+                "en": "This text will be appended to the end of the output files to help separate outputs from multiple runs."
+            }, 
+            "id": "results_suffix", 
+            "label": {
+                "en": "Results Suffix (Optional)"
+            }, 
+            "required": false, 
+            "returns": {
+                "ifEmpty": "pass"
+            }, 
+            "type": "text"
+        }, 
+        {
+            "id": "top_label", 
+            "label": {
+                "en": "The biophysical model and valuation model may be run independently or together. In order to run the valuation model, either the biophysical model must be run with 'Calculate Sequestration' checked, or inputs must be provided under the 'Sequestration Data' section below."
+            }, 
+            "type": "label"
+        }, 
+        {
+            "args_id": "do_biophysical", 
+            "collapsible": true, 
+            "defaultValue": true, 
+            "elements": [
+                {
+                    "defaultValue": false, 
+                    "helpText": {
+                        "en": "Check to enable sequestration analysis. This requires inputs of Land Use/Land Cover maps for both current and future scenarios."
+                    }, 
+                    "id": "calc_sequestration", 
+                    "label": {
+                        "en": "Calculate Sequestration"
+                    }, 
+                    "required": false, 
+                    "signals": [
+                        "enables:redd", 
+                        "enables:cur_lulc_year", 
+                        "enables:fut_lulc_raster", 
+                        "set_required:fut_lulc_raster", 
+                        "enables:fut_lulc_year", 
+                        "enables:cur_harvest_map", 
+                        "enables:fut_harvest_map"
+                    ], 
+                    "type": "checkbox"
+                }, 
+                {
+                    "defaultValue": false, 
+                    "helpText": {
+                        "en": "Check to enable REDD scenario analysis. This requires three Land Use/Land Cover maps: one for the current scenario, one for the future baseline scenario, and one for the future REDD policy scenario."
+                    }, 
+                    "id": "redd", 
+                    "label": {
+                        "en": "REDD Scenario Analysis"
+                    }, 
+                    "required": false, 
+                    "signals": [
+                        "enables:redd_lulc_raster", 
+                        "set_required:redd_lulc_raster", 
+                        "disables:cur_harvest_map", 
+                        "disables:fut_harvest_map"
+                    ], 
+                    "type": "checkbox"
+                }, 
+                {
+                    "collapsible": false, 
+                    "elements": [
+                        {
+                            "args_id": "lulc_cur_uri", 
+                            "defaultValue": "../Base_Data/Terrestrial/lulc_samp_cur/hdr.adf", 
+                            "helpText": {
+                                "en": "A GDAL-supported raster representing the land-cover of the current scenario."
+                            }, 
+                            "id": "cur_lulc_raster", 
+                            "label": {
+                                "en": "Current Land Use/Land Cover (Raster)"
+                            }, 
+                            "required": true, 
+                            "type": "file", 
+                            "validateAs": {
+                                "type": "GDAL"
+                            }
+                        }, 
+                        {
+                            "args_id": "lulc_cur_year", 
+                            "dataType": "int", 
+                            "defaultValue": "2000", 
+                            "helpText": {
+                                "en": "The calendar year of the current scenario."
+                            }, 
+                            "id": "cur_lulc_year", 
+                            "label": {
+                                "en": "Year of Land Cover"
+                            }, 
+                            "required": false, 
+                            "type": "text", 
+                            "validText": "-?[0-9]+", 
+                            "width": 70
+                        }
+                    ], 
+                    "id": "cur_lulc_box", 
+                    "label": {
+                        "en": "Current Land Use/Land Cover"
+                    }, 
+                    "type": "container"
+                }, 
+                {
+                    "collapsible": false, 
+                    "elements": [
+                        {
+                            "args_id": "lulc_fut_uri", 
+                            "defaultValue": "../Base_Data/Terrestrial/lulc_samp_fut/hdr.adf", 
+                            "helpText": {
+                                "en": "A GDAL-supported raster representing the land-cover of the future scenario. <br><br>If REDD scenario analysis is enabled, this should be the reference, or baseline, future scenario against which to compare the REDD policy scenario."
+                            }, 
+                            "id": "fut_lulc_raster", 
+                            "label": {
+                                "en": "Baseline (Raster)"
+                            }, 
+                            "required": false, 
+                            "type": "file", 
+                            "validateAs": {
+                                "type": "GDAL"
+                            }
+                        }, 
+                        {
+                            "args_id": "lulc_redd_uri", 
+                            "defaultValue": "../Carbon/Input/lulc_samp_redd.tif", 
+                            "helpText": {
+                                "en": "A GDAL-supported raster representing the land-cover of the REDD policy future scenario. This scenario will be compared to the baseline future scenario."
+                            }, 
+                            "id": "redd_lulc_raster", 
+                            "label": {
+                                "en": "REDD Policy (Raster)"
+                            }, 
+                            "required": false, 
+                            "type": "file", 
+                            "validateAs": {
+                                "type": "GDAL"
+                            }
+                        }, 
+                        {
+                            "args_id": "lulc_fut_year", 
+                            "dataType": "int", 
+                            "defaultValue": "2030", 
+                            "helpText": {
+                                "en": "The calendar year of the future scenario."
+                            }, 
+                            "id": "fut_lulc_year", 
+                            "label": {
+                                "en": "Year of Land Cover"
+                            }, 
+                            "required": false, 
+                            "type": "text", 
+                            "validText": "-?[0-9]+", 
+                            "width": 70
+                        }
+                    ], 
+                    "id": "fut_lulc_box", 
+                    "label": {
+                        "en": "Future Land Use/Land Cover"
+                    }, 
+                    "type": "container"
+                }, 
+                {
+                    "args_id": "carbon_pools_uri", 
+                    "defaultValue": "../Carbon/Input/carbon_pools_samp.csv", 
+                    "helpText": {
+                        "en": "A table that maps the land-cover IDs to carbon pools.  The table must contain columns of 'LULC', 'C_above', 'C_Below', 'C_Soil', 'C_Dead' as described in the User's Guide.  The values in LULC must at least include the LULC IDs in the land cover maps."
+                    }, 
+                    "id": "carbon_pools", 
+                    "label": {
+                        "en": "Carbon Pools"
+                    }, 
+                    "required": true, 
+                    "type": "file", 
+                    "validateAs": {
+                        "fieldsExist": [
+                            "lucode", 
+                            "C_above", 
+                            "C_Below", 
+                            "C_Soil", 
+                            "C_Dead"
+                        ], 
+                        "type": "CSV"
+                    }
+                }, 
+                {
+                    "args_id": "hwp_cur_shape_uri", 
+                    "defaultValue": "../Carbon/Input/harv_samp_cur.shp", 
+                    "helpText": {
+                        "en": "An OGR-supported shapefile containing information about harvested wood products for the current scenario.  The field is optional.  If supplied, the shapefile must have the fields 'Cut_cur', 'Start_date', 'Freq_cur', 'Decay_cur', 'C_den_cur', 'BCEF_cur'."
+                    }, 
+                    "id": "cur_harvest_map", 
+                    "label": {
+                        "en": "Current Harvest Rate Map (Optional)"
+                    }, 
+                    "required": false, 
+                    "returns": {
+                        "ifEmpty": "pass"
+                    }, 
+                    "signals": [
+                        "set_required:cur_lulc_year"
+                    ], 
+                    "type": "file", 
+                    "validateAs": {
+                        "fieldsExist": [
+                            "Cut_cur", 
+                            "Start_date", 
+                            "Freq_cur", 
+                            "Decay_cur", 
+                            "C_den_cur", 
+                            "BCEF_cur"
+                        ], 
+                        "layers": [
+                            {
+                                "name": {
+                                    "inheritFrom": "filename"
+                                }, 
+                                "type": "polygons"
+                            }
+                        ], 
+                        "type": "OGR"
+                    }
+                }, 
+                {
+                    "args_id": "hwp_fut_shape_uri", 
+                    "defaultValue": "../Carbon/Input/harv_samp_fut.shp", 
+                    "helpText": {
+                        "en": "An OGR-supported shapefile containing information about harvested wood products for the future scenario.  The field is optional.  If supplied the shapefile must have the fields 'Cut_cur', 'Start_date', 'Freq_cur', 'Decay_cur', 'C_den_cur', 'BCEF_cur'."
+                    }, 
+                    "id": "fut_harvest_map", 
+                    "label": {
+                        "en": "Future Harvest Rate Map (Optional)"
+                    }, 
+                    "required": false, 
+                    "returns": {
+                        "ifEmpty": "pass"
+                    }, 
+                    "signals": [
+                        "set_required:cur_lulc_year", 
+                        "set_required:fut_lulc_year"
+                    ], 
+                    "type": "file", 
+                    "validateAs": {
+                        "fieldsExist": [
+                            "Cut_fut", 
+                            "Freq_fut", 
+                            "Decay_fut", 
+                            "C_den_fut", 
+                            "BCEF_fut"
+                        ], 
+                        "layers": [
+                            {
+                                "name": {
+                                    "inheritFrom": "filename"
+                                }, 
+                                "type": "polygons"
+                            }
+                        ], 
+                        "type": "OGR"
+                    }
+                }, 
+                {
+                    "args_id": "do_uncertainty", 
+                    "collapsible": true, 
+                    "elements": [
+                        {
+                            "args_id": "carbon_pools_uncertain_uri", 
+                            "defaultValue": "../Carbon/Input/carbon_pools_samp_uncertain.csv", 
+                            "helpText": {
+                                "en": "A table that maps the land cover ids to probability distributions for carbon pools. Each probability distribution must be specified by a mean and a standard deviation. The table must contain columns of 'LULC', 'C_above_mean', 'C_above_sd', 'C_below_mean', 'C_below_sd', 'C_soil_mean', 'C_soil_sd', 'C_dead_mean', and 'C_dead_sd' as described in the user's guide.  The values in LULC must at least include the LULC IDs in the land cover maps."
+                            }, 
+                            "id": "carbon_pools_uncertain", 
+                            "label": {
+                                "en": "Carbon pools"
+                            }, 
+                            "required": true, 
+                            "signals": [
+                                "set_required:confidence_threshold"
+                            ], 
+                            "type": "file", 
+                            "validateAs": {
+                                "fieldsExist": [
+                                    "lucode", 
+                                    "C_above_mean", 
+                                    "C_above_sd", 
+                                    "C_below_mean", 
+                                    "C_below_sd", 
+                                    "C_soil_mean", 
+                                    "C_soil_sd", 
+                                    "C_dead_mean", 
+                                    "C_dead_sd"
+                                ], 
+                                "type": "table"
+                            }
+                        }, 
+                        {
+                            "args_id": "confidence_threshold", 
+                            "dataType": "float", 
+                            "defaultValue": "90", 
+                            "helpText": {
+                                "en": "The percent confidence that should be used as a minimum threshold for highlighting areas of confidence in the output data."
+                            }, 
+                            "id": "confidence_threshold", 
+                            "label": {
+                                "en": "Confidence Threshold"
+                            }, 
+                            "type": "text", 
+                            "validText": "[0-9][0-9]([.][0-9]*)?", 
+                            "width": 50
+                        }
+                    ], 
+                    "id": "uncertain_carbon_pool_container", 
+                    "label": {
+                        "en": "Data for Uncertainty Analysis (enable to trigger uncertainty analysis)"
+                    }, 
+                    "signals": [
+                        "disables:carbon_pools"
+                    ], 
+                    "type": "container"
+                }
+            ], 
+            "id": "biophysical_container", 
+            "label": {
+                "en": "Run Biophysical Model"
+            }, 
+            "signals": [
+                "disables:sequest_uri", 
+                "disables:yr_cur", 
+                "disables:yr_fut"
+            ], 
+            "type": "container"
+        }, 
+        {
+            "collapsible": false, 
+            "elements": [
+                {
+                    "args_id": "sequest_uri", 
+                    "helpText": {
+                        "en": "The per-pixel sequestered carbon either from a run of the InVEST Carbon Biophysical model, or from a user defined source."
+                    }, 
+                    "id": "sequest_uri", 
+                    "label": {
+                        "en": "Sequestration Raster"
+                    }, 
+                    "type": "file", 
+                    "validateAs": {
+                        "type": "GDAL"
+                    }
+                }, 
+                {
+                    "args_id": "yr_cur", 
+                    "dataType": "int", 
+                    "helpText": {
+                        "en": "The calendar year of the current scenario."
+                    }, 
+                    "id": "yr_cur", 
+                    "label": {
+                        "en": "Start Year of Sequestration Measurement"
+                    }, 
+                    "required": true, 
+                    "type": "text", 
+                    "validText": "-?[0-9]+", 
+                    "validateAs": {
+                        "type": "number"
+                    }, 
+                    "width": 70
+                }, 
+                {
+                    "args_id": "yr_fut", 
+                    "dataType": "int", 
+                    "helpText": {
+                        "en": "The calendar year of the future scenario."
+                    }, 
+                    "id": "yr_fut", 
+                    "label": {
+                        "en": "Final Year of Sequestration Measurement"
+                    }, 
+                    "required": true, 
+                    "type": "text", 
+                    "validText": "-?[0-9]+", 
+                    "validateAs": {
+                        "type": "number"
+                    }, 
+                    "width": 70
+                }
+            ], 
+            "id": "sequestration_container", 
+            "label": {
+                "en": "Sequestration data (required for valuation if biophysical model is not run)"
+            }, 
+            "type": "container"
+        }, 
+        {
+            "args_id": "do_valuation", 
+            "collapsible": true, 
+            "elements": [
+                {
+                    "id": "valuation_label", 
+                    "label": {
+                        "en": "In order to run valuation, either the biophysical model must be run with 'Calculate Sequestration' checked, or inputs must be provided under the 'Sequestration Data' section above."
+                    }, 
+                    "type": "label"
+                }, 
+                {
+                    "args_id": "carbon_price_units", 
+                    "defaultValue": 0, 
+                    "helpText": {
+                        "en": "The units for the price per unit of carbon type."
+                    }, 
+                    "id": "carbon_price_units", 
+                    "label": {
+                        "en": "Price in Terms of Metric Tons of"
+                    }, 
+                    "options": {
+                        "en": [
+                            "Carbon (C)", 
+                            "Carbon Dioxide (CO2)"
+                        ]
+                    }, 
+                    "required": true, 
+                    "type": "dropdown"
+                }, 
+                {
+                    "args_id": "V", 
+                    "dataType": "float", 
+                    "defaultValue": "43.00", 
+                    "helpText": {
+                        "en": "The price per unit ton of carbon or C02 as defined in the carbon price units."
+                    }, 
+                    "id": "value", 
+                    "label": {
+                        "en": "Value of Carbon (Price/Metric Ton)"
+                    }, 
+                    "required": true, 
+                    "type": "text", 
+                    "validText": "[0-9]+(\\.[0-9][0-9])?", 
+                    "validateAs": {
+                        "type": "number"
+                    }, 
+                    "width": 70
+                }, 
+                {
+                    "args_id": "r", 
+                    "dataType": "int", 
+                    "defaultValue": "7", 
+                    "helpText": {
+                        "en": "The discount rate as an integer percent."
+                    }, 
+                    "id": "discount_rate", 
+                    "label": {
+                        "en": "Market Discount in Price of Carbon (%)"
+                    }, 
+                    "required": true, 
+                    "type": "text", 
+                    "validText": "-?([0-9]+)?\\.[0-9]+", 
+                    "validateAs": {
+                        "type": "number"
+                    }, 
+                    "width": 70
+                }, 
+                {
+                    "args_id": "c", 
+                    "dataType": "float", 
+                    "defaultValue": "0", 
+                    "helpText": {
+                        "en": "The integer percent increase of the price of carbon per year."
+                    }, 
+                    "id": "rate_change", 
+                    "label": {
+                        "en": "Annual Rate of Change in Price of Carbon (%)"
+                    }, 
+                    "required": true, 
+                    "type": "text", 
+                    "validText": "-?([0-9]+)?\\.[0-9]+", 
+                    "validateAs": {
+                        "type": "number"
+                    }, 
+                    "width": 70
+                }
+            ], 
+            "id": "valuation_container", 
+            "label": {
+                "en": "Run Valuation Model"
+            }, 
+            "type": "container"
+        }
+    ], 
+    "height": 800, 
+    "id": "window", 
+    "label": {
+        "en": "InVEST Carbon Model (Biophysical and Valuation)"
+    }, 
+    "localDocURI": "../documentation/carbonstorage.html", 
+    "modelName": {
+        "en": "carbon_combined"
+    }, 
+    "targetScript": "natcap.invest.carbon.carbon_combined", 
+    "width": 700
+}

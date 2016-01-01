@@ -503,7 +503,8 @@ class Primitive(Element):
         return False
 
     def should_return(self):
-        LOGGER.debug('Checking whether should return: %s', self)
+        LOGGER.debug('Checking whether should return: %s (%s)',
+                     self, self.get_id('user'))
         # if element does not have an args_id, we're not supposed to return.
         # Therefore, return False.
         if 'args_id' not in self.config:
@@ -783,7 +784,11 @@ class Static(Primitive):
         return self.config['returnValue']
 
     def should_return(self):
-        return True  # static should ALWAYS return.
+        if 'args_id' in self.config:
+            # Static elements should always return, so long as there's an
+            # args_id.
+            return True
+        return False
 
     def state(self):
         return None

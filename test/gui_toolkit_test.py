@@ -303,7 +303,8 @@ class TextFieldTest(QtWidgetTest):
 class FileButtonTest(QtWidgetTest):
     def setUp(self):
         self._textfield = qt4.TextField('')
-        self.widget = qt4.FileButton('file', self._textfield)
+        self.widget = qt4.FileButton('file', self._textfield,
+                                     'Button Title')
 
     def test_file_selected(self):
         # can't actually get the file dialog's value programmatically, since the
@@ -316,7 +317,8 @@ class FileButtonTest(QtWidgetTest):
 class FolderButtonTest(FileButtonTest):
     def setUp(self):
         self._textfield = qt4.TextField('')
-        self.widget = qt4.FileButton('folder', self._textfield)
+        self.widget = qt4.FileButton('folder', self._textfield,
+                                     'Button Title')
 
 class DropdownTest(QtWidgetTest):
     def setUp(self):

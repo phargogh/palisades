@@ -14,11 +14,16 @@ import locale
 
 import palisades.i18n.translation
 
+
 class SignalNotFound(Exception):
     """A custom exception for when a signal was not found."""
     pass
 
-_EXPAND_DIR = lambda x: os.path.expanduser(os.path.join(*x))
+
+def _EXPAND_DIR(path_list):
+    return os.path.expanduser(os.path.join(*path_list))
+
+
 _SETTINGS_FOLDERS = {
     'Windows': _EXPAND_DIR(['~', 'Appdata', 'local', 'NatCap']),
     'Linux': _EXPAND_DIR(['~', '.natcap']),
@@ -26,8 +31,6 @@ _SETTINGS_FOLDERS = {
     '': tempfile.gettempdir(),  # if python doesn't know the platform.
 }
 SETTINGS_DIR = _SETTINGS_FOLDERS[platform.system()]
-
-
 LOGGER = logging.getLogger('utils')
 
 class RepeatingTimer(threading.Thread):

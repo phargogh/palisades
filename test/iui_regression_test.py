@@ -6,6 +6,18 @@ import unittest
 
 
 class WindEnergyRegressionTest(unittest.TestCase):
+    def tearDown(self):
+        # Forcing a reload of the i18n resources.  I don't yet know exactly why
+        # this needs to be done, but if I don't have these two lines here and
+        # I call this at the shell:
+        #   $ `nosetests test/iui_regression_test.py test/translation_test.py`
+        # I get a bunch of failures in translation_test.py where the wrong sets
+        # of languages are returned.  This sounds like a bug to me (seems to me
+        # that a module shouldn't be so stateful), but I can't find the cause
+        # just yet.
+        from palisades.i18n import translation
+        reload(translation)
+
     def setUp(self):
         from palisades import elements
         from palisades.i18n import translation
@@ -451,9 +463,6 @@ class WindEnergyRegressionTest(unittest.TestCase):
         self.gui = palisades.gui.get_application()
         self.gui.add_window(self.form)
         self.form.emit_signals()
-
-    def test_setup(self):
-        pass
 
     def test_aoi_enables_land_polygon(self):
         # The AOI element should be enabled.

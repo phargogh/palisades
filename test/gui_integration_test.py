@@ -15,21 +15,21 @@ from palisades.gui import core
 APPLICATION = core.ApplicationGUI()
 
 class UIObjectIntegrationTest(unittest.TestCase):
-    def setUp(self):
-        self.element = elements.Element({})
-        self.view = core.UIObject(self.element)
-
     def test_visibility(self):
+        element = elements.Element({"visible": True})
+        view = core.UIObject(element)
+
         # verify that when the core element's visibility changes, this view's
         # set_visible function is called.
         # this happens because the core element's set_visible function causes
         # the visibility_changed signal to be emitted, which then causes the
         # palisades.gui.core.UIObject.set_visible() function to be called,
         # which currently just raises NotYetImplemented.
-        self.assertRaises(core.NotYetImplemented, self.element.set_visible,
-            not self.element.is_visible())
+        with self.assertRaises(core.NotYetImplemented):
+            element.set_visible(False)
 
-        self.assertRaises(core.NotYetImplemented, self.view.set_visible, True)
+        with self.assertRaises(core.NotYetImplemented):
+            view.set_visible(True)
 
 # TODO: add a test that verifies behavior on validation completion.
 class PrimitiveIntegrationTest(UIObjectIntegrationTest):
@@ -232,7 +232,6 @@ class ContainerIntegrationTest(GroupIntegrationTest):
         # toolkit's collapsibility matches the element's collapsibility.
         self.assertEqual(self.element.is_collapsible(), False)
         self.assertEqual(self.view.widgets.is_collapsible(), False)
-        self.assertRaises(RuntimeError, self.view.widgets.set_collapsed, True)
 
         # to test collapsibility, I need to create a container that is
         # collapsible.
@@ -294,8 +293,6 @@ class ContainerIntegrationTest(GroupIntegrationTest):
         _check_interactivity(view.elements, False)
 
 
-
-
 class MultiIntegrationTest(ContainerIntegrationTest):
     def setUp(self):
         self.contained_elements = [
@@ -314,6 +311,9 @@ class MultiIntegrationTest(ContainerIntegrationTest):
         # there should be no contained elements by default, even though there
         # are some contained elements in the user-defined config.
         self.assertEqual(len(self.view.elements), 0)
+
+    def test_default_expanded(self):
+        self.assertFalse(self.element.is_collapsed())
 
     def test_add_element(self):
         # verify that there are no elements ... yet

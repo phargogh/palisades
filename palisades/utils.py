@@ -365,7 +365,8 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
         # slightly.  If the user has not defined return configuration options,
         # skip the tweaking since defaults are assumed internally.
         # Also, 'options' are now translateable.
-        if element_type in ['dropdown', 'checkbox']:
+        if (element_type in ['checkbox'] or
+                'dropdown' in unicode(element_type).lower()):
             try:
                 return_type = new_config['returns']
                 if isinstance(return_type, dict):  # when this is a mapValues dict

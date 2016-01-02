@@ -596,7 +596,7 @@ class Dropdown(LabeledPrimitive):
 
         self.set_default_config(self.defaults)
         assert self.config['returns']['type']in ['strings', 'ordinals'], (
-            'the "returns" type key must be either "strings" or "ordinals", '
+            'the "returns" type key must be one of ["strings", "ordinals"] '
             'not %s' % self.config['returns'])
 
         self.options = self.config['options']
@@ -649,10 +649,18 @@ class Dropdown(LabeledPrimitive):
         return_option = self.config['returns']['type']
         if return_option == 'strings':
             if isinstance(self._value, int):
-                return self.options[self._value]
-            return self._value
-        else:  # return option is 'ordinals'
-            return self._value
+                return_value = self.options[self._value]
+            return_value = self._value
+        else:
+            return_value = self._value
+
+        try:
+            return self.config['returns']['mapValues'][return_value]
+        except KeyError:
+            # If the user's config doesn't have 'mapValues' OR the config
+            # doesn't define a mapping for this value, return the original
+            # return value, defined by the config['returns']['type'] string.
+            return return_value
 
     def state(self):
         state_dict = {

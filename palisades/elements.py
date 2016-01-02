@@ -1076,6 +1076,7 @@ class Container(Group):
         self._collapsed = not self.config['defaultValue']
 
         self.toggled = Communicator()
+        self.set_collapsed(self._collapsed)
 
     def emit_signals(self):
         self.toggled.emit(self.is_collapsed())

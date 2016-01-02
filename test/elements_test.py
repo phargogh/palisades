@@ -1572,6 +1572,7 @@ class DropdownTest(LabeledPrimitiveTest):
         self.element.set_state(state)
         self.assertEqual(self.element.value(), 'No options specified')
 
+
 class CheckBoxTest(LabeledPrimitiveTest):
     def setUp(self):
         self.element = elements.CheckBox({})

@@ -601,18 +601,38 @@ class Dropdown(LabeledPrimitive):
 
         self.options = self.config['options']
         self._value = self.config['defaultValue']
+        self.options_changed = Communicator()
 
     def set_value(self, new_value):
-        assert type(new_value) is IntType, ('Dropdown index must be an '
-         'int, %s found' % new_value)
-        assert new_value >= 0, 'Dropdown index must be >= 0'
-        assert new_value < len(self.options), 'Dropdown index must exist'
+        if isinstance(new_value, int):
+            assert new_value >= -1, 'Dropdown index must be >= -1, not %s' % new_value
+            assert new_value <= len(self.options), 'Dropdown index must exist'
+        elif isinstance(new_value, basestring):
+            assert new_value in self.options, 'Value not in options %s' % self.options
+
         LabeledPrimitive.set_value(self, new_value)
+
+    def set_options(self, options_list, new_value=None):
+        if self.options != options_list:
+            self.options = options_list
+
+            try:
+                if new_value is None:
+                    self._value = self.config['defaultValue']
+                else:
+                    self._value = new_value
+            except (AssertionError, ValueError) as error:
+                # Default value must be a valid index into the new options
+                # list or must be a string in that list.  If this is not the
+                # case, then we'll reset the index to -1 (unset).
+                self.set_value(-1)
+            self.options_changed.emit(options_list)
 
     def current_index(self):
         """Return the current index (an int) of the dropdown."""
-        if type(self._value) is IntType:
+        if isinstance(self._value, int):
             return self._value
+
         try:
             return self.options.index(self._value)
         except ValueError:
@@ -622,13 +642,13 @@ class Dropdown(LabeledPrimitive):
     def value(self):
         # if there are no options to select or the user has not selected an
         # option, return None.
-        if len(self.options) is 0 or self._value is -1:
+        if len(self.options) == 0 or self._value == -1:
             return None
 
         # get the value of the currently selected option.
         return_option = self.config['returns']['type']
         if return_option == 'strings':
-            if type(self._value) is IntType:
+            if isinstance(self._value, int):
                 return self.options[self._value]
             return self._value
         else:  # return option is 'ordinals'
@@ -640,6 +660,78 @@ class Dropdown(LabeledPrimitive):
             'is_hidden': self.is_hidden()
         }
         return state_dict
+
+
+class TableDropdown(Dropdown):
+    defaults = {
+        'options': ['No options specified'],
+        'defaultValue': 0,
+        'validateAs': {'type': 'disabled'},
+        'enabled': False,  # disable by default, until enabled.
+        'label': u'',
+        'hideable': False,
+        'required': False,
+        'helpText': "",
+        'returns': {
+            'ifDisabled': False,
+            'ifEmpty': False,
+            'ifHidden': False,
+            'type': 'strings'
+        },
+    }
+    def __init__(self, configuration):
+        Dropdown.__init__(self, configuration)
+        self.set_default_config(self.defaults)
+
+    def load_columns(self, filepath):
+        raise NotImplementedError
+
+    def state(self):
+        state_dict = {
+            'current_index': self.current_index(),
+            'current_text': self.options[self.current_index()],
+            'is_hidden': self.is_hidden(),
+        }
+        return state_dict
+
+    def set_state(self, state_dict):
+        self.set_value(state['current_text'])
+        self.set_hidden(state['is_hidden'])
+
+
+class OGRFieldDropdown(TableDropdown):
+    defaults = {
+        'options': ['No options specified'],
+        'defaultValue': 0,
+        'validateAs': {'type': 'disabled'},
+        'enabled': False,  # disable by default, until enabled.
+        'label': u'',
+        'hideable': False,
+        'required': False,
+        'helpText': "",
+        'returns': {
+            'ifDisabled': False,
+            'ifEmpty': False,
+            'ifHidden': False,
+            'type': 'strings'
+        },
+    }
+    def __init__(self, configuration):
+        TableDropdown.__init__(self, configuration)
+        self.set_default_config(self.defaults)
+
+    def load_columns(self, filepath):
+        from osgeo import ogr
+        vector = ogr.Open(filepath)
+        if not vector:
+            self.set_options([])
+            return
+
+        layer = vector.GetLayer()
+        fieldnames = [field.GetName() for field in layer.schema]
+        print 'FIELDNAMES', fieldnames
+        self.set_options(fieldnames, new_value=self.config['defaultValue'])
+
 
 class Text(LabeledPrimitive):
     defaults = {
@@ -858,6 +950,7 @@ class Group(Element):
             'hidden': Static,
             'label': Label,
             'dropdown': Dropdown,
+            'OGRFieldDropdown': OGRFieldDropdown,
             'container': Container,
             'checkbox': CheckBox,
             'multi': Multi,

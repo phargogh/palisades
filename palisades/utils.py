@@ -112,6 +112,7 @@ def decode_string(bytestring):
     LOGGER.warn("Wasn't able to decode string %s" % bytestring)
     return bytestring
 
+
 def apply_defaults(configuration, defaults, skip_duplicates=True,
         cleanup=False, old_defaults=None):
     """Take the input configuration and apply default values if and only if the
@@ -130,6 +131,36 @@ def apply_defaults(configuration, defaults, skip_duplicates=True,
         should be considered.
 
     Returns a dictionary with rendered default values."""
+
+    primitive_types = [int, float, basestring, str, unicode]
+    iterable_types = [list, dict]
+
+    def merge(a, b, path=None):
+        "merges b into a"
+        if path is None: path = []
+        for key in b:
+            if key in a:
+                if isinstance(a[key], dict) and isinstance(b[key], dict):
+                    merge(a[key], b[key], path + [str(key)])
+                elif a[key] == b[key]:
+                    pass # same leaf value
+                elif ((type(a[key]) in primitive_types and
+                        type(b[key]) in primitive_types) or
+                        (type(a[key] in iterable_types) and
+                         type(b[key] in iterable_types))):
+                    # When types are both primitive or both iterable but
+                    # values differ, use the user's value.
+                    pass
+                else:
+                    raise TypeError('Conflict at %s' %
+                                    '.'.join(path + [str(key)]))
+            else:
+                a[key] = b[key]
+        return a
+
+    #return merge(configuration, defaults)
+
+
 
 
     # Sanitize old_defaults for use later.
@@ -237,6 +268,12 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
 
     # TODO: make this SAFE for OGRDropdown elements.
     connections = {}  # dict mapping {trigger_id: [(operation, target_id)]}
+    def add_connection(palisades_op, trigger, target_id):
+        op_tuple = (palisades_op, target_id)
+        try:
+            connections[trigger].append(op_tuple)
+        except KeyError:
+            connections[trigger] = [op_tuple]
 
     iui_ops = {  # dict mapping IUI ops to palisades equivalents
         'enabledBy': 'enables',
@@ -251,22 +288,34 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
         else:
             for connectivity_op in iui_ops.keys():
                 if connectivity_op in element:
+                    # palisades_op represneents the palisades shortform signal
+                    # type (enables, disables, set_required, etc.)
                     palisades_op = iui_ops[connectivity_op]
+
                     trigger_id = element[connectivity_op]
                     target_id = element['id']
 
                     # requiredIf triggers are a list.  Conform to this.
-                    if connectivity_op not in ['requiredIf']:
-                        trigger_id_list = [trigger_id]
-                    else:
+                    if connectivity_op in ['requiredIf']:
                         trigger_id_list = trigger_id
+                    else:
+                        trigger_id_list = [trigger_id]
 
+                    # OGR/CSV dropdowns in IUI use the 'enabledBy' key to serve
+                    # several purposes: enable the dropdown AND fetch the
+                    # value of the table file from the enabling element.
+                    # This allows the element that enables the table dropdown
+                    # to have two signals, both pointint to the table dropdown.
+                    if ((connectivity_op == 'enabledBy') and
+                            (element['type'] in ['CSVFieldDropdown',
+                                                 'OGRFieldDropdown'])):
+                        add_connection(palisades_op, trigger_id, target_id)
+                        palisades_op = 'populate_tabledropdown'
+
+                    # This is iterable because requiredIf might well have many
+                    # elements that it links to.
                     for trigger in trigger_id_list:
-                        op_tuple = (palisades_op, target_id)
-                        try:
-                            connections[trigger].append(op_tuple)
-                        except KeyError:
-                            connections[trigger] = [op_tuple]
+                        add_connection(palisades_op, trigger, target_id)
 
     _locate_interactivity(iui_config)
 
@@ -364,6 +413,7 @@ def expand_signal(shortform_signal):
         "enables": ("satisfaction_changed", "set_enabled"),
         "disables": ("satisfaction_changed", "set_disabled"),
         "set_required": ("satisfaction_changed", "set_conditionally_required"),
+        "populate_tabledropdown": ("value_changed", "load_columns"),
     }
 
     try:

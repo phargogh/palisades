@@ -8,6 +8,7 @@ import os
 os.environ['QT_API'] = 'PyQt4'
 
 import palisades.gui
+from palisades import elements
 from palisades.gui import qt4 as toolkit
 from palisades.validation import V_ERROR
 from palisades.validation import V_PASS
@@ -132,6 +133,8 @@ class GroupGUI(UIObject):
             'Label': LabelGUI,
             'Static': None,  # None means no GUI display.
             'Dropdown': DropdownGUI,
+            'TableDropdown': DropdownGUI,
+            'OGRFieldDropdown': DropdownGUI,
             'Container': ContainerGUI,
             'CheckBox': CheckBoxGUI,
             'Multi': MultiGUI,
@@ -275,6 +278,7 @@ class PrimitiveGUI(UIObject):
         self.widgets = []
         self._visible = True
         self._enabled = True
+        self.set_enabled(self.element.is_enabled())
 
     def set_visible(self, is_visible):
         self._visible = is_visible
@@ -316,6 +320,9 @@ class LabeledPrimitiveGUI(PrimitiveGUI):
             toolkit.Empty(),
             self._help_button,
         ]
+        # We modified local widgets, so we need to restore the correct enable
+        # state
+        self.set_enabled(self.element.is_enabled())
 
     # TODO: make this set the active widget.
     # I'm thinking of a function to set the active input widget, but you could
@@ -449,11 +456,35 @@ class DropdownGUI(LabeledPrimitiveGUI):
     def __init__(self, core_element):
         LabeledPrimitiveGUI.__init__(self, core_element)
 
+        if isinstance(core_element, elements.TableDropdown):
+            # TableDropDowns won't have their columns until they are loaded
+            # from their target file.
+            current_index = -1
+        else:
+            current_index = self.element.current_index()
+
         self._dropdown = toolkit.Dropdown(self.element.options,
-            self.element.current_index())
+            current_index)
         self.set_widget(2, self._dropdown)
 
         self._dropdown.value_changed.register(self.element.set_value)
+        self.element.options_changed.register(self._load_options)
+
+        # We modified local widgets, so we need to restore the correct enable
+        # state
+        self.set_enabled(self.element.is_enabled())
+
+    def _load_options(self, new_options):
+        self._dropdown.load_options(new_options)
+        try:
+            current_index = self.element.current_index()
+        except ValueError as e:
+            print e
+            current_index = -1
+
+        print 'OPTIONS', current_index
+        self._dropdown.set_index(current_index)
+        self.set_enabled(self.element.is_enabled())
 
 class LabelGUI(UIObject):
     def __init__(self, core_element):

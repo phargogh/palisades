@@ -797,8 +797,7 @@ class Dropdown(QtGui.QComboBox, QtWidget):
     def __init__(self, options, default_value):
         QtGui.QComboBox.__init__(self)
         QtWidget.__init__(self)
-        for option in options:
-            self.addItem(option)
+        self.load_options(options)
 
         # create the value_changed communicator and connect the
         # current_index_changed slot.  the slot passes the int index of the new
@@ -814,6 +813,12 @@ class Dropdown(QtGui.QComboBox, QtWidget):
 
     def set_index(self, new_index):
         self.setCurrentIndex(new_index)
+
+    def load_options(self, options_list):
+        self.clear()
+        for option in options_list:
+            self.addItem(option)
+
 
 class InfoDialog(QtGui.QDialog):
     def __init__(self):

@@ -1394,6 +1394,20 @@ class DropdownTest(LabeledPrimitiveTest):
     def setUp(self):
         self.element = elements.Dropdown({})
 
+    def test_signals(self):
+        expected_signals = [
+            'config_changed',
+            'hidden_toggled',
+            'interactivity_changed',
+            'options_changed',
+            'satisfaction_changed',
+            'validation_completed',
+            'validity_changed',
+            'value_changed',
+            'visibility_changed'
+        ]
+        self.assertEqual(sorted(self.element.signals), sorted(expected_signals))
+
     def test_default_config(self):
         expected_defaults = {
             'defaultValue': 0,
@@ -1455,6 +1469,7 @@ class DropdownTest(LabeledPrimitiveTest):
         """Assert that the correct restrictions are in place on inputs."""
         config = {
             'options': ['a', 'b', 'c'],
+            'returns': {'type': 'strings'},
         }
         dropdown = elements.Dropdown(config)
 
@@ -1467,12 +1482,12 @@ class DropdownTest(LabeledPrimitiveTest):
         self.assertEqual(dropdown.value(), 'b')
 
         # Try to set the value to an illegitimate index
-        self.assertRaises(AssertionError, dropdown.set_value, 'a')
+        self.assertRaises(AssertionError, dropdown.set_value, 'z')
         self.assertRaises(AssertionError, dropdown.set_value, {})
         self.assertRaises(AssertionError, dropdown.set_value,
             len(dropdown.options) + 2)
         self.assertRaises(AssertionError, dropdown.set_value, [])
-        self.assertRaises(AssertionError, dropdown.set_value, -1)
+        self.assertRaises(AssertionError, dropdown.set_value, -2)
         self.assertRaises(AssertionError, dropdown.set_value, -10)
 
     def test_get_value(self):

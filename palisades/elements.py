@@ -609,6 +609,9 @@ class Dropdown(LabeledPrimitive):
             assert new_value <= len(self.options), 'Dropdown index must exist'
         elif isinstance(new_value, basestring):
             assert new_value in self.options, 'Value not in options %s' % self.options
+        else:
+            raise AssertionError(('Dropdown value type not '
+                                  'recognized: {ctype}').format(ctype=type(new_value)))
 
         LabeledPrimitive.set_value(self, new_value)
 
@@ -650,7 +653,8 @@ class Dropdown(LabeledPrimitive):
         if return_option == 'strings':
             if isinstance(self._value, int):
                 return_value = self.options[self._value]
-            return_value = self._value
+            else:
+                return_value = self._value
         else:
             return_value = self._value
 

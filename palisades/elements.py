@@ -1076,7 +1076,12 @@ class Container(Group):
         self._collapsed = not self.config['defaultValue']
 
         self.toggled = Communicator()
-        self.set_collapsed(self._collapsed)
+
+        try:
+            self.set_collapsed(self._collapsed)
+        except InteractionError:
+            # When the container is not collapsible
+            pass
 
     def emit_signals(self):
         self.toggled.emit(self.is_collapsed())

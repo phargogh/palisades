@@ -1,20 +1,21 @@
 import distutils.sysconfig
-from distutils.core import setup
-from distutils import cmd
+from setuptools import setup
+from setuptools import Command
 from distutils.command.install_data import install_data as _install_data
 from distutils.command.build import build as _build
-from distutils.command.build_py import build_py as _build_py
-from distutils.command.sdist import sdist as _sdist
 import os
 import glob
-import traceback
+
+import natcap.versioner
 
 import palisades
 import palisades.i18n.msgfmt
 
+
 SITE_PACKAGES = distutils.sysconfig.get_python_lib()
 
-class build_translations(cmd.Command):
+
+class build_translations(Command):
     description = 'Compile .po files to .mo files'
     user_options = []
 
@@ -41,10 +42,12 @@ class build_translations(cmd.Command):
                     print 'Compiling %s to %s' % (src, dest)
                     palisades.i18n.msgfmt.make(src, dest)
 
+
 class build(_build):
     sub_commands = _build.sub_commands + [('build_trans', None)]
     def run(self):
         _build.run(self)
+
 
 class install_data(_install_data):
     def run(self):
@@ -56,45 +59,20 @@ class install_data(_install_data):
             self.data_files.append((lang_dir, [lang_file]))
         _install_data.run(self)
 
-class CustomPythonBuilder(_build_py):
-    """Custom python build step for distutils.  Builds a python distribution in
-    the specified folder ('build' by default) and writes the adept version
-    information to the temporary source tree therein."""
-    def run(self):
-        _build_py.run(self)
-
-        # Write version information (which is derived from the adept mercurial
-        # source tree) to the build folder's copy of adept.__init__.
-        filename = os.path.join(self.build_lib, 'palisades', '__init__.py')
-        print 'Writing version data to %s' % filename
-        palisades.versioning.write_build_info(filename)
-
-class CustomSdist(_sdist):
-    """Custom source distribution builder.  Builds a source distribution via the
-    distutils sdist command, but then writes the adept version information to
-    the temp source tree before everything is archived for distribution."""
-    def make_release_tree(self, base_dir, files):
-        _sdist.make_release_tree(self, base_dir, files)
-
-        # Write version information (which is derived from the adept mercurial
-        # source tree) to the build folder's copy of adept.__init__.
-        filename = os.path.join(base_dir, 'palisades', '__init__.py')
-        print 'Writing version data to %s' % filename
-        palisades.versioning.write_build_info(filename)
 
 icon_dir = os.path.join(SITE_PACKAGES, 'palisades', 'gui', 'icons')
 data_files = [(icon_dir, glob.glob('palisades/gui/icons/*.png'))]
 
 setup(
-    name      = 'palisades',
-    version   = palisades.__version__,
-    packages  = ['palisades', 'palisades.gui', 'palisades.i18n'],
-    license   = 'Apache',
-    data_files = data_files,
-    cmdclass  = {
+    name='palisades',
+    packages=['palisades', 'palisades.gui', 'palisades.i18n'],
+    license='3-clause BSD',
+    data_files=data_files,
+    version=natcap.versioner.parse_version(),
+    natcap_version='palisades/version.py',
+    cmdclass={
         'build': build,
         'build_trans': build_translations,
-        'build_py': CustomPythonBuilder,
-        'sdist': CustomSdist,
-        'install_data': install_data},
+        'install_data': install_data
+    },
 )

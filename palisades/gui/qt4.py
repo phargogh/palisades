@@ -501,15 +501,30 @@ class ValidationButton(InformationButton):
 
         return title + message + body + width_table
 
+
 class Label(QtGui.QLabel, QtWidget):
-    def __init__(self, label_text):
+    def __init__(self, label_text, styles=None):
         QtWidget.__init__(self)
         QtGui.QLabel.__init__(self, label_text)
         self.setTextFormat(QtCore.Qt.RichText)
         self.setWordWrap(True)
 
+        if styles is not None:
+            self.set_styles(styles)
+
+    def set_label(self, label_text):
+        self.setText(label_text)
+
+    def set_styles(self, styles):
+        styles_keys = ['{k}: {v}'.format(k=k, v=v) for (k, v)
+                       in styles.iteritems()]
+        styles_string = 'QLabel { {styles} }'.format(
+            styles='; '.join(styles=styles_keys))
+        self.setStyleSheet(styles_string)
+
     def is_visible(self):
         return self.isVisible()
+
 
 class ElementLabel(QtGui.QLabel, QtWidget):
     error_changed = Signal(bool)

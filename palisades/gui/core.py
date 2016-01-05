@@ -491,13 +491,21 @@ class DropdownGUI(LabeledPrimitiveGUI):
 class LabelGUI(UIObject):
     def __init__(self, core_element):
         UIObject.__init__(self, core_element)
-        self.widgets = toolkit.Label(self.element.label())
+        self.widgets = toolkit.Label(self.element.label(),
+                                     core_element.styles())
+        self.element.label_changed.register(self._reload_label)
+        self.element.styles_changed.register(self._reload_label)
 
     def set_visible(self, is_visible):
         self.widgets.set_visible(is_visible)
 
     def set_enabled(self, is_enabled):
         self.widgets.set_enabled(is_enabled)
+
+    def _reload_label(self, event_data=None):
+        self.widgets.set_styles(self.element.styles())
+        self.widgets.set_label(self.element.label())
+
 
 class FormGUI():
     LOG_FMT = "%(asctime)s %(name)-18s %(levelname)-8s %(message)s"

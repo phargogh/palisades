@@ -912,12 +912,34 @@ class Label(Static):
     def __init__(self, configuration):
         Static.__init__(self, configuration)
         new_defaults = {
+            'style': None,
             'label': ''
         }
         self.set_default_config(new_defaults)
 
+        self._label = self.config['label']
+        self._styles = self.config['style']
+        self.label_changed = Communicator()
+        self.styles_changed = Communicator()
+
     def label(self):
-        return self.config['label']
+        return self._label
+
+    def set_label(self, new_label):
+        if self._label != new_label:
+            self._label = new_label
+            self.label_changed.emit(new_label)
+
+    def styles(self):
+        return self._styles
+
+    def set_styles(self, new_styles):
+        assert type(new_styles) == dict, ('new_styles must be a dict, not a '
+                                          '%s') % type(new_styles)
+
+        if new_styles != self._styles:
+            self._styles = new_styles
+            self.styles_changed.emit(new_styles)
 
     def state(self):
         return

@@ -1024,10 +1024,11 @@ class Group(Element):
             Returns nothing."""
         for element_config in elements:
             try:
-                new_element = self._registrar[element_config['type']](element_config)
+                new_element_cls = self._registrar[element_config['type']]
             except KeyError as error:
                 raise KeyError('%s not recognized as an acceptable element type' % error)
-            LOGGER.debug('Creating new element %s', new_element)
+            else:
+                new_element = new_element_cls(element_config)
 
             self._add_element(new_element)
 

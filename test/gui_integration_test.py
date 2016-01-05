@@ -1,18 +1,8 @@
 import unittest
-import os
-import time
-from types import ListType
-
-import mock
-
-from PyQt4.QtTest import QTest
 
 from palisades import elements
 from palisades.gui import core
 
-# view for the GUI layer
-
-APPLICATION = core.ApplicationGUI()
 
 class UIObjectIntegrationTest(unittest.TestCase):
     def test_visibility(self):

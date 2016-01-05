@@ -158,10 +158,7 @@ def apply_defaults(configuration, defaults, skip_duplicates=True,
                 a[key] = b[key]
         return a
 
-    #return merge(configuration, defaults)
-
-
-
+    # return merge(configuration, defaults)
 
     # Sanitize old_defaults for use later.
     if old_defaults is None:
@@ -266,7 +263,6 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
     # extracted here, because IUI and palisades have very different
     # implementations of inter-element communication.
 
-    # TODO: make this SAFE for OGRDropdown elements.
     connections = {}  # dict mapping {trigger_id: [(operation, target_id)]}
     def add_connection(palisades_op, trigger, target_id):
         op_tuple = (palisades_op, target_id)

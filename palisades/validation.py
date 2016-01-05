@@ -10,17 +10,8 @@ import time
 import threading
 import traceback
 
-try:
-    from osgeo import ogr
-except ImportError:
-    import osgeo.ogr as ogr
-
-try:
-    from osgeo import gdal
-except ImportError:
-    import osgeo.gdal as gdal
-
-from dbfpy import dbf
+from osgeo import gdal
+from osgeo import ogr
 
 from palisades.utils import Communicator
 from palisades.utils import RepeatingTimer
@@ -30,22 +21,6 @@ V_PASS = None
 V_FAIL = 'fail'
 V_ERROR = 'error'
 
-def get_fields(feature):
-    """Return a dict with all fields in the given feature.
-
-        feature - an OGR feature.
-
-        Returns an assembled python dict with a mapping of
-        fieldname -> fieldvalue"""
-
-    fields = {}
-    for i in range(feature.GetFieldCount()):
-        field_def = feature.GetFieldDefnRef(i)
-        name = field_def.GetNameRef()
-        value = feature.GetField(i)
-        fields[name] = value
-
-    return fields
 
 # taken from iui/registrar.py
 class Registrar(object):
@@ -62,7 +37,7 @@ class Registrar(object):
         except KeyError: #key not in self.map
             return None
         except ValueError as e:
-            #This handles the case where a type is a numeric value but doens't cast 
+            #This handles the case where a type is a numeric value but doens't cast
             #correctly.  In that case what is the value of an empty string?  Perhaps
             #it should be NaN?  Here we're returning 0.  James and Rich arbitrarily
             #decided this on 5/16/2012, there's no other good reason.
@@ -312,7 +287,7 @@ class ValidationAssembler(object):
         element identified by id, where the element itself depends on the
         context."""
 
-        return 0
+        raise NotImplementedError
 
     def _is_primitive(self, valid_dict):
         """Check to see if a validation dictionary is a primitive, as defined by
@@ -677,7 +652,8 @@ class TableChecker(FileChecker, ValidationAssembler):
 
             for row in table:
                 for field in restricted_fields:
-                    assembled_dict = self.assemble(row[field], restriction['validateAs'])
+                    field_value = row['field']
+                    assembled_dict = self.assemble(field_value, restriction['validateAs'])
 
                     error = None
                     if assembled_dict['type'] == 'number':
@@ -818,20 +794,18 @@ class OGRChecker(TableChecker):
                 return 'Not all features are ' + type_string
 
     def _get_fieldnames(self):
-        layer_def = self.layer.GetLayerDefn()
-        num_fields = layer_def.GetFieldCount()
-
-        field_list = []
-        for index in range(num_fields):
-            field_def = layer_def.GetFieldDefn(index)
-            field_list.append(field_def.GetNameRef())
-
-        return field_list
+        fieldnames = [f.GetName() for f in self.file.GetLayer().schema]
+        return fieldnames
 
     def _build_table(self):
         table_rows = []
-        for feature in self.layer:
-            table_rows.append(get_fields(feature))
+        fieldnames = self._get_fieldnames()
+        for feature in self.file.GetLayer():
+            row = {}
+            for fieldname in fieldnames:
+                row[fieldname] = feature.GetField(fieldname)
+            table_rows.append(row)
+            print row
 
         return table_rows
 
@@ -841,23 +815,27 @@ class DBFChecker(TableChecker):
 
         #Passing in the value of readOnly, because we might only need to
         #check to see if it's available for reading
-        self.file = dbf.Dbf(self.uri, readOnly = read_only)
+        self.file = ogr.Open(self.uri)
 
-        if not isinstance(self.file, dbf.Dbf):
+        if self.file is None:
             return str('Must be a DBF file')
 
     def _get_fieldnames(self):
-        return self.file.fieldNames
+        layer = self.file.GetLayer()
+        fieldnames = [f.GetName() for f in layer.schema]
+        return fieldnames
 
     def _build_table(self):
         table_rows = []
-
-        for record in range(self.file.recordCount):
+        layer = self.file.GetLayer()
+        fieldnames = self._get_fieldnames()
+        for feature in layer:
             row = {}
-            for fieldname in self._get_fieldnames():
-                row[fieldname] = self.file[record][fieldname]
-
+            for fieldname in fieldnames:
+                row[fieldname] = feature.GetField(fieldname)
             table_rows.append(row)
+            print row
+        layer.ResetReading()
 
         return table_rows
 
@@ -1000,7 +978,7 @@ class PrimitiveChecker(Checker):
             # If the user has not provided a regular expression, we should use
             # the default regular expression instead.
             user_pattern = self.default_regexp
-        
+
         pattern = re.compile(user_pattern, flag)
         value = valid_dict['value']  # the value to compare against our regex
         if pattern.match(str(value)) == None:
@@ -1118,7 +1096,7 @@ class FlexibleTableChecker(TableChecker):
         except IOError as e:
             return str("IOError: %s" % str(e))
         except (csv.Error, ValueError) as e:
-            return str(e)            
+            return str(e)
 
     def _build_table(self):
         # Forward the call to the checker for the particular table type.

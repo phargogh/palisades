@@ -4,11 +4,9 @@ invest_natcap.iui.palisades.validation."""
 
 import unittest
 import os
-import pdb
 import platform
 import shutil
 
-import palisades
 from palisades import validation
 
 TEST_DATA = os.path.join(os.path.dirname(__file__), 'data')
@@ -419,8 +417,11 @@ class DBFCheckerTester(CheckerTester):
 
             self.validate_as['restrictions'] = [num_restriction,
                                                 const_restriction,
-                                                field_restriction,
                                                 str_restriction]
+            self.assertNoError()
+
+            self.validate_as['restrictions'] = [field_restriction]
+            print self.validate_as
             self.assertNoError()
 
 class UnicodeDBFCheckerTester(DBFCheckerTester):

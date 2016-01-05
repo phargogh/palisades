@@ -118,7 +118,7 @@ class UIObject(object):
     def set_enabled(self, is_enabled):
         """Update the element's interactivity in the toolkit"""
         _print_obj_debug(self)
-        raise NotYetImplemented
+        raise NotImplementedError
 
 class GroupGUI(UIObject):
     def __init__(self, core_element, registrar=None):
@@ -180,7 +180,7 @@ class GroupGUI(UIObject):
         except TypeError as error:
             # Happens when the element's GUI representation in registry is
             # None, meaning that there should not be a GUI display.
-            LOGGER.exception('Error when creating the view for a %s: %s',
+            LOGGER.debug('No graphical representation known for %s: %s',
                 element_classname, error)
             new_element = None
 

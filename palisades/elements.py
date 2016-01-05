@@ -58,6 +58,7 @@ class Application(object):
         self.config_langs = allowed_langs
         self._window = Form(configuration)
         self._window.set_langs(allowed_langs)
+        self._window.emit_signals()
 
 class Element(object):
     """Element contains the core logic and interactivity required by all
@@ -595,7 +596,7 @@ class Dropdown(LabeledPrimitive):
             'label']
 
         self.set_default_config(self.defaults)
-        assert self.config['returns']['type']in ['strings', 'ordinals'], (
+        assert self.config['returns']['type'] in ['strings', 'ordinals'], (
             'the "returns" type key must be one of ["strings", "ordinals"] '
             'not %s' % self.config['returns'])
 

@@ -7,7 +7,6 @@ import platform
 import logging
 import subprocess
 
-import PyQt4
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 Signal = QtCore.pyqtSignal
@@ -518,8 +517,8 @@ class Label(QtGui.QLabel, QtWidget):
     def set_styles(self, styles):
         styles_keys = ['{k}: {v}'.format(k=k, v=v) for (k, v)
                        in styles.iteritems()]
-        styles_string = 'QLabel { {styles} }'.format(
-            styles='; '.join(styles=styles_keys))
+        styles_string = 'QLabel {{ {styles} }}'.format(
+            styles='; '.join(styles_keys))
         self.setStyleSheet(styles_string)
 
     def is_visible(self):
@@ -1502,4 +1501,3 @@ class FormWindow(QtWidget, QtGui.QWidget):
 
     def add_widget(self, gui_object):
         self.input_pane.add_widget(gui_object)
-

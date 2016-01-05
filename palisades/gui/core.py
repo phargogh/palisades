@@ -1,9 +1,8 @@
 import logging
-from types import *
-import time
 import platform
 import subprocess
 import os
+import code
 
 os.environ['QT_API'] = 'PyQt4'
 
@@ -91,7 +90,7 @@ class ApplicationGUI(object):
                 pass
         raise KeyError(id)
 
-    def execute(self):
+    def execute(self, interactive=False):
         self.app.process_events()
         for window in self.windows:
             window.show()
@@ -101,7 +100,23 @@ class ApplicationGUI(object):
             self.splashscreen.show_message(_('Ready!'))
             self.splashscreen.finish(self.windows[0].window, 1)
 
-        self.app.execute()
+        if interactive:
+            code.interact(
+                banner=('Palisades Debug Shell\n'
+                        "Globals:\n"
+                        "  form - The form element object\n"
+                        "  gui  - The gui representation of the form\n"
+                        "NOTE: Terminating the shell terminates the "
+                        "application."),
+                local={
+                    'form': self.window.element,
+                    'gui': self.window
+                })
+        else:
+            self.app.execute()
+
+    def exit(self):
+        self.app.exit()
 
 class UIObject(object):
     def __init__(self, core_element):

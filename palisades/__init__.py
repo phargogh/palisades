@@ -2,11 +2,9 @@ import versioning
 import sys
 import glob
 import os
-import locale
 import json
 
 import palisades.i18n
-from palisades import utils
 _ = palisades.i18n.language.ugettext
 
 # The __version__ attribute MUST be set to 'dev'.  It is changed automatically
@@ -78,7 +76,7 @@ def locate_config(expected_uri):
     print found_json
     return found_json
 
-def launch(json_uri, splash_img=None, runner=None):
+def launch(json_uri, splash_img=None, runner=None, interactive=False):
     """Construct a core application instance based on the user-defined
     configuration file and then build a GUI instance off of that core
     application.  Once this latter component has been constructed, call its
@@ -90,6 +88,8 @@ def launch(json_uri, splash_img=None, runner=None):
             used.
         runner=None - a subclass of execution.PythonRunner class to use to run
             the application.  If None, execution.PythonRunner will be used.
+        interactive=False - A boolean.  If True, an interactive python shell
+            will be created in the current shell process.
 
     Returns nothing."""
     from palisades import elements
@@ -118,7 +118,7 @@ def launch(json_uri, splash_img=None, runner=None):
     gui_app.add_window(ui._window)
 
     print _('Starting application')
-    gui_app.execute()
+    gui_app.execute(interactive=interactive)
 
 def locate_dist_config():
     """Locate the distribution configration.  If the distribution does not have

@@ -1088,8 +1088,17 @@ class Container(Group):
             # When the container is not collapsible
             pass
 
+    def is_satisfied(self):
+        if self.is_enabled():
+            if self.is_collapsible() and not self.is_collapsed():
+                return True
+            elif not self.is_collapsible():
+                return True
+        return False
+
     def emit_signals(self):
         self.toggled.emit(self.is_collapsed())
+        Group.emit_signals(self)
 
     def set_display_label(self, display):
         assert type(display) is BooleanType, 'display must be True or False'

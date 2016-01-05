@@ -1007,6 +1007,75 @@ class ContainerTest(GroupTest):
         self.assertRaises(elements.InteractionError, self.element.set_collapsed,
             True)
 
+    def test_satisfaction_based_on_enabled_state(self):
+        from palisades import elements
+        config = {
+            'enabled': True,
+            'label': False,
+            'collapsible': False,
+        }
+        container = elements.Container(config)
+
+        self.assertTrue(container.is_enabled())
+        self.assertTrue(container.is_satisfied())
+
+        # disable the container; satisfaction, enabled state should change.
+        container.set_enabled(False)
+        self.assertFalse(container.is_enabled())
+        self.assertFalse(container.is_satisfied())
+
+    def test_satisfaction_based_on_enabled_state_collapsible(self):
+        from palisades import elements
+        config = {
+            'enabled': True,
+            'label': False,
+            'collapsible': True,
+        }
+        container = elements.Container(config)
+
+        self.assertTrue(container.is_enabled())
+        self.assertTrue(container.is_satisfied())
+
+        # disable the container; satisfaction, enabled state should change.
+        container.set_enabled(False)
+        self.assertFalse(container.is_enabled())
+        self.assertFalse(container.is_satisfied())
+
+    def test_satisfaction_based_on_collapsed_state(self):
+        from palisades import elements
+        config = {
+            'enabled': True,
+            'label': False,
+            'collapsible': True,
+        }
+        container = elements.Container(config)
+
+        self.assertFalse(container.is_collapsed())
+        self.assertTrue(container.is_satisfied())
+
+        # Collapse the container, satisfaction should change.
+        container.set_collapsed(True)
+        self.assertTrue(container.is_collapsed())
+        self.assertFalse(container.is_satisfied())
+
+    def test_satisfaction_based_on_collapsed_state_initially_collapsed(self):
+        from palisades import elements
+        config = {
+            'enabled': True,
+            'label': False,
+            'collapsible': True,
+            'defaultValue': False,
+        }
+        container = elements.Container(config)
+
+        self.assertTrue(container.is_collapsed())
+        self.assertFalse(container.is_satisfied())
+
+        # Collapse the container, satisfaction should change.
+        container.set_collapsed(False)
+        self.assertFalse(container.is_collapsed())
+        self.assertTrue(container.is_satisfied())
+
     def test_get_state(self):
         expected_state = {
             'enabled': self.element.is_enabled(),

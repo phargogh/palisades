@@ -382,6 +382,7 @@ class TextGUI(LabeledPrimitiveGUI):
         self._text_field.reset_requested.register(self._reset_value)
 
         self.element.validation_completed.register(self._update_validation)
+        self.set_enabled(self.element.is_enabled())
 
     def _reset_value(self, event=None):
         self.element.reset_value()
@@ -440,6 +441,7 @@ class FileGUI(TextGUI):
             self._text_field, self.element.config['label'])
         self._file_button.file_selected.register(self._file_selected)
         self.set_widget(3, self._file_button)
+        self.set_enabled(self.element.is_enabled())
 
     def _file_requested(self, event=None):
         if len(self.element.value()) == 0:

@@ -908,7 +908,24 @@ class Static(Primitive):
     def is_valid(self):
         return True
 
+
 class Label(Static):
+    STYLE_ALERT_GREEN = {
+        'padding': '15px',
+        'background-color': '#d4efcc',
+        'border': '2px solid #3e895b',
+    }
+    STYLE_ALERT_RED = {
+        'padding': '15px',
+        'background-color': '#ebabb6',
+        'border': '2px solid #a23332',
+    }
+    STYLE_ALERT_BLUE = {
+        'padding': '15px',
+        'background-color': '#62C5E4',
+        'border': '2px solid #005874',
+    }
+
     def __init__(self, configuration):
         Static.__init__(self, configuration)
         new_defaults = {

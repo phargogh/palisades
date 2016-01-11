@@ -1,7 +1,7 @@
 import os
-import threading
 import logging
 from types import *
+import re
 
 from palisades import fileio
 from palisades import utils
@@ -925,6 +925,11 @@ class Label(Static):
         'background-color': '#62C5E4',
         'border': '2px solid #005874',
     }
+    STYLE_ALERT_YELLOW = {
+        'padding': '15px',
+        'background-color': '#faa732',
+        'border': '2px solid #fbee50',
+    }
 
     def __init__(self, configuration):
         Static.__init__(self, configuration)
@@ -1577,10 +1582,11 @@ class Form():
 
     def lastrun_uri(self):
         """Fetch the URI for the internal lastrun save file."""
-        if palisades.release == 'null':
+        version = palisades.__version__
+        if not re.match('([0-9].){3}', version):
             version_str = 'dev'
         else:
-            version_str = palisades.__version__
+            version_str = version
         lastrun_filename = '%s_lastrun_%s.json' % (self._ui.config['modelName'],
             version_str)
 

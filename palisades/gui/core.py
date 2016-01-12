@@ -158,7 +158,7 @@ class GroupGUI(UIObject):
         }
 
         if registrar != None:
-            assert type(registrar) is DictType
+            assert isinstance(registrar, dict)
             registry.update(registrar)
 
         self.registrar = registry

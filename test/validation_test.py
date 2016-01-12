@@ -6,6 +6,7 @@ import unittest
 import os
 import platform
 import shutil
+import tempfile
 
 from palisades import validation
 
@@ -64,11 +65,18 @@ class CheckerTester(unittest.TestCase):
 class FileCheckerTester(CheckerTester):
     """Test the class palisades.validation.FileChecker"""
     def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        sample_file = os.path.join(VALIDATION_DATA, 'text_test_i18n.txt')
+        new_filepath = os.path.join(self.temp_dir, u'text_test_кибо.txt')
+        shutil.copy(sample_file, new_filepath)
         self.validate_as = {
             'type': 'file',
-            'value': os.path.join(VALIDATION_DATA, u'text_test_кибо.txt')
+            'value': new_filepath
         }
         self.checker = validation.FileChecker()
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
 
     def test_uri_exists(self):
         """Assert that the FileChecker can open a file."""

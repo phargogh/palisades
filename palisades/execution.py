@@ -4,9 +4,8 @@ import os
 import imp
 import datetime
 import sys
-import traceback
 import time
-from types import DictType
+import importlib
 
 from palisades.utils import Communicator
 from palisades.utils import RepeatingTimer
@@ -15,6 +14,7 @@ logging.basicConfig(format='%(asctime)s %(name)-18s %(threadName)-10s %(levelnam
      %(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %H:%M:%S ')
 
 LOGGER = logging.getLogger('')
+
 
 class ThreadFilter(logging.Filter):
     """When used, this filters out log messages that were recorded from other
@@ -65,6 +65,10 @@ def locate_module(module):
         Returns a tuple of (executeable module, module name)"""
 
     LOGGER.debug('Trying to import %s', module)
+    try:
+        importlib.import_module(module)
+    except ImportError:
+        LOGGER.debug('Importlib import failed: %s', module)
 
     if module in sys.modules:
         model = sys.modules[module]
@@ -84,13 +88,6 @@ def locate_module(module):
             # the resulting import will be for package only).
             # therefore, we need to import each level sequentially
             # TODO: test this
-
-#            try:
-#                imp.find_module(module)
-#            except ImportError:
-#                LOGGER.debug('Could not find module via imp')
-#            print module
-
             LOGGER.debug('Direct import failed, trying to split module')
             modules = module.split('.')
             model = __import__(modules[0])  # import base level
@@ -113,6 +110,7 @@ def locate_module(module):
         LOGGER.debug('Loading %s from PATH', model_name)
     LOGGER.debug('Model successfully loaded from %s', model.__file__)
     return (model, model_name)
+
 
 def _iui_style_import(module_list, path=None):
     """Search for and return an executable module object as long as the target
@@ -137,6 +135,7 @@ def _iui_style_import(module_list, path=None):
         return _iui_style_import(module_list[1:], imported_module.__path__)
     else:
         return imported_module
+
 
 def _get_module_from_path(module_list, path=None):
     """Search for and return an executable module object as long as the target
@@ -174,7 +173,8 @@ def _get_module_from_path(module_list, path=None):
     else:
         return imported_module
 
-#TODO: Need ability to run some things pre-run:
+
+# TODO: Need ability to run some things pre-run:
 #  * redirect temp folder to workspace
 #  * make the workspace
 #  * execute another script (such as the InVEST logger)

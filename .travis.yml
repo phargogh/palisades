@@ -9,10 +9,9 @@ before_install:
     - sudo apt-get update
     - sudo apt-get install python-qt4
     - sudo apt-get install gdal-bin libgdal1h python-gdal
+    - sudo pip install --upgrade natcap.versioner>=0.3.1 --egg --no-binary :all:
 
 install:
-    - wget http://ncp-dev.stanford.edu/~jdouglass/dbfpy-2.3.0.tar.gz
-    - pip install dbfpy-2.3.0.tar.gz 
     - python setup.py install
 
 script: nosetests test/validation_test.py

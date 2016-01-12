@@ -1026,11 +1026,11 @@ class CSVChecker(TableChecker):
 
         try:
             # using csv Sniffer not to see if it's a valid file, but to
-            # determine the dialect, the 1024 and example comes from its docpage
-            # https://docs.python.org/2/library/csv.html#csv.Sniffer
+            # determine the dialect.  csv.Sniffer requires that whole lines are
+            # provided.
             csv_file = open(self.uri, 'rbU')
             dialect = csv.Sniffer().sniff(
-                csv_file.read(1024), delimiters=";,")
+                '\n'.join(csv_file.readlines(1024)), delimiters=";,")
             csv_file.seek(0)
             self.file = csv.DictReader(csv_file, dialect=dialect)
         except IOError as e:

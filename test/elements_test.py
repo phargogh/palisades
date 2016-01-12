@@ -1368,7 +1368,9 @@ class LabelTest(ElementTest):
             'config_changed',
             'hidden_toggled',
             'interactivity_changed',
+            'label_changed',
             'satisfaction_changed',
+            'styles_changed',
             'validation_completed',
             'validity_changed',
             'value_changed',
@@ -1394,6 +1396,7 @@ class LabelTest(ElementTest):
             'hideable': False,
             'required': False,
             'validateAs': {'type': 'disabled'},
+            'style': None,
             'returns': {
                 'ifDisabled': False,
                 'ifEmpty': False,

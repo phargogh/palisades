@@ -1393,7 +1393,9 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.run_button.clicked.connect(self._run_pressed)
         self.quit_button.clicked.connect(self._quit_pressed)
 #        self.reset_button.clicked.connect(self.resetParametersToDefaults)
+        self.resize_window()
 
+    def resize_window(self, top_padding=100):
         #add the buttonBox to the window.
         self.layout().addWidget(self.button_box)
         self.close_confirmed = False
@@ -1410,7 +1412,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
 
         screen_height = screen_geometry.height() * 0.95
         # 100 pads the height for buttons, menu bars.
-        min_height = self.input_pane.minimumSizeHint().height() + 100
+        min_height = self.input_pane.minimumSizeHint().height() + top_padding
         if min_height > screen_height:
             height = screen_height
         else:

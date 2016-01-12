@@ -35,6 +35,7 @@ class ThreadFilter(logging.Filter):
             return True
         return False
 
+
 class ErrorQueueFilter(logging.Filter):
     """When used, this filters for log messages that have a user-defined log
     level or greated and tracks matching messages.
@@ -56,6 +57,7 @@ class ErrorQueueFilter(logging.Filter):
     def get_errors(self):
         return self._queue
 
+
 def locate_module(module):
     """Locate and import the requested module.
 
@@ -76,7 +78,7 @@ def locate_module(module):
         LOGGER.debug('Found %s in sys.modules', module)
     elif os.path.isfile(module):
         model = imp.load_source('model', module)
-       # Model name is name of module file, minus the extension
+        # Model name is name of module file, minus the extension
         model_name = os.path.splitext(os.path.basename(module))[0]
         LOGGER.debug('Loading %s from %s', model_name, model)
     else:
@@ -198,7 +200,7 @@ class PythonRunner():
             func_name='execute' - the function to be called on the loaded
                 module.  Defaults to 'execute' for IUI compatibility."""
 
-        assert type(args) is DictType, ('Args must be a dict, '
+        assert isinstance(args, dict), ('Args must be a dict, '
             '%s (%s) found instead' % (args, type(args)))
 
         module, module_name = locate_module(module_string)
@@ -250,6 +252,7 @@ class PythonRunner():
             self.finished.emit(self.executor.name)
             del self.executor
             self.executor = None
+
 
 class LogManager():
     LOG_FMT = "%(asctime)s %(name)-18s %(levelname)-8s %(message)s"
@@ -338,7 +341,6 @@ class LogManager():
         object."""
         self.logfile_handler.close()
         self.remove_log_handler(self.logfile_handler)
-        #LOGGER.removeHandler(self.logfile_handler)
 
 
 class Executor(threading.Thread):
@@ -380,7 +382,6 @@ class Executor(threading.Thread):
         self.failed = False
         self.exception = None
 
-
     def run(self):
         """Run the python script provided by the user with the arguments
         specified.  This function also prints the arguments to the logfile
@@ -413,6 +414,7 @@ class Executor(threading.Thread):
             LOGGER.info('Execution finished')
             self.log_manager.close()
 
+
 def format_time(seconds):
     """Render the integer number of seconds as a string.  Returns a string.
     """
@@ -428,4 +430,3 @@ def format_time(seconds):
     if minutes > 0:
         return "%sm %ss" % (minutes, seconds)
     return "%ss" % seconds
-

@@ -33,6 +33,7 @@ _SETTINGS_FOLDERS = {
 SETTINGS_DIR = _SETTINGS_FOLDERS[platform.system()]
 LOGGER = logging.getLogger('utils')
 
+
 class RepeatingTimer(threading.Thread):
     """A timer thread that calls a function after n seconds until the cancel()
     function is called."""
@@ -48,13 +49,11 @@ class RepeatingTimer(threading.Thread):
         self.finished.set()
 
     def run(self):
-        while True:
-            self.finished.wait(self.interval)
-            if not self.finished.is_set():
-                self.function()
-            else:
-                # If the thread has been cancelled, break out of the loop
-                break
+        # Interesting discussion on threading.event.wait() vs. time.sleep
+        # here: http://stackoverflow.com/a/29082411/299084
+        while not self.finished.wait(self.interval):
+            self.function()
+
 
 class Communicator(object):
     """Element represents the base class for all UI elements.  It focuses

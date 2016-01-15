@@ -169,32 +169,6 @@ class DefaultsTest(unittest.TestCase):
 
 class CoreTest(unittest.TestCase):
     """A test class for functions found in palisades.core."""
-    def test_apply_defaults(self):
-        defaults = {
-            'a': 'test_value',
-            'b': 'another'
-        }
-
-        test_configuration = {
-            0: 'something',
-            'a': 'custom_value',
-        }
-
-        expected_result = {
-            0: 'something',
-            'a': 'custom_value',
-            'b': 'another'
-        }
-        self.assertEqual(utils.apply_defaults(test_configuration, defaults),
-            expected_result)
-
-        duplicates_replaced_result = {
-            0: 'something',
-            'a': 'test_value',
-            'b': 'another',
-        }
-        self.assertEqual(utils.apply_defaults(test_configuration, defaults,
-            False), duplicates_replaced_result)
 
     def test_nested_defaults(self):
         defaults = {
@@ -224,72 +198,6 @@ class CoreTest(unittest.TestCase):
         }
         self.assertEqual(utils.apply_defaults(test_configuration, defaults),
             expected_result)
-
-    def test_default_config_update(self):
-        # a case where existing defaults are not overridden by user input.
-        test_configuration = {
-        }
-        first_defaults = {
-            0: {'hello': 'world'}
-        }
-        first_update = utils.apply_defaults(test_configuration, first_defaults)
-        self.assertEqual(first_update, {0: {'hello': 'world'}})
-
-        second_defaults = {
-            0: None
-        }
-
-        # add 3rd parameter=False to make this pass
-        second_update = utils.apply_defaults(first_update, second_defaults,
-            old_defaults=first_defaults)
-        self.assertEqual(second_update, {0: None})
-
-    def test_default_config_update_dicts(self):
-        test_configuration = {
-            'returns': {'some': 'value'},
-        }
-        first_defaults = {
-            'returns': {
-                'ifEmpty': True,
-                'ifNot': False,
-            }
-        }
-        first_update = utils.apply_defaults(test_configuration, first_defaults)
-        self.assertEqual(first_update, {
-            'returns': {
-                'some': 'value',
-                'ifEmpty': True,
-                'ifNot': False,
-            }
-        })
-
-        # Commenting this all out for now, as the update functionality is under
-        # development and buggy.
-        second_defaults = {
-            'returns': None,
-        }
-        second_update = utils.apply_defaults(
-            first_update, second_defaults, old_defaults=first_defaults, cleanup=True,
-            skip_duplicates=False)
-        self.assertEqual(second_update, {
-            'returns': {
-                'some': 'value',
-            }
-        })
-
-    def test_default_config_cleanup(self):
-        # verify cleaning up attributes not defined in defaults works.
-        test_config = {
-            'attribute': 'to delete',
-            'keep': 'this',
-        }
-        test_defaults = {
-            'keep': 'this line',
-        }
-
-        # add cleanup=True to make this pass
-        result = utils.apply_defaults(test_config, test_defaults, cleanup=True)
-        self.assertEqual(result, {'keep': 'this'})
 
     def test_convert_config(self):
         # take an IUI configuration object and convert it to palisades.

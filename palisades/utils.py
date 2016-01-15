@@ -374,6 +374,15 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
             except KeyError:
                 pass
 
+        # The 'dataType' value is now stored in the 'returns' dict.
+        if 'dataType' in new_config:
+            try:
+                new_config['returns']['type'] = new_config['dataType']
+            except KeyError:
+                new_config['returns'] = {'type': new_config['dataType']}
+            del new_config['dataType']
+
+
         if 'elements' in new_config:
             translated_elements_list = []
             for contained_config in new_config['elements']:

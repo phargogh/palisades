@@ -112,37 +112,33 @@ def decode_string(bytestring):
     return bytestring
 
 
-def apply_defaults(configuration, defaults, skip_duplicates=True,
-        cleanup=False, old_defaults=None):
-    """Take the input configuration and apply default values if and only if the
+def apply_defaults(configuration, defaults):
+    """Applies defaults to the configuration dict.
+
+    Take the input configuration and apply default values if and only if the
     configuration option was not specified by the user.
 
-    configuration - a python dictionary of configuration options
-    defaults - a python dictionary of default values.
-    skip_duplicates - a Boolean.  If true, keys found in the configuration
-        dictionary and in defaults wil be skipped.  If False, the defaults
-        dictionary will be blindly applied to the configuration.  Defaults to
-        True.
-    cleanup - a boolean.  indicates whether to remove entries from
-        configuration that are not in defaults.
-    old_defaults - a dictionary or None.  If a dictionary, it should be of the
-        current default dictionary.  If None, this indicates that no defaults
-        should be considered.
+    Parameters:
+        configuration - a python dictionary of configuration options
+        defaults - a python dictionary of default values.
 
-    Returns a dictionary with rendered default values."""
+    Returns:
+        A dict with rendered default values."""
 
     primitive_types = [int, float, basestring, str, unicode]
     iterable_types = [list, dict]
 
+    # a = user config
+    # b = defaults
     def merge(a, b, path=None):
         "merges b into a"
         if path is None: path = []
         for key in b:
             if key in a:
                 if isinstance(a[key], dict) and isinstance(b[key], dict):
-                    merge(a[key], b[key], path + [str(key)])
+                    a[key] = merge(a[key], b[key], path + [str(key)])
                 elif a[key] == b[key]:
-                    pass # same leaf value
+                    pass  # same leaf value
                 elif ((type(a[key]) in primitive_types and
                         type(b[key]) in primitive_types) or
                         (type(a[key] in iterable_types) and
@@ -157,44 +153,8 @@ def apply_defaults(configuration, defaults, skip_duplicates=True,
                 a[key] = b[key]
         return a
 
-    # return merge(configuration, defaults)
+    return merge(configuration, defaults)
 
-    # Sanitize old_defaults for use later.
-    if old_defaults is None:
-        old_defaults = {}
-
-    sanitized_config = configuration.copy()
-    for key, default_value in defaults.iteritems():
-        # If we find the current entry in the old_defaults dictionary AND the
-        # value is the same as the old default value, we know that the default
-        # value should be overridden with the new default value.
-        if key in old_defaults:
-            if old_defaults[key] == sanitized_config[key]:
-                sanitized_config[key] = default_value
-
-        try:
-            if type(default_value) is DictType:
-                default_value = apply_defaults(sanitized_config[key],
-                    default_value, cleanup=cleanup)
-                sanitized_config[key] = default_value
-        except:
-            # if the key is missing from the user's dictionary, we'll pass for
-            # now.  It's handled below.
-            pass
-
-        if skip_duplicates:
-            if key not in sanitized_config:
-                sanitized_config[key] = default_value
-        else:
-            sanitized_config[key] = default_value
-
-
-    if cleanup:
-        for sanitized_key in sanitized_config.keys():
-            if sanitized_key not in defaults:
-                del sanitized_config[sanitized_key]
-
-    return sanitized_config
 
 def save_dict_to_json(dictionary, uri, indent=None):
     """Save a python dictionary to JSON at the specified URI."""

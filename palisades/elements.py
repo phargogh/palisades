@@ -614,7 +614,7 @@ class Dropdown(LabeledPrimitive):
             'ifDisabled': False,
             'ifEmpty': False,
             'ifHidden': False,
-            'type': 'strings'
+            'type': 'string'
         },
     }
 
@@ -623,9 +623,9 @@ class Dropdown(LabeledPrimitive):
         self._hashable_config = ['hideable', 'validateAs', 'options',
             'label']
 
-        assert self.config['returns']['type'] in ['strings', 'ordinals'], (
-            'the "returns" type key must be one of ["strings", "ordinals"] '
-            'not %s' % self.config['returns'])
+        assert self.config['returns']['type'] in ['string', 'ordinal'], (
+            'the "returns" type key must be one of ["string", "ordinal"] '
+            'not %s' % self.config['returns']['type'])
 
         self.options = self.config['options']
         self._value = self.config['defaultValue']
@@ -678,7 +678,7 @@ class Dropdown(LabeledPrimitive):
 
         # get the value of the currently selected option.
         return_option = self.config['returns']['type']
-        if return_option == 'strings':
+        if return_option == 'string':
             if isinstance(self._value, int):
                 return_value = self.options[self._value]
             else:
@@ -716,7 +716,7 @@ class TableDropdown(Dropdown):
             'ifDisabled': False,
             'ifEmpty': False,
             'ifHidden': False,
-            'type': 'strings'
+            'type': 'string'
         },
     }
 
@@ -750,7 +750,7 @@ class OGRFieldDropdown(TableDropdown):
             'ifDisabled': False,
             'ifEmpty': False,
             'ifHidden': False,
-            'type': 'strings'
+            'type': 'string'
         },
     }
 

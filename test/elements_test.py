@@ -1495,7 +1495,7 @@ class DropdownTest(LabeledPrimitiveTest):
             'label': u'',
             'options': ['No options specified'],
             'returns': {
-                'type': 'strings',
+                'type': 'string',
                 'ifDisabled': False,
                 'ifEmpty': False,
                 'ifHidden': False,
@@ -1517,7 +1517,7 @@ class DropdownTest(LabeledPrimitiveTest):
             'helpText': '',
             'options': ['No options specified'],
             'returns': {
-                'type': 'strings',
+                'type': 'string',
                 'ifEmpty': False,
                 'ifHidden': False,
                 'ifDisabled': False,
@@ -1550,7 +1550,7 @@ class DropdownTest(LabeledPrimitiveTest):
         """Assert that the correct restrictions are in place on inputs."""
         config = {
             'options': ['a', 'b', 'c'],
-            'returns': {'type': 'strings'},
+            'returns': {'type': 'string'},
         }
         dropdown = elements.Dropdown(config)
 
@@ -1575,7 +1575,7 @@ class DropdownTest(LabeledPrimitiveTest):
         """Assert the correct output value of a Dropdown (strings)"""
         config = {
             'options': ['a', 'b', 'c'],
-            'returns': {'type': 'strings'},
+            'returns': {'type': 'string'},
         }
         dropdown = elements.Dropdown(config)
 
@@ -1592,7 +1592,7 @@ class DropdownTest(LabeledPrimitiveTest):
         """Assert the correct output value of a Dropdown (ordinals)"""
         config = {
             'options': ['a', 'b', 'c'],
-            'returns': {'type': 'ordinals'},
+            'returns': {'type': 'ordinal'},
         }
         dropdown = elements.Dropdown(config)
 

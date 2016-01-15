@@ -334,11 +334,13 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
                 return_type = new_config['returns']
                 if isinstance(return_type, dict):  # when this is a mapValues dict
                     new_config['returns'] = {
-                        'type': 'strings',
-                        'mapValues': return_type['mapValues'],
+                        'type': 'string',
+                        # Strip off the trailing `s` from the return type
+                        'mapValues': return_type['mapValues'][:-1],
                     }
-                else:  # either strings or ordinals
-                    new_config['returns'] = {'type': return_type}
+                else:  # either string or ordinal
+                    # Strip off the trailing `s` from the return type
+                    new_config['returns'] = {'type': return_type[:-1]}
             except KeyError:
                 pass
 

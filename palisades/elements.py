@@ -289,6 +289,7 @@ class Primitive(Element):
             'ifDisabled': False,
             'ifEmpty': False,
             'ifHidden': False,
+            'type': 'string',
         },
     }
 
@@ -363,7 +364,24 @@ class Primitive(Element):
 
     def value(self):
         """Get the value of this element."""
-        return self._value
+        type_casts = {
+            'string': lambda x: unicode(x, 'utf-8'),
+            'int': int,
+            'float': float,
+        }
+        try:
+            return_datatype = self.config['returns']['type']
+            return type_casts[return_datatype](self._value)
+        except KeyError as missing_key:
+            # If the programmer requested an invalid type, raise a helpful
+            # exception.
+            raise KeyError(('Return type %s not allowed, must be one of '
+                            '"string", "int" or "float"') % missing_key)
+        except ValueError:
+            # When the value cannot be converted to the reqested type, raise a
+            # helpful exception.
+            raise ValueError('Value %s cannot be converted to %s.' % (
+                self._value, return_datatype))
 
     def is_valid(self):
         """Return the validity of this input.  If an element has not been
@@ -555,6 +573,7 @@ class LabeledPrimitive(Primitive):
             'ifDisabled': False,
             'ifEmpty': False,
             'ifHidden': False,
+            'type': 'string',
         },
     }
 
@@ -760,6 +779,7 @@ class Text(LabeledPrimitive):
             'ifDisabled': False,
             'ifEmpty': False,
             'ifHidden': False,
+            'type': 'string',
         },
     }
 
@@ -811,6 +831,7 @@ class File(Text):
             'ifDisabled': False,
             'ifEmpty': False,
             'ifHidden': False,
+            'type': 'string',
         },
     }
 
@@ -871,6 +892,7 @@ class Folder(File):
             'ifDisabled': False,
             'ifEmpty': False,
             'ifHidden': False,
+            'type': 'string',
         },
     }
 
@@ -981,6 +1003,7 @@ class CheckBox(LabeledPrimitive):
             'ifDisabled': False,
             'ifEmpty': False,
             'ifHidden': False,
+            'type': 'string',
         },
     }
 

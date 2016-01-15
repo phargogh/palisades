@@ -45,6 +45,128 @@ class RepeatingTimerTest(unittest.TestCase):
             timer.cancel()
             raise error
 
+
+class DefaultsTest(unittest.TestCase):
+    def test_apply_single_level_defaults_all_values_exist(self):
+        defaults = {
+            'a': 1,
+            'b': 2,
+        }
+
+        user_config = {
+            'a': 'a',
+            'b': 2,
+        }
+
+        merged_config = utils.apply_defaults(user_config, defaults)
+        self.assertEqual(
+            merged_config,
+            {
+                'a': 'a',
+                'b': 2
+            }
+        )
+
+    def test_apply_single_level_defaults_missing_values(self):
+        defaults = {
+            'a': 1,
+            'b': 2,
+            'c': 3
+        }
+        user_config = {}
+        merged_config = utils.apply_defaults(user_config, defaults)
+        self.assertEqual(merged_config, defaults)
+
+    def test_apply_nested_defaults_all_values_exist(self):
+        defaults = {
+            'a': 1,
+            'b': 2,
+            'c': {
+                'd': 4,
+                'e': 5,
+            }
+        }
+        user_config = {
+            'a': 'a',
+            'b': 2,
+            'c': {
+                'd': 'd',
+                'e': 'e',
+            }
+        }
+        merged_config = utils.apply_defaults(user_config, defaults)
+        self.assertEqual(merged_config, user_config)
+
+    def test_apply_nested_defaults_missing_values(self):
+        defaults = {
+            'a': 1,
+            'b': 2,
+            'c': {
+                'd': 4,
+                'e': 5,
+            }
+        }
+        user_config = {
+            'a': 'a'
+        }
+        merged_config = utils.apply_defaults(user_config, defaults)
+        self.assertEqual(
+            merged_config,
+            {
+                'a': 'a',
+                'b': 2,
+                'c': {
+                    'd': 4,
+                    'e': 5,
+                }
+            })
+
+    def test_apply_flat_defaults_type_mismatch(self):
+        defaults = {
+            'a': 1
+        }
+        user_config = {
+            'a': ['foo']
+        }
+
+        merged_config = utils.apply_defaults(user_config, defaults)
+        self.assertEqual(merged_config, user_config)
+
+    def test_apply_nested_defaults_type_mismatch(self):
+        defaults = {
+            'a': 1,
+            'b': {
+                'c': [1],
+            }
+        }
+        user_config = {
+            'a': 'a',
+            'b': {
+                'c': 1,
+            }
+        }
+
+        merged_config = utils.apply_defaults(user_config, defaults)
+        self.assertEqual(merged_config, user_config)
+
+    def test_apply_nested_defaults_user_defined_no_default(self):
+        defaults = {
+            'a': 1,
+        }
+        user_config = {
+            'b': 2
+        }
+        merged_config = utils.apply_defaults(user_config, defaults)
+        self.assertEqual(
+            merged_config,
+            {
+                'a': 1,
+                'b': 2,
+            }
+        )
+
+
+
 class CoreTest(unittest.TestCase):
     """A test class for functions found in palisades.core."""
     def test_apply_defaults(self):
@@ -133,17 +255,27 @@ class CoreTest(unittest.TestCase):
             }
         }
         first_update = utils.apply_defaults(test_configuration, first_defaults)
-        self.assertEqual(first_update, {'returns': {'some': 'value',
-            'ifEmpty': True, 'ifNot': False}})
+        self.assertEqual(first_update, {
+            'returns': {
+                'some': 'value',
+                'ifEmpty': True,
+                'ifNot': False,
+            }
+        })
 
         # Commenting this all out for now, as the update functionality is under
         # development and buggy.
-        #second_defaults = {
-        #    'returns': None,
-        #}
-        #second_update = utils.apply_defaults(first_update, second_defaults,
-        #    old_defaults=first_defaults)
-        #self.assertEqual(second_update, {'returns': {'some': 'value'}})
+        second_defaults = {
+            'returns': None,
+        }
+        second_update = utils.apply_defaults(
+            first_update, second_defaults, old_defaults=first_defaults, cleanup=True,
+            skip_duplicates=False)
+        self.assertEqual(second_update, {
+            'returns': {
+                'some': 'value',
+            }
+        })
 
     def test_default_config_cleanup(self):
         # verify cleaning up attributes not defined in defaults works.

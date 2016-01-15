@@ -372,9 +372,10 @@ class Primitive(Element):
             return unicode(value, 'utf-8')
 
         type_casts = {
-            'string': lambda x: unicode(x, 'utf-8'),
+            'string': _cast_to_string,
             'int': int,
             'float': float,
+            'bool': bool,
         }
         try:
             return_datatype = self.config['returns']['type']
@@ -387,6 +388,9 @@ class Primitive(Element):
         except ValueError:
             # When the value cannot be converted to the reqested type, raise a
             # helpful exception.
+            if isinstance(self._value, basestring):
+                if len(self._value) == 0:
+                    return self._value
             raise ValueError('Value %s cannot be converted to %s.' % (
                 self._value, return_datatype))
 
@@ -811,7 +815,7 @@ class Text(LabeledPrimitive):
         LabeledPrimitive.set_value(self, new_value)
 
     def has_input(self):
-        if len(self.value()) > 0:
+        if len(self._value) > 0:
             return True
         return False
 

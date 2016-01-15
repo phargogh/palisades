@@ -140,10 +140,8 @@ class Element(object):
 
         Returns nothing."""
 
-        old_defaults = self._default_config.copy()
         self._default_config.update(new_defaults)
-        self.config = utils.apply_defaults(self.config, self._default_config,
-                old_defaults=old_defaults)
+        self.config = utils.apply_defaults(self.config, self._default_config)
         self.config_changed.emit(self.config)
 
     def is_enabled(self):
@@ -365,9 +363,9 @@ class Primitive(Element):
     def value(self):
         """Get the value of this element."""
         def _cast_to_string(value):
-            if isinstance(value, bool):
-                value = str(bool)
-            elif isinstance(value, unicode):
+            if type(value) in [bool, int, float]:
+                value = str(value)
+            elif isinstance(value, unicode) or value is None:
                 return value
             return unicode(value, 'utf-8')
 
@@ -391,6 +389,7 @@ class Primitive(Element):
             if isinstance(self._value, basestring):
                 if len(self._value) == 0:
                     return self._value
+
             raise ValueError('Value %s cannot be converted to %s.' % (
                 self._value, return_datatype))
 
@@ -764,7 +763,6 @@ class OGRFieldDropdown(TableDropdown):
 
         layer = vector.GetLayer()
         fieldnames = [field.GetName() for field in layer.schema]
-        print 'FIELDNAMES', fieldnames
         self.set_options(fieldnames, new_value=self.config['defaultValue'])
 
 
@@ -902,7 +900,7 @@ class Static(Primitive):
     defaults = {
         'returnValue': None,
         'hideable': False,
-        'enabled': False,
+        'enabled': True,
         'required': False,
         'validateAs': {'type': 'disabled'},
     }
@@ -1148,6 +1146,7 @@ class Container(Group):
         'label': '',
         'collapsible': False,
         'defaultValue': True,
+        'elements': [],
     }
 
     def __init__(self, configuration, new_elements=None):
@@ -1255,7 +1254,19 @@ class Multi(Container):
         'link_text': 'Add another',
         'helpText': "",
         'return_type': 'list',
+        'elements': [],
         'template': {
+            'defaultValue': '',
+            'enabled': True,
+            'helpText': '',
+            'hideable': False,
+            'required': False,
+            'returns': {
+                'ifDisabled': False,
+                'ifHidden': False,
+                'ifEmpty': False,
+                'type': 'string',
+            },
             'type': 'text',
             'label': 'Input a number',
             'validateAs': {'type': 'disabled'},
@@ -1345,6 +1356,7 @@ class Tab(Group):
     defaults = {
         'enabled': True,
         'label': '',
+        'elements': [],
     }
 
     def label(self):

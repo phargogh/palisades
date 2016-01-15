@@ -100,7 +100,8 @@ class Element(object):
         self.satisfaction_changed = Communicator()
 
         # Render the configuration and save to self.config
-        self.config = utils.apply_defaults(configuration, self.defaults)
+        self.config = configuration
+        self.set_default_config(self.defaults)
 
         # set element attributes
         LOGGER.debug('config = %s', self.config)
@@ -314,7 +315,6 @@ class Primitive(Element):
         self.validity_changed = Communicator()
 
         # update the default configuration and set defaults based on the config.
-        self.set_default_config(self.defaults)
         self._hidden = self.config['hideable']
         self._hideable = self.config['hideable']
         self._required = self.config['required']
@@ -364,6 +364,13 @@ class Primitive(Element):
 
     def value(self):
         """Get the value of this element."""
+        def _cast_to_string(value):
+            if isinstance(value, bool):
+                value = str(bool)
+            elif isinstance(value, unicode):
+                return value
+            return unicode(value, 'utf-8')
+
         type_casts = {
             'string': lambda x: unicode(x, 'utf-8'),
             'int': int,
@@ -581,7 +588,6 @@ class LabeledPrimitive(Primitive):
         Primitive.__init__(self, configuration)
         self._hashable_config = ['hideable', 'validateAs', 'label']
 
-        self.set_default_config(self.defaults)
         self._label = self.config['label']
 
     def set_label(self, new_label):
@@ -614,7 +620,6 @@ class Dropdown(LabeledPrimitive):
         self._hashable_config = ['hideable', 'validateAs', 'options',
             'label']
 
-        self.set_default_config(self.defaults)
         assert self.config['returns']['type'] in ['strings', 'ordinals'], (
             'the "returns" type key must be one of ["strings", "ordinals"] '
             'not %s' % self.config['returns'])
@@ -711,9 +716,6 @@ class TableDropdown(Dropdown):
             'type': 'strings'
         },
     }
-    def __init__(self, configuration):
-        Dropdown.__init__(self, configuration)
-        self.set_default_config(self.defaults)
 
     def load_columns(self, filepath):
         raise NotImplementedError
@@ -748,9 +750,6 @@ class OGRFieldDropdown(TableDropdown):
             'type': 'strings'
         },
     }
-    def __init__(self, configuration):
-        TableDropdown.__init__(self, configuration)
-        self.set_default_config(self.defaults)
 
     def load_columns(self, filepath):
         from osgeo import ogr
@@ -786,7 +785,6 @@ class Text(LabeledPrimitive):
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
         self._value = u""
-        self.set_default_config(self.defaults)
 
         # Set the value of the element from the config's defaultValue.
         self.set_value(self.config['defaultValue'])
@@ -838,7 +836,6 @@ class File(Text):
     def __init__(self, configuration):
         Text.__init__(self, configuration)
 
-        self.set_default_config(self.defaults)
         self.set_value(self.config['defaultValue'])
 
     def set_value(self, new_value):
@@ -898,14 +895,17 @@ class Folder(File):
 
 
 class Static(Primitive):
+    defaults = {
+        'returnValue': None,
+        'hideable': False,
+        'enabled': False,
+        'required': False,
+        'validateAs': {'type': 'disabled'},
+    }
+
     def __init__(self, configuration):
         Primitive.__init__(self, configuration)
         self._hashable_config = ['returnValue']
-        new_defaults = {
-            'returnValue': None,
-        }
-
-        self.set_default_config(new_defaults)
 
     def value(self):
         try:
@@ -952,14 +952,18 @@ class Label(Static):
         'background-color': '#faa732',
         'border': '2px solid #fbee50',
     }
+    defaults = {
+        'returnValue': None,
+        'enabled': True,
+        'hideable': False,
+        'required': False,
+        'validateAs': {'type': 'disabled'},
+        'style': None,
+        'label': '',
+    }
 
     def __init__(self, configuration):
         Static.__init__(self, configuration)
-        new_defaults = {
-            'style': None,
-            'label': ''
-        }
-        self.set_default_config(new_defaults)
 
         self._label = self.config['label']
         self._styles = self.config['style']
@@ -1003,7 +1007,7 @@ class CheckBox(LabeledPrimitive):
             'ifDisabled': False,
             'ifEmpty': False,
             'ifHidden': False,
-            'type': 'string',
+            'type': 'bool',  # allowed: int, bool, string
         },
     }
 
@@ -1020,6 +1024,11 @@ class CheckBox(LabeledPrimitive):
         return self.value()
 
 class Group(Element):
+    defaults = {
+        'enabled': True,
+        'elements': [],
+    }
+
     def __init__(self, configuration, new_elements=None):
         Element.__init__(self, configuration)
 
@@ -1043,11 +1052,6 @@ class Group(Element):
 
         self._registrar = element_registry
         self._elements = []
-        new_defaults = {
-            'enabled': True,
-            'elements': [],
-        }
-        self.set_default_config(new_defaults)
 
         self.create_elements(self.config['elements'])
         self._display_label = True
@@ -1135,15 +1139,15 @@ class Group(Element):
 class Container(Group):
     """A Container is a special kind of Group that can enable or disable all its
     sub-elements."""
+    defaults = {
+        'enabled': True,
+        'label': '',
+        'collapsible': False,
+        'defaultValue': True,
+    }
+
     def __init__(self, configuration, new_elements=None):
         Group.__init__(self, configuration, new_elements)
-        new_defaults = {
-            'enabled': True,
-            'label': '',
-            'collapsible': False,
-            'defaultValue': True,
-        }
-        self.set_default_config(new_defaults)
 
         self._collapsible = self.config['collapsible']
         self._collapsed = not self.config['defaultValue']
@@ -1239,22 +1243,23 @@ class Container(Group):
 
 
 class Multi(Container):
+    defaults = {
+        'label': '',
+        'enabled': True,
+        'collapsible': False,
+        'defaultValue': True,
+        'link_text': 'Add another',
+        'helpText': "",
+        'return_type': 'list',
+        'template': {
+            'type': 'text',
+            'label': 'Input a number',
+            'validateAs': {'type': 'disabled'},
+        },
+    }
+
     def __init__(self, configuration, new_elements=None):
         Container.__init__(self, configuration, new_elements)
-        new_defaults = {
-            'label': '',
-            'enabled': True,
-            'collapsible': False,
-            'defaultValue': True,
-            'link_text': 'Add another',
-            'helpText': "",
-            'return_type': 'list',
-            'template': {
-                'type': 'text',
-                'label': 'Input a number',
-                'validateAs': {'type': 'disabled'},
-            },
-        }
 
         # clean up unused configuration options inherited from Container
         # we have absolutely no interest in user-defined elements, since this
@@ -1265,8 +1270,6 @@ class Multi(Container):
             self._elements = []
             LOGGER.warn('Multi element does not currently support '
                 ' non-template elements.  Elements found have been removed.')
-
-        self.set_default_config(new_defaults)
 
         self.element_added = Communicator()
         self.element_removed = Communicator()
@@ -1335,13 +1338,10 @@ class TabGroup(Group):
         Group.create_elements(self, elements)
 
 class Tab(Group):
-    def __init__(self, configuration, new_elements=None):
-        Group.__init__(self, configuration, new_elements)
-        new_defaults = {
-            'enabled': True,
-            'label': '',
-        }
-        self.set_default_config(new_defaults)
+    defaults = {
+        'enabled': True,
+        'label': '',
+    }
 
     def label(self):
         return self.config['label']

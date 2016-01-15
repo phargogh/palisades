@@ -316,6 +316,14 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
         if element_type == 'hiddenElement':
             new_config['type'] = 'hidden'
 
+        # The 'dataType' value is now stored in the 'returns' dict.
+        if 'dataType' in new_config:
+            try:
+                new_config['returns']['type'] = new_config['dataType']
+            except KeyError:
+                new_config['returns'] = {'type': new_config['dataType']}
+            del new_config['dataType']
+
         # If we have a dropdown menu, the 'returns' options have changed
         # slightly.  If the user has not defined return configuration options,
         # skip the tweaking since defaults are assumed internally.
@@ -333,15 +341,6 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
                     new_config['returns'] = {'type': return_type}
             except KeyError:
                 pass
-
-        # The 'dataType' value is now stored in the 'returns' dict.
-        if 'dataType' in new_config:
-            try:
-                new_config['returns']['type'] = new_config['dataType']
-            except KeyError:
-                new_config['returns'] = {'type': new_config['dataType']}
-            del new_config['dataType']
-
 
         if 'elements' in new_config:
             translated_elements_list = []

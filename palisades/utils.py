@@ -335,8 +335,7 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
                 if isinstance(return_type, dict):  # when this is a mapValues dict
                     new_config['returns'] = {
                         'type': 'string',
-                        # Strip off the trailing `s` from the return type
-                        'mapValues': return_type['mapValues'][:-1],
+                        'mapValues': return_type['mapValues'],
                     }
                 else:  # either string or ordinal
                     # Strip off the trailing `s` from the return type

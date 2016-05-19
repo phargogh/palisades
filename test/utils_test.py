@@ -199,6 +199,41 @@ class CoreTest(unittest.TestCase):
         self.assertEqual(utils.apply_defaults(test_configuration, defaults),
             expected_result)
 
+    def test_convert_config_map_values_dict(self):
+        # Convert an IUI dict that includes a mapValues element that is a dict.
+
+        iui_config = {
+            "type": "dropdown",
+            "args_id": "dropdown_args_id",
+            "label": "foo",
+            "options": ["Square", "Hexagon"],
+            "defaultValue": "Hexagon",
+            "required": True,
+            "returns": {
+                "mapValues": {
+                    "Square": "square",
+                    "Hexagon": "hexagon"
+                }
+            }
+        }
+
+        expected_config = {
+            'type': 'dropdown',
+            'args_id': 'dropdown_args_id',
+            'defaultValue': 'Hexagon',
+            'label': {'en': 'foo'},
+            'options': {'en': ['Square', 'Hexagon']},
+            'required': True,
+            'returns': {
+                'mapValues': {
+                    'Hexagon': 'hexagon',
+                    'Square': 'square'
+                },
+                'type': 'string'},
+        }
+
+        self.assertEqual(utils.convert_iui(iui_config), expected_config)
+
     def test_convert_config(self):
         # take an IUI configuration object and convert it to palisades.
         sample_config = {

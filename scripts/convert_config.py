@@ -5,6 +5,10 @@ instructions:
 import argparse
 import json
 import sys
+import logging
+
+logging.basicConfig(format='%(levelname)-8s %(message)s',
+                    level=logging.WARNING, datefmt='%m/%d/%Y %H:%M:%S ')
 
 from palisades import utils
 

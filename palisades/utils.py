@@ -343,6 +343,11 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
             except KeyError:
                 pass
 
+        # If we have a multielement, rename the sampleElement -> template
+        if element_type == 'multi':
+            new_config['template'] = new_config['sampleElement']
+            del new_config['sampleElement']
+
         if 'elements' in new_config:
             translated_elements_list = []
             for contained_config in new_config['elements']:

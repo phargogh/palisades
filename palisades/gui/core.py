@@ -195,7 +195,7 @@ class GroupGUI(UIObject):
         except TypeError as error:
             # Happens when the element's GUI representation in registry is
             # None, meaning that there should not be a GUI display.
-            LOGGER.debug('No graphical representation known for %s: %s',
+            LOGGER.warning('No graphical representation known for %s: %s',
                 element_classname, error)
             new_element = None
 
@@ -380,9 +380,13 @@ class TextGUI(LabeledPrimitiveGUI):
     def __init__(self, core_element):
         LabeledPrimitiveGUI.__init__(self, core_element)
 
-        # If element.value() is not True, set to False.  Could be True, False
-        # or None.
-        self._text_field = toolkit.TextField(self.element.value())
+        # Convert int/float types to bytestring.  String output of text
+        # elements should already be UTF-8
+        element_value = self.element.value()
+        if type(element_value) in [float, int]:
+            element_value = str(element_value)
+
+        self._text_field = toolkit.TextField(element_value)
         self.set_widget(2, self._text_field)
 
         # when the text is modified in the textfield, call down to the element

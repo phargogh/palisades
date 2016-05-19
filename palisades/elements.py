@@ -1289,9 +1289,11 @@ class Multi(Container):
         self.element_added = Communicator()
         self.element_removed = Communicator()
 
+        self.set_value(self.config['defaultValue'])
+
     def emit_signals(self):
         for element_index in range(len(self._elements)):
-            self.element_added.emit(new_index)
+            self.element_added.emit(element_index)
 
     def add_element(self, index=None):
         # need an optional argument for when an element is added by the

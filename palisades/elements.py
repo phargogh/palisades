@@ -624,8 +624,9 @@ class Dropdown(LabeledPrimitive):
             'label']
 
         assert self.config['returns']['type'] in ['string', 'ordinal'], (
-            'the "returns" type key must be one of ["string", "ordinal"] '
-            'not %s' % self.config['returns']['type'])
+            'the "returns" type key in element %s must be one of ["string",'
+            '"ordinal"] not %s' % (self.get_id(),
+                                   self.config['returns']['type']))
 
         self.options = self.config['options']
         self._value = self.config['defaultValue']
@@ -657,7 +658,8 @@ class Dropdown(LabeledPrimitive):
                 # list or must be a string in that list.  If this is not the
                 # case, then we'll reset the index to -1 (unset).
                 self.set_value(-1)
-            self.options_changed.emit(options_list)
+        self.options_changed.emit(options_list)
+        self.value_changed.emit(new_value)
 
     def current_index(self):
         """Return the current index (an int) of the dropdown."""
@@ -732,8 +734,8 @@ class TableDropdown(Dropdown):
         return state_dict
 
     def set_state(self, state_dict):
-        self.set_value(state['current_text'])
-        self.set_hidden(state['is_hidden'])
+        self.set_value(state_dict['current_text'])
+        self.set_hidden(state_dict['is_hidden'])
 
 
 class OGRFieldDropdown(TableDropdown):

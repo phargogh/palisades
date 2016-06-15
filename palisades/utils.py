@@ -320,7 +320,7 @@ def convert_iui(iui_config, lang_codes=['en'], current_lang='en'):
         if 'dataType' in new_config:
             try:
                 new_config['returns']['type'] = new_config['dataType']
-            except KeyError:
+            except (KeyError, TypeError):
                 new_config['returns'] = {'type': new_config['dataType']}
             del new_config['dataType']
 

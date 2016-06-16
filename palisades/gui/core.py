@@ -566,11 +566,10 @@ class FormGUI():
         GUI element, or raises a KeyError if not found."""
         known_elements = {}
         def _locate(element):
+            known_elements[element.element.get_id('user')] = element
             if isinstance(element, GroupGUI):
                 for contained_element in element.elements:
                     _locate(contained_element)
-            else:
-                known_elements[element.element.get_id('user')] = element
 
         _locate(self.group)
         return known_elements[id]

@@ -1679,8 +1679,6 @@ class Form():
         #for element, valid in zip(form_data, element_validity):
         #    print valid, element
 
-        import pprint
-        pprint.pprint(zip(element_validity, form_data))
         return all(element_validity)
 
     def form_errors(self):

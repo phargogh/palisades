@@ -50,13 +50,14 @@ def get_elements_list(group_pointer):
 
 # Assume this is a window for a moment.
 class Application(object):
-    def __init__(self, config_uri, lang_code='en'):
+    def __init__(self, config_uri, lang_code='en', ignore_prev_runs=False):
         # if GUI is None, have to visual display.
         # install the specified internal language.
+        # Optionally ignore previous (saved) run data.
         palisades.i18n.language.set(lang_code)
         allowed_langs, configuration = translation.translate_json(config_uri, lang_code)
         self.config_langs = allowed_langs
-        self._window = Form(configuration)
+        self._window = Form(configuration, ignore_prev_runs=ignore_prev_runs)
         self._window.set_langs(allowed_langs)
         self._window.emit_signals()
 
@@ -791,7 +792,7 @@ class Text(LabeledPrimitive):
         self._value = u""
 
         # Set the value of the element from the config's defaultValue.
-        self.set_value(self.config['defaultValue'])
+        self.set_value(configuration['defaultValue'])
 
     def set_value(self, new_value):
         """Subclassed from LabeledPrimitive.set_value.  Casts all input values
@@ -812,6 +813,8 @@ class Text(LabeledPrimitive):
             # For when new_value is already unicode.
             pass
 
+        LOGGER.debug('Text element %s setting value from %s to %s',
+                     self.get_id('user'), self._value, new_value)
         LabeledPrimitive.set_value(self, new_value)
 
     def has_input(self):
@@ -1009,7 +1012,7 @@ class CheckBox(LabeledPrimitive):
         'helpText': "",
         'returns': {
             'ifDisabled': False,
-            'ifEmpty': False,
+            'ifEmpty': True,  # Return a value if not checked
             'ifHidden': False,
             'type': 'bool',  # allowed: int, bool, string
         },
@@ -1081,6 +1084,8 @@ class Group(Element):
             except KeyError as error:
                 raise KeyError('%s not recognized as an acceptable element type' % error)
             else:
+                LOGGER.debug('Creating a new element with configuration %s',
+                             element_config)
                 new_element = new_element_cls(element_config)
 
             self._add_element(new_element)
@@ -1336,7 +1341,8 @@ class Multi(Container):
                 value = element.value()
             return value
 
-        return [_recursive_value(e) for e in self.elements()]
+        return_list = [_recursive_value(e) for e in self.elements()]
+        return return_list
 
     def state(self):
         state_dict = Container.state(self)
@@ -1374,7 +1380,7 @@ class Tab(Group):
 #  * packages up required arguments from elements
 #  * starts a model running when triggered.
 class Form():
-    def __init__(self, configuration):
+    def __init__(self, configuration, ignore_prev_runs=False):
         self._ui = Group(configuration)
 
         self.elements = self.find_elements()
@@ -1390,14 +1396,15 @@ class Form():
         # now that the form has been created, load the lastrun state, if
         # appliccable.
         lastrun_uri = self.lastrun_uri()
-        try:
-            self.load_state(lastrun_uri)
-            LOGGER.info('Successfully loaded lastrun from %s',
-                lastrun_uri)
-        except IOError:
-            # when no lastrun file exists for this version
-            LOGGER.warn('No lastrun file found at %s.  Skipping.',
-                lastrun_uri)
+        if not ignore_prev_runs:
+            try:
+                self.load_state(lastrun_uri)
+                LOGGER.info('Successfully loaded lastrun from %s',
+                    lastrun_uri)
+            except IOError:
+                # when no lastrun file exists for this version
+                LOGGER.warn('No lastrun file found at %s.  Skipping.',
+                    lastrun_uri)
 
     def set_langs(self, langs):
         """Set the available languages of the form."""
@@ -1658,22 +1665,23 @@ class Form():
             boolean."""
             if not is_visible:
                 return True
-            if not is_valid and is_required:
-                return False
             if not should_return:  # element should not return, so ignore
                 return True
+            if not is_valid and is_required:
+                return False
             if is_valid and should_return is True: # is valid, should return
                 return True
             return False  # otherwise, element should not return
 
-        element_validity = map(lambda x: element_ok_for_submission(*x),
-            form_data)
+        element_validity = [element_ok_for_submission(*x) for x in form_data]
 
         #print "VALID | args_id, is_valid, should_return, is_required, is_visible"
         #for element, valid in zip(form_data, element_validity):
         #    print valid, element
 
-        return not False in element_validity
+        import pprint
+        pprint.pprint(zip(element_validity, form_data))
+        return all(element_validity)
 
     def form_errors(self):
         """Return a list of tuples containing (args_id, value) that are invalid
@@ -1683,7 +1691,7 @@ class Form():
             if not element.is_visible():
                 continue  # skip elements that are hidden from view.
 
-            if not element.is_valid():
+            if not element.is_valid() and element.should_return():
                 invalid_inputs.append((element.config['args_id'], element.value()))
         return invalid_inputs
 

@@ -1202,7 +1202,7 @@ class Container(Group):
             raise InteractionError("Container is not collapsible")
 
         self._collapsed = is_collapsed
-        self.toggled.emit(is_collapsed)
+        self.emit_signals()
 
         for element in self.elements():
             element.set_enabled(not is_collapsed)

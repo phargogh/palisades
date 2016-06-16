@@ -990,7 +990,12 @@ class NumberChecker(PrimitiveChecker):
         PrimitiveChecker.__init__(self)
 
         # Set numeric default regexp.  Used if user does not provide a regex
-        self.default_regexp = '^\\s*[0-9]*(\.[0-9]*)?\\s*$'
+        # \s matches whitespace character.
+        self.default_regexp = (
+            r'^\s*'  # preceeding whitespace
+            r'([0-9]*(\.[0-9]*)?)|'  # decimal floating-point notation
+            r'([0-9]*\.[0-9]+[eE]-?[0-9]+)' # scientific notation
+            r'\s*$')  # trailing whitespace
         updates = {'gteq': self.greater_than_equal_to,
                    'greaterThan': self.greater_than,
                    'lteq':  self.less_than_equal_to,

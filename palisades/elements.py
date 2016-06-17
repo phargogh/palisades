@@ -1160,7 +1160,7 @@ class Container(Group):
         Group.__init__(self, configuration, new_elements)
 
         self._collapsible = self.config['collapsible']
-        self._collapsed = not self.config['defaultValue']
+        self._collapsed = not bool(self.config['defaultValue'])
 
         self.toggled = Communicator()
 
@@ -1257,7 +1257,7 @@ class Multi(Container):
         'label': '',
         'enabled': True,
         'collapsible': False,
-        'defaultValue': True,
+        'defaultValue': [],
         'link_text': 'Add another',
         'helpText': "",
         'return_type': 'list',
@@ -1313,6 +1313,9 @@ class Multi(Container):
     def remove_element(self, index):
         popped_element = self._elements.pop(index)
         self.element_removed.emit(index)
+
+    def is_collapsed(self):
+        return False
 
     def set_value(self, value_list):
         for value in value_list:

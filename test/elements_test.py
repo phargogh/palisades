@@ -1010,8 +1010,8 @@ class ContainerTest(GroupTest):
         self.assertEqual(self.element.is_collapsed(), False)
 
         # Verify that we can't collapse the container.
-        self.assertRaises(elements.InteractionError, self.element.set_collapsed,
-            True)
+        with self.assertRaises(elements.InteractionError):
+            self.element.set_collapsed(True)
 
     def test_satisfaction_based_on_enabled_state(self):
         from palisades import elements
@@ -1134,7 +1134,7 @@ class MultiTest(ContainerTest):
             'label': '',
             'helpText': '',
             'enabled': True,
-            'defaultValue': True,  # Subclass of container, indicates is open.
+            'defaultValue': [],
             'collapsible': False,
             'elements': [],
             'link_text': 'Add another',
@@ -1289,8 +1289,15 @@ class MultiTest(ContainerTest):
         }]
         self.assertEqual(nested_multi.value(), expected_value)
 
+    def test_set_collapsed_uncollapsible(self):
+        multi = elements.Multi({})
 
+        # the default collapsibility should be False.
+        self.assertEqual(multi.is_collapsed(), False)
 
+        # Verify that we can't collapse the container.
+        with self.assertRaises(elements.InteractionError):
+            multi.set_collapsed(True)
 
     def test_get_state(self):
         expected_state = {
@@ -1301,19 +1308,29 @@ class MultiTest(ContainerTest):
         self.assertEqual(self.element.state(), expected_state)
 
     def test_set_state(self):
+        multi = elements.Multi({'collapsible': True})
         new_state = {
             'enabled': False,
             'collapsed': False,
             'value': [],
         }
-        self.element.set_state(new_state)
-        self.assertEqual(self.element.is_enabled(), False)
-        self.assertEqual(self.element.is_collapsed(), False)
-        self.assertEqual(len(self.element.elements()), 0)
+        multi.set_state(new_state)
+        self.assertEqual(multi.is_enabled(), False)
+        self.assertEqual(multi.is_collapsed(), False)
+        self.assertEqual(len(multi.elements()), 0)
 
     def test_get_id(self):
         element_id = self.element.get_id()
         self.assertEqual(element_id, '027588c3492fd9dda1342862158ba3f6')
+
+    def test_set_collapsed(self):
+        # MultiElements are not collapsible.
+        with self.assertRaises(elements.InteractionError):
+            self.element.set_collapsed(False)
+
+    def test_collapsability(self):
+        self.assertFalse(self.element.is_collapsible())
+
 
 class StaticTest(ElementTest):
     def setUp(self):
@@ -1681,7 +1698,7 @@ class CheckBoxTest(LabeledPrimitiveTest):
             'enabled': True,
             'returns': {
                 'ifDisabled': False,
-                'ifEmpty': False,
+                'ifEmpty': True,
                 'ifHidden': False,
                 'type': 'bool',
             },

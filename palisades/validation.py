@@ -991,10 +991,12 @@ class NumberChecker(PrimitiveChecker):
 
         # Set numeric default regexp.  Used if user does not provide a regex
         # \s matches whitespace character.
+        # Allowed pattern types:
+        #  * Decimal (e.g. 4.333112)
+        #  * Scientific (e.g. 4.E-170, 9.442e10)
         self.default_regexp = (
             r'^\s*'  # preceeding whitespace
-            r'([0-9]*(\.[0-9]*)?)|'  # decimal floating-point notation
-            r'([0-9]*\.[0-9]+[eE]-?[0-9]+)' # scientific notation
+            r'(-?[0-9]*(\.[0-9]*)?([eE]-?[0-9]+)?)'
             r'\s*$')  # trailing whitespace
         updates = {'gteq': self.greater_than_equal_to,
                    'greaterThan': self.greater_than,

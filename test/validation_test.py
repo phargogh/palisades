@@ -803,3 +803,12 @@ class NumberCheckerTester(CheckerTester):
 
         self.validate_as['value'] = ' 5gg'
         self.assertError()
+
+        self.validate_as['value'] = '-3.3'
+        self.assertNoError()
+
+        self.validate_as['value'] = '-3.3e10'
+        self.assertNoError()
+
+        self.validate_as['value'] = '4.E-70'
+        self.assertNoError()

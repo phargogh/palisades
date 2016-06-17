@@ -956,8 +956,8 @@ class Label(Static):
     }
     STYLE_ALERT_YELLOW = {
         'padding': '15px',
-        'background-color': '#faa732',
-        'border': '2px solid #fbee50',
+        'background-color': '#fbee50',
+        'border': '2px solid #faa732',
     }
     defaults = {
         'returnValue': None,

@@ -256,11 +256,9 @@ class ContainerGUI(GroupGUI):
     def _set_collapsed(self, event=None):
         self.widgets.set_collapsed(self.element.is_collapsed())
 
-        for element in self.element.elements():
-            element.set_visible(not self.element.is_collapsed())
-
         for gui_elem in self.elements:
             gui_elem.set_visible(not self.element.is_collapsed())
+            gui_elem.set_enabled(not self.element.is_collapsed())
 
 class MultiGUI(ContainerGUI):
     def __init__(self, core_element, registrar=None):

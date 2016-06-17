@@ -294,7 +294,7 @@ class MultiIntegrationTest(ContainerIntegrationTest):
             },
         ]
         self.config = {'elements': self.contained_elements,
-                       'defaultValue': True, 'collapsible': False}
+                       'defaultValue': [], 'collapsible': False}
         self.element = elements.Multi(self.config)
         self.view = core.MultiGUI(self.element)
 
@@ -345,6 +345,14 @@ class MultiIntegrationTest(ContainerIntegrationTest):
         self.assertEqual(self.view.widgets.count(), 2)
         self.assertEqual(self.element.elements()[0].value(), 'bbb')
         self.assertEqual(self.element.elements()[1].value(), 'ccc')
+
+    def test_collapsibility(self):
+        # Multi Elements are not collapsible, unlike containers.
+        self.assertFalse(self.element.is_collapsed())
+        self.assertFalse(self.element.is_collapsible())
+        self.assertFalse(self.view.widgets.is_collapsible())
+        self.assertFalse(self.view.widgets.is_collapsed())
+
 
 #class TabGroupIntegrationTest(GroupIntegrationTest):
 

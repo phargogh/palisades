@@ -627,16 +627,15 @@ class TextField(QtGui.QLineEdit, QtWidget):
 
     def set_text(self, new_value, force=False):
         # only set the new text if the user is not editing the text.
-        if not self._is_editing or force is True:
-            try:
-                if type(new_value) in (FloatType, IntType):
-                    new_value = str(new_value)
+        try:
+            if type(new_value) in (FloatType, IntType):
+                new_value = str(new_value)
 
-                cast_value = unicode(new_value, 'utf-8')
-            except TypeError:
-                # When we already have unicode
-                cast_value = new_value
-            self.setText(cast_value)
+            cast_value = unicode(new_value, 'utf-8')
+        except TypeError:
+            # When we already have unicode
+            cast_value = new_value
+        self.setText(cast_value)
 
     def _reset_requested(self, qstring_value):
         self.reset_requested.emit(True)
@@ -652,9 +651,10 @@ class TextField(QtGui.QLineEdit, QtWidget):
         refresh_action.triggered.connect(self._value_changed)
         menu.addAction(refresh_action)
 
-        reset_default = QtGui.QAction(_('Reset to default'), menu)
-        reset_default.triggered.connect(self.reset_requested.emit)
-        menu.addAction(reset_default)
+        reset_action = QtGui.QAction(_('Reset to default'), menu)
+        reset_action.setIcon(QtGui.QIcon(ICON_UNDO))
+        reset_action.triggered.connect(self._reset_requested)
+        menu.addAction(reset_action)
 
         menu.exec_(event.globalPos())
 

@@ -1412,8 +1412,8 @@ class Form():
                     lastrun_uri)
             except IOError:
                 # when no lastrun file exists for this version
-                LOGGER.warn('No lastrun file found at %s.  Skipping.',
-                    lastrun_uri)
+                LOGGER.info(('No lastrun file found at %s. Using default form '
+                             'values.'), lastrun_uri)
 
     def set_langs(self, langs):
         """Set the available languages of the form."""

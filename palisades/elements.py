@@ -1009,6 +1009,7 @@ class CheckBox(LabeledPrimitive):
         'hideable': False,
         'enabled': True,
         'required': False,
+        'defaultValue': False,
         'helpText': "",
         'returns': {
             'ifDisabled': False,
@@ -1020,12 +1021,17 @@ class CheckBox(LabeledPrimitive):
 
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
-        self._value = False  # initialize to be unchecked.
+        self.set_value(self.config['defaultValue'])
 
     def set_value(self, new_value):
         assert type(new_value) is BooleanType, ('new_value must be either True'
             ' or False, %s found' % type(new_value))
         LabeledPrimitive.set_value(self, new_value)
+
+        # For most elements, satisfaction_changed is emitted after validation
+        # completes successfully.  For checkboxes, we rarely (if ever) have
+        # validation.
+        self.satisfaction_changed.emit(new_value)
 
     def has_input(self):
         return self.value()
@@ -1205,8 +1211,8 @@ class Container(Group):
         self.emit_signals()
 
         for element in self.elements():
-            element.set_enabled(not is_collapsed)
             element.set_visible(not is_collapsed)
+            element.emit_signals()
 
     def is_collapsible(self):
         return self._collapsible

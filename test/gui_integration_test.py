@@ -3,6 +3,9 @@ import unittest
 from palisades import elements
 from palisades.gui import core
 
+# Opening up the QT application here on import prevents a related segfault.
+QT4_APPLICATION = core.ApplicationGUI()
+
 
 class UIObjectIntegrationTest(unittest.TestCase):
     def test_visibility(self):
@@ -371,3 +374,106 @@ class LabelIntegrationTest(UIObjectIntegrationTest):
         self.assertEqual(self.view.widgets.is_visible(), False)
         self.view.widgets.show()
         self.assertEqual(self.view.widgets.is_visible(), True)
+
+
+class ContainerWithElementsTest(UIObjectIntegrationTest):
+    @unittest.skip('Needs work to ensure correctness')
+    def test_container_with_interactive_elements(self):
+        """Test for element interactivity within a collapsible container.
+
+        This issue came up when testing the IUI to palisades migration of the
+        InVEST Wind Energy model."""
+
+        from palisades import elements
+
+        form = elements.Form({
+            'modelName': 'test_form',
+            'elements': [
+                {
+                    'id': 'test_container',
+                    'type': 'container',
+                    'collapsible': True,
+                    'defaultValue': False,
+                    'elements': [
+                        {
+                            "args_id": "price_table",
+                            "defaultValue": True,
+                            "id": "price_table",
+                            "label": {
+                                "en": "Use Price Table"
+                            },
+                            "signals": [
+                                "enables:wind_schedule",
+                                "disables:wind_price",
+                                "disables:rate_change"
+                            ],
+                            "type": "checkbox"
+                        },
+                        {
+                            "args_id": "wind_schedule",
+                            "id": "wind_schedule",
+                            "label": {
+                                "en": "Wind Energy Price Table (CSV)"
+                            },
+                            "type": "file",
+                        },
+                        {
+                            "args_id": "wind_price",
+                            "defaultValue": "",
+                            "id": "wind_price",
+                            "label": {
+                                "en": "Price of Energy per Kilowatt Hour ($/kWh)"
+                            },
+                            "required": True,
+                            "returns": {
+                                "type": "float"
+                            },
+                            "type": "text",
+                            "validText": "^[0-9]*\\.?[0-9]+$",
+                            "enabled": False,
+                        },
+                        {
+                            "args_id": "rate_change",
+                            "defaultValue": "0",
+                            "id": "rate_change",
+                            "label": {
+                                "en": "Annual Rate of Change in Price of Wind Energy"
+                            },
+                            "required": True,
+                            "returns": {
+                                "type": "float"
+                            },
+                            "type": "text",
+                            "validText": "[-+]?[0-9]*\\.?[0-9]+$",
+                            "width": 70,
+                            "enabled": False,
+                        }
+                    ]
+                }
+            ]
+        })
+
+        container_element = form.find_element('test_container')
+        checkbox_element = form.find_element('price_table')
+        wind_table_element = form.find_element('wind_schedule')
+        wind_price_element = form.find_element('wind_price')
+        rate_change_element = form.find_element('rate_change')
+
+        # Check the initial state of the UI.
+        self.assertEqual(container_element.is_enabled(), True)
+        self.assertEqual(container_element.is_collapsible(), True)
+        self.assertEqual(container_element.is_collapsed(), True)
+
+        self.assertFalse(wind_table_element.is_visible())
+        self.assertFalse(wind_price_element.is_visible())
+        self.assertFalse(rate_change_element.is_visible())
+
+        # open up the container and check the initial enabled status of the
+        # elements.
+        container_element.set_collapsed(False)
+        self.assertTrue(wind_table_element.is_visible())
+        self.assertTrue(wind_price_element.is_visible())
+        self.assertTrue(rate_change_element.is_visible())
+
+        self.assertTrue(checkbox_element.is_enabled())
+        self.assertEqual(checkbox_element.value(), True)

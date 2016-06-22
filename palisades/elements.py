@@ -1751,4 +1751,6 @@ class Form():
 
             self.runner.start()
 
-
+    def reset_values(self):
+        for element in self.elements:
+            element.reset_value()

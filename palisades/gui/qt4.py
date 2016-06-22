@@ -1326,6 +1326,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
         # create communicators.
         self.submit_pressed = Communicator()
         self.quit_requested = Communicator()
+        self.reset_requested = Communicator()
 
         # set the window title
         if window_title is None:
@@ -1388,19 +1389,19 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.quit_button = QtGui.QPushButton(_(' Quit'))
         self.quit_button.setIcon(QtGui.QIcon(os.path.join(ICON_CLOSE)))
 
-#        self.reset_button = QtGui.QPushButton(_(' Reset'))
-#        self.reset_button.setIcon(QtGui.QIcon(os.path.join(ICON_UNDO)))
+        self.reset_button = QtGui.QPushButton(_(' Reset'))
+        self.reset_button.setIcon(QtGui.QIcon(os.path.join(ICON_UNDO)))
 
         #create the buttonBox (a container for buttons)
         self.button_box = QtGui.QDialogButtonBox()
         self.button_box.addButton(self.run_button, QtGui.QDialogButtonBox.AcceptRole)
         self.button_box.addButton(self.quit_button, QtGui.QDialogButtonBox.RejectRole)
-#        self.button_box.addButton(self.reset_button, QtGui.QDialogButtonBox.ResetRole)
+        self.button_box.addButton(self.reset_button, QtGui.QDialogButtonBox.ResetRole)
 
         #connect the buttons to their functions.
         self.run_button.clicked.connect(self._run_pressed)
         self.quit_button.clicked.connect(self._quit_pressed)
-#        self.reset_button.clicked.connect(self.resetParametersToDefaults)
+        self.reset_button.clicked.connect(self._reset_pressed)
         self.resize_window()
 
     def resize_window(self, top_padding=100):
@@ -1494,6 +1495,9 @@ class FormWindow(QtWidget, QtGui.QWidget):
 
     def _run_pressed(self):
         self.submit_pressed.emit(True)
+
+    def _reset_pressed(self):
+        self.reset_requested.emit(True)
 
     def close(self):
         # If close() is called, we know for sure that we want to close thw

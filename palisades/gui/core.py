@@ -548,6 +548,7 @@ class FormGUI():
 
         self.window.submit_pressed.register(self.submit)
         self.window.quit_requested.register(self.close)
+        self.window.reset_requested.register(self.reset)
         self.element.submitted.register(self.messages_dialog.start)
         self.element.submitted.register(self._open_messages_window)
 
@@ -663,3 +664,5 @@ class FormGUI():
         if self.quit_confirm.confirm():
             self.window.close()
 
+    def reset(self, data=None):
+        self.element.reset_values()

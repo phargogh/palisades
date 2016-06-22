@@ -1349,6 +1349,9 @@ class FormWindow(QtWidget, QtGui.QWidget):
 #        self.remove_lastrun = self.file_menu.addAction('&Clear cached runs ...')
         self.set_lang_action = self.file_menu.addAction(_('Set &Language ...'))
         self.set_lang_action.setShortcut(QtGui.QKeySequence("Ctrl+L"))
+        self.reset_action = self.file_menu.addAction(_('&Reset inputs to defaults'))
+        self.reset_action.setIcon(QtGui.QIcon(ICON_UNDO))
+        self.reset_action.setShortcut(QtGui.QKeySequence("Ctrl+Alt+R"))
         self.exit_action = self.file_menu.addAction(_('Exit'))
         self.exit_action.setShortcut(QtGui.QKeySequence("Ctrl+Q"))
 #        self.about_app_action = self.file_menu.addAction('About %s' % window_title)
@@ -1368,6 +1371,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.save_file_action.triggered.connect(self.save_params_request.emit)
         self.load_file_action.triggered.connect(self.load_params_request.emit)
         self.set_lang_action.triggered.connect(self.set_language_request)
+        self.reset_action.triggered.connect(self._reset_pressed)
 #        self.remove_lastrun.triggered.connect(self.ui.remove_lastrun)
         self.save_to_python.triggered.connect(self.save_python_request.emit)
 #        self.save_to_json.triggered.connect(self.ui.save_to_json)
@@ -1393,19 +1397,14 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.quit_button = QtGui.QPushButton(_(' Quit'))
         self.quit_button.setIcon(QtGui.QIcon(os.path.join(ICON_CLOSE)))
 
-        self.reset_button = QtGui.QPushButton(_(' Reset'))
-        self.reset_button.setIcon(QtGui.QIcon(os.path.join(ICON_UNDO)))
-
         #create the buttonBox (a container for buttons)
         self.button_box = QtGui.QDialogButtonBox()
         self.button_box.addButton(self.run_button, QtGui.QDialogButtonBox.AcceptRole)
         self.button_box.addButton(self.quit_button, QtGui.QDialogButtonBox.RejectRole)
-        self.button_box.addButton(self.reset_button, QtGui.QDialogButtonBox.ResetRole)
 
         #connect the buttons to their functions.
         self.run_button.clicked.connect(self._run_pressed)
         self.quit_button.clicked.connect(self._quit_pressed)
-        self.reset_button.clicked.connect(self._reset_pressed)
         self.resize_window()
 
     def resize_window(self, top_padding=100):

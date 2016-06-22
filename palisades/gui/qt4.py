@@ -1125,7 +1125,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
     message_added = Signal(unicode)
     _finished = Signal(bool)
 
-    def __init__(self):
+    def __init__(self, window_title=None):
         """Constructor for the ModelDialog class.
 
             root - a pointer to the parent window
@@ -1135,7 +1135,9 @@ class RealtimeMessagesDialog(QtGui.QDialog):
 
         #set window attributes
         self.setLayout(QtGui.QVBoxLayout())
-        self.setWindowTitle(_("Running the model"))
+        if not window_title:
+            window_title = _("Running the model")
+        self.setWindowTitle(window_title)
         self.resize(700, 500)
         center_window(self)
         self.setModal(True)

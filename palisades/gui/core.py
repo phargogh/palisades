@@ -538,7 +538,8 @@ class FormGUI():
         self.window.set_langs(self.langs)
         self.quit_confirm = toolkit.ConfirmQuitDialog()
         self.errors_dialog = toolkit.ErrorDialog()
-        self.messages_dialog = toolkit.RealtimeMessagesDialog()
+        self.messages_dialog = toolkit.RealtimeMessagesDialog(
+            window_title="Running " + self.element.title())
         self.file_dialog = toolkit.FileDialog()
         self.workspace_confirm_dialog = toolkit.WarningDialog()
 

@@ -1400,6 +1400,7 @@ class Form():
 
         self.setup_communication(self.elements)
 
+        self.submission_requested = Communicator()
         self.submitted = Communicator()
 
         # now that the form has been created, load the lastrun state, if
@@ -1724,6 +1725,9 @@ class Form():
 
     def submit(self, event=None):
         LOGGER.debug('Starting the form submission process')
+
+        # User has the opportunity to raise InvalidData here
+        self.submission_requested.emit(True)
 
         # if success, assemble the arguments dictionary and send it off to the
         # base Application

@@ -21,6 +21,18 @@ V_PASS = None
 V_FAIL = 'fail'
 V_ERROR = 'error'
 
+# Allowed pattern types:
+#  * Decimal (e.g. 4.333112)
+#  * Scientific (e.g. 4.E-170, 9.442e10)
+NUM_REGEX = (
+    r'^\s*'  # preceeding whitespace
+    r'(-?[0-9]*(\.[0-9]*)?([eE]-?[0-9]+)?)'
+    r'\s*$')  # trailing whitespace
+
+
+class ValidationError(ValueError):
+    """Custom validation error."""
+    pass
 
 # taken from iui/registrar.py
 class Registrar(object):
@@ -86,6 +98,9 @@ class Validator(Registrar):
         self.thread = None
         self.timer = None
         self.finished = Communicator()
+
+    def add_validation(self, validation_callable, position):
+        """Add a validation function or callable to the validation process."""
 
     def validate(self, valid_dict):
         """Validate the element.  This is a two step process: first, all
@@ -389,6 +404,69 @@ class Checker(Registrar):
             raise Warning('An unexpected error was encountered during' +
                           ' validation.  Use this input at your own risk.')
         return None
+
+def check_filepath(path, mustExist=False, permissions='r'):
+    if mustExist and not os.path.exists(path):
+        raise ValidationError('Not found: %s', path)
+
+    if permissions:
+        if not os.path.exists(path):
+            path = os.path.dirname(path)
+
+        for letter, mode, descriptor in [
+                ('r', os.R_OK, 'read'),
+                ('w', os.W_OK, 'write'),
+                ('x', os.X_OK, 'execute')]:
+            if letter in permissions and not os.access(path, mode):
+                raise ValidationError('You must have %s access to %s' %
+                                      (descriptor, path))
+
+def check_folderpath(path, mustExist=False, permissions='r', contains=None):
+    check_filepath(path, mustExist, permissions)
+
+    if contains:
+        missing_files = []
+        for relpath in contains:
+            contained_filepath = os.path.join(path, relpath)
+            if not os.path.exists(contained_filepath):
+                missing_files.append(relpath)
+
+            if missing_files:
+                raise ValidationError('Directory %s is missing files: %s',
+                                      (path, missing_files))
+
+def check_raster(path):
+    gdal.PushErrorHandler('CPLQuietErrorHandler')
+    dataset = gdal.Open(path)
+    if not dataset:
+        raise ValidationError('%s is not a GDAL-supported raster')
+
+def check_regexp(string, pattern='.*', flag=None):
+    # Don't bother accepting  a regexp datastructure ... it's not used in
+    # InVEST anyways and is easy enough to just write out.
+    raise NotImplementedError
+
+def check_number(num, gteq=None, greaterThan=None, lteq=None, lessThan=None,
+                 allowedValues=None):
+    if gteq != None and not num >= gteq:
+        raise ValidationError('%s must be greater than or equal to %s' %
+                              (num, gteq))
+    if greaterThan != None and not num > greaterThan:
+        raise ValidationError('%s must be greater than %s' % (num, greaterThan))
+    if lteq != None and not num < lteq:
+        raise ValidationError('%s must be less than or equal to %s' %
+                              (num, lteq))
+    if lessThan != None and not num > lessThan:
+        raise ValidationError('%s must be less than %s' % (num, lessThan ))
+
+    if allowedValues:
+        default_numeric_params = {
+            'pattern': NUM_REGEX,
+            'flag': None,
+        }
+        check_regexp(default_numeric_params.update(allowedValues))
+
+
 
 class URIChecker(Checker):
     """This subclass of Checker provides functionality for URI-based inputs."""

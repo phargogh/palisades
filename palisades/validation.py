@@ -405,6 +405,7 @@ class Checker(Registrar):
                           ' validation.  Use this input at your own risk.')
         return None
 
+
 def check_filepath(path, mustExist=False, permissions='r'):
     if mustExist and not os.path.exists(path):
         raise ValidationError('Not found: %s', path)
@@ -421,7 +422,7 @@ def check_filepath(path, mustExist=False, permissions='r'):
                 raise ValidationError('You must have %s access to %s' %
                                       (descriptor, path))
 
-def check_folderpath(path, mustExist=False, permissions='r', contains=None):
+def check_folder(path, mustExist=False, permissions='r', contains=None):
     check_filepath(path, mustExist, permissions)
 
     if contains:
@@ -435,19 +436,21 @@ def check_folderpath(path, mustExist=False, permissions='r', contains=None):
                 raise ValidationError('Directory %s is missing files: %s',
                                       (path, missing_files))
 
+
 def check_raster(path):
+    check_filepath(path, mustExist=True, permissions='r')
+
     gdal.PushErrorHandler('CPLQuietErrorHandler')
     dataset = gdal.Open(path)
     if not dataset:
         raise ValidationError('%s is not a GDAL-supported raster')
 
-def check_regexp(string, pattern='.*', flag=None):
-    # Don't bother accepting  a regexp datastructure ... it's not used in
-    # InVEST anyways and is easy enough to just write out.
-    raise NotImplementedError
 
 def check_number(num, gteq=None, greaterThan=None, lteq=None, lessThan=None,
                  allowedValues=None):
+
+    num = float(num)
+
     if gteq != None and not num >= gteq:
         raise ValidationError('%s must be greater than or equal to %s' %
                               (num, gteq))
@@ -464,730 +467,194 @@ def check_number(num, gteq=None, greaterThan=None, lteq=None, lessThan=None,
             'pattern': NUM_REGEX,
             'flag': None,
         }
-        check_regexp(default_numeric_params.update(allowedValues))
+        check_regexp(str(num), **default_numeric_params.update(allowedValues))
 
 
+def check_regexp(string, pattern='.*', flag=None):
+    # Don't bother accepting  a regexp datastructure ... it's not used in
+    # InVEST anyways and is easy enough to just write out.
 
-class URIChecker(Checker):
-    """This subclass of Checker provides functionality for URI-based inputs."""
-    def __init__(self):
-        Checker.__init__(self)
-        self.uri = None  # initialize to none
-        self.add_check_function(self.check_exists)
+    known_flags = {
+        None: 0,  # Indicates no regex flags
+        'ignoreCase': re.IGNORECASE,
+        'verbose': re.VERBOSE,
+        'debug': re.DEBUG,
+        'locale': re.LOCALE,
+        'multiline': re.MULTILINE,
+        'dotAll': re.DOTALL,
+    }
 
-        updates = {'mustExist': self.check_exists,
-                   'permissions': self.check_permissions}
-        self.update_map(updates)
-
-    def check_exists(self, valid_dict):
-        """Verify that the file at valid_dict['value'] exists."""
-
-        self.uri = valid_dict['value']
-
-        if os.path.exists(self.uri) == False:
-            return 'File not found: %s' % self.uri
-
-    def check_permissions(self, permissions):
-        """Verify that the URI has the given permissions.
-
-            permissions - a string containing the characters 'r' for readable,
-                'w' for writeable, and/or 'x' for executable.  Multiple
-                characters may be specified, and all specified permissions will
-                be checked.  'rwx' will check all 3 permissions.  'rx' will
-                check only read and execute.  '' will not check any permissions.
-
-            Returns a string with and error message, if one is found, or else
-            None."""
-
-        # A data structure for making a clean way of looping over available
-        # modes.  First elemnt is the user-defined mode character.  Second
-        # element is the OS package constant to pass to os.access.  Third
-        # element is the string permission type to insert into the error string.
-        file_modes = [
-            ('r', os.R_OK, 'read'),
-            ('w', os.W_OK, 'write'),
-            ('x', os.X_OK, 'execute')
-        ]
-
-        def _verify_permissions(uri):
-            for letter, mode, descriptor in file_modes:
-                if letter in permissions and not os.access(uri, mode):
-                    return 'You must have %s access to %s' % (descriptor, uri)
-
-        # If the file does not exist, we don't have access to it.
-        # We therefore need to check that the file exists before we can
-        # assert that we do not have access to it.
-        # If the file does not exist, check that we have permissions to the
-        # parent folder instead, so that we can create the folder there.
-        if os.path.exists(self.uri):
-            return _verify_permissions(self.uri)
-        else:
-            parent_folder = os.path.dirname(self.uri)
-            return _verify_permissions(parent_folder)
+    matches = re.compile(pattern, known_flags[flag])
+    if not matches.match(string):
+        raise ValidationError('Value %s not allowed for pattern %s' %
+                              (string, pattern))
 
 
-class FolderChecker(URIChecker):
-    """This subclass of URIChecker is tweaked to validate a folder."""
-    def __init__(self):
-        URIChecker.__init__(self)
+def check_table_fields(table_fields, expected_fields):
+    table_fields_set = set([f.upper() for f in table_fields])
+    expected_fields_set = set([f.upper() for f in expected_fields])
 
-        updates = {'contains': self.check_contents}
-        self.update_map(updates)
-
-    def check_exists(self, valid_dict):
-        """Verify that the file at valid_dict['value'] exists.  Reimplemented
-        from URIChecker class to provide more helpful, folder-oriented error
-        message."""
-        self.uri = valid_dict['value']
-
-        try:
-            folder_must_exist = valid_dict['mustExist']
-        except KeyError:
-            # Thrown when 'mustExist' is not a key in valid_dict.
-            folder_must_exist = False
-
-        if folder_must_exist and not os.path.isdir(self.uri):
-            return str('Folder must exist on disk')
-        else:
-            if os.path.isfile(self.uri):
-                return self.uri + ' already exists on disk'
-
-    def check_contents(self, files):
-        """Verify that the files listed in `files` exist.  Paths in `files` must
-        be relative to the Folder path that we are validating.  This function
-        strictly validates the presence of these files.
-
-            files - a list of string file URIs, where each file is relative to
-                the Folder stored in self.uri.
-
-        Conforming with all Checker classes, this function returns a string
-        error if one of the files does not exist or None if all required files
-        are found."""
-
-        for uri in files:
-            if not os.path.exists(os.path.join(self.uri, uri)):
-                return '"%s" must exist in "%s"' % (uri, self.uri)
+    difference = expected_fields_set - table_fields_set
+    if difference:
+        raise ValidationError('Table is missing fields: %s' % list(difference))
 
 
-class FileChecker(URIChecker):
-    """This subclass of URIChecker is tweaked to validate a file on disk.
-
-        In contrast to the FolderChecker class, this class validates that a
-        specific file exists on disk."""
-
-    def __init__(self):
-        URIChecker.__init__(self)
-        self.add_check_function(self.open)
-
-    def open(self, valid_dict):
-        """Checks to see if the file at self.uri can be opened by python.
-
-            This function can be overridden by subclasses as appropriate for the
-            filetype.
-
-            Returns an error string if the file cannot be opened.  None if
-            otherwise."""
-
-        try:
-            file_handler = open(self.uri, 'r')
-            file_handler.close()
-        except IOError:
-            return 'Unable to open file'
-
-class GDALChecker(FileChecker):
-    """This class subclasses FileChecker to provide GDAL-specific validation.
-    """
-
-    def open(self, valid_dict):
-        """Attempt to open the GDAL object.  URI must exist.  This is an
-        overridden FileChecker.open()
-
-        Returns an error string if in error.  Returns none otherwise."""
-
-        gdal.PushErrorHandler('CPLQuietErrorHandler')
-        file_obj = gdal.Open(self.uri)
-        if file_obj == None:
-            return 'Must be a raster that GDAL can open'
-
-class TableChecker(FileChecker, ValidationAssembler):
-    """This class provides a template for validation of table-based files."""
-
-    def __init__(self):
-        FileChecker.__init__(self)
-        ValidationAssembler.__init__(self)
-        updates = {'fieldsExist': self.verify_fields_exist,
-                   'restrictions': self.verify_restrictions}
-        self.update_map(updates)
-        self.num_checker = NumberChecker()
-        self.str_checker = PrimitiveChecker()
-
-    def get_matching_fields(self, field_defn):
-        fieldnames = self._get_fieldnames()
-        # If the field is statically defined, check that the field exists
-        # and move on, raising an error if it does not exist.
-        if field_defn.__class__ in [unicode, str]:
-            fieldnames = map(lambda x: x.upper(), fieldnames)
-            if field_defn.upper() not in fieldnames:
-                return []
-            restricted_fields = [field_defn]
-
-        # If the fieldname is defined by a regular expression, we need to go
-        # through all the fieldnames in this table to check if the target
-        # regex matches.
-        else:
-            # Use a list to keep track of the restricted fields that match
-            # the defined regex.
-            restricted_fields = []
-
-            # Loop through all fields to check if the field matches the
-            # target regular expression.  NOTE: restriction['field'] is
-            # allowed the same structure as defined in
-            # PrimitiveChecker.check_regexp().
-            for field in fieldnames:
-                # Create a copy of the restriction dictionary so we don't
-                # cause unwanted side effects.
-                field_regex_dict = {'allowedValues': field_defn.copy()}
-
-                # PrimitiveChecker.check_regexp() needs a value to check, so
-                # set it to the fieldname.
-                field_regex_dict['value'] = field
-
-                # Check whether the fieldname matches the defined field
-                # regular expression by using the logic in
-                # PrimitiveChecker().
-                field_error = self.str_checker.check_regexp(
-                    field_regex_dict)
-
-                # In this case, we want to know whether the regex matches.
-                # When the regex matches, no error is returned.  If no error
-                # is found (so the field matches the regex), track the field
-                # so we can check it later.
-                if field_error in [None, '']:
-                    restricted_fields.append(field)
-        return restricted_fields
-
-    def verify_fields_exist(self, field_list):
-        """This is a function stub for reimplementation.  field_list is a python
-        list of strings where each string in the list is a required fieldname.
-        List order is not validated.  Returns the error string if an error is
-        found.  Returns None if no error found."""
-
-        fieldnames = self._get_fieldnames()
-
-        for required_field in field_list:
-            matching_fields = self.get_matching_fields(required_field)
-
-            # If it's a string, we know that it has to exist.
-            if required_field.__class__ in [unicode, str]:
-                matching_fields = map(lambda x: x.lower(), matching_fields)
-                if required_field.lower() not in matching_fields:
-                    return str('Required field: "%s" not found in %s' %
-                        (required_field, fieldnames))
+def check_table_restrictions(row_dict, restriction_list):
+    for restriction in restriction_list:
+        field_details = restriction['field']
+        if isinstance(field_details, basestring):
+            # Then it's a fieldname
+            label = field_details
+            if field_details in row_dict:
+                matching_fieldnames = [field_details]
             else:
-                # We know it should be a dictionary, so there might be
-                # minimum/maximum existence rules.
+                matching_fieldnames = []
+        elif isinstance(field_details, dict):
+            # If it's not a string, it's a dict that represents a regular
+            # expression that could match many fields.
+            label = field_details['pattern']
+            regex = re.compile(field_details['pattern'])
+            matching_fieldnames = [k for k in row_dict if regex.match(k)]
+        else:
+            raise Exception('Invalid field configuration: %s', field_details)
+
+        try:
+            if restriction['required'] and not matching_fieldnames:
+                raise ValidationError('File is missing fields matching %s' %
+                                      label)
+        except KeyError:
+            # field is not required by default, so ignore.
+            pass
+
+        for field in matching_fieldnames:
+            restriction_type = restriction['validateAs']['type']
+            if restriction_type == 'number':
+                check_number(num=row_dict[field], **restriction)
+            elif restriction_type == 'string':
+                check_regexp(string=row_dict[field], **restriction)
+            else:
+                raise Exception('Unsupported restriction type %s' %
+                                restriction_type)
+
+
+def check_csv(path, fieldsExist=None, restrictions=None):
+    # Before we actually open up the CSV for use, we need to check it for
+    # consistency.  Specifically, all CSV inputs to InVEST must adhere to
+    # the following:
+    #    - All strings are surrounded by double-quotes
+    #    - the CSV is comma-delimited.
+
+    # using csv Sniffer not to see if it's a valid file, but to
+    # determine the dialect.  csv.Sniffer requires that whole lines are
+    # provided.
+    with open(path, 'rbU') as csv_file:
+        dialect = csv.Sniffer().sniff(
+            '\n'.join(csv_file.readlines(1024)), delimiters=";,")
+        csv_file.seek(0)
+    opened_file = csv.DictReader(open(path), dialect=dialect)
+
+    if fieldsExist:
+        check_table_fields(opened_file.fieldnames, fieldsExist)
+
+    if restrictions:
+        for row_dict in opened_file:
+            check_table_restrictions(row_dict, restrictions)
+
+
+def check_vector(path, fieldsExist=None, restrictions=None, layers=None):
+    vector = ogr.Open(path)
+    vector_fieldnames = [f.GetName() for f in vector.GetLayer().schema]
+
+    if fieldsExist:
+        check_table_fields(vector_fieldnames, fieldsExist)
+
+    if restrictions:
+        for layer_index, layer in vector:
+            for feature in layer:
+                row_dict = dict((field, feature.GetField(field))
+                                for field in vector_fieldnames)
                 try:
-                    min_fields = required_field['min']
-                except KeyError:
-                    min_fields = 1
+                    check_table_restrictions(row_dict, restrictions)
+                except ValidationError as validation_error:
+                    raise ValidationError('Validation error in layer %s: %s' %
+                                          (layer_index, validation_error))
 
-                try:
-                    max_fields = required_field['max']
-                except KeyError:
-                    max_fields = 1000
-
-                pattern = required_field['field']['pattern']
-                num_matches = len(matching_fields)
-                if num_matches < min_fields:
-                    return str('A minimum of %s fields matching the pattern %s '
-                        'must exist, %s found.' % (min_fields, pattern,
-                        num_matches))
-
-                if num_matches > max_fields:
-                    return str('A maximum of %s fields matching the pattern %s '
-                        'may exist, %s found.' % (max_fields, pattern,
-                        num_matches))
-
-    def verify_restrictions(self, restriction_list):
-        table = self._build_table()
-        for restriction_orig in restriction_list:
-            restriction = restriction_orig.copy()
-            restricted_fields = self.get_matching_fields(restriction['field'])
-
-            # If the user has not defined whether the field is required,
-            # assume that the field is not required.  True field existence
-            # enforcement is handled by the 'fieldExists' flag.
-            if 'required' not in restriction:
-                restriction['required'] = False
-
-            # If the user is required to have some fields matching this
-            # regex but has not met that requirement, return an error
-            # message.
-            if len(restricted_fields) == 0 and restriction['required']:
-                return str('This file must have at least one field '
-                    'matching the pattern %s' %
-                    restriction['field']['pattern'])
-
-            for row in table:
-                for field in restricted_fields:
-                    field_value = row['field']
-                    assembled_dict = self.assemble(field_value, restriction['validateAs'])
-
-                    error = None
-                    if assembled_dict['type'] == 'number':
-                        error = self.num_checker.run_checks(assembled_dict)
-                    else:  # assume the restriction type is a string
-                        error = self.str_checker.run_checks(assembled_dict)
-
-                    if error != None and error != '':
-                        return error
-
-    def _build_table(self):
-        """This is a function stub for reimplementation.  Must return a list of
-        dictionaries, where the keys to each dictionary are the fieldnames."""
-
-        return [{}]
-
-    def _get_value(self, fieldname):
-        """This is a function stub for reimplementation.  Function should fetch
-            the value of the given field at the specified row.  Must return a scalar.
-            """
-
-        return 0
-
-    def _get_fieldnames(self):
-        """This is a function stub for reimplementation.  Function should fetch
-            a python list of strings where each string is a fieldname in the
-            table."""
-
-        return []
-
-class OGRChecker(TableChecker):
-    def __init__(self):
-        TableChecker.__init__(self)
-
-        updates = {'layers': self.check_layers}
-        self.update_map(updates)
-
-        #self.add_check_function(self.check_layers)
-
-        self.layer_types = {'polygons' : ogr.wkbPolygon,
-                            'points'  : ogr.wkbPoint}
-
-    def open(self, valid_dict):
-        """Attempt to open the shapefile."""
-
-        self.file = ogr.Open(self.uri)
-
-        if not isinstance(self.file, ogr.DataSource):
-            return str('Shapefile not compatible with OGR')
-
-    def check_layers(self, layer_list):
-        """Attempt to open the layer specified in self.valid."""
-
-        for layer_dict in layer_list:
-            layer_name = layer_dict['name']
-
-            #used when the engineer wants to specify a layer that is the same as
-            #the filename without the file suffix.
+    if layers:
+        for layer_info in layers:
+            layer_name = layer_info['name']
             if isinstance(layer_name, dict):
-                tmp_name = os.path.basename(self.file.GetName())
-                layer_name = os.path.splitext(tmp_name)[0]
+                # dict here represents {'inheritFrom': 'file'}.  The form is
+                # inconsequential, it just means that we use the first layer
+                # available.
+                layer = vector.GetLayer(0)
+                layer_name = layer.GetName()
+            else:
+                layer = vector.GetLayerByName(layer_name)
 
-            self.layer = self.file.GetLayerByName(layer_name)
+            if not layer:
+                raise ValidationError('Vector is missing layer %s' %
+                                      layer_name)
 
-            if not isinstance(self.layer, ogr.Layer):
-                return 'Shapefile must have a layer called ' + layer_name
+            reference = layer.GetSpatialRef()
+            if 'projection' in layer_info:
 
-            if 'projection' in layer_dict:
-                reference = self.layer.GetSpatialRef()
-
-                # Validate projection units if the user specifies it.
-                if 'units' in layer_dict['projection']:
+                if 'units' in layer_info['projection']:
                     linear_units = reference.GetLinearUnitsName().lower()
 
-                    # This dictionary maps IUI-defined projection strings to the
-                    # WKT unit name strings that OGR recognizes.
-                    # Use a list of possible options to identify different
-                    # spellings.
+                    # keys are JSON-understood projection units
+                    # values are known projection wkt equivalents
                     known_units = {
                         'meters':  ['meter', 'metre'],
                         'latLong': ['degree'],
                         'US Feet': ['foot_us']
                     }
 
-                    # Get the JSON-defined projection unit and validate that the
-                    # name extracted from the Spatial Reference matches what we
-                    # expect.
                     # NOTE: If the JSON-defined linear unit (the expected unit)
                     # is not in the known_units dictionary, this will
                     # throw a keyError, which causes a validation error to be
                     # printed.
-                    required_unit = layer_dict['projection']['units']
+                    required_unit = layer_info['projection']['units']
                     try:
                         expected_units = known_units[required_unit]
                     except:
-                        return ('Expected projection units must be '
+                        raise ValidationError(
+                            'Expected projection units must be '
                             'one of %s, not %s' % (known_units.keys(),
-                            required_unit))
+                                                   required_unit))
 
                     if linear_units not in expected_units:
-                        return ('Shapefile layer %s must be projected '
+                        raise ValidationError(
+                            'Vector layer %s must be projected '
                             'in %s (one of %s, case-insensitive). \'%s\' '
                             'found.') % (layer_name, required_unit,
                                 expected_units, linear_units)
 
                 # Validate whether the layer should be projected
                 projection = reference.GetAttrValue('PROJECTION')
-                if 'exists' in layer_dict['projection']:
-                    should_be_projected = layer_dict['projection']['exists']
+                if 'exists' in layer_info['projection']:
+                    should_be_projected = layer_info['projection']['exists']
                     if bool(projection) != should_be_projected:
                         if not should_be_projected:
                             negate_string = 'not'
                         else:
                             negate_string = ''
-                        return ('Shapefile layer %s should %s be ' +
-                                   'projected') % (layer_name, negate_string)
+                        raise ValidationError(
+                            'Vector layer %s should %s be ' +
+                            'projected') % (layer_name, negate_string)
 
                 # Validate whether the layer's projection matches the
                 # specified projection
-                if 'name' in layer_dict['projection']:
-                    if projection != layer_dict['projection']['name']:
-                        return ('Shapefile layer ' + layer_name + ' must be ' +
-                            'projected as ' + layer_dict['projection']['name'])
+                if 'name' in layer_info['projection']:
+                    projection_name = layer_info['projection']['name']
+                    if projection != projection_name:
+                        raise ValidationError(
+                            'Shapefile layer %s must be '
+                            'projected as %s' % (layer_name, projection_name))
 
-            if 'datum' in layer_dict:
-                reference = self.layer.GetSpatialRef()
+            if 'datum' in layer_info:
                 datum = reference.GetAttrValue('DATUM')
-                if datum != layer_dict['datum']:
-                    return ('Shapefile layer ' + layer_name + ' must ' +
-                        'have the datum ' + layer_dict['datum'])
+                if datum != layer_info['datum']:
+                    raise ValidationError(
+                        'Vector layer %s must have the datum %s' % (
+                            layer_name, layer_info['datum']))
 
-    def _check_layer_type(self, type_string):
-        for feature in self.layer:
-            geometry = feature.GetGeometryRef()
-            geom_type = geometry.GetGeometryType()
-
-            if geom_type != self.layer_types[type_string]:
-                return 'Not all features are ' + type_string
-
-    def _get_fieldnames(self):
-        fieldnames = [f.GetName() for f in self.file.GetLayer().schema]
-        return fieldnames
-
-    def _build_table(self):
-        table_rows = []
-        fieldnames = self._get_fieldnames()
-        for feature in self.file.GetLayer():
-            row = {}
-            for fieldname in fieldnames:
-                row[fieldname] = feature.GetField(fieldname)
-            table_rows.append(row)
-            print row
-
-        return table_rows
-
-class DBFChecker(TableChecker):
-    def open(self, valid_dict, read_only = True):
-        """Attempt to open the DBF."""
-
-        #Passing in the value of readOnly, because we might only need to
-        #check to see if it's available for reading
-        self.file = ogr.Open(self.uri)
-
-        if self.file is None:
-            return str('Must be a DBF file')
-
-    def _get_fieldnames(self):
-        layer = self.file.GetLayer()
-        fieldnames = [f.GetName() for f in layer.schema]
-        return fieldnames
-
-    def _build_table(self):
-        table_rows = []
-        layer = self.file.GetLayer()
-        fieldnames = self._get_fieldnames()
-        for feature in layer:
-            row = {}
-            for fieldname in fieldnames:
-                row[fieldname] = feature.GetField(fieldname)
-            table_rows.append(row)
-            print row
-        layer.ResetReading()
-
-        return table_rows
-
-class PrimitiveChecker(Checker):
-    def __init__(self):
-        Checker.__init__(self)
-        self.default_regexp = '.*'
-        self.add_check_function(self.check_regexp)
-
-        # We still need to record the allowedValues key in the values map.  It
-        # won't be executed twice in self.run_checks()
-        updates = {'allowedValues': self.check_regexp}
-        self.update_map(updates)
-
-        self.regexp_flags = {'ignoreCase': re.IGNORECASE,
-                             'verbose': re.VERBOSE,
-                             'debug': re.DEBUG,
-                             'locale': re.LOCALE,
-                             'multiline': re.MULTILINE,
-                             'dotAll': re.DOTALL}
-
-    def check_regexp(self, valid_dict):
-        """Check an input regular expression contained in valid_dict.
-
-            valid_dict - a python dictionary with the following structure:
-            valid_dict['value'] - (required) a python string to be matched
-            valid_dict['allowed_values'] - (required) a python dictionary with the
-                following entries:
-            valid_dict['allowed_values']['pattern'] - ('required') must match
-                one of the following formats:
-                    * A python string regular expression formatted according to
-                      the re module (http://docs.python.org/library/re.html)
-                    * A python list of values to be matched.  These are treated
-                      as logical or ('|' in the built regular expression).  Note
-                      that the entire input pattern will be matched if you use
-                      this option.  For more fine-tuned matching, use the dict
-                      described below.
-                    * A python dict with the following entries:
-                        'values' - (optional) a python list of strings that are
-                            joined by the 'join' key to create a single regular
-                            expression.  If this a 'values' list is not
-                            provided, it's assumed to be ['.*'], which matches
-                            all patterns.
-                        'join' - (optional) the character with which to join all
-                            provided values to form a single regular expression.
-                            If the 'join' value is not provided, it defaults to
-                            '|', the operator for logical or.
-                        'sub' - (optional) a string on which string substitution
-                            will be performed for all elements in the 'values'
-                            list.  If this value is not provided, it defaults to
-                            '^%s$', which causes the entire string to be
-                            matched.  This string uses python's standard string
-                            formatting operations:
-                            http://docs.python.org/library/stdtypes.html#string-formatting-operations
-                            but should only use a single '%s'
-            valid_dict['allowed_values']['flag'] - (optional) a python string
-                representing one of the python re module's available
-                regexp flags.  Available values are: 'ignoreCase', 'verbose',
-                'debug', 'locale', 'multiline', 'dotAll'.  If a different
-                string is provided, no flags are applied to the regular
-                expression matching.
-
-            example valid_dicts:
-                # This would try to match '[a-z_]* in 'sample_string_pattern'
-                valid_dict = {'value' : 'sample_string pattern',
-                              'allowed_values' : {'pattern': '[a-z_]*'}}
-
-                # This would try to match '^test$|^word$' in 'sample_list_pattern'
-                valid_dict = {'value' : 'sample_list_pattern',
-                              'allowed_values': {'pattern': ['test', 'word']}}
-
-                # This would try to match 'test.words' in sample_dict_pattern
-                valid_dict = {'value' : 'sample_dict_pattern',
-                              'allowed_values': {'pattern': {
-                                  'values': ['test', 'words'],
-                                  'join': '.',
-                                  'sub': '%s'}
-
-            This function builds a single regular expression string (if
-            necessary) and checks to see if valid_dict['value'] matches that
-            string.  If not, a python string with an error message is returned.
-            Otherwise, None is returned.
-            """
-        try:
-            # Attempt to get the user's selected flag from the validation
-            # dictionary.  Raises a KeyError if it isn't found.
-            flag = self.regexp_flags[valid_dict['allowedValues']['flag']]
-        except KeyError:
-            # 0 is the python re module's way of specifying no flag.  This is
-            # used if the user has not provided a regexp flag in the validation
-            # dictionary.
-            flag = 0
-
-        try:
-            # Attempt to build a regexp object based on the regex info.
-            # Raises a KeyError if the user has not provided a regular
-            # expression to use.
-            valid_pattern = valid_dict['allowedValues']['pattern']
-
-            # If the user's provided pattern is a string, we should use it
-            # directly and assume it's a stright-up regular expression.
-            if isinstance(valid_pattern, str) or isinstance(valid_pattern,
-                    unicode):
-                user_pattern = valid_pattern
-            else:
-                # If the user provides a data structure instead of a string, we
-                # should build a regular expression from the user's information.
-                try:
-                    join_char = valid_pattern['join']
-                except (KeyError, TypeError):
-                    # KeyError thrown when 'join' key does not exist.
-                    # TypeError thrown when valid_pattern is not a dict.
-                    join_char = '|'
-
-                try:
-                    sub_string = valid_pattern['sub']
-                except (KeyError, TypeError):
-                    # KeyError thrown when 'sub' key does not exist.
-                    # TypeError thrown when valid_pattern is not a dict.
-                    sub_string = '^%s$'
-
-                try:
-                    value_list = valid_pattern['values']
-                except KeyError:
-                    # Thrown when the user does not provide a list of values
-                    value_list = ['.*']
-                except TypeError:
-                    # Thrown when valid_pattern is not a dictionary.
-                    # value_list must be a python list, so we should convert
-                    # whatever is given us into a list.  Casting a list to a
-                    # list results in a list.
-                    value_list = list(valid_pattern)
-
-                # Apply the user's configuration options to all values defined
-                # and actually build a single regular expression string for
-                # python's re module.
-                rendered_list = [sub_string % r for r in value_list]
-                user_pattern = join_char.join(rendered_list)
-        except KeyError:
-            # If the user has not provided a regular expression, we should use
-            # the default regular expression instead.
-            user_pattern = self.default_regexp
-
-        pattern = re.compile(user_pattern, flag)
-        value = valid_dict['value']  # the value to compare against our regex
-        if pattern.match(str(value)) == None:
-            return str("Value '%s' not allowed (allowed values: %s)" %
-                (value, user_pattern))
-
-class NumberChecker(PrimitiveChecker):
-    def __init__(self):
-        PrimitiveChecker.__init__(self)
-
-        # Set numeric default regexp.  Used if user does not provide a regex
-        # \s matches whitespace character.
-        # Allowed pattern types:
-        #  * Decimal (e.g. 4.333112)
-        #  * Scientific (e.g. 4.E-170, 9.442e10)
-        self.default_regexp = (
-            r'^\s*'  # preceeding whitespace
-            r'(-?[0-9]*(\.[0-9]*)?([eE]-?[0-9]+)?)'
-            r'\s*$')  # trailing whitespace
-        updates = {'gteq': self.greater_than_equal_to,
-                   'greaterThan': self.greater_than,
-                   'lteq':  self.less_than_equal_to,
-                   'lessThan':  self.less_than}
-        self.update_map(updates)
-
-    def greater_than(self, b):
-        if not float(self.value) > b:
-            return str(self.value) + ' must be greater than ' + str(b)
-
-    def less_than(self, b):
-        if not float(self.value) < b:
-            return str(self.value) + ' must be less than ' + str(b)
-
-    def less_than_equal_to(self, b):
-        if not float(self.value) <= b:
-            return str(self.value) + ' must be less than or equal to ' + str(b)
-
-    def greater_than_equal_to(self, b):
-        if not float(self.value) >= b:
-            return str(str(self.value) + ' must be greater than or equal to ' +
-                str(b))
-
-class CSVChecker(TableChecker):
-    def open(self, valid_dict):
-        """Attempt to open the CSV file"""
-
-        # Before we actually open up the CSV for use, we need to check it for
-        # consistency.  Specifically, all CSV inputs to InVEST must adhere to
-        # the following:
-        #    - All strings are surrounded by double-quotes
-        #    - the CSV is comma-delimited.
-
-        try:
-            # using csv Sniffer not to see if it's a valid file, but to
-            # determine the dialect.  csv.Sniffer requires that whole lines are
-            # provided.
-            csv_file = open(self.uri, 'rbU')
-            dialect = csv.Sniffer().sniff(
-                '\n'.join(csv_file.readlines(1024)), delimiters=";,")
-            csv_file.seek(0)
-            self.file = csv.DictReader(csv_file, dialect=dialect)
-        except IOError as e:
-            return str("IOError: %s" % str(e))
-        except (csv.Error, ValueError) as e:
-            return str(e)
-
-    def _build_table(self):
-        table_rows = []
-        fieldnames = self._get_fieldnames()
-        for record in self.file:
-            table_rows.append(record)
-        return table_rows
-
-    def _get_fieldnames(self):
-        if not hasattr(self.file, 'fieldnames'):
-            self.fieldnames = self.file.next()
-        else:
-            self.fieldnames = self.file.fieldnames
-
-        return self.fieldnames
-
-    #all check functions take a single value, which is returned by the
-    #element.value() function.  All check functions should perform the required
-    #checks and return an error string.
-    #if no error is found, the check function should return None.
-
-class FlexibleTableChecker(TableChecker):
-    """This class validates a file in a generic 'table' format.
-
-    Currently, this supports DBF and CSV formats.
-
-    This class is essentially a wrapper that first determines which file format we're
-    dealing with, and then delegates the rest of the work to the appropriate
-    Checker class for that specific file format.
-    """
-    def open(self, valid_dict):
-        """Attempt to open the file"""
-        # As a first approximation, we attempt to use the file suffix.
-        # If the suffix is .dbf, we just treat it as a DBF file.
-        if self.uri.lower().endswith('.dbf'):
-            self.specific_table_checker = DBFChecker()
-        else:
-            # We try to treat the file as a CSV.
-            # First, parse it as a CSV file and see if it works.
-            with open(self.uri) as tablefile:
-                reader = csv.reader(tablefile)
-                try:
-                    # Just read all the rows in the file. We don't need to do anything with them.
-                    for row in reader:
-                        pass
-                    # We've read the file correctly, so seems like it's a CSV file.
-                    self.specific_table_checker = CSVChecker()
-                except csv.Error:
-                    # We got an error while reading, so it's probably not a CSV file.
-                    # We treat it as a DBF file.
-                    self.specific_table_checker = DBFChecker()
-
-        self.specific_table_checker.uri = self.uri
-
-        # We might be trying to read a non-DBF file as a DBF, so if we get
-        # an exception we just return an error.
-        try:
-            return self.specific_table_checker.open(valid_dict)
-        except IOError as e:
-            return str("IOError: %s" % str(e))
-        except (csv.Error, ValueError) as e:
-            return str(e)
-
-    def _build_table(self):
-        # Forward the call to the checker for the particular table type.
-        return self.specific_table_checker._build_table()
-
-    def _get_fieldnames(self):
-        return self.specific_table_checker._get_fieldnames()

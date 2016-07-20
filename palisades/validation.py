@@ -432,9 +432,9 @@ def check_folder(path, mustExist=False, permissions='r', contains=None):
             if not os.path.exists(contained_filepath):
                 missing_files.append(relpath)
 
-            if missing_files:
-                raise ValidationError('Directory %s is missing files: %s',
-                                      (path, missing_files))
+        if missing_files:
+            raise ValidationError('Directory %s is missing files: %s',
+                                  (path, missing_files))
 
 
 def check_raster(path):

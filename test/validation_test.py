@@ -161,87 +161,46 @@ class TestFileValidation(unittest.TestCase):
             validation.check_filepath(fake_filepath, permissions='r')
 
 
-class FolderCheckerTester(CheckerTester):
-    """Test the class palisades.validation.FileChecker"""
+class TestFolderValidation(unittest.TestCase):
+
+    """Test fixture for folder validation.
+
+    While folder validation allows for finer control of existence and
+    permissions checking, these capabilities are tested in the file
+    existence and permissions fixture, above.
+    """
+
     def setUp(self):
-        self.validate_as = {
-            'type': 'folder',
-            'value': VALIDATION_DATA
-        }
-        self.checker = validation.FolderChecker()
-
-    def test_folder_exists(self):
-        """Assert that the FolderChecker can verify a folder exists."""
-        self.assertNoError()
-
-    def test_not_folder(self):
-        """Assert that the FolderChecker fails if given a false URI."""
-        self.validate_as['mustExist'] = True
-        self.validate_as['value'] += 'a'
-        self.assertError()
-
-    def test_folder_contents(self):
-        """Assert FolderChecker verifies the presence of files"""
-        self.validate_as['contains'] = ['Guild.dbf', 'Guild.csv']
-        self.validate_as['value'] = VALIDATION_DATA
-        self.assertNoError()
-
-    def test_folder_contents_not_present(self):
-        """Assert FolderChecker fails if given a file that does not exist."""
-        self.validate_as['contains'] = ['not_there.csv']
-        self.validate_as['value'] = os.path.join(VALIDATION_DATA, 'iui')
-        self.assertError()
-
-    def test_permissions_read(self):
-        """Assert FolderChecker fails if given a folder without read access"""
-        self.validate_as['permissions'] = 'r'
-        self.validate_as['value'] = '/'
-        self.assertNoError()
-
-    def test_permissions_write(self):
-        """Assert FolderChecker passes when given a folder with write access"""
-        self.validate_as['permissions'] = 'w'
-        self.validate_as['value'] = VALIDATION_DATA
-        self.assertNoError()
-
-    def test_permissions_no_write(self):
-        """Assert FolderChecker fails when given a folder without write access"""
-        self.validate_as['permissions'] = 'w'
-
-        if platform.system() == 'Linux':
-            self.validate_as['value'] = '/etc'
-        elif platform.system() == 'Windows':
-            self.validate_as['value'] = 'C:\Program Files'
-        elif platform.system() == 'Darwin':
-            self.validate_as['value'] = '/etc'
-        else:
-            raise Exception('Don\'t know what folder to use as restricted')
-
-        self.assertError()
-
-    def test_permissions_execute(self):
-        """Assert FolderChecker passes when folder has execute permissions."""
-        self.validate_as['permissions'] = 'x'
-        self.validate_as['value'] = VALIDATION_DATA
-        self.assertNoError()
-
-class UnicodeFolderCheckerTester(FolderCheckerTester):
-    def setUp(self):
-        self.unicode_dir = u'folder_тамквюам'
-        self.validate_as = {
-            'type': 'folder',
-            'value': self.unicode_dir,
-        }
-        self.checker = validation.FolderChecker()
-
-        # copy the whole validation data dir to the new folder for this suite
-        # of tests.
-        if os.path.exists(self.unicode_dir):
-            shutil.rmtree(self.unicode_dir)
-        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+        """Setup function, overridden from ``unittest.TestCase.setUp``."""
+        self.workspace_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        shutil.rmtree(self.unicode_dir)
+        """Teardown, overridden from ``unittest.TestCase.tearDown``."""
+        shutil.rmtree(self.workspace_dir)
+
+    def test_folder_no_contains_requirement(self):
+        """Validation: verify folder can skip file existence checks."""
+        from palisades import validation
+        validation.check_folder(self.workspace_dir, contains=None)
+
+    def test_folder_contains_files(self):
+        """Validation: verify folder can check contained file existence."""
+        from palisades import validation
+
+        filename = 'example.txt'
+        with open(os.path.join(self.workspace_dir, filename), 'w') as fd:
+            fd.write('hello!')
+
+        validation.check_folder(self.workspace_dir, contains=[filename])
+
+    def test_folder_missing_files(self):
+        """Validation: verify failure when expected files are missing."""
+        from palisades import validation
+
+        with self.assertRaises(validation.ValidationError):
+            validation.check_folder(self.workspace_dir,
+                                    contains=['missing.txt'])
+
 
 class GDALCheckerTester(CheckerTester):
     """Test the class iui_validate.GDALChecker"""

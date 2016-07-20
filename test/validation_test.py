@@ -247,6 +247,135 @@ class TestRasterValidation(unittest.TestCase):
             validation.check_raster(raster_filepath)
 
 
+class TestNumberValidation(unittest.TestCase):
+
+    """Test fixture for numeric validation."""
+
+    def test_string(self):
+        """Validation: Check a string representation of a number."""
+        from palisades import validation
+        validation.check_number('123')
+
+    def test_nonnumeric_string(self):
+        """Validation: Verify failure for a nonnumeric string."""
+        from palisades import validation
+        with self.assertRaises(ValueError):
+            validation.check_number('foo')
+
+    def test_gteq(self):
+        """Validation: Verify gteq comparison."""
+        from palisades import validation
+        validation.check_number(1, gteq=0)
+
+    def test_gteq_fails(self):
+        """Validation: Verify gteq failure."""
+        from palisades import validation
+        with self.assertRaises(validation.ValidationError):
+            validation.check_number(1, gteq=2)
+
+    def test_gt(self):
+        """Validation: Verify gt comparison."""
+        from palisades import validation
+        validation.check_number(1, greaterThan=0)
+
+    def test_gt_fails(self):
+        """Validation: Verify gt failure."""
+        from palisades import validation
+        with self.assertRaises(validation.ValidationError):
+            validation.check_number(1, greaterThan=2)
+
+    def test_lteq(self):
+        """Validation: Verify lteq comparison."""
+        from palisades import validation
+        validation.check_number(1, lteq=2)
+
+    def test_lteq_fails(self):
+        """Validation: Verify lteq failure."""
+        from palisades import validation
+        with self.assertRaises(validation.ValidationError):
+            validation.check_number(1, lteq=0)
+
+    def test_lt(self):
+        """Validation: Verify gt comparison."""
+        from palisades import validation
+        validation.check_number(1, lessThan=2)
+
+    def test_lt_fails(self):
+        """Validation: Verify lt failure."""
+        from palisades import validation
+        with self.assertRaises(validation.ValidationError):
+            validation.check_number(1, lessThan=0)
+
+    def test_matching_pattern(self):
+        """Validation: Verify numeric regex can be user-defined."""
+        from palisades import validation
+        validation.check_number(0.555, allowedValues={'pattern': '0.5+'})
+
+
+class TestTableRestrictions(unittest.TestCase):
+
+    """Test fixture for testing table restrictions."""
+
+    def test_invalid_restriction_config(self):
+        """Validation: verify vailure on bad restriction type."""
+        from palisades import validation
+
+        restrictions = [{'type': 'bad type!'}]
+        with self.assertRaises(Exception):
+            validation.check_table_restrictions({}, restrictions)
+
+    def test_invalid_field_config(self):
+        """Validation: verify failure on bad field configuration."""
+        from palisades import validation
+
+        restrictions = [123]
+        with self.assertRaises(Exception):
+            validation.check_table_restrictions({}, restrictions)
+
+    def test_missing_required_fieldnames(self):
+        """Validation: verify failure on required but missing fieldnames."""
+        from palisades import validation
+
+        restrictions = [{'validateAs': {'type': 'number'},
+                         'required': True,
+                         'field': 'field_a'}]
+        table_row = {'field_b': 'value'}
+
+        with self.assertRaises(validation.ValidationError):
+            validation.check_table_restrictions(table_row, restrictions)
+
+    def test_matching_numeric_field_restrictions(self):
+        """Validation: verify basic numeric field restriction."""
+        from palisades import validation
+
+        restrictions = [{'validateAs': {'type': 'number'}, 'field': 'field_a'}]
+        table_row = {'field_a': 1.234}
+
+        validation.check_table_restrictions(table_row, restrictions)
+
+    def test_matching_string_field_restrictions(self):
+        """Validation: verify basic string field restriction."""
+        from palisades import validation
+
+        restrictions = [{'validateAs': {'type': 'string'}, 'field': 'field_a'}]
+        table_row = {'field_a': 'hello!'}
+
+        validation.check_table_restrictions(table_row, restrictions)
+
+    def test_fieldname_pattern(self):
+        """Validation: verify user-defined field pattern matching."""
+        from palisades import validation
+
+        restrictions = [{'validateAs': {'type': 'string'},
+                         'field': {'pattern': 'hello+!'}}]
+        table_row = {
+            'foo': 1,
+            'hello!': 2,
+            'hellooo!': 3,
+        }
+        validation.check_table_restrictions(table_row, restrictions)
+
+
 class OGRCheckerTester(CheckerTester):
     """Test the class palisades.validation.OGRChecker"""
     def setUp(self):

@@ -21,13 +21,6 @@ V_PASS = None
 V_FAIL = 'fail'
 V_ERROR = 'error'
 
-# Allowed pattern types:
-#  * Decimal (e.g. 4.333112)
-#  * Scientific (e.g. 4.E-170, 9.442e10)
-NUM_REGEX = (
-    r'^\s*'  # preceeding whitespace
-    r'(-?[0-9]*(\.[0-9]*)?([eE]-?[0-9]+)?)'
-    r'\s*$')  # trailing whitespace
 
 
 class ValidationError(ValueError):
@@ -456,18 +449,26 @@ def check_number(num, gteq=None, greaterThan=None, lteq=None, lessThan=None,
                               (num, gteq))
     if greaterThan != None and not num > greaterThan:
         raise ValidationError('%s must be greater than %s' % (num, greaterThan))
-    if lteq != None and not num < lteq:
+    if lteq != None and not num <= lteq:
         raise ValidationError('%s must be less than or equal to %s' %
                               (num, lteq))
-    if lessThan != None and not num > lessThan:
+    if lessThan != None and not num < lessThan:
         raise ValidationError('%s must be less than %s' % (num, lessThan ))
 
+    # Allowed default pattern types:
+    #  * Decimal (e.g. 4.333112)
+    #  * Scientific (e.g. 4.E-170, 9.442e10)
+    default_numeric_params = {
+        'pattern': (
+            r'^\s*'  # preceeding whitespace
+            r'(-?[0-9]*(\.[0-9]*)?([eE]-?[0-9]+)?)'
+            r'\s*$'),  # trailing whitespace
+        'flag': None,
+    }
     if allowedValues:
-        default_numeric_params = {
-            'pattern': NUM_REGEX,
-            'flag': None,
-        }
-        check_regexp(str(num), **default_numeric_params.update(allowedValues))
+        default_numeric_params.update(allowedValues)
+
+    check_regexp(str(num), **default_numeric_params)
 
 
 def check_regexp(string, pattern='.*', flag=None):
@@ -483,6 +484,9 @@ def check_regexp(string, pattern='.*', flag=None):
         'multiline': re.MULTILINE,
         'dotAll': re.DOTALL,
     }
+
+    if type(string) in [int, float]:
+        string = str(string)
 
     matches = re.compile(pattern, known_flags[flag])
     if not matches.match(string):
@@ -514,7 +518,13 @@ def check_table_restrictions(row_dict, restriction_list):
             # expression that could match many fields.
             label = field_details['pattern']
             regex = re.compile(field_details['pattern'])
-            matching_fieldnames = [k for k in row_dict if regex.match(k)]
+            matching_fieldnames = []
+            for key in row_dict:
+                if type(key) in [int, float]:
+                    key = str(key)
+
+                if regex.match(key):
+                    matching_fieldnames.append(key)
         else:
             raise Exception('Invalid field configuration: %s', field_details)
 
@@ -528,10 +538,13 @@ def check_table_restrictions(row_dict, restriction_list):
 
         for field in matching_fieldnames:
             restriction_type = restriction['validateAs']['type']
+            restriction_params = restriction['validateAs'].copy()
+            del restriction_params['type']
+
             if restriction_type == 'number':
-                check_number(num=row_dict[field], **restriction)
+                check_number(num=row_dict[field], **restriction_params)
             elif restriction_type == 'string':
-                check_regexp(string=row_dict[field], **restriction)
+                check_regexp(string=row_dict[field], **restriction_params)
             else:
                 raise Exception('Unsupported restriction type %s' %
                                 restriction_type)

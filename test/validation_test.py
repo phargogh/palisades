@@ -9,9 +9,11 @@ import shutil
 import tempfile
 
 from palisades import validation
+import mock
 
 TEST_DATA = os.path.join(os.path.dirname(__file__), 'data')
 VALIDATION_DATA = os.path.join(TEST_DATA, 'validation')
+
 
 class CheckerTester(unittest.TestCase):
     """This class defines commonly-used methods for checker classes in
@@ -62,50 +64,102 @@ class CheckerTester(unittest.TestCase):
         error = self.check()
         self.assertIn(substr, error)
 
-class FileCheckerTester(CheckerTester):
-    """Test the class palisades.validation.FileChecker"""
+
+class TestFileValidation(unittest.TestCase):
+
+    """Test fixture for file existence and permissions checking."""
+
     def setUp(self):
-        self.temp_dir = tempfile.mkdtemp()
-        sample_file = os.path.join(VALIDATION_DATA, 'text_test_i18n.txt')
-        new_filepath = os.path.join(self.temp_dir, u'text_test_кибо.txt')
-        shutil.copy(sample_file, new_filepath)
-        self.validate_as = {
-            'type': 'file',
-            'value': new_filepath
-        }
-        self.checker = validation.FileChecker()
+        """Setup function, overridden from ``unittest.TestCase.setUp``."""
+        self.workspace_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        shutil.rmtree(self.temp_dir)
+        """Teardown, overridden from ``unittest.TestCase.tearDown``."""
+        shutil.rmtree(self.workspace_dir)
 
-    def test_uri_exists(self):
-        """Assert that the FileChecker can open a file."""
-        self.assertNoError()
+    @staticmethod
+    def make_file(workspace):
+        """Create a primitive text file within the workspace.
 
-    def test_nonexistent_uri(self):
-        """Assert that the FileChecker fails if given a false URI."""
-        self.validate_as['value'] += 'a'
-        self.assertError()
+        The file will be created within the workspace and will have the
+        filename 'file.txt'.
 
-    def test_permissions_read(self):
-        """Assert that the FileChecker fails if given a file without read
-        permissions."""
-        self.validate_as['permissions'] = 'r'
-        self.assertNoError()
+        Parameters:
+            workspace (string): The string path to the workspace.
 
-    def test_permissions_write(self):
-        """Assert that the FileChecker fails if given a file without read
-        permissions."""
+        Returns:
+            The string path to the new file on disk.
+        """
+        filepath = os.path.join(workspace, 'file.txt')
+        with open(filepath, 'w') as open_file:
+            open_file.write('hello!')
 
-        self.validate_as['permissions'] = 'w'
-        self.assertNoError()
+        return filepath
 
-    def test_permissions_no_execute(self):
-        """Assert that the FileChecker fails if given a file without read
-        permissions."""
+    def test_filepath_exists(self):
+        """Validation: verify filepath existence."""
+        from palisades import validation
 
-        self.validate_as['permissions'] = 'x'
-        self.assertError()
+        filepath = TestFileValidation.make_file(self.workspace_dir)
+        validation.check_filepath(filepath, mustExist=True, permissions=None)
+
+    def test_filepath_not_found(self):
+        """Validation: verify failure when file not found."""
+        from palisades import validation
+
+        filepath = os.path.join(self.workspace_dir, 'foo.txt')
+
+        with self.assertRaises(validation.ValidationError):
+            validation.check_filepath(filepath, mustExist=True)
+
+    def test_filepath_read_permissions_fails(self):
+        """Validation: verify failure when read access required, not found."""
+        from palisades import validation
+
+        filepath = TestFileValidation.make_file(self.workspace_dir)
+
+        with self.assertRaises(validation.ValidationError):
+            with mock.patch('os.access', lambda x, y: False):
+                validation.check_filepath(filepath, permissions='r')
+
+    def test_filepath_write_permissions_fails(self):
+        """Validation: verify failure when write access required, not found."""
+        from palisades import validation
+
+        filepath = TestFileValidation.make_file(self.workspace_dir)
+
+        with self.assertRaises(validation.ValidationError):
+            with mock.patch('os.access', lambda x, y: False):
+                validation.check_filepath(filepath, permissions='w')
+
+    def test_filepath_execute_permissions_fails(self):
+        """Validation: verify failure when ex. access required, not found."""
+        from palisades import validation
+
+        filepath = TestFileValidation.make_file(self.workspace_dir)
+
+        with self.assertRaises(validation.ValidationError):
+            with mock.patch('os.access', lambda x, y: False):
+                validation.check_filepath(filepath, permissions='x')
+
+    def test_all_permissions_pass(self):
+        """Validation: verify all permissions required and found."""
+        from palisades import validation
+
+        filepath = TestFileValidation.make_file(self.workspace_dir)
+
+        with mock.patch('os.access', lambda x, y: True):
+            validation.check_filepath(filepath, permissions='rwx')
+
+    def test_read_permissions_dirname(self):
+        """Validation: verify read permissions on dirname of a given file."""
+        from palisades import validation
+
+        fake_filepath = os.path.join(self.workspace_dir, 'foo.txt')
+
+        with mock.patch('os.access', lambda x, y: True):
+            validation.check_filepath(fake_filepath, permissions='r')
+
 
 class FolderCheckerTester(CheckerTester):
     """Test the class palisades.validation.FileChecker"""

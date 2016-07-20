@@ -202,39 +202,50 @@ class TestFolderValidation(unittest.TestCase):
                                     contains=['missing.txt'])
 
 
-class GDALCheckerTester(CheckerTester):
-    """Test the class iui_validate.GDALChecker"""
+class TestRasterValidation(unittest.TestCase):
+
+    """Test fixture for GDAL-supported raster validation."""
+
     def setUp(self):
-        self.validate_as = {'type': 'GDAL',
-                            'value': os.path.join(VALIDATION_DATA, 'lulc_samp_cur')}
-        self.checker = validation.GDALChecker()
-
-    def test_opens(self):
-        """Assert that GDALChecker can open a file."""
-        self.assertNoError()
-
-    def test_not_exists(self):
-        """Assert that GDALChecker fails if given a bad URI"""
-        self.validate_as['value'] += 'aaa'
-        self.assertError()
-
-class UnicodeGDALCheckerTester(GDALCheckerTester):
-    def setUp(self):
-        self.unicode_dir = u'folder_тамквюам'
-        self.validate_as = {
-            'type': 'GDAL',
-            'value': os.path.join(self.unicode_dir, 'lulc_samp_cur'),
-        }
-        self.checker = validation.GDALChecker()
-
-        # copy the whole validation data dir to the new folder for this suite
-        # of tests.
-        if os.path.exists(self.unicode_dir):
-            shutil.rmtree(self.unicode_dir)
-        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+        """Setup function, overridden from ``unittest.TestCase.setUp``."""
+        self.workspace_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        shutil.rmtree(self.unicode_dir)
+        """Teardown, overridden from ``unittest.TestCase.tearDown``."""
+        shutil.rmtree(self.workspace_dir)
+
+    def test_bad_filepath(self):
+        """Validation: verify that a missing file raises an error."""
+        from palisades import validation
+
+        bad_filename = os.path.join(self.workspace_dir, 'not_found.tif')
+
+        with self.assertRaises(validation.ValidationError):
+            validation.check_raster(bad_filename)
+
+    def test_valid_raster(self):
+        """Validation: verify that a valid raster checks out."""
+        from palisades import validation
+        from osgeo import gdal
+
+        raster_filepath = os.path.join(self.workspace_dir, 'raster.tif')
+
+        driver = gdal.GetDriverByName('GTiff')
+        driver.Create(raster_filepath, 1, 1, 1, gdal.GDT_Float32)
+
+        validation.check_raster(raster_filepath)
+
+    def test_invalid_raster(self):
+        """Validation: verify that an invalid raster raises an error."""
+        from palisades import validation
+
+        raster_filepath = os.path.join(self.workspace_dir, 'bad_raster.tif')
+        with open(raster_filepath, 'w') as bad_raster:
+            bad_raster.write('this cannot possibly be a valid raster')
+
+        with self.assertRaises(validation.ValidationError):
+            validation.check_raster(raster_filepath)
+
 
 class OGRCheckerTester(CheckerTester):
     """Test the class palisades.validation.OGRChecker"""

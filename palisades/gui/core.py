@@ -253,6 +253,9 @@ class ContainerGUI(GroupGUI):
         # container
         self.element.toggled.register(self._set_collapsed)
 
+        # Initialize the interactivity state
+        self.widgets.set_enabled(self.element.is_enabled())
+
     def _set_collapsed(self, event=None):
         self.widgets.set_collapsed(self.element.is_collapsed())
 

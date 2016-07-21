@@ -311,6 +311,26 @@ class TestNumberValidation(unittest.TestCase):
         from palisades import validation
         validation.check_number(0.555, allowedValues={'pattern': '0.5+'})
 
+    def test_matching_pattern_scientific(self):
+        """Validation: Verify default regex supports scientific notation."""
+        from palisades import validation
+        validation.check_number(0.3e10)
+
+    def test_matching_pattern_negative_scientific(self):
+        """Validation: Verify default regex supports negative sci. notation."""
+        from palisades import validation
+        validation.check_number(0.3e-10)
+
+    def test_matching_pattern_decimal(self):
+        """Validation: Verify default regex supports decimal notation."""
+        from palisades import validation
+        validation.check_number(0.3)
+
+    def test_matching_pattern_int(self):
+        """Validation: Verify default regex supports int notation."""
+        from palisades import validation
+        validation.check_number(12345)
+
 
 class TestTableRestrictions(unittest.TestCase):
 

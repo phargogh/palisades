@@ -4,9 +4,9 @@ invest_natcap.iui.palisades.validation."""
 
 import unittest
 import os
-import platform
 import shutil
 import tempfile
+import random
 
 from palisades import validation
 import mock
@@ -376,164 +376,334 @@ class TestTableRestrictions(unittest.TestCase):
         validation.check_table_restrictions(table_row, restrictions)
 
 
-class OGRCheckerTester(CheckerTester):
-    """Test the class palisades.validation.OGRChecker"""
+class TestVectorValidation(unittest.TestCase):
+
+    """Test fixture for OGR validation."""
+
     def setUp(self):
-        self.validate_as = {'type':'OGR',
-                            'value': os.path.join(VALIDATION_DATA, 'AOI_WCVI')}
-        self.checker = validation.OGRChecker()
-
-    def test_file_layers(self):
-        """Assert tha OGRChecker can validate layer restrictions."""
-        layer = {'name': {'inheritFrom': 'file'}}
-        self.validate_as['layers'] = [layer]
-
-        incremental_additions = [('name', {'inheritFrom': 'file'}),
-                                 ('type', 'polygons'),
-                                 ('projection', 'Transverse_Mercator'),
-                                 ('datum', 'WGS_1984')]
-
-        for key, value in incremental_additions:
-            self.validate_as['layers'][0][key] = value
-            self.assertNoError()
-
-    def test_fields_exist(self):
-        """Assert that OGRChecker can validate that fields exist."""
-        updates = {'layers': [{'name': 'harv_samp_cur'}],
-                   'value': os.path.join(VALIDATION_DATA, 'harv_samp_cur'),
-                   'fieldsExist': [
-                       {'field': {'pattern': 'start_date',
-                                  'flag': 'ignoreCase'}},
-                       {'field': {'pattern': 'Cut_cur',
-                                  'flag': 'ignoreCase'}},
-                       {'field': {'pattern': 'BCEF_cur',
-                                  'flag': 'ignoreCase'}}]
-                  }
-        self.validate_as.update(updates)
-        self.assertNoError()
-
-        self.validate_as['fieldsExist'].append('nonexistent_field')
-        self.assertError()
-
-        self.validate_as['fieldsExist'] = ['StArT_dAtE', 'Cut_cur']
-        self.assertNoError()
-
-
-    def test_projection(self):
-        """Assert that OGRChecker can validate projection units."""
-        updates = {'layers': [{'name': 'harv_samp_cur',
-                               'projection': {'units': 'meters'}}],
-                   'value': os.path.join(VALIDATION_DATA, 'harv_samp_cur')}
-        self.validate_as.update(updates)
-        self.assertNoError()
-
-        # Verify that if the JSON definition requires a projection that we don't
-        # recognize in validation's known_units dictionary.
-        updates = {'layers': [{'name': 'mn',
-                               'projection': {'units': 'SOMETHING!'}}],
-                   'value': os.path.join(VALIDATION_DATA, 'mn')}
-        self.validate_as.update(updates)
-        self.assertError()
-
-    def test_is_projected(self):
-        """Assert that OGRChecker can validate the projection."""
-        # Check that the layer is projected.
-        updates = {'layers': [{'name': 'harv_samp_cur',
-                               'projection': {'exists': True}}],
-                   'value': os.path.join(VALIDATION_DATA, 'harv_samp_cur')}
-        self.validate_as.update(updates)
-        self.assertNoError()
-
-        # Check that the layer is projected (should fail)
-        updates = {'layers': [{'name': 'harv_samp_cur',
-                               'projection': {'exists': False}}],
-                   'value': os.path.join(VALIDATION_DATA, 'harv_samp_cur.shp')}
-        self.validate_as.update(updates)
-        self.assertError()
-
-        # Check that the layer is projected
-        updates = {'layers': [{'name': 'harv_samp_cur',
-                               'projection': {'name': 'Transverse_Mercator'}}],
-                   'value': os.path.join(VALIDATION_DATA, 'harv_samp_cur')}
-        self.validate_as.update(updates)
-        self.assertNoError()
-
-        # Check that the layer is projected (should fail)
-        updates = {'layers': [{'name': 'harv_samp_cur',
-                               'projection': {'name': 'nonexistent_prj'}}],
-                               'value': os.path.join(VALIDATION_DATA, 'harv_samp_cur')}
-        self.validate_as.update(updates)
-        self.assertError()
-
-        # Check that the layer is projected
-        updates = {'layers': [{'name': 'harv_samp_cur',
-                               'projection': {'name': 'Transverse_Mercator'},
-                               'datum': 'North_American_Datum_1983'}],
-                   'value': os.path.join(VALIDATION_DATA, 'harv_samp_cur')}
-        self.validate_as.update(updates)
-        self.assertNoError()
-
-        # Check that the layer is projected (should fail)
-        updates = {'layers': [{'name': 'harv_samp_cur',
-                               'projection': {'name': 'Transverse_Mercator'},
-                               'datum': 'some_other_datum'}],
-                   'value': os.path.join(VALIDATION_DATA, 'harv_samp_cur')}
-        self.validate_as.update(updates)
-        self.assertError()
-
-    def test_projection_meters(self):
-        """Assert that OGRChecker can validate projection units (meters)."""
-        # This should validate that the projection's linear units are in
-        # Meters.
-        updates = {'layers': [{'name': 'meter_proj',
-                               'projection': {'units': 'meters'}}],
-                   'value': os.path.join(VALIDATION_DATA, 'meter_proj')}
-        self.validate_as.update(updates)
-        self.assertNoError()
-
-        # This should validate that the projection's linear units are in
-        # Meters (spelled as 'metre').
-        updates = {'layers': [{'name': 'Florida_SC_UTM17N',
-                               'projection': {'units': 'meters'}}],
-                   'value': os.path.join(VALIDATION_DATA,
-                       'Florida_SC_UTM17N')}
-        self.validate_as.update(updates)
-        self.assertNoError()
-
-    def test_projection_latlong(self):
-        """Assert that OGRChecker can validate projection units (latlong)."""
-        # This should return an error.
-        updates = {'layers': [{'name': 'harv_samp_cur',
-                               'projection': {'units': 'latLong'}}],
-                   'value': os.path.join(VALIDATION_DATA, 'harv_samp_cur.shp')}
-        self.validate_as.update(updates)
-        self.assertError()
-
-    def test_projection_us_feet(self):
-        """Assert that OGRChecker can validate projection units (US Feet)."""
-        # This should validate that the projection's linear units are in
-        # Degrees.
-        updates = {'layers': [{'name': 'mn',
-                               'projection': {'units': 'US Feet'}}],
-                   'value': os.path.join(VALIDATION_DATA, 'mn')}
-        self.validate_as.update(updates)
-        self.assertNoError()
-
-class UnicodeOGRCheckerTester(OGRCheckerTester):
-    def setUp(self):
-        self.unicode_dir = u'folder_тамквюам'
-        self.validate_as = {'type':'OGR',
-                            'value': os.path.join(self.unicode_dir, 'AOI_WCVI')}
-        self.checker = validation.OGRChecker()
-
-        # copy the whole validation data dir to the new folder for this suite
-        # of tests.
-        if os.path.exists(self.unicode_dir):
-            shutil.rmtree(self.unicode_dir)
-        shutil.copytree(unicode(VALIDATION_DATA, 'utf-8'), self.unicode_dir)
+        """Setup function, overridden from ``unittest.TestCase.setUp``."""
+        self.workspace_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        shutil.rmtree(self.unicode_dir)
+        """Teardown function overridden from ``unittest.TestCase.tearDown``."""
+        shutil.rmtree(self.workspace_dir)
+
+    def test_missing_file(self):
+        """Validation: Vector can check that the file is missing."""
+        from palisades import validation
+
+        filepath = os.path.join(self.workspace_dir, 'missing_file.txt')
+        with self.assertRaises(validation.ValidationError):
+            validation.check_vector(filepath)
+
+    def test_invalid_vector(self):
+        """Validation: OGR cannot open an invalid vector."""
+        from palisades import validation
+
+        filepath = os.path.join(self.workspace_dir, 'new_file.txt')
+        with open(filepath, 'w') as open_file:
+            open_file.write('This should not be valid.')
+
+        with self.assertRaises(validation.ValidationError):
+            validation.check_vector(filepath)
+
+    def test_fields_exist(self):
+        """Validation: check that expected fields exist."""
+        from palisades import validation
+        from osgeo import ogr
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        driver = ogr.GetDriverByName('ESRI Shapefile')
+        vector = driver.CreateDataSource(filename)
+        layer = vector.CreateLayer('vector')
+
+        fieldnames = ['field 1', 'field 2']
+        for fieldname in fieldnames:
+            field_defn = ogr.FieldDefn(fieldname, ogr.OFTReal)
+            layer.CreateField(field_defn)
+
+        layer = None
+        vector = None
+
+        validation.check_vector(filename, fieldsExist=fieldnames)
+
+    @staticmethod
+    def create_vector_with_fields(filename, fieldnames):
+        """Create a primitive vector with one feature and a few fields.
+
+        This static method creates an ESRI shapefile at the target filepath
+        with a single point feature in it.  For each fieldname passed in via
+        the ``fieldnames`` parameter, a new field of type ``ogr.OFTReal`` will
+        be created with a seeded, random value.
+
+        Parameters:
+            filename (string): The path to the new file on disk.
+            fieldnames (list): A list of string fieldnames to be created.
+
+        Returns: None
+        """
+        from osgeo import ogr
+
+        driver = ogr.GetDriverByName('ESRI Shapefile')
+        vector = driver.CreateDataSource(filename)
+        layer = vector.CreateLayer('vector')
+
+        for fieldname in fieldnames:
+            field_defn = ogr.FieldDefn(fieldname, ogr.OFTReal)
+            layer.CreateField(field_defn)
+        layer_defn = layer.GetLayerDefn()
+
+        # Create a single sample feature
+        new_feature = ogr.Feature(layer_defn)
+        new_geometry = ogr.CreateGeometryFromWkt('POINT (10 10)')
+        new_feature.SetGeometry(new_geometry)
+
+        random.seed(1234)
+        for field in fieldnames:
+            new_feature.SetField(field, round(random.random(), 5))
+
+        layer.CreateFeature(new_feature)
+
+        layer = None
+        vector = None
+
+    def test_simple_table_restrictions_pass(self):
+        """Validation: check that using basic restrictions can pass."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        fieldnames = ['field 1', 'field 2']
+        TestVectorValidation.create_vector_with_fields(filename,
+                                                       fieldnames=fieldnames)
+
+        restrictions = [
+            {
+                'field': 'field 1',
+                'required': True,
+                'validateAs': {
+                    'type': 'number'
+                }
+            },
+            {
+                'field': 'field 2',
+                'required': True,
+                'validateAs': {
+                    'type': 'number'
+                }
+            }
+        ]
+        validation.check_vector(filename, fieldsExist=fieldnames,
+                                restrictions=restrictions)
+
+    def test_simple_table_restrictions_fail(self):
+        """Validation: check that using basic restrictions can fail."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        fieldnames = ['field 1', 'field 2']
+        TestVectorValidation.create_vector_with_fields(filename,
+                                                       fieldnames=fieldnames)
+
+        restrictions = [
+            {
+                'field': 'field 1',
+                'required': True,
+                'validateAs': {
+                    'type': 'number'
+                }
+            },
+            {
+                'field': 'field 3',
+                'required': True,
+                'validateAs': {
+                    'type': 'number'
+                }
+            }
+        ]
+        with self.assertRaises(validation.ValidationError):
+            validation.check_vector(filename, fieldsExist=fieldnames,
+                                    restrictions=restrictions)
+
+    @staticmethod
+    def create_simple_vector(filepath, epsg_code=3157, layername='auto'):
+        """Create a simple ESRI Shapefile without fields or features.
+
+        Parameters:
+            filepath (string): The string filepath to the location where the
+                vector will be stored on disk.
+            epsg_code (int or None): The EPSG code to use to set the
+                spatial reference of the created vector.  If ``None``, the
+                spatial reference will not be set.
+            layername (string or None): The string layername to use.
+                If ``auto``, the basename of the filepath (without the
+                extension) will be used.  If ``None``, a layer will not be
+                created at all.
+
+        Returns:
+            ``None``
+        """
+        from osgeo import ogr, osr
+
+        driver = ogr.GetDriverByName('ESRI Shapefile')
+        vector = driver.CreateDataSource(filepath)
+        if epsg_code:
+            srs = osr.SpatialReference()
+            srs.ImportFromEPSG(epsg_code)
+        else:
+            srs = None
+
+        if layername:
+            if layername == 'auto':
+                layername = os.path.splitext(os.path.basename(filepath))[0]
+            layer = vector.CreateLayer(layername, srs=srs)
+            layer = None
+
+        vector = None
+
+    def test_named_layer_missing(self):
+        """Validation: fail when an expected layer can't be found."""
+        from palisades import validation
+        from osgeo import ogr
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        TestVectorValidation.create_simple_vector(filename, layername=None)
+
+        with self.assertRaises(validation.ValidationError):
+            validation.check_vector(filename, layers=[{'name': 'foo'}])
+
+    def test_inherited_layer(self):
+        """Validation: pass when expected layername is inherited."""
+        from palisades import validation
+        from osgeo import ogr
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        TestVectorValidation.create_simple_vector(filename)
+
+        validation.check_vector(
+            filename, layers=[{'name': {'inheritFrom': 'file'}}])
+
+    def test_no_spatial_reference(self):
+        """Validation: fail when vector SRS not found but needed."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        TestVectorValidation.create_simple_vector(filename, epsg_code=None)
+
+        layer_config = [{
+            'name': 'vector',
+            'projection': {
+                'units': 'meters'
+            }
+        }]
+        with self.assertRaises(validation.ValidationError):
+            validation.check_vector(filename, layers=layer_config)
+
+    def test_projection_units_meter(self):
+        """Validation: pass when projected units match expected units."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        TestVectorValidation.create_simple_vector(filename)
+
+        layer_config = [{
+            'name': 'vector',
+            'projection': {
+                'units': 'meters'
+            }
+        }]
+        validation.check_vector(filename, layers=layer_config)
+
+    def test_projection_units_error(self):
+        """Validation: fail when units do not match expected units."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        TestVectorValidation.create_simple_vector(filename)
+
+        layer_config = [{
+            'name': 'vector',
+            'projection': {
+                'units': 'feet'
+            }
+        }]
+        with self.assertRaises(validation.ValidationError):
+            validation.check_vector(filename, layers=layer_config)
+
+    def test_projection_exists(self):
+        """Validation: verify vector is projected."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        TestVectorValidation.create_simple_vector(filename)
+
+        layer_config = [{
+            'name': 'vector',
+            'projection': {
+                'exists': True
+            }
+        }]
+        validation.check_vector(filename, layers=layer_config)
+
+    def test_projection_should_not_exist(self):
+        """Validation: fail when vector is projected but not supposed to be."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        TestVectorValidation.create_simple_vector(filename)
+
+        layer_config = [{
+            'name': 'vector',
+            'projection': {
+                'exists': False
+            }
+        }]
+        with self.assertRaises(validation.ValidationError):
+            validation.check_vector(filename, layers=layer_config)
+
+    def test_vector_should_not_be_projected(self):
+        """Validation: verify vector is unprojected."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        TestVectorValidation.create_simple_vector(filename, epsg_code=4269)
+
+        layer_config = [{
+            'name': 'vector',
+            'projection': {
+                'exists': False
+            }
+        }]
+        validation.check_vector(filename, layers=layer_config)
+
+    def test_vector_projection_name_does_not_match(self):
+        """Validation: fail when projection name does not match expected."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        TestVectorValidation.create_simple_vector(filename)
+
+        layer_config = [{
+            'name': 'vector',
+            'projection': {
+                'name': 'Mercator'
+            }
+        }]
+        with self.assertRaises(validation.ValidationError):
+            validation.check_vector(filename, layers=layer_config)
+
+    def test_vector_datum_does_not_match(self):
+        """Validation: fail when datum does not match."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'vector.shp')
+        TestVectorValidation.create_simple_vector(filename)
+
+        layer_config = [{
+            'name': 'vector',
+            'datum': 'D_Uranus_2000'  # like with EPSG 79975
+        }]
+        with self.assertRaises(validation.ValidationError):
+            validation.check_vector(filename, layers=layer_config)
 
 
 class DBFCheckerTester(CheckerTester):

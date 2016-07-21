@@ -575,14 +575,19 @@ def check_csv(path, fieldsExist=None, restrictions=None):
 
 
 def check_vector(path, fieldsExist=None, restrictions=None, layers=None):
+    check_filepath(path, mustExist=True, permissions='r')
+
     vector = ogr.Open(path)
+    if not vector:
+        raise ValidationError('Not a valid OGR vector: %s' % path)
+
     vector_fieldnames = [f.GetName() for f in vector.GetLayer().schema]
 
     if fieldsExist:
         check_table_fields(vector_fieldnames, fieldsExist)
 
     if restrictions:
-        for layer_index, layer in vector:
+        for layer_index, layer in enumerate(vector):
             for feature in layer:
                 row_dict = dict((field, feature.GetField(field))
                                 for field in vector_fieldnames)
@@ -610,6 +615,9 @@ def check_vector(path, fieldsExist=None, restrictions=None, layers=None):
 
             reference = layer.GetSpatialRef()
             if 'projection' in layer_info:
+                if not reference:
+                    raise ValidationError('Could not read spatial reference '
+                                          'information from vector')
 
                 if 'units' in layer_info['projection']:
                     linear_units = reference.GetLinearUnitsName().lower()
@@ -618,7 +626,6 @@ def check_vector(path, fieldsExist=None, restrictions=None, layers=None):
                     # values are known projection wkt equivalents
                     known_units = {
                         'meters':  ['meter', 'metre'],
-                        'latLong': ['degree'],
                         'US Feet': ['foot_us']
                     }
 
@@ -636,11 +643,11 @@ def check_vector(path, fieldsExist=None, restrictions=None, layers=None):
                                                    required_unit))
 
                     if linear_units not in expected_units:
-                        raise ValidationError(
+                        raise ValidationError((
                             'Vector layer %s must be projected '
                             'in %s (one of %s, case-insensitive). \'%s\' '
                             'found.') % (layer_name, required_unit,
-                                expected_units, linear_units)
+                                expected_units, linear_units))
 
                 # Validate whether the layer should be projected
                 projection = reference.GetAttrValue('PROJECTION')
@@ -651,9 +658,9 @@ def check_vector(path, fieldsExist=None, restrictions=None, layers=None):
                             negate_string = 'not'
                         else:
                             negate_string = ''
-                        raise ValidationError(
+                        raise ValidationError((
                             'Vector layer %s should %s be ' +
-                            'projected') % (layer_name, negate_string)
+                            'projected') % (layer_name, negate_string))
 
                 # Validate whether the layer's projection matches the
                 # specified projection
@@ -670,4 +677,3 @@ def check_vector(path, fieldsExist=None, restrictions=None, layers=None):
                     raise ValidationError(
                         'Vector layer %s must have the datum %s' % (
                             layer_name, layer_info['datum']))
-

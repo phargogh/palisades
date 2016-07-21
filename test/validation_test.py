@@ -723,3 +723,70 @@ class TestVectorValidation(unittest.TestCase):
         }]
         with self.assertRaises(validation.ValidationError):
             validation.check_vector(filename, layers=layer_config)
+
+
+class TestCSVValidation(unittest.TestCase):
+
+    """Test fixture for testing CSV files."""
+
+    def setUp(self):
+        """Setup function, overridden from ``unittest.TestCase.setUp``."""
+        self.workspace_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        """Teardown, overridden from ``unittest.TestCase.tearDown``."""
+        shutil.rmtree(self.workspace_dir)
+
+    @staticmethod
+    def create_sample_csv(filepath):
+        """Create a simple sample CSV at the given filepath.
+
+        Parameters:
+            filepath (string): The string path to where the file should be
+                created on disk.
+
+        Returns:
+            ``None``
+        """
+        with open(filepath, 'w') as open_file:
+            open_file.write(
+                '"foo", "bar", "baz"\n'
+                '1, 2, 3\n'
+                '2, "b", "c"\n')
+
+    def test_csv_detect_dialect(self):
+        """Validation (CSV): csv dialect detection"""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'test.csv')
+        TestCSVValidation.create_sample_csv(filename)
+        validation.check_csv(filename)
+
+    def test_csv_fields_exist(self):
+        """Validation (CSV): verify we can validate field existence."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'test.csv')
+        TestCSVValidation.create_sample_csv(filename)
+
+        expected_fields = ['foo', 'bar', 'baz']
+
+        validation.check_csv(filename, fieldsExist=expected_fields)
+
+    def test_csv_restrictions(self):
+        """Validation (CSV): verify we can run table restrictions via CSV."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'test.csv')
+        TestCSVValidation.create_sample_csv(filename)
+
+        restrictions = [{
+            'field': 'foo',
+            'validateAs': {
+                'type': 'number',
+                'lessThan': 3,
+                'gteq': 1,
+            }
+        }]
+
+        validation.check_csv(filename, restrictions=restrictions)

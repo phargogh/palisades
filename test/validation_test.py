@@ -12,56 +12,7 @@ import mock
 
 TEST_DATA = os.path.join(os.path.dirname(__file__), 'data')
 VALIDATION_DATA = os.path.join(TEST_DATA, 'validation')
-
-
-class CheckerTester(unittest.TestCase):
-    """This class defines commonly-used methods for checker classes in
-    palisades.validation.  Since all of the checker classes have a uniform call
-    structure, we can abstract certain logic away from the actual test classes
-    into this convenient superclass."""
-
-    def check(self):
-        """Call the established checker's run_checks function with
-        self.validate_as as input.
-
-        prerequisites:
-            * a checker object has been created at self.checker
-            * the validation dictionary has been saved at self.validate_as.
-
-        returns a string with length > 0 if an error is found.  None or '' if
-        no error is found."""
-
-        return self.checker.run_checks(self.validate_as)
-
-    def assertNoError(self):
-        """Call self.check and assert that no error is found with the input
-        dictionary.
-
-        returns nothing"""
-
-        error = self.check()
-        if error != None:
-            self.assertEqual(error, '')
-
-    def assertError(self):
-        """Call self.check and assert that an error is found with the input
-        dictionary.
-
-        returns nothing"""
-
-        error = self.check()
-        self.assertNotEqual(error, '', msg='No error message produced')
-        self.assertNotEqual(error, None, msg='No error message produced')
-
-    def assertErrorWithMessage(self, substr):
-        """Assert that an error with the given substring is produced.
-
-        This is useful so we can make sure that the error that occurs is the
-        one that we expect.
-
-        returns nothing"""
-        error = self.check()
-        self.assertIn(substr, error)
+UTF8_STRING = u'тамквюам'
 
 
 class TestFileValidation(unittest.TestCase):
@@ -70,7 +21,8 @@ class TestFileValidation(unittest.TestCase):
 
     def setUp(self):
         """Setup function, overridden from ``unittest.TestCase.setUp``."""
-        self.workspace_dir = tempfile.mkdtemp()
+        self.workspace_dir = tempfile.mkdtemp(suffix=UTF8_STRING)
+        print self.workspace_dir
 
     def tearDown(self):
         """Teardown, overridden from ``unittest.TestCase.tearDown``."""
@@ -207,7 +159,7 @@ class TestRasterValidation(unittest.TestCase):
 
     def setUp(self):
         """Setup function, overridden from ``unittest.TestCase.setUp``."""
-        self.workspace_dir = tempfile.mkdtemp()
+        self.workspace_dir = tempfile.mkdtemp(suffix=UTF8_STRING)
 
     def tearDown(self):
         """Teardown, overridden from ``unittest.TestCase.tearDown``."""
@@ -401,7 +353,7 @@ class TestVectorValidation(unittest.TestCase):
 
     def setUp(self):
         """Setup function, overridden from ``unittest.TestCase.setUp``."""
-        self.workspace_dir = tempfile.mkdtemp()
+        self.workspace_dir = tempfile.mkdtemp(suffix=UTF8_STRING)
 
     def tearDown(self):
         """Teardown function overridden from ``unittest.TestCase.tearDown``."""
@@ -573,7 +525,8 @@ class TestVectorValidation(unittest.TestCase):
 
         if layername:
             if layername == 'auto':
-                layername = os.path.splitext(os.path.basename(filepath))[0]
+                # ESRI Shapefile layer names MUST be ASCII
+                layername = str(os.path.splitext(os.path.basename(filepath))[0])
             layer = vector.CreateLayer(layername, srs=srs)
             layer = None
 

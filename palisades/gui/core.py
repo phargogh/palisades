@@ -661,8 +661,6 @@ class FormGUI():
             if self.messages_dialog.workspace_open_requested():
                 explore_folder(self.element.get_target_workspace())
 
-        self.element.runner.executor.log_manager.remove_log_handler(self.messages_handler)
-
     def _open_workspace_if_finished(self, event=None):
         if self.element.runner.is_finished():
             if self.messages_dialog.workspace_open_requested():

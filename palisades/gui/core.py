@@ -3,6 +3,7 @@ import platform
 import subprocess
 import os
 import code
+import time
 
 os.environ['QT_API'] = 'PyQt4'
 
@@ -620,7 +621,7 @@ class FormGUI():
             files_in_workspace = os.path.join(workspace_elem.value(), '*')
             if len(files_in_workspace) > 0:
                 self.workspace_confirm_dialog.set_title(_('Output Exists'))
-                self.workspace_confirm_dialog.body.setText(_(
+                self.workspace_confirm_dialog.set_body_text(_(
                     'The directory {workspace} exists and contains files '
                     'that may be overwritten.  Continue?').format(
                         workspace=os.path.basename(workspace_elem.value())))
@@ -628,10 +629,13 @@ class FormGUI():
                 # PROMPT FOR USER CONFIRMATION
                 # 1 indicates user acceptance.
                 # 0 indicates rejcection/cancellation.
-                if self.workspace_confirm_dialog.show() == 0:
+                self.workspace_confirm_dialog.confirm()  # non-blocking
+                while self.workspace_confirm_dialog.exit_code is None:
+                    time.sleep(0.1)
+
+                if self.workspace_confirm_dialog.exit_code == 0:
                     # Returning will prevent the form from being submitted.
                     return
-
         try:
             self.element.submit()
             errors = []
@@ -668,7 +672,11 @@ class FormGUI():
         self.window.show()
 
     def close(self, data=None):
-        if self.quit_confirm.confirm():
+        self.quit_confirm.confirm()
+        while self.quit_confirm.exit_code is None:
+            time.sleep(0.1)
+
+        if self.quit_confirm.exit_code != 0:
             self.window.close()
 
     def reset(self, data=None):

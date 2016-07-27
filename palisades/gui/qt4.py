@@ -845,9 +845,16 @@ class Dropdown(QtGui.QComboBox, QtWidget):
 
 
 class InfoDialog(QtGui.QDialog):
+    body_text_changed = Signal(unicode)
+    title_changed = Signal(unicode)
+    show_needed = Signal()
+    confirmed = Signal()
+
     def __init__(self):
         QtGui.QDialog.__init__(self)
         self.messages = []
+        self.exit_code = None
+
         self.resize(400, 200)
         self.setWindowTitle(_('Errors exist!'))
         self.setLayout(QtGui.QVBoxLayout())
@@ -880,8 +887,17 @@ class InfoDialog(QtGui.QDialog):
         self.button_box.addButton(self.ok_button, QtGui.QDialogButtonBox.AcceptRole)
         self.layout().addWidget(self.button_box)
 
-    def showEvent(self, event=None):
-        QtGui.QDialog.showEvent(self, event)
+        self.title_changed.connect(self._set_title)
+        self.body_text_changed.connect(self._set_body_text)
+        self.show_needed.connect(self._show)
+        self.confirmed.connect(self._confirm)
+
+    def show(self, event=None):
+        self.show_needed.emit()
+
+    def _show(self, data=None):
+        self.exit_code = None
+        QtGui.QDialog.show(self)
         center_window(self)
 
     def set_icon(self, uri, scale=False):
@@ -893,19 +909,25 @@ class InfoDialog(QtGui.QDialog):
         self.icon.setPixmap(scaled_img)
 
     def set_title(self, title):
+        self.title_changed.emit(title)
+
+    def _set_title(self, title):
         self.title.setText(title)
 
     def set_messages(self, message_list):
         self.messages = message_list
 
     def set_body_text(self, text):
+        self.body_text_changed.emit(text)
+
+    def _set_body_text(self, text):
         self.body.setText(text)
 
     def confirm(self):
-        exit_code = self.exec_()
-        if exit_code != 0:
-            return True
-        return False
+        self.confirmed.emit()
+
+    def _confirm(self):
+        self.exit_code = self.exec_()
 
 class WarningDialog(InfoDialog):
     def __init__(self):
@@ -918,13 +940,6 @@ class WarningDialog(InfoDialog):
         self.no_button.setIcon(QtGui.QIcon(ICON_ENTER))
         self.no_button.clicked.connect(self.reject)
         self.button_box.addButton(self.no_button, QtGui.QDialogButtonBox.RejectRole)
-
-    def show(self):
-        """
-        Overridden from QWidget.show().  exec_() returns a QDialog exit status
-        indicating the button the user selected (accepted or rejected).
-        """
-        return self.exec_()
 
     def showEvent(self, event=None):
         """
@@ -1124,6 +1139,8 @@ class RealtimeMessagesDialog(QtGui.QDialog):
     error_changed = Signal(bool)
     message_added = Signal(unicode)
     _finished = Signal(bool)
+    started = Signal()
+    showed = Signal()
 
     def __init__(self, window_title=None):
         """Constructor for the ModelDialog class.
@@ -1208,10 +1225,18 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.error_changed.connect(self.messageArea.set_error)
         self.message_added.connect(self._write)
         self._finished.connect(self._threadsafe_finish)
+        self.started.connect(self._start)
+        self.showed.connect(self._show)
 
         # Customize the window title bar to disable the close/minimize/mazimize
         # buttons, just showing the title of the modal dialog.
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
+
+    def show(self):
+        self.showed.emit()
+
+    def _show(self, event=None):
+        QtGui.QDialog.show(self)
 
     def _emit_workspace(self, event=None):
         if not self.openWorkspaceCB.isVisible():
@@ -1222,6 +1247,9 @@ class RealtimeMessagesDialog(QtGui.QDialog):
         self.dir_open_requested.emit(requested)
 
     def start(self, event=None):
+        self.started.emit()
+
+    def _start(self, event=None):
         self.is_executing = True
         self.statusArea.clear()
         self.start_buttons()

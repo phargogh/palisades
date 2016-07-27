@@ -1429,8 +1429,20 @@ class Form():
         except KeyError:
             # Check if an element with args_id workspace_dir exists
             for elem_id, element in self.element_index.iteritems():
-                if element.config['args_id'] == 'workspace_dir':
-                    return element.value()
+                try:
+                    if element.config['args_id'] == 'workspace_dir':
+                        return element.value()
+                except KeyError:
+                    # elements aren't required to have an args_id!
+                    pass
+
+            # If we haven't found an args_id of workspace_dir, see if there's
+            # an element with that ID.
+            try:
+                self.find_element('workspace_dir')
+            except KeyError:
+                # If that doesn't work, we still have a base case below.
+                pass
 
         # Base case: return home dir.
         return os.path.expandpath('~')

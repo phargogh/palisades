@@ -10,6 +10,7 @@ import palisades.gui
 from palisades import elements
 from palisades.gui import qt4 as toolkit
 from palisades.validation import V_ERROR
+from palisades.validation import V_FAIL
 from palisades.validation import V_PASS
 from palisades.elements import InvalidData
 
@@ -414,6 +415,8 @@ class TextGUI(LabeledPrimitiveGUI):
         if self.element.has_input():
             error_msg, error = error_state
             active = True
+            if error == V_FAIL:
+                error = 'error'
         else:
             if self.element.is_required():
                 error = V_ERROR

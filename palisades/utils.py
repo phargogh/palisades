@@ -113,7 +113,7 @@ class Communicator(object):
                     break
 
                 t = threading.Thread(target=callback_data['func'],
-                                     args=callback_data['args'],
+                                     args=(argument,) + callback_data['args'],
                                      kwargs=callback_data['kwargs'])
                 t.start()
                 threads.append(t)

@@ -55,7 +55,9 @@ class Registrar(object):
     def get_func(self, mapKey):
         return self.map[mapKey]
 
-class Validator(Registrar):
+
+
+class _Validator(Registrar):
     """Validator class contains a reference to an object's type-specific
         checker.
         It is assumed that one single iui input element will have its own
@@ -74,17 +76,17 @@ class Validator(Registrar):
         #allElements is a pointer to a python dict: str id -> obj pointer.
         Registrar.__init__(self)
 
-        updates = {'disabled': Checker,
-                   'GDAL': GDALChecker,
-                   'OGR': OGRChecker,
-                   'number': NumberChecker,
-                   'file': FileChecker,
-                   'exists': URIChecker,
-                   'folder': FolderChecker,
-                   'DBF': DBFChecker,
-                   'CSV': CSVChecker,
-                   'table': FlexibleTableChecker,
-                   'string': PrimitiveChecker}
+#        updates = {'disabled': Checker,
+#                   'GDAL': GDALChecker,
+#                   'OGR': OGRChecker,
+#                   'number': NumberChecker,
+#                   'file': FileChecker,
+#                   'exists': URIChecker,
+#                   'folder': FolderChecker,
+#                   'DBF': DBFChecker,
+#                   'CSV': CSVChecker,
+#                   'table': FlexibleTableChecker,
+#                   'string': PrimitiveChecker}
         self.update_map(updates)
         self.type_checker = self.init_type_checker(str(validator_type))
         self.validate_funcs = []
@@ -677,3 +679,40 @@ def check_vector(path, fieldsExist=None, restrictions=None, layers=None):
                     raise ValidationError(
                         'Vector layer %s must have the datum %s' % (
                             layer_name, layer_info['datum']))
+
+
+class Validator(object):
+    types = {
+        'disabled': lambda x: None,
+        'GDAL': check_raster,
+        'OGR': check_vector,
+        'number': check_number,
+        'file': check_filepath,
+        'exists': check_filepath,
+        'folder': check_folder,
+        'CSV': check_csv,
+        'string': check_regexp,
+    }
+    def __init__(self, type_str):
+        self.finished = Communicator()
+        self.func = self.types[type_str]
+
+    def validate(self, value, config):
+        try:
+            cp_config = config.copy()
+            try:
+                del cp_config['type']
+            except KeyError:
+                pass
+
+            self.func(value, **cp_config)
+            error_msg = None
+            status = V_PASS
+        except ValidationError as e:
+            error_msg = str(e)
+            status = V_FAIL
+        except Exception as e:
+            error_msg = str(e)
+            status = V_ERROR
+
+        self.finished.emit((error_msg, status))

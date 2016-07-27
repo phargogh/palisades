@@ -323,6 +323,7 @@ class Primitive(Element):
         # Set up our validator
         self._validator = validation.Validator(
             self.config['validateAs']['type'])
+        self.value_changed.register(self.validate)
         self._validator.finished.register(self._get_validation_result)
 
     def emit_signals(self):
@@ -399,15 +400,6 @@ class Primitive(Element):
         validated, it will be validated here and will block until validation
         completes.  Returns a Boolean.
         """
-        # If we don't know the validity and the validator has finished
-        if self._valid == None and self._validator.thread_finished() == True:
-            self.validate()
-
-        if self._validator.thread is None:
-            self.validate()
-
-        self._validator.join()
-
         # Return whether validation passed (a boolean).
         if self.has_input():
             return self._valid
@@ -417,11 +409,7 @@ class Primitive(Element):
             else:
                 return True  # if no input and optional, input is valid.
 
-    def validate(self):
-        # if validation is already in progress, block until finished.
-        while not self._validator.thread_finished():
-            pass
-
+    def validate(self, data=None):
         if self.config['required'] and not self.has_input():
             LOGGER.debug('Element %s is required' % self)
             elem_req_msg = _('Element is required')
@@ -430,10 +418,9 @@ class Primitive(Element):
             return
 
         validation_dict = self.config['validateAs'].copy()
-        validation_dict['value'] = self.value()
-        self._validator.validate(validation_dict)  # this starts the thread
+        self._validator.validate(self.value(), validation_dict)  # this starts the thread
 
-    def _get_validation_result(self, error):
+    def _get_validation_result(self, error=None):
         """Utility class method to get the error result from the validator
         object.  Sets self._valid according to whether validation passed or
         failed, and sets the validation error to the error found (if any).

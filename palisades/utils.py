@@ -11,6 +11,9 @@ from types import StringType
 from types import UnicodeType
 import tempfile
 import locale
+import multiprocessing
+import Queue
+from multiprocessing.managers import BaseManager
 
 import palisades.i18n.translation
 
@@ -55,6 +58,10 @@ class RepeatingTimer(threading.Thread):
             self.function()
 
 
+class QueueManager(BaseManager):
+    pass
+
+
 class Communicator(object):
     """Element represents the base class for all UI elements.  It focuses
     on inter-element connectivity and communication."""
@@ -65,34 +72,101 @@ class Communicator(object):
     def __init__(self):
         self.callbacks = []
 
-    def register(self, callback):
-        """This function appends the target function call to the list of
-        signals stored by this element"""
+        # why can't I just use a list for the queue here???
+        # does a Queue.Queue (instead of multiprocessing.Queue) make a
+        # difference??
 
-        self.callbacks.append(callback)
+        #self.queue = multiprocessing.Queue()
+        self.queue = Queue.Queue()
+        self.pool = multiprocessing.Pool(processes=4)
+        #self.manager = QueueManager()
+        #self.manager.register('callbacks', list)
+        self.lock = threading.Lock()
 
-    def emit(self, argument):
+    def register(self, callback, *args, **kwargs):
+        """Register a callback function and optional arguments.
+
+        Any additional arguments provided by ``*args`` or ``**kwargs`` will be
+        registered to the function as well and, when ``emit()`` is called,
+        the target callback will be called with these arguments.
+
+        Parameters:
+            callback (callable): a callable that takes at least one
+                user-defined argument.
+
+        Returns:
+            ``None``
+        """
+        data = {
+            'func': callback,
+            'args': args,
+            'kwargs': kwargs,
+        }
+        self.lock.acquire()
+        #self.manager.callbacks.append(data)
+        self.callbacks.append(data)
+        self.lock.release()
+
+    def emit(self, argument, join=False):
         """Call all of the registered callback functions with the argument
         passed in.
 
         argument - the object to be passed to all callbacks.
 
         Returns nothing."""
+        self.lock.acquire()
 
-        for callback_func in self.callbacks:
-            callback_func(argument)
+        # load up the queue
+        #for callback_data in self.manager.callbacks:
+        for callback_data in self.callbacks:
+            self.queue.put(callback_data)
+        self.queue.put('STOP')
+
+        try:
+            while True:
+            #for callback_data in self.manager.callbacks:
+                callback_data = self.queue.get()
+                print 'CB_DATA', callback_data
+                if callback_data == 'STOP':
+                    self.pool.close()
+                    break
+
+                #print 'EMPTY', self.queue.empty()
+                self.pool.apply_async(callback_data['func'],
+                                      args= callback_data['args'],
+                                      kwds=callback_data['kwargs'])
+        finally:
+            if join:
+                #print 'EMPTY', self.queue.empty()
+                self.pool.join()
+            self.lock.release()
 
     def remove(self, target):
-        """"""
+        """Remove a matching callback from the list of callbacks.
+
+        Parameters:
+            target (callable): a callable that has been registered as a
+                callback in this Communicator instance.
+
+        Returns:
+            ``None``
+
+        Raises:
+            SignalNotFound: When the callback was not found.
+        """
         try:
-            callbacks_list = [cb for cb in self.callbacks]
+            callbacks_list = [cb['func'] for cb in self.callbacks]
+            self.lock.acquire()
             index = callbacks_list.index(target)
             self.callbacks.pop(index)
         except ValueError:
             # want to raise a custom exception here so that it's independent of
             # implementation details in this class.
-            raise SignalNotFound(('Signal %s ' % str(target),
-                'was not found or was previously removed'))
+            raise SignalNotFound(
+                ('Signal %s ' % str(target),
+                 'was not found or was previously removed'))
+        finally:
+            self.lock.release()
 
 
 def decode_string(bytestring):

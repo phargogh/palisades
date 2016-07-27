@@ -1,23 +1,43 @@
 import time
 import unittest
+import os.path
 
 import palisades
 from palisades import utils
 from palisades import elements
 
-class CommunicatorTest(unittest.TestCase):
-    class SampleEmitter(utils.Communicator):
-        def print_something(self, event=None):
-            print 'something printed'
+import mock
 
+
+def some_function():
+    pass
+
+class CommunicatorTest(unittest.TestCase):
 
     def setUp(self):
         self.a = utils.Communicator()
-        self.b = self.SampleEmitter()
+        #self.b = self.SampleEmitter()
 
     def test_register(self):
-        self.a.register(self.b.print_something)
-        self.a.emit(None)
+        from palisades import utils
+        a = utils.Communicator()
+
+        def mock_func(*args, **kwargs):
+            print 'yep, called it!'
+            mock_func.called = True
+        mock_func.called = False
+        self.mock_func = mock_func
+
+        #mock_func = PickleableMock()
+        #mock_func = mock.mock.Mock()
+        #mock_func = mock.MagicMock()
+        with mock.patch('os.path.join') as mocked_func:
+            a.register(mocked_func)
+            a.emit(None, join=True)
+            print mocked_func
+            print mocked_func.__dict__
+
+            self.assertTrue(os.path.join.called)
 
     def test_remove(self):
         self.a.register(self.b.print_something)

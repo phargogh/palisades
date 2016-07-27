@@ -9,44 +9,21 @@ from palisades import elements
 import mock
 
 
-def some_function():
-    pass
+class MockedObj(object):
+    def __call__(self, *args, **kwargs):
+        CommunicatorTest.test_register.called = True
+
 
 class CommunicatorTest(unittest.TestCase):
-
-    def setUp(self):
-        self.a = utils.Communicator()
-        #self.b = self.SampleEmitter()
-
     def test_register(self):
         from palisades import utils
         a = utils.Communicator()
+        obj = mock.Mock()
+        a.register(obj)
+        a.emit(None, join=True)
 
-        def mock_func(*args, **kwargs):
-            print 'yep, called it!'
-            mock_func.called = True
-        mock_func.called = False
-        self.mock_func = mock_func
+        self.assertTrue(obj.called)
 
-        #mock_func = PickleableMock()
-        #mock_func = mock.mock.Mock()
-        #mock_func = mock.MagicMock()
-        with mock.patch('os.path.join') as mocked_func:
-            a.register(mocked_func)
-            a.emit(None, join=True)
-            print mocked_func
-            print mocked_func.__dict__
-
-            self.assertTrue(os.path.join.called)
-
-    def test_remove(self):
-        self.a.register(self.b.print_something)
-        self.a.remove(self.b.print_something)
-
-    def test_remove_fails(self):
-        self.a.register(self.b.print_something)
-        self.a.remove(self.b.print_something)
-        self.assertRaises(utils.SignalNotFound, self.a.remove, self.b.print_something)
 
 class RepeatingTimerTest(unittest.TestCase):
     def test_timer_smoke(self):

@@ -11,9 +11,7 @@ from types import StringType
 from types import UnicodeType
 import tempfile
 import locale
-import multiprocessing
 import Queue
-from multiprocessing.managers import BaseManager
 
 import palisades.i18n.translation
 
@@ -58,10 +56,6 @@ class RepeatingTimer(threading.Thread):
             self.function()
 
 
-class QueueManager(BaseManager):
-    pass
-
-
 class Communicator(object):
     """Element represents the base class for all UI elements.  It focuses
     on inter-element connectivity and communication."""
@@ -71,16 +65,7 @@ class Communicator(object):
     # When a signal is emitted, data about the signal should also be passed.
     def __init__(self):
         self.callbacks = []
-
-        # why can't I just use a list for the queue here???
-        # does a Queue.Queue (instead of multiprocessing.Queue) make a
-        # difference??
-
-        #self.queue = multiprocessing.Queue()
         self.queue = Queue.Queue()
-        self.pool = multiprocessing.Pool(processes=4)
-        #self.manager = QueueManager()
-        #self.manager.register('callbacks', list)
         self.lock = threading.Lock()
 
     def register(self, callback, *args, **kwargs):
@@ -103,7 +88,6 @@ class Communicator(object):
             'kwargs': kwargs,
         }
         self.lock.acquire()
-        #self.manager.callbacks.append(data)
         self.callbacks.append(data)
         self.lock.release()
 
@@ -117,28 +101,26 @@ class Communicator(object):
         self.lock.acquire()
 
         # load up the queue
-        #for callback_data in self.manager.callbacks:
         for callback_data in self.callbacks:
             self.queue.put(callback_data)
         self.queue.put('STOP')
 
         try:
+            threads = []
             while True:
-            #for callback_data in self.manager.callbacks:
                 callback_data = self.queue.get()
-                print 'CB_DATA', callback_data
                 if callback_data == 'STOP':
-                    self.pool.close()
                     break
 
-                #print 'EMPTY', self.queue.empty()
-                self.pool.apply_async(callback_data['func'],
-                                      args= callback_data['args'],
-                                      kwds=callback_data['kwargs'])
+                t = threading.Thread(target=callback_data['func'],
+                                     args=callback_data['args'],
+                                     kwargs=callback_data['kwargs'])
+                t.start()
+                threads.append(t)
         finally:
             if join:
-                #print 'EMPTY', self.queue.empty()
-                self.pool.join()
+                for thread in threads:
+                    thread.join()
             self.lock.release()
 
     def remove(self, target):

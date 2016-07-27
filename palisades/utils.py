@@ -66,7 +66,7 @@ class Communicator(object):
     def __init__(self):
         self.callbacks = []
         self.queue = Queue.Queue()
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
 
     def register(self, callback, *args, **kwargs):
         """Register a callback function and optional arguments.
@@ -87,9 +87,8 @@ class Communicator(object):
             'args': args,
             'kwargs': kwargs,
         }
-        self.lock.acquire()
-        self.callbacks.append(data)
-        self.lock.release()
+        with self.lock:
+            self.callbacks.append(data)
 
     def emit(self, argument, join=False):
         """Call all of the registered callback functions with the argument
@@ -98,30 +97,28 @@ class Communicator(object):
         argument - the object to be passed to all callbacks.
 
         Returns nothing."""
-        self.lock.acquire()
+        with self.lock:
+            # load up the queue
+            for callback_data in self.callbacks:
+                self.queue.put(callback_data)
+            self.queue.put('STOP')
 
-        # load up the queue
-        for callback_data in self.callbacks:
-            self.queue.put(callback_data)
-        self.queue.put('STOP')
+            try:
+                threads = []
+                while True:
+                    callback_data = self.queue.get()
+                    if callback_data == 'STOP':
+                        break
 
-        try:
-            threads = []
-            while True:
-                callback_data = self.queue.get()
-                if callback_data == 'STOP':
-                    break
-
-                t = threading.Thread(target=callback_data['func'],
-                                     args=(argument,) + callback_data['args'],
-                                     kwargs=callback_data['kwargs'])
-                t.start()
-                threads.append(t)
-        finally:
-            if join:
-                for thread in threads:
-                    thread.join()
-            self.lock.release()
+                    t = threading.Thread(target=callback_data['func'],
+                                        args=(argument,) + callback_data['args'],
+                                        kwargs=callback_data['kwargs'])
+                    t.start()
+                    threads.append(t)
+            finally:
+                if join:
+                    for thread in threads:
+                        thread.join()
 
     def remove(self, target):
         """Remove a matching callback from the list of callbacks.
@@ -136,19 +133,18 @@ class Communicator(object):
         Raises:
             SignalNotFound: When the callback was not found.
         """
-        try:
-            callbacks_list = [cb['func'] for cb in self.callbacks]
-            self.lock.acquire()
-            index = callbacks_list.index(target)
-            self.callbacks.pop(index)
-        except ValueError:
-            # want to raise a custom exception here so that it's independent of
-            # implementation details in this class.
-            raise SignalNotFound(
-                ('Signal %s ' % str(target),
-                 'was not found or was previously removed'))
-        finally:
-            self.lock.release()
+        with self.lock:
+            try:
+                callbacks_list = [cb['func'] for cb in self.callbacks]
+                self.lock.acquire()
+                index = callbacks_list.index(target)
+                self.callbacks.pop(index)
+            except ValueError:
+                # want to raise a custom exception here so that it's independent of
+                # implementation details in this class.
+                raise SignalNotFound(
+                    ('Callback %s ' % str(target),
+                     'was not found or was previously removed'))
 
 
 def decode_string(bytestring):

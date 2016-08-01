@@ -4,10 +4,13 @@ import subprocess
 import os
 import code
 import time
+import sys
+import traceback
 
 os.environ['QT_API'] = 'PyQt4'
 
 import palisades.gui
+import palisades.i18n
 from palisades import elements
 from palisades.gui import qt4 as toolkit
 from palisades.validation import V_ERROR
@@ -18,6 +21,7 @@ from palisades.elements import InvalidData
 class NotYetImplemented(Exception): pass
 
 LOGGER = logging.getLogger('palisades.gui.core')
+_ = palisades.i18n.language.ugettext
 
 def _print_obj_debug(obj):
     print '#' * 40
@@ -56,6 +60,20 @@ def explore_folder(dirname):
         LOGGER.error(error)
         LOGGER.error('Cannot find default file browser. Platform: %s |' +
             ' folder: %s', platform.system(), dirname)
+
+def printstacks():
+    print >> sys.stderr, "\n*** STACKTRACE - START ***\n"
+    code = []
+    for threadId, stack in sys._current_frames().items():
+        code.append("\n# ThreadID: %s" % threadId)
+        for filename, lineno, name, line in traceback.extract_stack(stack):
+            code.append('File: "%s", line %d, in %s' % (filename, lineno, name))
+            if line:
+                code.append("  %s" % (line.strip()))
+
+    for line in code:
+        print >> sys.stderr, line
+    print >> sys.stderr, "\n*** STACKTRACE - END ***\n"
 
 
 class ApplicationGUI(object):
@@ -108,11 +126,13 @@ class ApplicationGUI(object):
                         "Globals:\n"
                         "  form - The form element object\n"
                         "  gui  - The gui representation of the form\n"
+                        "  printstacks - print current threadstacks\n"
                         "NOTE: Terminating the shell terminates the "
                         "application."),
                 local={
                     'form': self.window.element,
-                    'gui': self.window
+                    'gui': self.window,
+                    'printstacks': printstacks,
                 })
         else:
             self.app.execute()

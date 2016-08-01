@@ -896,7 +896,6 @@ class InfoDialog(QtGui.QDialog):
         self.show_needed.emit()
 
     def _show(self, data=None):
-        self.exit_code = None
         QtGui.QDialog.show(self)
         center_window(self)
 

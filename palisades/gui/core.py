@@ -649,6 +649,7 @@ class FormGUI():
                 # PROMPT FOR USER CONFIRMATION
                 # 1 indicates user acceptance.
                 # 0 indicates rejcection/cancellation.
+                self.workspace_confirm_dialog.exit_code = None
                 self.workspace_confirm_dialog.confirm()  # non-blocking
                 while self.workspace_confirm_dialog.exit_code is None:
                     time.sleep(0.1)

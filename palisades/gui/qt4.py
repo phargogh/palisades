@@ -971,8 +971,10 @@ class ErrorDialog(InfoDialog):
 
     def showEvent(self, event=None):
         label_string = '<ul>'
-        for element_tuple in self.messages:
-            label_string += '<li>%s: %s</li>' % element_tuple
+        for element_id, exception in self.messages:
+            print exception
+            label_string += '<li><b>%s</b>: <br/>%s</li>' % (element_id,
+                                                             str(exception))
         label_string += '</ul>'
 
         num_messages = len(self.messages)

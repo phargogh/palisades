@@ -83,12 +83,12 @@ class Communicator(object):
     # When a signal is emitted, data about the signal should also be passed.
     def __init__(self):
         self.callbacks = []
-        self.callback_queue = Queue.Queue()
+        self.callback_queue = Queue.PriorityQueue()
         self.response_queue = Queue.Queue()
         self.lock = threading.RLock()
         self._exceptions = []
 
-    def register(self, callback, *args, **kwargs):
+    def register(self, callback, priority=0, *args, **kwargs):
         """Register a callback function and optional arguments.
 
         Any additional arguments provided by ``*args`` or ``**kwargs`` will be
@@ -98,6 +98,8 @@ class Communicator(object):
         Parameters:
             callback (callable): a callable that takes at least one
                 user-defined argument.
+            priority (int): the priority of the callable. Callbacks with
+                low priority values will be called first.
 
         Returns:
             ``None``
@@ -108,7 +110,7 @@ class Communicator(object):
             'kwargs': kwargs,
         }
         with self.lock:
-            self.callbacks.append(data)
+            self.callbacks.append((priority, data))
 
     def emit(self, argument, join=False):
         """Call all of the registered callback functions with the argument
@@ -123,15 +125,19 @@ class Communicator(object):
             while not self.response_queue.empty():
                 self.response_queue.get()
 
-            # load up the queue
-            for callback_data in self.callbacks:
-                self.callback_queue.put(callback_data)
-            self.callback_queue.put('STOP')
+            # load up the callback queue
+            # PriorityQueue returns lowest-valued priorities first, so the
+            # sentinel should be greater than the highest defined priority.
+            max_priority = 0
+            for priority, callback_data in self.callbacks:
+                max_priority = max(max_priority, priority)
+                self.callback_queue.put((priority, callback_data))
+            self.callback_queue.put((max_priority+1, 'STOP'))
 
             try:
                 threads = []
                 while True:
-                    callback_data = self.callback_queue.get()
+                    priority, callback_data = self.callback_queue.get()
                     if callback_data == 'STOP':
                         break
 

@@ -68,7 +68,7 @@ def check_raster(path):
 
 
 def check_number(num, gteq=None, greaterThan=None, lteq=None, lessThan=None,
-                 allowedValues=None):
+                 pattern=None, flag=None):
 
     num = float(num)
 
@@ -86,17 +86,16 @@ def check_number(num, gteq=None, greaterThan=None, lteq=None, lessThan=None,
     # Allowed default pattern types:
     #  * Decimal (e.g. 4.333112)
     #  * Scientific (e.g. 4.E-170, 9.442e10)
-    default_numeric_params = {
-        'pattern': (
+    if not pattern:
+        pattern = (
             r'^\s*'  # preceeding whitespace
             r'(-?[0-9]*(\.[0-9]*)?([eE]-?[0-9]+)?)'
-            r'\s*$'),  # trailing whitespace
-        'flag': None,
-    }
-    if allowedValues:
-        default_numeric_params.update(allowedValues)
+            r'\s*$')  # trailing whitespace
 
-    check_regexp(str(num), **default_numeric_params)
+    if not flag:
+        flag = None
+
+    check_regexp(str(num), pattern=pattern, flag=flag)
 
 
 def check_regexp(string, pattern='.*', flag=None):
@@ -166,8 +165,10 @@ def check_table_restrictions(row_dict, restriction_list):
 
         for field in matching_fieldnames:
             restriction_type = restriction['validateAs']['type']
-            restriction_params = restriction['validateAs'].copy()
-            del restriction_params['type']
+            try:
+                restriction_params = restriction['validateAs']['allowedValues']
+            except KeyError:
+                restriction_params = {}
 
             if restriction_type == 'number':
                 check_number(num=row_dict[field], **restriction_params)

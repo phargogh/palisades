@@ -12,6 +12,7 @@ from types import UnicodeType
 import tempfile
 import locale
 import Queue
+import sys
 
 import palisades.i18n.translation
 
@@ -56,6 +57,23 @@ class RepeatingTimer(threading.Thread):
             self.function()
 
 
+class CommunicationWorker(threading.Thread):
+    def __init__(self, target, args=(), kwargs={}, response_queue=None):
+        threading.Thread.__init__(self)
+        self.target = target
+        self.args = args
+        self.kwargs = kwargs
+        self.response_queue = response_queue
+
+    def run(self):
+        try:
+            self.target(*self.args, **self.kwargs)
+        except Exception as error:
+            LOGGER.exception('Failure in thread %s', self.name)
+            if self.response_queue:
+                self.response_queue.put(sys.exc_info())
+
+
 class Communicator(object):
     """Element represents the base class for all UI elements.  It focuses
     on inter-element connectivity and communication."""
@@ -65,8 +83,10 @@ class Communicator(object):
     # When a signal is emitted, data about the signal should also be passed.
     def __init__(self):
         self.callbacks = []
-        self.queue = Queue.Queue()
+        self.callback_queue = Queue.Queue()
+        self.response_queue = Queue.Queue()
         self.lock = threading.RLock()
+        self._exceptions = []
 
     def register(self, callback, *args, **kwargs):
         """Register a callback function and optional arguments.
@@ -98,27 +118,47 @@ class Communicator(object):
 
         Returns nothing."""
         with self.lock:
+            # clear out the response queue
+            self._exceptions = []
+            while not self.response_queue.empty():
+                self.response_queue.get()
+
             # load up the queue
             for callback_data in self.callbacks:
-                self.queue.put(callback_data)
-            self.queue.put('STOP')
+                self.callback_queue.put(callback_data)
+            self.callback_queue.put('STOP')
 
             try:
                 threads = []
                 while True:
-                    callback_data = self.queue.get()
+                    callback_data = self.callback_queue.get()
                     if callback_data == 'STOP':
                         break
 
-                    t = threading.Thread(target=callback_data['func'],
-                                        args=(argument,) + callback_data['args'],
-                                        kwargs=callback_data['kwargs'])
+                    t = CommunicationWorker(
+                        target=callback_data['func'],
+                        args=(argument,) + callback_data['args'],
+                        kwargs=callback_data['kwargs'],
+                        response_queue=self.response_queue)
+
                     t.start()
                     threads.append(t)
             finally:
                 if join:
                     for thread in threads:
                         thread.join()
+
+    def exceptions(self):
+        if not self.response_queue.empty():
+            exceptions = []
+            with self.lock:
+                while not self.response_queue.empty():
+                    exceptions.append(self.response_queue.get())
+        else:
+            exceptions = self._exceptions
+
+        return exceptions
+
 
     def remove(self, target):
         """Remove a matching callback from the list of callbacks.

@@ -2,6 +2,7 @@ import os
 import logging
 from types import *
 import re
+import itertools
 
 from palisades import fileio
 from palisades import utils
@@ -1726,7 +1727,19 @@ class Form():
         LOGGER.debug('Starting the form submission process')
 
         # User has the opportunity to raise InvalidData here
-        self.submission_requested.emit(True)
+        self.submission_requested.emit(True, join=True)
+
+        # examine the exceptions from the submission_requested communicator
+        exceptions_raised = self.submission_requested.exceptions()
+        if exceptions_raised:
+            # TODO: make this be less messy.  How to make it easier to extract
+            # exceptions??
+            invalid_data_exceptions = list(itertools.chain(
+                *[e[1].data for e in exceptions_raised
+                  if isinstance(e[1], InvalidData)]))
+
+            if invalid_data_exceptions:
+                raise InvalidData(invalid_data_exceptions)
 
         # if success, assemble the arguments dictionary and send it off to the
         # base Application

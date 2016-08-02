@@ -13,6 +13,9 @@ import tempfile
 import locale
 import Queue
 import sys
+import contextlib
+import time
+import uuid4
 
 import palisades.i18n.translation
 
@@ -34,6 +37,59 @@ _SETTINGS_FOLDERS = {
 }
 SETTINGS_DIR = _SETTINGS_FOLDERS[platform.system()]
 LOGGER = logging.getLogger('utils')
+
+
+class TimedLoggingFilter:
+    """Filter log messages based on the time of the previous log message.
+
+    All messages are filtered in this way, regardless of priority.
+
+    This class also functions as a context manager.
+    """
+    def __init__(self, logger, interval):
+        self.logger = logger
+        self.interval = interval
+        self.last_time = time.time()
+
+    def filter(self, record):
+        current_time = time.time()
+        if current_time - self.last_time > self.interval:
+            self.last_time = time.time()
+            return True
+        return False
+
+    def __enter__(self):
+        self.logger.addFilter(self)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.logger.removeFilter(self)
+
+
+class ProgressLogger(logging.LoggerAdapter):
+    def __init__(self, logger, lvl=logging.INFO, interval=0, msg='Progress: %(progress).2f%%'):
+        logging.LoggerAdapter.__init__(self, logger)
+        self.progress = 0
+        self.log_level = lvl
+        self.timed_filter = TimedLoggingFilter(interval)
+        self.message = msg
+        self.id = uuid4.uuid4()
+
+    def process(self, msg, kwargs):
+        if 'progress' not in kwargs:
+            kwargs['progress'] = self.progress
+
+        kwargs['progress_id'] = self.id
+        return msg, kwargs
+
+    def __enter__(self):
+        self.progress = 0
+        self.logger.log(self.log_level, self.message)
+        self.logger.addFilter(self.timed_filter)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.progress = 100
+        self.logger.log(self.log_level, self.message)
+        self.logger.removeFilter(self.timed_filter)
 
 
 class RepeatingTimer(threading.Thread):

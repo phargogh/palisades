@@ -220,12 +220,15 @@ class PythonRunner():
 
         self.started = Communicator()
         self.finished = Communicator()
+        self.failed = None
 
     def start(self):
         """Start the execution of the thread and the internal status checker.
         Emits the started signal.
 
         Returns nothing."""
+
+        self.failed = None
 
         self.executor.start()
         LOGGER.debug('Started executor thread')
@@ -249,6 +252,7 @@ class PythonRunner():
 
         if not self.executor.is_alive():
             self._checker.cancel()
+            self.failed = self.executor.failed
             self.finished.emit(thread_name=self.executor.name,
                                thread_failed=self.executor.failed)
             del self.executor

@@ -3,6 +3,7 @@ import logging
 from types import *
 import re
 import itertools
+import glob
 
 from palisades import fileio
 from palisades import utils
@@ -23,9 +24,21 @@ class InvalidData(ValueError):
     def __str__(self):
         return 'Inputs have errors: %s' % repr(self.data)
 
+class WorkspaceExists(RuntimeError):
+    pass
+
 class ValidationStarted(RuntimeError): pass
 class ElementDisabled(RuntimeError): pass
 class InteractionError(RuntimeError): pass
+
+
+def _check_workspace(data, form):
+    """Check to see if a workspace exists.  If it does, raise WorkspaceExistsWarning."""
+    workspace = form.find_element('workspace_dir').value()
+    files_in_workspace = glob.glob(os.path.join(workspace, '*'))
+    if os.path.exists(workspace) and files_in_workspace:
+        raise WorkspaceExists(workspace)
+
 
 def get_elements_list(group_pointer):
     """Construct a data structure with pointers to the elements of the group.
@@ -96,10 +109,10 @@ class Element(object):
         self._hashable_config = []  # keys corresponding to config keys to hash
 
         # Set up the communicators
-        self.config_changed = Communicator()
-        self.interactivity_changed = Communicator()
-        self.visibility_changed = Communicator()
-        self.satisfaction_changed = Communicator()
+        self.config_changed = Communicator('config_changed')
+        self.interactivity_changed = Communicator('interactivity_changed')
+        self.visibility_changed = Communicator('visibility_changed')
+        self.satisfaction_changed = Communicator('satisfaction_changed')
 
         # Render the configuration and save to self.config
         self.config = configuration
@@ -309,10 +322,10 @@ class Primitive(Element):
         self._hashable_config = ['hideable', 'validateAs']
 
         # Set up our Communicator(s)
-        self.value_changed = Communicator()
-        self.validation_completed = Communicator()
-        self.hidden_toggled = Communicator()
-        self.validity_changed = Communicator()
+        self.value_changed = Communicator('value_changed')
+        self.validation_completed = Communicator('validation_changed')
+        self.hidden_toggled = Communicator('hidden_toggled')
+        self.validity_changed = Communicator('validity_changed')
 
         # update the default configuration and set defaults based on the config.
         self._hidden = self.config['hideable']
@@ -619,7 +632,7 @@ class Dropdown(LabeledPrimitive):
 
         self.options = self.config['options']
         self._value = self.config['defaultValue']
-        self.options_changed = Communicator()
+        self.options_changed = Communicator('options_changed')
 
     def set_value(self, new_value):
         if isinstance(new_value, int):
@@ -962,8 +975,8 @@ class Label(Static):
 
         self._label = self.config['label']
         self._styles = self.config['style']
-        self.label_changed = Communicator()
-        self.styles_changed = Communicator()
+        self.label_changed = Communicator('label_changed')
+        self.styles_changed = Communicator('styles_changed')
 
     def label(self):
         return self._label
@@ -1156,7 +1169,7 @@ class Container(Group):
         self._collapsible = self.config['collapsible']
         self._collapsed = not bool(self.config['defaultValue'])
 
-        self.toggled = Communicator()
+        self.toggled = Communicator('toggled')
 
         try:
             self.set_collapsed(self._collapsed)
@@ -1287,8 +1300,8 @@ class Multi(Container):
             LOGGER.warn('Multi element does not currently support '
                 ' non-template elements.  Elements found have been removed.')
 
-        self.element_added = Communicator()
-        self.element_removed = Communicator()
+        self.element_added = Communicator('element_added')
+        self.element_removed = Communicator('element_removed')
 
         self.set_value(self.config['defaultValue'])
 
@@ -1388,8 +1401,9 @@ class Form():
 
         self.setup_communication(self.elements)
 
-        self.submission_requested = Communicator()
-        self.submitted = Communicator()
+        self.submission_requested = Communicator('submission_requested')
+        self.submission_requested.register(_check_workspace, priority=-1, form=self)
+        self.submitted = Communicator('submitted')
 
         # now that the form has been created, load the lastrun state, if
         # appliccable.
@@ -1723,7 +1737,7 @@ class Form():
         functionality to execution.PythonRunner."""
         self._runner_class = runner_class
 
-    def submit(self, event=None):
+    def submit(self, event=None, workspace_can_exist=False):
         LOGGER.debug('Starting the form submission process')
 
         # User has the opportunity to raise InvalidData here
@@ -1732,14 +1746,27 @@ class Form():
         # examine the exceptions from the submission_requested communicator
         exceptions_raised = self.submission_requested.exceptions()
         if exceptions_raised:
-            # TODO: make this be less messy.  How to make it easier to extract
-            # exceptions??
+
+            # Check for whether the workspace exists.
+            workspace_exceptions = [e[1] for e in exceptions_raised
+                                    if isinstance(e[1], WorkspaceExists)]
+            if workspace_exceptions and not workspace_can_exist:
+                raise WorkspaceExists(workspace_exceptions[0])
+
+            # Check to see if InvalidData was raised in a callback
             invalid_data_exceptions = list(itertools.chain(
                 *[e[1].data for e in exceptions_raised
                   if isinstance(e[1], InvalidData)]))
 
             if invalid_data_exceptions:
                 raise InvalidData(invalid_data_exceptions)
+
+            # Handle other exceptions as well.
+            other_exceptions = [(str(e[1].__class__.__name__), str(e[1]))
+                                for e in exceptions_raised
+                                if e[1].__class__ not in [WorkspaceExists, InvalidData]]
+            if other_exceptions:
+                raise InvalidData(other_exceptions)
 
         # if success, assemble the arguments dictionary and send it off to the
         # base Application
@@ -1770,3 +1797,4 @@ class Form():
     def reset_values(self):
         for element in self.elements:
             element.reset_value()
+

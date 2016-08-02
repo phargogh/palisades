@@ -196,7 +196,7 @@ class Container(Group):
         Group.__init__(self)
         self.setTitle(label_text)
 
-        self.checkbox_toggled = Communicator()
+        self.checkbox_toggled = Communicator('checkbox_toggled')
         self.toggled.connect(self._container_toggled)
         self.setSizePolicy(QtGui.QSizePolicy.Minimum,
             QtGui.QSizePolicy.Maximum)
@@ -249,7 +249,7 @@ class Multi(Container):
         def __init__(self, row_index):
             Button.__init__(self)
             self._row_index = row_index
-            self.pushed = Communicator()
+            self.pushed = Communicator('pushed')
             self.released.connect(self._button_pushed)
             self.setIcon(QtGui.QIcon(ICON_MINUS))
             self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
@@ -263,7 +263,7 @@ class Multi(Container):
             rendered_link = template % link_text
             QtGui.QLabel.__init__(self, rendered_link)
 
-            self.clicked = Communicator()
+            self.clicked = Communicator('clicked')
             self.linkActivated.connect(self.clicked.emit)
 
     def __init__(self, label_text, link_text):
@@ -271,9 +271,9 @@ class Multi(Container):
 
         # TODO: implement defaultValue
 
-        self.element_requested = Communicator()
-        self.element_added = Communicator()
-        self.element_removed = Communicator()
+        self.element_requested = Communicator('element_requested')
+        self.element_added = Communicator('element_added')
+        self.element_removed = Communicator('element_removed')
 
         self.add_element_link = self.AddElementLink(link_text)
         self.add_element_link.clicked.register(self.element_requested.emit)
@@ -566,9 +566,9 @@ class TextField(QtGui.QLineEdit, QtWidget):
 
         # set up my communicator instances and connect them to the correct Qt
         # signals.
-        self.value_changed = Communicator()
-        self.reset_requested = Communicator()
-        self.clicked = Communicator()
+        self.value_changed = Communicator('value_changed')
+        self.reset_requested = Communicator('reset_requested')
+        self.clicked = Communicator('clicked')
         self.textChanged.connect(self._value_changed)
         self.error_changed.connect(self._set_error)
         self.editingFinished.connect(self._editing_finished)
@@ -688,7 +688,7 @@ class CheckBox(QtGui.QCheckBox, QtWidget):
 
         self.setText(label_text)
 
-        self.checkbox_toggled = Communicator()
+        self.checkbox_toggled = Communicator('checkbox_toggled')
         self.toggled.connect(self._checkbox_toggled)
         self.error_changed.connect(self._set_error)
 
@@ -741,7 +741,7 @@ class FileButton(Button):
 
         self.clicked.connect(self._get_file)
 
-        self.file_selected = Communicator()
+        self.file_selected = Communicator('file_selected')
 
     def _get_file(self):
         if len(self.text_field.text()) == 0:
@@ -826,7 +826,7 @@ class Dropdown(QtGui.QComboBox, QtWidget):
         # create the value_changed communicator and connect the
         # current_index_changed slot.  the slot passes the int index of the new
         # current index, so that should just work as expected.
-        self.value_changed = Communicator()
+        self.value_changed = Communicator('value_changed')
         self.currentIndexChanged.connect(self.value_changed.emit)
 
         # set the default index
@@ -1162,7 +1162,7 @@ class RealtimeMessagesDialog(QtGui.QDialog):
 
         self.is_executing = False
         self.cancel = False
-        self.dir_open_requested = Communicator()
+        self.dir_open_requested = Communicator('dir_open_requested')
 
         #create statusArea-related widgets for the window.
         self.statusAreaLabel = QtGui.QLabel(_('Messages:'))
@@ -1357,9 +1357,9 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.setLayout(QtGui.QVBoxLayout())
 
         # create communicators.
-        self.submit_pressed = Communicator()
-        self.quit_requested = Communicator()
-        self.reset_requested = Communicator()
+        self.submit_pressed = Communicator('submit_pressed')
+        self.quit_requested = Communicator('quit_requested')
+        self.reset_requested = Communicator('reset_requested')
 
         # set the window title
         if window_title is None:
@@ -1392,9 +1392,9 @@ class FormWindow(QtWidget, QtGui.QWidget):
         self.menu_bar.addMenu(self.dev_menu)
         self.layout().setMenuBar(self.menu_bar)
 
-        self.load_params_request = Communicator()
-        self.save_params_request = Communicator()
-        self.save_python_request = Communicator()
+        self.load_params_request = Communicator('load_params_request')
+        self.save_params_request = Communicator('save_params_request')
+        self.save_python_request = Communicator('save_python_request')
         self.app_info_dialog = InfoDialog()
         self.exit_action.triggered.connect(self._quit_pressed)
         self.save_file_action.triggered.connect(self.save_params_request.emit)

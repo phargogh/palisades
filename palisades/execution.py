@@ -249,7 +249,8 @@ class PythonRunner():
 
         if not self.executor.is_alive():
             self._checker.cancel()
-            self.finished.emit(self.executor.name)
+            self.finished.emit(thread_name=self.executor.name,
+                               thread_failed=self.executor.failed)
             del self.executor
             self.executor = None
 

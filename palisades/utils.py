@@ -58,15 +58,18 @@ class RepeatingTimer(threading.Thread):
 
 
 class CommunicationWorker(threading.Thread):
-    def __init__(self, target, args=(), kwargs={}, response_queue=None):
+    def __init__(self, target, name, args=(), kwargs={}, response_queue=None):
         threading.Thread.__init__(self)
         self.target = target
         self.args = args
         self.kwargs = kwargs
         self.response_queue = response_queue
+        self.callback_name = name
 
     def run(self):
         try:
+            LOGGER.debug('Starting %s (%s) with args: %s, kwargs: %s',
+                         self.name, self.callback_name, self.args, self.kwargs)
             self.target(*self.args, **self.kwargs)
         except Exception as error:
             LOGGER.exception('Failure in thread %s', self.name)
@@ -81,12 +84,13 @@ class Communicator(object):
     # signal['target'] - a pointer to the signal's target element and function
     # signal['condition'] - the condition under which this signal is emitted
     # When a signal is emitted, data about the signal should also be passed.
-    def __init__(self):
+    def __init__(self, name=None):
         self.callbacks = []
         self.callback_queue = Queue.PriorityQueue()
         self.response_queue = Queue.Queue()
         self.lock = threading.RLock()
         self._exceptions = []
+        self.name = name
 
     def register(self, callback, priority=0, *args, **kwargs):
         """Register a callback function and optional arguments.
@@ -112,7 +116,7 @@ class Communicator(object):
         with self.lock:
             self.callbacks.append((priority, data))
 
-    def emit(self, argument, join=False):
+    def emit(self, argument=None, join=False, **kwargs):
         """Call all of the registered callback functions with the argument
         passed in.
 
@@ -141,10 +145,18 @@ class Communicator(object):
                     if callback_data == 'STOP':
                         break
 
+                    copied_kwargs = callback_data['kwargs'].copy()
+                    copied_kwargs.update(kwargs)
+
+                    args = callback_data['args']
+                    if argument:
+                        args = (argument,) + args
+
                     t = CommunicationWorker(
                         target=callback_data['func'],
-                        args=(argument,) + callback_data['args'],
-                        kwargs=callback_data['kwargs'],
+                        name=self.name,
+                        args=args,
+                        kwargs=copied_kwargs,
                         response_queue=self.response_queue)
 
                     t.start()

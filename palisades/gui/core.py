@@ -16,7 +16,7 @@ from palisades.gui import qt4 as toolkit
 from palisades.validation import V_ERROR
 from palisades.validation import V_FAIL
 from palisades.validation import V_PASS
-from palisades.elements import InvalidData
+from palisades.elements import InvalidData, WorkspaceExists
 
 class NotYetImplemented(Exception): pass
 
@@ -636,30 +636,30 @@ class FormGUI():
         Callback to check for errors and submit unless there are errors in the
         form.
         """
-        workspace_elem = self.element.find_element('workspace_dir')
-        if os.path.exists(workspace_elem.value()):
-            files_in_workspace = os.path.join(workspace_elem.value(), '*')
-            if len(files_in_workspace) > 0:
-                self.workspace_confirm_dialog.set_title(_('Output Exists'))
-                self.workspace_confirm_dialog.set_body_text(_(
-                    'The directory {workspace} exists and contains files '
-                    'that may be overwritten.  Continue?').format(
-                        workspace=os.path.basename(workspace_elem.value())))
-
-                # PROMPT FOR USER CONFIRMATION
-                # 1 indicates user acceptance.
-                # 0 indicates rejcection/cancellation.
-                self.workspace_confirm_dialog.exit_code = None
-                self.workspace_confirm_dialog.confirm()  # non-blocking
-                while self.workspace_confirm_dialog.exit_code is None:
-                    time.sleep(0.1)
-
-                if self.workspace_confirm_dialog.exit_code == 0:
-                    # Returning will prevent the form from being submitted.
-                    return
         try:
             self.element.submit()
             errors = []
+        except WorkspaceExists as workspace_path:
+            self.workspace_confirm_dialog.set_title(_('Output Exists'))
+            self.workspace_confirm_dialog.set_body_text(_(
+                'The directory {workspace} exists and contains files '
+                'that may be overwritten.  Continue?').format(
+                    workspace=workspace_path))
+
+            # PROMPT FOR USER CONFIRMATION
+            # 1 indicates user acceptance.
+            # 0 indicates rejcection/cancellation.
+            self.workspace_confirm_dialog.exit_code = None
+            self.workspace_confirm_dialog.confirm()  # non-blocking
+            while self.workspace_confirm_dialog.exit_code is None:
+                time.sleep(0.1)
+
+            if self.workspace_confirm_dialog.exit_code == 0:
+                # Returning will prevent the form from being submitted.
+                return
+
+            self.element.submit(workspace_can_exist=True)
+
         except InvalidData as error:
             errors = error.data[:]
             self.errors_dialog.set_messages(errors)
@@ -672,8 +672,7 @@ class FormGUI():
         self.messages_dialog.show()
         self.element.runner.executor.log_manager.add_log_handler(self.messages_handler)
 
-    def _runner_finished(self, event=None):
-        thread_failed = self.element.runner.executor.failed
+    def _runner_finished(self, thread_name, thread_failed):
         if thread_failed:
             self.messages_dialog.finish(thread_failed,
                 self.element.runner.executor.exception)

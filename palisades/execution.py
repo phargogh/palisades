@@ -12,10 +12,7 @@ import tempfile
 from palisades.utils import Communicator
 from palisades.utils import RepeatingTimer
 
-logging.basicConfig(format='%(asctime)s %(name)-18s %(threadName)-10s %(levelname)-8s \
-     %(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %H:%M:%S ')
-
-LOGGER = logging.getLogger('')
+LOGGER = logging.getLogger('palisades.execution')
 
 
 @contextlib.contextmanager

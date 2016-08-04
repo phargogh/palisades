@@ -36,7 +36,7 @@ _SETTINGS_FOLDERS = {
     '': tempfile.gettempdir(),  # if python doesn't know the platform.
 }
 SETTINGS_DIR = _SETTINGS_FOLDERS[platform.system()]
-LOGGER = logging.getLogger('utils')
+LOGGER = logging.getLogger('palisades.utils')
 
 
 class TimedLoggingFilter:
@@ -124,11 +124,13 @@ class CommunicationWorker(threading.Thread):
 
     def run(self):
         try:
-            LOGGER.debug('Starting %s (%s) with args: %s, kwargs: %s',
-                         self.name, self.callback_name, self.args, self.kwargs)
+            LOGGER.debug('Starting %s (%s -> %s) with args: %s, kwargs: %s',
+                         self.name, self.callback_name, self.target.__name__,
+                         self.args, self.kwargs)
             self.target(*self.args, **self.kwargs)
         except Exception as error:
-            LOGGER.exception('Failure in thread %s', self.name)
+            LOGGER.exception('Failure in thread %s at target %s', self.name,
+                             self.target)
             if self.response_queue:
                 self.response_queue.put(sys.exc_info())
 
@@ -205,7 +207,7 @@ class Communicator(object):
                     copied_kwargs.update(kwargs)
 
                     args = callback_data['args']
-                    if argument:
+                    if argument is not None:
                         args = (argument,) + args
 
                     t = CommunicationWorker(

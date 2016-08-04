@@ -693,7 +693,7 @@ class CheckBox(QtGui.QCheckBox, QtWidget):
         self.error_changed.connect(self._set_error)
 
     def _checkbox_toggled(self, event=None):
-        self.checkbox_toggled.emit(self.isChecked())
+        self.checkbox_toggled.emit(self.is_checked())
 
     def is_checked(self):
         return self.isChecked()

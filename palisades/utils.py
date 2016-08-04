@@ -15,7 +15,7 @@ import Queue
 import sys
 import contextlib
 import time
-import uuid4
+import uuid
 
 import palisades.i18n.translation
 
@@ -72,7 +72,7 @@ class ProgressLogger(logging.LoggerAdapter):
         self.log_level = lvl
         self.timed_filter = TimedLoggingFilter(interval)
         self.message = msg
-        self.id = uuid4.uuid4()
+        self.id = uuid.uuid4()
 
     def process(self, msg, kwargs):
         if 'progress' not in kwargs:

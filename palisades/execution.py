@@ -8,6 +8,7 @@ import time
 import importlib
 import contextlib
 import tempfile
+import pprint
 
 from palisades.utils import Communicator
 from palisades.utils import RepeatingTimer
@@ -73,6 +74,13 @@ class ThreadFilter(logging.Filter):
         if record.threadName == self.thread_name:
             return True
         return False
+
+
+class PalisadesFilter(logging.Filter):
+    def filter(self, record):
+        if record.name.startswith('palisades'):
+            return False
+        return True
 
 
 class ErrorQueueFilter(logging.Filter):
@@ -316,6 +324,8 @@ class LogManager():
         self.thread_name = thread_name
         self._print_formatter = logging.Formatter(None, None)
         self._file_formatter = logging.Formatter(self.LOG_FMT, self.DATE_FMT)
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.NOTSET)
 
         if log_uri is not None:
             self.logfile_handler = logging.FileHandler(self.log_uri, mode='w')
@@ -324,11 +334,14 @@ class LogManager():
 
         self.thread_filter = ThreadFilter(thread_name)
         self.error_queue_filter = ErrorQueueFilter()
+        self.palisades_filter = PalisadesFilter()
 
         self.logfile_handler.addFilter(self.thread_filter)
+        self.logfile_handler.addFilter(self.palisades_filter)
         self.logfile_handler.addFilter(self.error_queue_filter)
         self.logfile_handler.setFormatter(self._file_formatter)
-        LOGGER.addHandler(self.logfile_handler)
+
+        self.logger.addHandler(self.logfile_handler)
 
     def print_args(self, args):
         """Log the input arguments dictionary to this manager's logfile.
@@ -349,37 +362,40 @@ class LogManager():
 
         args_string = '\n'.join([format_str % (arg) for arg in sorted_args])
         args_string = "Printing arguments\nArguments:\n%s\n" % args_string
-        LOGGER.info(args_string)
+        self.logger.info(args_string)
 
     def print_errors(self):
         """Print all logging errors"""
         error_records = self.error_queue_filter.get_errors()
         if len(error_records) > 0:
             self.logfile_handler.removeFilter(self.error_queue_filter)
-            LOGGER.info('\n\n')
-            LOGGER.warn('Non-critical warnings found during execution:')
+            self.logger.info('\n\n')
+            self.logger.warn('Non-critical warnings found during execution:')
             for error_record in self.error_queue_filter.get_errors():
-                LOGGER.handle(error_record)
-            LOGGER.info('\n\n')
+                self.logger.handle(error_record)
+            self.logger.info('\n\n')
             self.logfile_handler.addFilter(self.error_queue_filter)
 
-    def add_log_handler(self, handler):
+    def add_log_handler(self, handler, filter_palisades=False):
         """Add a logging handler.  Before the handler is added to the logger
         object, we also add a logging filter so that it only logs messages from
         this thread."""
         handler.addFilter(self.thread_filter)
-        LOGGER.addHandler(handler)
+        if filter_palisades:
+            handler.addFilter(self.palisades_filter)
+        self.logger.addHandler(handler)
 
     def remove_log_handler(self, handler):
         """Remove a logging handler."""
         handler.removeFilter(self.thread_filter)
         handler.removeFilter(self.error_queue_filter)
-        LOGGER.removeHandler(handler)
+        handler.removeFilter(self.palisades_filter)
+        self.logger.removeHandler(handler)
 
     def print_message(self, message):
         """Print the input message to the log using the simple print formatter."""
         self.logfile_handler.setFormatter(self._print_formatter)
-        LOGGER.debug(message)
+        self.logger.debug(message)
         self.logfile_handler.setFormatter(self._file_formatter)
 
     def close(self):
@@ -440,14 +456,15 @@ class Executor(threading.Thread):
         try:
             function = getattr(self.module, self.func_name)
         except AttributeError as error:
-            LOGGER.exception(error)
+            self.log_manager.logger.exception(error)
             self.failed = True
             raise AttributeError(('Unable to find function "%s" in module "%s" '
                 'at %s') % (self.func_name, self.module.__name__,
                 self.module.__file__))
         try:
             LOGGER.debug('Found function %s', function)
-            LOGGER.debug('Starting model with %s args', self.args)
+            LOGGER.debug('Starting model with args: \n%s',
+                         pprint.pformat(self.args))
             with patch_tempdir(self.tempdir):
                 function(self.args.copy())
         except Exception as error:
@@ -458,8 +475,8 @@ class Executor(threading.Thread):
         finally:
             self.log_manager.print_errors()
             elapsed_time = round(time.time() - start_time, 2)
-            LOGGER.info('Elapsed time: %s', format_time(elapsed_time))
-            LOGGER.info('Execution finished')
+            self.log_manager.logger.info('Elapsed time: %s', format_time(elapsed_time))
+            self.log_manager.logger.info('Execution finished')
             self.log_manager.close()
 
 

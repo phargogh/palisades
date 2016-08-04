@@ -670,7 +670,8 @@ class FormGUI():
 
     def _open_messages_window(self, event=None):
         self.messages_dialog.show()
-        self.element.runner.executor.log_manager.add_log_handler(self.messages_handler)
+        self.element.runner.executor.log_manager.add_log_handler(
+            self.messages_handler, filter_palisades=True)
 
     def _runner_finished(self, thread_name, thread_failed):
         if thread_failed:

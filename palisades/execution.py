@@ -6,6 +6,8 @@ import datetime
 import sys
 import time
 import importlib
+import contextlib
+import tempfile
 
 from palisades.utils import Communicator
 from palisades.utils import RepeatingTimer
@@ -14,6 +16,46 @@ logging.basicConfig(format='%(asctime)s %(name)-18s %(threadName)-10s %(levelnam
      %(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %H:%M:%S ')
 
 LOGGER = logging.getLogger('')
+
+
+@contextlib.contextmanager
+def patch_tempdir(tempdir_path):
+    """Manage a context with tempfiles saved to a defined directory.
+
+    When inside of this activated context, the environment variables
+    ``TMP``, ``TEMP``, and ``TEMPDIR``, as well as ``tempfile.tempdir``, will
+    all be set to the ``tempdir_path`` parameter.  These values will be
+    restored to their original states when the context manager exits.
+
+    Parameters:
+        tempdir_path (string): The path to the new folder where tempfiles
+            should be saved.  See python's ``tempfile`` documentation for
+            details.
+    """
+    old_env_values = {}
+    for tmp_variable in ['TMP', 'TEMP', 'TEMPDIR']:
+        LOGGER.debug('Setting $%s=%s', tmp_variable, tempdir_path)
+        try:
+            current_value = os.environ[tmp_variable]
+        except KeyError:
+            current_value = None
+        old_env_values[tmp_variable] = current_value
+
+        os.environ[tmp_variable] = tempdir_path
+
+    old_tempdir = tempfile.tempdir
+    tempfile.tempdir = tempdir_path
+
+    yield
+
+    tempfile.tempdir = old_tempdir
+    for env_varname, old_value in old_env_values.iteritems():
+        LOGGER.debug('Restoring former value of $%s=%s', env_varname,
+                     old_value)
+        if not old_value:
+            del os.environ[env_varname]
+        else:
+            os.environ[env_varname] = old_value
 
 
 class ThreadFilter(logging.Filter):
@@ -208,14 +250,16 @@ class PythonRunner():
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d--%H_%M_%S")
         filename = '%s-log-%s.txt' % (module_name, timestamp)
 
-        try:
-            os.makedirs(args['workspace_dir'])
-        except OSError:
-            # workspace already exists, so no need to do anything else.
-            pass
+        tempdir = os.path.join(args['workspace_dir'], 'tmp')
+        for path in [args['workspace_dir'], tempdir]:
+            try:
+                os.makedirs(tempdir)
+            except OSError:
+                # folder already exists, so no need to do anything else.
+                pass
 
         log_file_uri = os.path.join(args['workspace_dir'], filename)
-        self.executor = Executor(module, args, func_name, log_file_uri)
+        self.executor = Executor(module, args, func_name, log_file_uri, tempdir=tempdir)
         self._checker = RepeatingTimer(0.1, self._check_executor)
 
         self.started = Communicator()
@@ -371,7 +415,7 @@ class Executor(threading.Thread):
     In keeping with convention, a single Executor thread instance is only
     designed to be run once.  To run the same function again, it is best to
     create a new Executor instance and run that."""
-    def __init__(self, module, args, func_name='execute', log_file=None):
+    def __init__(self, module, args, func_name='execute', log_file=None, tempdir=None):
         """Initialization function for the Executor.
 
             module - a python module that has already been imported.
@@ -386,6 +430,7 @@ class Executor(threading.Thread):
         self.log_manager = LogManager(self.name, log_file)
         self.failed = False
         self.exception = None
+        self.tempdir = tempdir
 
     def run(self):
         """Run the python script provided by the user with the arguments
@@ -406,7 +451,8 @@ class Executor(threading.Thread):
         try:
             LOGGER.debug('Found function %s', function)
             LOGGER.debug('Starting model with %s args', self.args)
-            function(self.args.copy())
+            with patch_tempdir(self.tempdir):
+                function(self.args.copy())
         except Exception as error:
             # We deliverately want to catch all possible exceptions.
             LOGGER.exception(error)

@@ -673,7 +673,7 @@ class FormGUI():
         self.element.runner.executor.log_manager.add_log_handler(
             self.messages_handler, filter_palisades=True)
 
-    def _runner_finished(self, thread_name, thread_failed):
+    def _runner_finished(self, thread_name, thread_failed, thread_traceback):
         if thread_failed:
             self.messages_dialog.finish(thread_failed,
                 self.element.runner.executor.exception)

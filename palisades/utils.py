@@ -39,38 +39,10 @@ SETTINGS_DIR = _SETTINGS_FOLDERS[platform.system()]
 LOGGER = logging.getLogger('palisades.utils')
 
 
-class TimedProgressLoggingFilter:
-    """Filter log messages based on the time of the previous log message.
-
-    All messages are filtered in this way, regardless of priority.
-
-    This class also functions as a context manager.
-    """
-    def __init__(self, logger, interval):
-        self.logger = logger
-        self.interval = interval
-        self.last_time = time.time()
-
-    def filter(self, record):
-        if not hasattr(record, 'progress'):
-            return True
-
-        current_time = time.time()
-        if current_time - self.last_time > self.interval:
-            self.last_time = time.time()
-            return True
-        return False
-
-    def __enter__(self):
-        self.logger.addFilter(self)
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.logger.removeFilter(self)
-
-
-class ProgressLoggerAdapter(logging.Adapter):
+class ProgressLoggerAdapter(logging.LoggerAdapter):
     # Expects a progress keyword when user logs a message.
     def process(self, msg, kwargs):
+        # TODO: make the progress keyword optional.
         if 'progress' not in kwargs:
             raise ValueError('progress argument expected but not found')
 

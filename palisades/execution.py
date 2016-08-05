@@ -105,6 +105,28 @@ class ErrorQueueFilter(logging.Filter):
         return self._queue
 
 
+class TimedProgressLoggingFilter:
+    """Filter log messages based on the time of the previous log message.
+
+    All messages are filtered in this way, regardless of priority.
+
+    This class also functions as a context manager.
+    """
+    def __init__(self, interval):
+        self.interval = interval
+        self.last_time = time.time()
+
+    def filter(self, record):
+        if not hasattr(record, 'progress'):
+            return True
+
+        current_time = time.time()
+        if current_time - self.last_time > self.interval:
+            self.last_time = time.time()
+            return True
+        return False
+
+
 def locate_module(module):
     """Locate and import the requested module.
 
@@ -266,6 +288,7 @@ class PythonRunner():
         log_file_uri = os.path.join(args['workspace_dir'], filename)
         self.executor = Executor(module, args, func_name, log_file_uri, tempdir=tempdir)
         self._checker = RepeatingTimer(0.1, self._check_executor)
+        self.args = args
 
         self.started = Communicator()
         self.finished = Communicator()
@@ -285,7 +308,8 @@ class PythonRunner():
         self._checker.start()
         LOGGER.debug('Started checker thread')
 
-        self.started.emit(self.executor.name)
+        self.started.emit(thread_name=self.executor.name,
+                          thread_args=self.args)
 
     def is_finished(self):
         """Check whether the current executor thread is active.
@@ -303,7 +327,8 @@ class PythonRunner():
             self._checker.cancel()
             self.failed = self.executor.failed
             self.finished.emit(thread_name=self.executor.name,
-                               thread_failed=self.executor.failed)
+                               thread_failed=self.executor.failed,
+                               thread_traceback=self.executor.traceback)
             del self.executor
             self.executor = None
 
@@ -335,10 +360,12 @@ class LogManager():
         self.thread_filter = ThreadFilter(thread_name)
         self.error_queue_filter = ErrorQueueFilter()
         self.palisades_filter = PalisadesFilter()
+        self.timed_filter = TimedProgressLoggingFilter(interval=5)
 
         self.logfile_handler.addFilter(self.thread_filter)
         self.logfile_handler.addFilter(self.palisades_filter)
         self.logfile_handler.addFilter(self.error_queue_filter)
+        self.logfile_handler.addFilter(self.timed_filter)
         self.logfile_handler.setFormatter(self._file_formatter)
 
         self.logger.addHandler(self.logfile_handler)
@@ -383,6 +410,7 @@ class LogManager():
         handler.addFilter(self.thread_filter)
         if filter_palisades:
             handler.addFilter(self.palisades_filter)
+        handler.addFilter(self.timed_filter)
         self.logger.addHandler(handler)
 
     def remove_log_handler(self, handler):
@@ -390,6 +418,7 @@ class LogManager():
         handler.removeFilter(self.thread_filter)
         handler.removeFilter(self.error_queue_filter)
         handler.removeFilter(self.palisades_filter)
+        handler.removeFilter(self.timed_filter)
         self.logger.removeHandler(handler)
 
     def print_message(self, message):
@@ -443,6 +472,7 @@ class Executor(threading.Thread):
         self.log_manager = LogManager(self.name, log_file)
         self.failed = False
         self.exception = None
+        self.traceback = None
         self.tempdir = tempdir
 
     def run(self):
@@ -472,6 +502,7 @@ class Executor(threading.Thread):
             LOGGER.exception(error)
             self.failed = True
             self.exception = error
+            self.traceback = traceback.format_exc()
         finally:
             self.log_manager.print_errors()
             elapsed_time = round(time.time() - start_time, 2)

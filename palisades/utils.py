@@ -39,7 +39,7 @@ SETTINGS_DIR = _SETTINGS_FOLDERS[platform.system()]
 LOGGER = logging.getLogger('palisades.utils')
 
 
-class TimedLoggingFilter:
+class TimedProgressLoggingFilter:
     """Filter log messages based on the time of the previous log message.
 
     All messages are filtered in this way, regardless of priority.
@@ -52,6 +52,9 @@ class TimedLoggingFilter:
         self.last_time = time.time()
 
     def filter(self, record):
+        if not hasattr(record, 'progress'):
+            return True
+
         current_time = time.time()
         if current_time - self.last_time > self.interval:
             self.last_time = time.time()
@@ -65,31 +68,29 @@ class TimedLoggingFilter:
         self.logger.removeFilter(self)
 
 
-class ProgressLogger(logging.LoggerAdapter):
-    def __init__(self, logger, lvl=logging.INFO, interval=0, msg='Progress: %(progress).2f%%'):
-        logging.LoggerAdapter.__init__(self, logger)
-        self.progress = 0
-        self.log_level = lvl
-        self.timed_filter = TimedLoggingFilter(interval)
-        self.message = msg
-        self.id = uuid.uuid4()
-
+class ProgressLoggerAdapter(logging.Adapter):
+    # Expects a progress keyword when user logs a message.
     def process(self, msg, kwargs):
         if 'progress' not in kwargs:
-            kwargs['progress'] = self.progress
+            raise ValueError('progress argument expected but not found')
 
-        kwargs['progress_id'] = self.id
+        extra = {'progress': kwargs['progress']}
+        if 'extra' in kwargs:
+            kwargs['extra'].update(extra)
+        else:
+            kwargs['extra'] = extra
+
         return msg, kwargs
 
-    def __enter__(self):
-        self.progress = 0
-        self.logger.log(self.log_level, self.message)
-        self.logger.addFilter(self.timed_filter)
+
+class ProgressLogger:
+    def __enter__(self, logger):
+        return ProgressLoggerAdapter(logger)
+        # log a first entry?
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.progress = 100
-        self.logger.log(self.log_level, self.message)
-        self.logger.removeFilter(self.timed_filter)
+        # log a final entry?
+        pass
 
 
 class RepeatingTimer(threading.Thread):

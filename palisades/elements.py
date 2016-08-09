@@ -4,6 +4,7 @@ from types import *
 import re
 import itertools
 import glob
+import threading
 
 from palisades import fileio
 from palisades import utils
@@ -103,6 +104,7 @@ class Element(object):
     def __init__(self, configuration, parent=None):
         object.__init__(self)
         self._visible = True
+        self.lock = threading.RLock()
 
         self._parent_ui = parent
         self._default_config = {}
@@ -127,19 +129,21 @@ class Element(object):
         """Return a list of string names of all attributes of this class that
         are Communicator instances."""
 
-        signals = []
-        for attr_name, attr_obj in self.__dict__.iteritems():
-            if isinstance(attr_obj, Communicator):
-                signals.append(attr_name)
+        with self.lock:
+            signals = []
+            for attr_name, attr_obj in self.__dict__.iteritems():
+                if isinstance(attr_obj, Communicator):
+                    signals.append(attr_name)
 
-        return signals
+            return signals
 
     def emit_signals(self):
         """Emit all signals with their appropriate value.  Returns nothing."""
-        self.config_changed.emit(self.config)
-        self.interactivity_changed.emit(self.is_enabled())
-        self.visibility_changed.emit(self.is_visible())
-        self.satisfaction_changed.emit(self.is_satisfied())
+        with self.lock:
+            self.config_changed.emit(self.config)
+            self.interactivity_changed.emit(self.is_enabled())
+            self.visibility_changed.emit(self.is_visible())
+            self.satisfaction_changed.emit(self.is_satisfied())
 
     def set_default_config(self, new_defaults):
         """Add default configuration options to this Element instance's default
@@ -155,9 +159,10 @@ class Element(object):
 
         Returns nothing."""
 
-        self._default_config.update(new_defaults)
-        self.config = utils.apply_defaults(self.config, self._default_config)
-        self.config_changed.emit(self.config)
+        with self.lock:
+            self._default_config.update(new_defaults)
+            self.config = utils.apply_defaults(self.config, self._default_config)
+            self.config_changed.emit(self.config)
 
     def is_enabled(self):
         """Query whether this element is enabled, indicating whether this
@@ -167,9 +172,10 @@ class Element(object):
 
         Returns a boolean."""
 
-        if self.is_visible():
-            return self._enabled
-        return False
+        with self.lock:
+            if self.is_visible():
+                return self._enabled
+            return False
 
     def set_disabled(self, new_state):
         """Enable or disable this element.
@@ -192,22 +198,23 @@ class Element(object):
 
         Returns nothing."""
 
-        prev_satisfaction = self.is_satisfied()
+        with self.lock:
+            prev_satisfaction = self.is_satisfied()
 
-        LOGGER.debug('Calling set_enabled with %s (current=%s)', new_state,
-            self._enabled)
-        new_state = bool(new_state)
+            LOGGER.debug('Calling set_enabled with %s (current=%s)', new_state,
+                self._enabled)
+            new_state = bool(new_state)
 
-        if new_state != self._enabled:
-            self._enabled = new_state
-            LOGGER.debug('element %s emitting interactivity_changed',
-                self.get_id('user'))
-            self.interactivity_changed.emit(new_state)
+            if new_state != self._enabled:
+                self._enabled = new_state
+                LOGGER.debug('element %s emitting interactivity_changed',
+                    self.get_id('user'))
+                self.interactivity_changed.emit(new_state)
 
-        if prev_satisfaction != self.is_satisfied():
-            LOGGER.debug('Element %s has updated satisfaction to %s, emitting',
-                self.get_id('user'), self.is_satisfied())
-            self.satisfaction_changed.emit(self.is_satisfied())
+            if prev_satisfaction != self.is_satisfied():
+                LOGGER.debug('Element %s has updated satisfaction to %s, emitting',
+                    self.get_id('user'), self.is_satisfied())
+                self.satisfaction_changed.emit(self.is_satisfied())
 
     def is_visible(self):
         """Query whether this element is visible and return the visibility
@@ -215,7 +222,8 @@ class Element(object):
 
         Returns a boolean."""
 
-        return self._visible
+        with self.lock:
+            return self._visible
 
     def set_visible(self, new_visibility):
         """Show or hide this element to the user.
@@ -231,14 +239,14 @@ class Element(object):
         element is invisible, it is not interactive.
 
         Returns Nothing."""
+        with self.lock:
+            assert type(new_visibility) is BooleanType, 'Visibility must be True or False'
 
-        assert type(new_visibility) is BooleanType, 'Visibility must be True or False'
-
-        # If visibility is changing, set the new visibility state and emit the
-        # visibility_changed signal.
-        if new_visibility != self.is_visible():
-            self._visible = new_visibility
-            self.visibility_changed.emit(self._visible)
+            # If visibility is changing, set the new visibility state and emit the
+            # visibility_changed signal.
+            if new_visibility != self.is_visible():
+                self._visible = new_visibility
+                self.visibility_changed.emit(self._visible)
 
     def set_state(self, state):
         raise Exception('Must be implemented for subclasses')
@@ -248,38 +256,40 @@ class Element(object):
 
     def _get_hashable_config(self):
         """Get the hashable configuration dictionary."""
-        hashable_obj = {}
-        for config_key, value in self._default_config.iteritems():
-            if config_key in self._hashable_config:
-                hashable_obj[config_key] = value
+        with self.lock:
+            hashable_obj = {}
+            for config_key, value in self._default_config.iteritems():
+                if config_key in self._hashable_config:
+                    hashable_obj[config_key] = value
 
-        # we always want to add certain object information, so add that here.
-        hashable_obj['classname'] = self.__class__.__name__
-        try:
-            hashable_obj['args_id'] = self.config['args_id']
-        except KeyError:
-            # if there's no args_id for this element, skip it.
-            pass
+            # we always want to add certain object information, so add that here.
+            hashable_obj['classname'] = self.__class__.__name__
+            try:
+                hashable_obj['args_id'] = self.config['args_id']
+            except KeyError:
+                # if there's no args_id for this element, skip it.
+                pass
 
-        LOGGER.debug('Hashable object: %s', hashable_obj)
-        return hashable_obj
+            LOGGER.debug('Hashable object: %s', hashable_obj)
+            return hashable_obj
 
     def get_id(self, id_type='md5sum'):
         # md5sum represents a hash of relevant element attributes.
         # user represents the user-defined identifier, if provided (None if not
         # provided in JSON config)
         # TODO: make this work for Groups.
-        assert id_type in ['md5sum', 'user']
+        with self.lock:
+            assert id_type in ['md5sum', 'user']
 
-        if id_type == 'md5sum':
-            return utils.get_md5sum(self._get_hashable_config())
-        else: # id type must be user-defined
-            try:
-                return self.config['id']
-            except KeyError:
-                # If the user did not specify an ID, then there is no user key.
-                # when this happens, get the md5sum ID instead.
-                return self.get_id('md5sum')
+            if id_type == 'md5sum':
+                return utils.get_md5sum(self._get_hashable_config())
+            else: # id type must be user-defined
+                try:
+                    return self.config['id']
+                except KeyError:
+                    # If the user did not specify an ID, then there is no user key.
+                    # when this happens, get the md5sum ID instead.
+                    return self.get_id('md5sum')
 
     def is_satisfied(self):
         """Basic function to test whether this element is satisfied.
@@ -309,53 +319,56 @@ class Primitive(Element):
 
     def __init__(self, configuration):
         Element.__init__(self, configuration)
-        self._value = None
+        with self.lock:
+            self._value = None
 
-        # self._valid has 3 possible states:
-        #   None -  indicates validation has not been performed on this value or
-        #           else validation is in progress.
-        #   True -  value passes validation.
-        #   False - value fails validation (either validation failure or a
-        #           warning)
-        self._valid = None
-        self._validation_error = None
-        self._hashable_config = ['hideable', 'validateAs']
+            # self._valid has 3 possible states:
+            #   None -  indicates validation has not been performed on this value or
+            #           else validation is in progress.
+            #   True -  value passes validation.
+            #   False - value fails validation (either validation failure or a
+            #           warning)
+            self._valid = None
+            self._validation_error = None
+            self._hashable_config = ['hideable', 'validateAs']
 
-        # Set up our Communicator(s)
-        self.value_changed = Communicator('value_changed')
-        self.validation_completed = Communicator('validation_changed')
-        self.hidden_toggled = Communicator('hidden_toggled')
-        self.validity_changed = Communicator('validity_changed')
+            # Set up our Communicator(s)
+            self.value_changed = Communicator('value_changed')
+            self.validation_completed = Communicator('validation_changed')
+            self.hidden_toggled = Communicator('hidden_toggled')
+            self.validity_changed = Communicator('validity_changed')
 
-        # update the default configuration and set defaults based on the config.
-        self._hidden = self.config['hideable']
-        self._hideable = self.config['hideable']
-        self._required = self.config['required']
-        self._conditionally_required = False
-        self._satisfied = False
+            # update the default configuration and set defaults based on the config.
+            self._hidden = self.config['hideable']
+            self._hideable = self.config['hideable']
+            self._required = self.config['required']
+            self._conditionally_required = False
+            self._satisfied = False
 
-        # Set up our validator
-        self._validator = validation.Validator(
-            self.config['validateAs']['type'])
-        self.value_changed.register(self.validate)
-        self._validator.finished.register(self._get_validation_result)
+            # Set up our validator
+            self._validator = validation.Validator(
+                self.config['validateAs']['type'])
+            self.value_changed.register(self.validate)
+            self._validator.finished.register(self._get_validation_result)
 
     def emit_signals(self):
-        self.value_changed.emit(self.value())
-        self.hidden_toggled.emit(self.is_hidden())
-        self.validity_changed.emit(self._valid)
+        with self.lock:
+            self.value_changed.emit(self.value())
+            self.hidden_toggled.emit(self.is_hidden())
+            self.validity_changed.emit(self._valid)
 
-        #TODO: not sure if this should even be emitted.  Skipping for now.
-        #self.validation_completed.emit(self._valid)
-        Element.emit_signals(self)
+            #TODO: not sure if this should even be emitted.  Skipping for now.
+            #self.validation_completed.emit(self._valid)
+            Element.emit_signals(self)
 
     def reset_value(self):
         """Reset the element's value to its default value, as defined in the
         configuration.
 
         Returns nothing."""
-        default_value = self.config['defaultValue']
-        self.set_value(default_value)
+        with self.lock:
+            default_value = self.config['defaultValue']
+            self.set_value(default_value)
 
     def set_value(self, new_value):
         """Set the value of this element.  If the element's value changes, all
@@ -363,76 +376,80 @@ class Primitive(Element):
 
         Returns nothing."""
 
-        LOGGER.debug('%s setting value to %s', self.get_id('user'), new_value)
-        if not self.is_enabled():
-            return
+        with self.lock:
+            LOGGER.debug('%s setting value to %s', self.get_id('user'), new_value)
+            if not self.is_enabled():
+                return
 
-        # If the value of this element has changed, we want to trigger all the
-        # elements that requested notification.
-        old_value = self.value()
-#        if old_value != new_value:
-        self._value = new_value
-        self._valid = None
-        self.value_changed.emit(new_value)
-        self.validate()
+            # If the value of this element has changed, we want to trigger all the
+            # elements that requested notification.
+            old_value = self.value()
+    #        if old_value != new_value:
+            self._value = new_value
+            self._valid = None
+            self.value_changed.emit(new_value)
+            self.validate()
 
     def value(self):
         """Get the value of this element."""
-        def _cast_to_string(value):
-            if type(value) in [bool, int, float]:
-                value = str(value)
-            elif isinstance(value, unicode) or value is None:
-                return value
-            return unicode(value, 'utf-8')
+        with self.lock:
+            def _cast_to_string(value):
+                if type(value) in [bool, int, float]:
+                    value = str(value)
+                elif isinstance(value, unicode) or value is None:
+                    return value
+                return unicode(value, 'utf-8')
 
-        type_casts = {
-            'string': _cast_to_string,
-            'int': int,
-            'float': float,
-            'bool': bool,
-        }
-        try:
-            return_datatype = self.config['returns']['type']
-            return type_casts[return_datatype](self._value)
-        except KeyError as missing_key:
-            # If the programmer requested an invalid type, raise a helpful
-            # exception.
-            raise KeyError(('Return type %s not allowed, must be one of '
-                            '"string", "int" or "float"') % missing_key)
-        except ValueError:
-            # When the value cannot be converted to the reqested type, raise a
-            # helpful exception.
-            if isinstance(self._value, basestring):
-                if len(self._value) == 0:
-                    return self._value
+            type_casts = {
+                'string': _cast_to_string,
+                'int': int,
+                'float': float,
+                'bool': bool,
+            }
+            try:
+                return_datatype = self.config['returns']['type']
+                return type_casts[return_datatype](self._value)
+            except KeyError as missing_key:
+                # If the programmer requested an invalid type, raise a helpful
+                # exception.
+                raise KeyError(('Return type %s not allowed, must be one of '
+                                '"string", "int" or "float"') % missing_key)
+            except ValueError:
+                # When the value cannot be converted to the reqested type, raise a
+                # helpful exception.
+                if isinstance(self._value, basestring):
+                    if len(self._value) == 0:
+                        return self._value
 
-            raise ValueError('Value %s cannot be converted to %s.' % (
-                self._value, return_datatype))
+                raise ValueError('Value %s cannot be converted to %s.' % (
+                    self._value, return_datatype))
 
     def is_valid(self):
         """Return the validity of this input.  If an element has not been
         validated, it will be validated here and will block until validation
         completes.  Returns a Boolean.
         """
-        # Return whether validation passed (a boolean).
-        if self.has_input():
-            return self._valid
-        else:
-            if self.is_required():
+        with self.lock:
+            # Return whether validation passed (a boolean).
+            if self.has_input():
                 return self._valid
             else:
-                return True  # if no input and optional, input is valid.
+                if self.is_required():
+                    return self._valid
+                else:
+                    return True  # if no input and optional, input is valid.
 
     def validate(self, data=None):
-        if self.config['required'] and not self.has_input():
-            LOGGER.debug('Element %s is required' % self)
-            elem_req_msg = _('Element is required')
-            elem_req_state = validation.V_FAIL
-            self._get_validation_result((elem_req_msg, elem_req_state))
-            return
+        with self.lock:
+            if self.config['required'] and not self.has_input():
+                LOGGER.debug('Element %s is required' % self)
+                elem_req_msg = _('Element is required')
+                elem_req_state = validation.V_FAIL
+                self._get_validation_result((elem_req_msg, elem_req_state))
+                return
 
-        validation_dict = self.config['validateAs'].copy()
-        self._validator.validate(self.value(), validation_dict)  # this starts the thread
+            validation_dict = self.config['validateAs'].copy()
+            self._validator.validate(self.value(), validation_dict)  # this starts the thread
 
     def _get_validation_result(self, error=None):
         """Utility class method to get the error result from the validator
@@ -440,54 +457,58 @@ class Primitive(Element):
         failed, and sets the validation error to the error found (if any).
 
         error - a tuple of (error_msg, error_state)."""
-        error_msg, state = error
+        with self.lock:
+            error_msg, state = error
 
-        prev_satisfaction = self._satisfied
-        LOGGER.debug('prev_satisfaction: %s', prev_satisfaction)
-        old_validity = self._valid
+            prev_satisfaction = self._satisfied
+            LOGGER.debug('prev_satisfaction: %s', prev_satisfaction)
+            old_validity = self._valid
 
-        if state == validation.V_PASS:
-            self._valid = True
-        else:
-            self._valid = False
+            if state == validation.V_PASS:
+                self._valid = True
+            else:
+                self._valid = False
 
-        # if validity changed, emit the validity_changed signal
-        if old_validity != self._valid:
-            LOGGER.debug('Validity of "%s" changed from %s to %s',
-                self.get_id('user'), old_validity, self._valid)
-            self.validity_changed.emit(self._valid)
+            # if validity changed, emit the validity_changed signal
+            if old_validity != self._valid:
+                LOGGER.debug('Validity of "%s" changed from %s to %s',
+                    self.get_id('user'), old_validity, self._valid)
+                self.validity_changed.emit(self._valid)
 
-        LOGGER.debug('Emitting validation_completed')
-        try:
-            if len(error_msg) > 0:
-                LOGGER.debug('Validation error: %s', error_msg)
-        except TypeError:
-            # when error_msg is None, there's no len().
-            # Error_msg of None means no validation error.
-            pass
+            LOGGER.debug('Emitting validation_completed')
+            try:
+                if len(error_msg) > 0:
+                    LOGGER.debug('Validation error: %s', error_msg)
+            except TypeError:
+                # when error_msg is None, there's no len().
+                # Error_msg of None means no validation error.
+                pass
 
-        self._validation_error = error_msg
-        self.validation_completed.emit(error)
+            self._validation_error = error_msg
+            self.validation_completed.emit(error)
 
-        LOGGER.debug('current satisfaction: %s', self.is_satisfied())
-        self._satisfied = self.is_satisfied()
-        if self.is_satisfied() != prev_satisfaction:
-            LOGGER.debug('Satisfaction changed for %s', self.get_id('user'))
-            self.satisfaction_changed.emit(self.is_satisfied())
+            LOGGER.debug('current satisfaction: %s', self.is_satisfied())
+            self._satisfied = self.is_satisfied()
+            if self.is_satisfied() != prev_satisfaction:
+                LOGGER.debug('Satisfaction changed for %s', self.get_id('user'))
+                self.satisfaction_changed.emit(self.is_satisfied())
 
     def is_hideable(self):
-        return self._hideable
+        with self.lock:
+            return self._hideable
 
     def set_hidden(self, is_hidden):
-        assert type(is_hidden) is BooleanType, ('is_hidden must be Boolean'
-            ', %s found instead' % is_hidden.__class__.__name__)
+        with self.lock:
+            assert type(is_hidden) is BooleanType, ('is_hidden must be Boolean'
+                ', %s found instead' % is_hidden.__class__.__name__)
 
-        if self._hidden != is_hidden:
-            self._hidden = is_hidden
-            self.hidden_toggled.emit(is_hidden)
+            if self._hidden != is_hidden:
+                self._hidden = is_hidden
+                self.hidden_toggled.emit(is_hidden)
 
     def is_hidden(self):
-        return self._hidden
+        with self.lock:
+            return self._hidden
 
     def is_satisfied(self):
         """Determine if this element has satisfactory input.  An element is
@@ -496,18 +517,19 @@ class Primitive(Element):
             - The element's validation must pass (if it has validation)
             - The element must be enabled.
         Returns a boolean with the satisfaction state."""
-
-        if self.has_input() and self._valid and self.is_enabled():
-            return True
-        return False
+        with self.lock:
+            if self.has_input() and self._valid and self.is_enabled():
+                return True
+            return False
 
     def state(self):
         """Return a python dictionary describing the state of this element."""
-        state_dict = {
-            'value': self.value(),
-            'is_hidden': self.is_hidden()
-        }
-        return state_dict
+        with self.lock:
+            state_dict = {
+                'value': self.value(),
+                'is_hidden': self.is_hidden()
+            }
+            return state_dict
 
     def set_state(self, state):
         """Set the state of this Element.
@@ -517,61 +539,67 @@ class Primitive(Element):
                     'value' -> some pythonic value relevant to this element.
                     'is_hidden' -> a boolean.  Ignored if not hideable.
         """
-        self.set_value(state['value'])
-        self.set_hidden(state['is_hidden'])
+        with self.lock:
+            self.set_value(state['value'])
+            self.set_hidden(state['is_hidden'])
 
     def is_required(self):
-        if self._required:
-            return self._required
-        return self._conditionally_required
+        with self.lock:
+            if self._required:
+                return self._required
+            return self._conditionally_required
 
     def set_conditionally_required(self, cond_require):
-        self._conditionally_required = cond_require
+        with self.lock:
+            self._conditionally_required = cond_require
 
     def has_input(self):
-        if self.value() != None:
-            return True
-        return False
+        with self.lock:
+            if self.value() != None:
+                return True
+            return False
 
     def should_return(self):
-        LOGGER.debug('Checking whether should return: %s (%s)',
-                     self, self.get_id('user'))
-        # if element does not have an args_id, we're not supposed to return.
-        # Therefore, return False.
-        if 'args_id' not in self.config:
-            LOGGER.debug('Element %s does not have an args_id', self)
-            return False
-
-        return_if_hidden = self.config['returns']['ifHidden']
-        if return_if_hidden or self.is_hidden():
-            LOGGER.debug('Element %s is hidden.', self)
-            return False
-
-        # if element is disabled and we're not supposed to return if disabled,
-        # return False.
-        return_if_disabled = self.config['returns']['ifDisabled']
-        if self.is_enabled() is False:
-            if return_if_disabled is False:
-                LOGGER.debug('Element %s is disabled and should not return',
-                    self)
+        with self.lock:
+            LOGGER.debug('Checking whether should return: %s (%s)',
+                        self, self.get_id('user'))
+            # if element does not have an args_id, we're not supposed to return.
+            # Therefore, return False.
+            if 'args_id' not in self.config:
+                LOGGER.debug('Element %s does not have an args_id', self)
                 return False
 
-        # if the element is empty and we're not supposed to return if it's
-        # empty, return False.  This is only the case when element is not
-        # required.
-        return_if_empty = self.config['returns']['ifEmpty']
-        required = self.config['required']
-        if (not return_if_empty and not self.has_input()) and not required:
-            LOGGER.debug('Element %s (%s) is empty', self,
-                    self.config['args_id'])
-            return False
+            return_if_hidden = self.config['returns']['ifHidden']
+            if return_if_hidden or self.is_hidden():
+                LOGGER.debug('Element %s is hidden.', self)
+                return False
 
-        # If none of the previous conditions have been met, return True.
-        return True
+            # if element is disabled and we're not supposed to return if disabled,
+            # return False.
+            return_if_disabled = self.config['returns']['ifDisabled']
+            if self.is_enabled() is False:
+                if return_if_disabled is False:
+                    LOGGER.debug('Element %s is disabled and should not return',
+                        self)
+                    return False
+
+            # if the element is empty and we're not supposed to return if it's
+            # empty, return False.  This is only the case when element is not
+            # required.
+            return_if_empty = self.config['returns']['ifEmpty']
+            required = self.config['required']
+            if (not return_if_empty and not self.has_input()) and not required:
+                LOGGER.debug('Element %s (%s) is empty', self,
+                        self.config['args_id'])
+                return False
+
+            # If none of the previous conditions have been met, return True.
+            return True
 
     def help_text(self):
         """Returns the helpText attribute string."""
-        return self.config['helpText']
+        with self.lock:
+            return self.config['helpText']
 
 class LabeledPrimitive(Primitive):
     defaults = {
@@ -591,16 +619,19 @@ class LabeledPrimitive(Primitive):
 
     def __init__(self, configuration):
         Primitive.__init__(self, configuration)
-        self._hashable_config = ['hideable', 'validateAs', 'label']
+        with self.lock:
+            self._hashable_config = ['hideable', 'validateAs', 'label']
 
-        self._label = self.config['label']
+            self._label = self.config['label']
 
     def set_label(self, new_label):
-        cast_label = new_label.decode("utf-8")
-        self._label = cast_label
+        with self.lock:
+            cast_label = new_label.decode("utf-8")
+            self._label = cast_label
 
     def label(self):
-        return self._label
+        with self.lock:
+            return self._label
 
 class Dropdown(LabeledPrimitive):
     defaults = {
@@ -622,88 +653,94 @@ class Dropdown(LabeledPrimitive):
 
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
-        self._hashable_config = ['hideable', 'validateAs', 'options',
-            'label']
+        with self.lock:
+            self._hashable_config = ['hideable', 'validateAs', 'options',
+                'label']
 
-        assert self.config['returns']['type'] in ['string', 'ordinal'], (
-            'the "returns" type key in element %s must be one of ["string",'
-            '"ordinal"] not %s' % (self.get_id(),
-                                   self.config['returns']['type']))
+            assert self.config['returns']['type'] in ['string', 'ordinal'], (
+                'the "returns" type key in element %s must be one of ["string",'
+                '"ordinal"] not %s' % (self.get_id(),
+                                    self.config['returns']['type']))
 
-        self.options = self.config['options']
-        self._value = self.config['defaultValue']
-        self.options_changed = Communicator('options_changed')
+            self.options = self.config['options']
+            self._value = self.config['defaultValue']
+            self.options_changed = Communicator('options_changed')
 
     def set_value(self, new_value):
-        if isinstance(new_value, int):
-            assert new_value >= -1, 'Dropdown index must be >= -1, not %s' % new_value
-            assert new_value <= len(self.options), 'Dropdown index must exist'
-        elif isinstance(new_value, basestring):
-            assert new_value in self.options, 'Value not in options %s' % self.options
-        else:
-            raise AssertionError(('Dropdown value type not '
-                                  'recognized: {ctype}').format(ctype=type(new_value)))
+        with self.lock:
+            if isinstance(new_value, int):
+                assert new_value >= -1, 'Dropdown index must be >= -1, not %s' % new_value
+                assert new_value <= len(self.options), 'Dropdown index must exist'
+            elif isinstance(new_value, basestring):
+                assert new_value in self.options, 'Value not in options %s' % self.options
+            else:
+                raise AssertionError(('Dropdown value type not '
+                                    'recognized: {ctype}').format(ctype=type(new_value)))
 
-        LabeledPrimitive.set_value(self, new_value)
+            LabeledPrimitive.set_value(self, new_value)
 
     def set_options(self, options_list, new_value=None):
-        if self.options != options_list:
-            self.options = options_list
+        with self.lock:
+            if self.options != options_list:
+                self.options = options_list
 
-            try:
-                if new_value is None:
-                    self._value = self.config['defaultValue']
-                else:
-                    self._value = new_value
-            except (AssertionError, ValueError) as error:
-                # Default value must be a valid index into the new options
-                # list or must be a string in that list.  If this is not the
-                # case, then we'll reset the index to -1 (unset).
-                self.set_value(-1)
-        self.options_changed.emit(options_list)
-        self.value_changed.emit(new_value)
+                try:
+                    if new_value is None:
+                        self._value = self.config['defaultValue']
+                    else:
+                        self._value = new_value
+                except (AssertionError, ValueError) as error:
+                    # Default value must be a valid index into the new options
+                    # list or must be a string in that list.  If this is not the
+                    # case, then we'll reset the index to -1 (unset).
+                    self.set_value(-1)
+            self.options_changed.emit(options_list)
+            self.value_changed.emit(new_value)
 
     def current_index(self):
         """Return the current index (an int) of the dropdown."""
-        if isinstance(self._value, int):
-            return self._value
+        with self.lock:
+            if isinstance(self._value, int):
+                return self._value
 
-        try:
-            return self.options.index(self._value)
-        except ValueError:
-            raise ValueError('Dropdown value {value} is not in {list}'.format(
-                value=self._value, list=self.options))
+            try:
+                return self.options.index(self._value)
+            except ValueError:
+                raise ValueError('Dropdown value {value} is not in {list}'.format(
+                    value=self._value, list=self.options))
 
     def value(self):
         # if there are no options to select or the user has not selected an
         # option, return None.
-        if len(self.options) == 0 or self._value == -1:
-            return None
+        with self.lock:
+            if len(self.options) == 0 or self._value == -1:
+                return None
 
-        # get the value of the currently selected option.
-        return_option = self.config['returns']['type']
-        if return_option == 'string':
-            if isinstance(self._value, int):
-                return_value = self.options[self._value]
+            # get the value of the currently selected option.
+            return_option = self.config['returns']['type']
+            if return_option == 'string':
+                if isinstance(self._value, int):
+                    return_value = self.options[self._value]
+                else:
+                    return_value = self._value
             else:
                 return_value = self._value
-        else:
-            return_value = self._value
 
-        try:
-            return self.config['returns']['mapValues'][return_value]
-        except KeyError:
-            # If the user's config doesn't have 'mapValues' OR the config
-            # doesn't define a mapping for this value, return the original
-            # return value, defined by the config['returns']['type'] string.
-            return return_value
+            try:
+                return self.config['returns']['mapValues'][return_value]
+            except KeyError:
+                # If the user's config doesn't have 'mapValues' OR the config
+                # doesn't define a mapping for this value, return the original
+                # return value, defined by the config['returns']['type'] string.
+                return return_value
 
     def state(self):
-        state_dict = {
-            'value': self._value,  # always return the current index
-            'is_hidden': self.is_hidden()
-        }
-        return state_dict
+        with self.lock:
+            state_dict = {
+                'value': self._value,  # always return the current index
+                'is_hidden': self.is_hidden()
+            }
+            return state_dict
 
 
 class TableDropdown(Dropdown):
@@ -728,16 +765,18 @@ class TableDropdown(Dropdown):
         raise NotImplementedError
 
     def state(self):
-        state_dict = {
-            'current_index': self.current_index(),
-            'current_text': self.options[self.current_index()],
-            'is_hidden': self.is_hidden(),
-        }
-        return state_dict
+        with self.lock:
+            state_dict = {
+                'current_index': self.current_index(),
+                'current_text': self.options[self.current_index()],
+                'is_hidden': self.is_hidden(),
+            }
+            return state_dict
 
     def set_state(self, state_dict):
-        self.set_value(state_dict['current_text'])
-        self.set_hidden(state_dict['is_hidden'])
+        with self.lock:
+            self.set_value(state_dict['current_text'])
+            self.set_hidden(state_dict['is_hidden'])
 
 
 class OGRFieldDropdown(TableDropdown):
@@ -760,14 +799,15 @@ class OGRFieldDropdown(TableDropdown):
 
     def load_columns(self, filepath):
         from osgeo import ogr
-        vector = ogr.Open(filepath)
-        if not vector:
-            self.set_options([])
-            return
+        with self.lock:
+            vector = ogr.Open(filepath)
+            if not vector:
+                self.set_options([])
+                return
 
-        layer = vector.GetLayer()
-        fieldnames = [field.GetName() for field in layer.schema]
-        self.set_options(fieldnames, new_value=self.config['defaultValue'])
+            layer = vector.GetLayer()
+            fieldnames = [field.GetName() for field in layer.schema]
+            self.set_options(fieldnames, new_value=self.config['defaultValue'])
 
 
 class Text(LabeledPrimitive):
@@ -790,10 +830,11 @@ class Text(LabeledPrimitive):
 
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
-        self._value = u""
+        with self.lock:
+            self._value = u""
 
-        # Set the value of the element from the config's defaultValue.
-        self.set_value(configuration['defaultValue'])
+            # Set the value of the element from the config's defaultValue.
+            self.set_value(configuration['defaultValue'])
 
     def set_value(self, new_value):
         """Subclassed from LabeledPrimitive.set_value.  Casts all input values
@@ -803,25 +844,27 @@ class Text(LabeledPrimitive):
 
         Returns nothing."""
 
-        # Numbers must first be cast to a str before they can be converted to
-        # python unicode objects.
-        if isinstance(new_value, float) or isinstance(new_value, int):
-            new_value = str(new_value)
+        with self.lock:
+            # Numbers must first be cast to a str before they can be converted to
+            # python unicode objects.
+            if isinstance(new_value, float) or isinstance(new_value, int):
+                new_value = str(new_value)
 
-        try:
-            new_value = unicode(new_value, 'utf-8')
-        except TypeError:
-            # For when new_value is already unicode.
-            pass
+            try:
+                new_value = unicode(new_value, 'utf-8')
+            except TypeError:
+                # For when new_value is already unicode.
+                pass
 
-        LOGGER.debug('Text element %s setting value from %s to %s',
-                     self.get_id('user'), self._value, new_value)
-        LabeledPrimitive.set_value(self, new_value)
+            LOGGER.debug('Text element %s setting value from %s to %s',
+                        self.get_id('user'), self._value, new_value)
+            LabeledPrimitive.set_value(self, new_value)
 
     def has_input(self):
-        if len(self._value) > 0:
-            return True
-        return False
+        with self.lock:
+            if len(self._value) > 0:
+                return True
+            return False
 
 class File(Text):
     defaults = {
@@ -843,8 +886,8 @@ class File(Text):
 
     def __init__(self, configuration):
         Text.__init__(self, configuration)
-
-        self.set_value(self.config['defaultValue'])
+        with self.lock:
+            self.set_value(self.config['defaultValue'])
 
     def set_value(self, new_value):
         """Set the value of the File element.  All input values will be cast to
@@ -866,21 +909,21 @@ class File(Text):
         new_value=''.
 
         Returns nothing."""
+        with self.lock:
+            assert type(new_value) in [StringType, UnicodeType], ('New value must'
+                'be either a bytestring or a unicode string, '
+                '%s found.' % type(new_value))
 
-        assert type(new_value) in [StringType, UnicodeType], ('New value must'
-            'be either a bytestring or a unicode string, '
-            '%s found.' % type(new_value))
+            new_value = utils.decode_string(new_value)
 
-        new_value = utils.decode_string(new_value)
-
-        if new_value == '':
-            # os.path.abspath('') is the same as os.getcwd(),
-            # so I need to have a special case here.  If the user enters '.',
-            # then the current dir will be used.
-            absolute_path = ''
-        else:
-            absolute_path = os.path.abspath(os.path.expanduser(new_value))
-        Text.set_value(self, absolute_path)
+            if new_value == '':
+                # os.path.abspath('') is the same as os.getcwd(),
+                # so I need to have a special case here.  If the user enters '.',
+                # then the current dir will be used.
+                absolute_path = ''
+            else:
+                absolute_path = os.path.abspath(os.path.expanduser(new_value))
+            Text.set_value(self, absolute_path)
 
 
 class Folder(File):
@@ -913,21 +956,24 @@ class Static(Primitive):
 
     def __init__(self, configuration):
         Primitive.__init__(self, configuration)
-        self._hashable_config = ['returnValue']
+        with self.lock:
+            self._hashable_config = ['returnValue']
 
     def value(self):
-        try:
-            return self.config['defaultValue']
-        except:
-            pass
-        return self.config['returnValue']
+        with self.lock:
+            try:
+                return self.config['defaultValue']
+            except:
+                pass
+            return self.config['returnValue']
 
     def should_return(self):
-        if 'args_id' in self.config:
-            # Static elements should always return, so long as there's an
-            # args_id.
-            return True
-        return False
+        with self.lock:
+            if 'args_id' in self.config:
+                # Static elements should always return, so long as there's an
+                # args_id.
+                return True
+            return False
 
     def state(self):
         return None
@@ -973,29 +1019,32 @@ class Label(Static):
     def __init__(self, configuration):
         Static.__init__(self, configuration)
 
-        self._label = self.config['label']
-        self._styles = self.config['style']
-        self.label_changed = Communicator('label_changed')
-        self.styles_changed = Communicator('styles_changed')
+        with self.lock:
+            self._label = self.config['label']
+            self._styles = self.config['style']
+            self.label_changed = Communicator('label_changed')
+            self.styles_changed = Communicator('styles_changed')
 
     def label(self):
         return self._label
 
     def set_label(self, new_label):
-        if self._label != new_label:
-            self._label = new_label
-            self.label_changed.emit(new_label)
+        with self.lock:
+            if self._label != new_label:
+                self._label = new_label
+                self.label_changed.emit(new_label)
 
     def styles(self):
         return self._styles
 
     def set_styles(self, new_styles):
-        assert type(new_styles) == dict, ('new_styles must be a dict, not a '
-                                          '%s') % type(new_styles)
+        with self.lock:
+            assert type(new_styles) == dict, ('new_styles must be a dict, not a '
+                                            '%s') % type(new_styles)
 
-        if new_styles != self._styles:
-            self._styles = new_styles
-            self.styles_changed.emit(new_styles)
+            if new_styles != self._styles:
+                self._styles = new_styles
+                self.styles_changed.emit(new_styles)
 
     def state(self):
         return
@@ -1022,17 +1071,19 @@ class CheckBox(LabeledPrimitive):
 
     def __init__(self, configuration):
         LabeledPrimitive.__init__(self, configuration)
-        self.set_value(self.config['defaultValue'])
+        with self.lock:
+            self.set_value(self.config['defaultValue'])
 
     def set_value(self, new_value):
-        assert type(new_value) is BooleanType, ('new_value must be either True'
-            ' or False, %s found' % type(new_value))
-        LabeledPrimitive.set_value(self, new_value)
+        with self.lock:
+            assert type(new_value) is BooleanType, ('new_value must be either True'
+                ' or False, %s found' % type(new_value))
+            LabeledPrimitive.set_value(self, new_value)
 
-        # For most elements, satisfaction_changed is emitted after validation
-        # completes successfully.  For checkboxes, we rarely (if ever) have
-        # validation.
-        self.satisfaction_changed.emit(new_value)
+            # For most elements, satisfaction_changed is emitted after validation
+            # completes successfully.  For checkboxes, we rarely (if ever) have
+            # validation.
+            self.satisfaction_changed.emit(new_value)
 
     def has_input(self):
         return self.value()
@@ -1061,14 +1112,15 @@ class Group(Element):
             'tabGroup': TabGroup,
         }
 
-        if new_elements is not None:
-            element_registry.update(new_elements)
+        with self.lock:
+            if new_elements is not None:
+                element_registry.update(new_elements)
 
-        self._registrar = element_registry
-        self._elements = []
+            self._registrar = element_registry
+            self._elements = []
 
-        self.create_elements(self.config['elements'])
-        self._display_label = True
+            self.create_elements(self.config['elements'])
+            self._display_label = True
 
     def _add_element(self, element):
         """Add the element to this group.
@@ -1085,17 +1137,18 @@ class Group(Element):
                 created.
 
             Returns nothing."""
-        for element_config in elements:
-            try:
-                new_element_cls = self._registrar[element_config['type']]
-            except KeyError as error:
-                raise KeyError('%s not recognized as an acceptable element type' % error)
-            else:
-                LOGGER.debug('Creating a new element with configuration %s',
-                             element_config)
-                new_element = new_element_cls(element_config)
+        with self.lock:
+            for element_config in elements:
+                try:
+                    new_element_cls = self._registrar[element_config['type']]
+                except KeyError as error:
+                    raise KeyError('%s not recognized as an acceptable element type' % error)
+                else:
+                    LOGGER.debug('Creating a new element with configuration %s',
+                                element_config)
+                    new_element = new_element_cls(element_config)
 
-            self._add_element(new_element)
+                self._add_element(new_element)
 
     def elements(self):
         return self._elements
@@ -1111,14 +1164,14 @@ class Group(Element):
         signal is emitted with the new state.
 
         Returns nothing."""
+        with self.lock:
+            assert type(new_state) is BooleanType, ('New state must be a boolean, '
+                '%s found instead.' % new_state.__type__.__name__)
 
-        assert type(new_state) is BooleanType, ('New state must be a boolean, '
-            '%s found instead.' % new_state.__type__.__name__)
+            for element in self.elements():
+                element.set_enabled(new_state)
 
-        for element in self.elements():
-            element.set_enabled(new_state)
-
-        Element.set_enabled(self, new_state)
+            Element.set_enabled(self, new_state)
 
     def set_visible(self, new_visibility):
         """Set the visibility of this Group and all its sub_elements.
@@ -1127,22 +1180,23 @@ class Group(Element):
             False, mark as invisible.  Applies to all sub-elements.
 
         Returns nothing."""
+        with self.lock:
+            assert type(new_visibility) is BooleanType, ('Visibility must be True'
+                'or False, %s found' % type(new_visibility))
 
-        assert type(new_visibility) is BooleanType, ('Visibility must be True'
-            'or False, %s found' % type(new_visibility))
+            for element in self.elements():
+                element.set_visible(new_visibility)
 
-        for element in self.elements():
-            element.set_visible(new_visibility)
-
-        Element.set_visible(self, new_visibility)
+            Element.set_visible(self, new_visibility)
 
     def state(self):
         """Returns a python dictionary with the relevant state of the Group (not
             including contained elements)."""
-        state_dict = {
-            'enabled': self.is_enabled(),
-        }
-        return state_dict
+        with self.lock:
+            state_dict = {
+                'enabled': self.is_enabled(),
+            }
+            return state_dict
 
     def set_state(self, state):
         """Set the state of this group element.
@@ -1166,54 +1220,60 @@ class Container(Group):
     def __init__(self, configuration, new_elements=None):
         Group.__init__(self, configuration, new_elements)
 
-        self._collapsible = self.config['collapsible']
-        self._collapsed = not bool(self.config['defaultValue'])
+        with self.lock:
+            self._collapsible = self.config['collapsible']
+            self._collapsed = not bool(self.config['defaultValue'])
 
-        self.toggled = Communicator('toggled')
+            self.toggled = Communicator('toggled')
 
-        try:
-            self.set_collapsed(self._collapsed)
-        except InteractionError:
-            # When the container is not collapsible
-            pass
+            try:
+                self.set_collapsed(self._collapsed)
+            except InteractionError:
+                # When the container is not collapsible
+                pass
 
     def is_satisfied(self):
-        if self.is_enabled():
-            if self.is_collapsible() and not self.is_collapsed():
-                return True
-            elif not self.is_collapsible():
-                return True
-        return False
+        with self.lock:
+            if self.is_enabled():
+                if self.is_collapsible() and not self.is_collapsed():
+                    return True
+                elif not self.is_collapsible():
+                    return True
+            return False
 
     def emit_signals(self):
-        self.toggled.emit(self.is_collapsed())
-        Group.emit_signals(self)
+        with self.lock:
+            self.toggled.emit(self.is_collapsed())
+            Group.emit_signals(self)
 
     def set_display_label(self, display):
-        assert type(display) is BooleanType, 'display must be True or False'
-        self._display_label = display
+        with self.lock:
+            assert type(display) is BooleanType, 'display must be True or False'
+            self._display_label = display
 
     def label(self):
-        if self._display_label:
-            return self.config['label']
-        return ''
+        with self.lock:
+            if self._display_label:
+                return self.config['label']
+            return ''
 
     def value(self):
         return not self._collapsed
 
     def set_collapsed(self, is_collapsed):
-        assert type(is_collapsed) is BooleanType
+        with self.lock:
+            assert type(is_collapsed) is BooleanType
 
-        # can only set as collapsed if container is collapsible
-        if not self.is_collapsible():
-            raise InteractionError("Container is not collapsible")
+            # can only set as collapsed if container is collapsible
+            if not self.is_collapsible():
+                raise InteractionError("Container is not collapsible")
 
-        self._collapsed = is_collapsed
-        self.emit_signals()
+            self._collapsed = is_collapsed
+            self.emit_signals()
 
-        for element in self.elements():
-            element.set_visible(not is_collapsed)
-            element.emit_signals()
+            for element in self.elements():
+                element.set_visible(not is_collapsed)
+                element.emit_signals()
 
     def is_collapsible(self):
         return self._collapsible
@@ -1224,9 +1284,10 @@ class Container(Group):
     def state(self):
         """Returns a python dictionary with the relevant state of the Group (not
             including contained elements)."""
-        state_dict = Group.state(self)
-        state_dict['collapsed'] = self.is_collapsed()
-        return state_dict
+        with self.lock:
+            state_dict = Group.state(self)
+            state_dict['collapsed'] = self.is_collapsed()
+            return state_dict
 
     def set_state(self, state):
         """Set the state of this group element.
@@ -1235,24 +1296,26 @@ class Container(Group):
                 'enabled' -> a boolean
                 'collapsed' -> a boolean
         """
-        if self.is_collapsible():
-            self.set_collapsed(state['collapsed'])
-        Group.set_state(self, state)
+        with self.lock:
+            if self.is_collapsible():
+                self.set_collapsed(state['collapsed'])
+            Group.set_state(self, state)
 
     def is_valid(self):
         """A group is always valid."""
         return True
 
     def should_return(self):
-        LOGGER.debug('Checking whether should return: %s', self)
-        # if element does not have an args_id, we're not supposed to return.
-        # Therefore, return False.
-        if 'args_id' not in self.config:
-            LOGGER.debug('Element %s does not have an args_id', self)
-            return False
+        with self.lock:
+            LOGGER.debug('Checking whether should return: %s', self)
+            # if element does not have an args_id, we're not supposed to return.
+            # Therefore, return False.
+            if 'args_id' not in self.config:
+                LOGGER.debug('Element %s does not have an args_id', self)
+                return False
 
-        # If none of the previous conditions have been met, return True.
-        return True
+            # If none of the previous conditions have been met, return True.
+            return True
 
     def is_required(self):
         # containers are never reauired.
@@ -1290,87 +1353,95 @@ class Multi(Container):
     def __init__(self, configuration, new_elements=None):
         Container.__init__(self, configuration, new_elements)
 
-        # clean up unused configuration options inherited from Container
-        # we have absolutely no interest in user-defined elements, since this
-        # element only has elements created according to the template.
-        # If any elements happen to have been created by the user, remove them
-        # and log a warning.
-        if len(self._elements) > 0:
-            self._elements = []
-            LOGGER.warn('Multi element does not currently support '
-                ' non-template elements.  Elements found have been removed.')
+        with self.lock:
+            # clean up unused configuration options inherited from Container
+            # we have absolutely no interest in user-defined elements, since this
+            # element only has elements created according to the template.
+            # If any elements happen to have been created by the user, remove them
+            # and log a warning.
+            if len(self._elements) > 0:
+                self._elements = []
+                LOGGER.warn('Multi element does not currently support '
+                    ' non-template elements.  Elements found have been removed.')
 
-        self.element_added = Communicator('element_added')
-        self.element_removed = Communicator('element_removed')
+            self.element_added = Communicator('element_added')
+            self.element_removed = Communicator('element_removed')
 
-        self.set_value(self.config['defaultValue'])
+            self.set_value(self.config['defaultValue'])
 
     def emit_signals(self):
-        for element_index in range(len(self._elements)):
-            self.element_added.emit(element_index)
+        with self.lock:
+            for element_index in range(len(self._elements)):
+                self.element_added.emit(element_index)
 
     def add_element(self, index=None):
         # need an optional argument for when an element is added by the
         # Container widget.
-        self.create_elements([self.config['template']])
-        new_index = len(self.elements()) - 1
-        LOGGER.debug('Adding a new element at index %s', new_index)
-        self.element_added.emit(new_index)  #index of element
+        with self.lock:
+            self.create_elements([self.config['template']])
+            new_index = len(self.elements()) - 1
+            LOGGER.debug('Adding a new element at index %s', new_index)
+            self.element_added.emit(new_index)  #index of element
 
     def remove_element(self, index):
-        popped_element = self._elements.pop(index)
-        self.element_removed.emit(index)
+        with self.lock:
+            popped_element = self._elements.pop(index)
+            self.element_removed.emit(index)
 
     def is_collapsed(self):
         return False
 
     def set_value(self, value_list):
-        for value in value_list:
-            self.add_element()
-            self.elements()[-1].set_value(value)
+        with self.lock:
+            for value in value_list:
+                self.add_element()
+                self.elements()[-1].set_value(value)
 
     def value(self):
+        with self.lock:
+            return_type = self.config['return_type']
+            return_values = {
+                'list': lambda elem_list: [_recursive_value(e) for e in elem_list],
+                'dict': lambda elem_list: dict((e.config['args_id'],
+                    _recursive_value(e)) for e in elem_list),
+            }
 
-        return_type = self.config['return_type']
-        return_values = {
-            'list': lambda elem_list: [_recursive_value(e) for e in elem_list],
-            'dict': lambda elem_list: dict((e.config['args_id'],
-                _recursive_value(e)) for e in elem_list),
-        }
+            def _recursive_value(element):
+                """Recurse through a nested set of elements and return a list of
+                values and lists of values for the elements contained within this
+                multi."""
+                if isinstance(element, Container):
+                    # may raise KeyError in either of two circumstances:
+                    #  - args_id is missing from any of the contained elements
+                    #  - return_value is not in ['list', 'dict']
+                    value = return_values[return_type](element.elements())
+                else:
+                    value = element.value()
+                return value
 
-        def _recursive_value(element):
-            """Recurse through a nested set of elements and return a list of
-            values and lists of values for the elements contained within this
-            multi."""
-            if isinstance(element, Container):
-                # may raise KeyError in either of two circumstances:
-                #  - args_id is missing from any of the contained elements
-                #  - return_value is not in ['list', 'dict']
-                value = return_values[return_type](element.elements())
-            else:
-                value = element.value()
-            return value
-
-        return_list = [_recursive_value(e) for e in self.elements()]
-        return return_list
+            return_list = [_recursive_value(e) for e in self.elements()]
+            return return_list
 
     def state(self):
-        state_dict = Container.state(self)
-        state_dict['value'] = self.value()
-        return state_dict
+        with self.lock:
+            state_dict = Container.state(self)
+            state_dict['value'] = self.value()
+            return state_dict
 
     def set_state(self, state):
-        self.set_value(state['value'])
-        Container.set_state(self, state)
+        with self.lock:
+            self.set_value(state['value'])
+            Container.set_state(self, state)
 
 class TabGroup(Group):
     def create_elements(self, elements):
         """Create elements after first asserting that all contained elements
         are tabs."""
-        for element_config in elements:
-            assert element_config['type'] == 'tab', ('Element type must be '
-                '"tab", %s found instead' % element_config['type'])
-        Group.create_elements(self, elements)
+        with self.lock:
+            for element_config in elements:
+                assert element_config['type'] == 'tab', ('Element type must be '
+                    '"tab", %s found instead' % element_config['type'])
+            Group.create_elements(self, elements)
 
 class Tab(Group):
     defaults = {

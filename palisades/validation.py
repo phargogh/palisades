@@ -319,6 +319,7 @@ class Validator(object):
         'folder': check_folder,
         'CSV': check_csv,
         'string': check_regexp,
+        'text': check_regexp,
     }
     def __init__(self, type_str):
         self.finished = Communicator()

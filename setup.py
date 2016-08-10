@@ -6,8 +6,6 @@ from distutils.command.build import build as _build
 import os
 import glob
 
-import natcap.versioner
-
 import palisades
 import palisades.i18n.msgfmt
 
@@ -68,8 +66,9 @@ setup(
     packages=['palisades', 'palisades.gui', 'palisades.i18n'],
     license='3-clause BSD',
     data_files=data_files,
-    version=natcap.versioner.parse_version(),
     natcap_version='palisades/version.py',
+    setup_requires=['natcap.versioner>=0.4.2'],
+    install_requires=['natcap.versioner>=0.4.2'],
     cmdclass={
         'build': build,
         'build_trans': build_translations,

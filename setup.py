@@ -6,9 +6,6 @@ from distutils.command.build import build as _build
 import os
 import glob
 
-import palisades
-import palisades.i18n.msgfmt
-
 
 SITE_PACKAGES = distutils.sysconfig.get_python_lib()
 
@@ -24,6 +21,7 @@ class build_translations(Command):
         pass
 
     def run(self):
+        import palisades.i18n.msgfmt
         po_dir = os.path.join(os.path.dirname(os.curdir), 'i18n')
         for path, names, filenames in os.walk(po_dir):
             for filepath in filenames:

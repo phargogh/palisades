@@ -329,7 +329,7 @@ class PythonRunner():
         if not self.executor.is_alive():
             self._checker.cancel()
             self.failed = self.executor.failed
-            self.tracback = self.executor.traceback
+            self.traceback = self.executor.traceback
             self.finished.emit(thread_name=self.executor.name,
                                thread_failed=self.executor.failed,
                                thread_traceback=self.executor.traceback)
@@ -502,7 +502,7 @@ class Executor(threading.Thread):
             with patch_tempdir(self.tempdir):
                 function(self.args.copy())
         except Exception as error:
-            # We deliverately want to catch all possible exceptions.
+            # We deliberately want to catch all possible exceptions.
             LOGGER.exception(error)
             self.failed = True
             self.exception = error

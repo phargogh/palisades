@@ -1091,8 +1091,7 @@ class CheckBox(LabeledPrimitive):
 
     def set_value(self, new_value):
         with self.lock:
-            assert type(new_value) is BooleanType, ('new_value must be either True'
-                ' or False, %s found' % type(new_value))
+            new_value = bool(new_value)
             LabeledPrimitive.set_value(self, new_value)
 
             # For most elements, satisfaction_changed is emitted after validation

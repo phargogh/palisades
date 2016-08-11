@@ -309,6 +309,7 @@ class Primitive(Element):
         'required': False,
         'enabled': True,
         'helpText': "",
+        'defaultValue': None,
         'returns': {
             'ifDisabled': False,
             'ifEmpty': False,
@@ -367,7 +368,18 @@ class Primitive(Element):
 
         Returns nothing."""
         with self.lock:
-            default_value = self.config['defaultValue']
+            default_value = None
+            for attr_dict in [self.config, self._default_config]:
+                try:
+                    default_value = attr_dict['defaultValue']
+                    break
+                except KeyError:
+                    pass
+
+            if default_value is None:
+                LOGGER.warn('No default value known for class %s',
+                            self.__class__.__name__)
+
             self.set_value(default_value)
 
     def set_value(self, new_value):
@@ -673,7 +685,8 @@ class Dropdown(LabeledPrimitive):
                 assert new_value >= -1, 'Dropdown index must be >= -1, not %s' % new_value
                 assert new_value <= len(self.options), 'Dropdown index must exist'
             elif isinstance(new_value, basestring):
-                assert new_value in self.options, 'Value not in options %s' % self.options
+                assert new_value in self.options, (
+                    'Value "%s" not in options %s' % (new_value, self.options))
             else:
                 raise AssertionError(('Dropdown value type not '
                                     'recognized: {ctype}').format(ctype=type(new_value)))

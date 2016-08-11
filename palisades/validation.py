@@ -208,8 +208,9 @@ def check_csv(path, fieldsExist=None, restrictions=None):
             check_table_restrictions(row_dict, restrictions)
 
 
-def check_vector(path, fieldsExist=None, restrictions=None, layers=None):
-    check_filepath(path, mustExist=True, permissions='r')
+def check_vector(path, mustExist=True, permissions='r', fieldsExist=None,
+                 restrictions=None, layers=None):
+    check_filepath(path, mustExist=mustExist, permissions=permissions)
 
     vector = ogr.Open(path)
     if not vector:

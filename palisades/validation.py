@@ -9,6 +9,7 @@ import sys
 import time
 import threading
 import traceback
+import logging
 
 from osgeo import gdal
 from osgeo import ogr
@@ -20,6 +21,7 @@ from palisades.utils import RepeatingTimer
 V_PASS = None
 V_FAIL = 'fail'
 V_ERROR = 'error'
+LOGGER = logging.getLogger(__name__)
 
 
 class ValidationError(ValueError):
@@ -68,7 +70,7 @@ def check_raster(path):
 
 
 def check_number(num, gteq=None, greaterThan=None, lteq=None, lessThan=None,
-                 pattern=None, flag=None):
+                 allowedValues=None):
 
     num = float(num)
 
@@ -86,16 +88,19 @@ def check_number(num, gteq=None, greaterThan=None, lteq=None, lessThan=None,
     # Allowed default pattern types:
     #  * Decimal (e.g. 4.333112)
     #  * Scientific (e.g. 4.E-170, 9.442e10)
-    if not pattern:
-        pattern = (
+    default_allowedValues = {
+        'pattern': (
             r'^\s*'  # preceeding whitespace
             r'(-?[0-9]*(\.[0-9]*)?([eE]-?[0-9]+)?)'
-            r'\s*$')  # trailing whitespace
+            r'\s*$'),  # trailing whitespace
+        'flag': None
+    }
+    if allowedValues:
+        default_allowedValues.update(allowedValues)
 
-    if not flag:
-        flag = None
-
-    check_regexp(str(num), pattern=pattern, flag=flag)
+    check_regexp(str(num),
+                 pattern=default_allowedValues['pattern'],
+                 flag=default_allowedValues['flag'])
 
 
 def check_regexp(string, pattern='.*', flag=None):
@@ -340,6 +345,7 @@ class Validator(object):
             error_msg = str(e)
             status = V_FAIL
         except Exception as e:
+            LOGGER.exception('Validation errored')
             error_msg = str(e)
             status = V_ERROR
 

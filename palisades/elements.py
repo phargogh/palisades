@@ -448,8 +448,9 @@ class Primitive(Element):
                 self._get_validation_result((elem_req_msg, elem_req_state))
                 return
 
-            validation_dict = self.config['validateAs'].copy()
-            self._validator.validate(self.value(), validation_dict)  # this starts the thread
+            if self.has_input():
+                validation_dict = self.config['validateAs'].copy()
+                self._validator.validate(self.value(), validation_dict)  # this starts the thread
 
     def _get_validation_result(self, error=None):
         """Utility class method to get the error result from the validator
@@ -952,6 +953,7 @@ class Static(Primitive):
         'enabled': True,
         'required': False,
         'validateAs': {'type': 'disabled'},
+        'defaultValue': False,
     }
 
     def __init__(self, configuration):
@@ -1321,6 +1323,13 @@ class Container(Group):
         # containers are never reauired.
         return False
 
+    def reset_value(self):
+        with self.lock:
+            try:
+                self.set_collapsed(not self.config['defaultValue'])
+            except InteractionError:
+                pass
+
 
 class Multi(Container):
     defaults = {
@@ -1393,9 +1402,19 @@ class Multi(Container):
 
     def set_value(self, value_list):
         with self.lock:
+            self.clear()
+
             for value in value_list:
                 self.add_element()
                 self.elements()[-1].set_value(value)
+
+    def clear(self):
+        while True:
+            try:
+                self.remove_element(0)
+            except IndexError:
+                # We've removed all the elements
+                break
 
     def value(self):
         with self.lock:
@@ -1432,6 +1451,11 @@ class Multi(Container):
         with self.lock:
             self.set_value(state['value'])
             Container.set_state(self, state)
+
+    def reset_value(self):
+        with self.lock:
+            self.set_value(self.config['defaultValue'])
+
 
 class TabGroup(Group):
     def create_elements(self, elements):

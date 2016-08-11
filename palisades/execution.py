@@ -9,6 +9,7 @@ import importlib
 import contextlib
 import tempfile
 import pprint
+import traceback
 
 from palisades.utils import Communicator
 from palisades.utils import RepeatingTimer
@@ -293,6 +294,7 @@ class PythonRunner():
         self.started = Communicator()
         self.finished = Communicator()
         self.failed = None
+        self.traceback = None
 
     def start(self):
         """Start the execution of the thread and the internal status checker.
@@ -301,6 +303,7 @@ class PythonRunner():
         Returns nothing."""
 
         self.failed = None
+        self.traceback = None
 
         self.executor.start()
         LOGGER.debug('Started executor thread')
@@ -326,6 +329,7 @@ class PythonRunner():
         if not self.executor.is_alive():
             self._checker.cancel()
             self.failed = self.executor.failed
+            self.tracback = self.executor.traceback
             self.finished.emit(thread_name=self.executor.name,
                                thread_failed=self.executor.failed,
                                thread_traceback=self.executor.traceback)

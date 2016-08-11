@@ -98,12 +98,10 @@ def check_number(num, gteq=None, greaterThan=None, lteq=None, lessThan=None,
     if allowedValues:
         default_allowedValues.update(allowedValues)
 
-    check_regexp(str(num),
-                 pattern=default_allowedValues['pattern'],
-                 flag=default_allowedValues['flag'])
+    check_regexp(str(num), default_allowedValues)
 
 
-def check_regexp(string, pattern='.*', flag=None):
+def check_regexp(string, allowedValues=None):
     # Don't bother accepting  a regexp datastructure ... it's not used in
     # InVEST anyways and is easy enough to just write out.
 
@@ -117,13 +115,26 @@ def check_regexp(string, pattern='.*', flag=None):
         'dotAll': re.DOTALL,
     }
 
+    default_allowedValues = {
+        'pattern': '.*',
+        'flag': None
+    }
+
+    # Assume defaults.
+    if not allowedValues:
+        allowedValues = default_allowedValues
+    else:
+        default_allowedValues.update(allowedValues)
+        allowedValues = default_allowedValues
+
     if type(string) in [int, float]:
         string = str(string)
 
-    matches = re.compile(pattern, known_flags[flag])
+    matches = re.compile(allowedValues['pattern'],
+                         known_flags[allowedValues['flag']])
     if not matches.match(string):
         raise ValidationError('Value %s not allowed for pattern %s' %
-                              (string, pattern))
+                              (string, allowedValues['pattern']))
 
 
 def check_table_fields(table_fields, expected_fields):
@@ -170,18 +181,22 @@ def check_table_restrictions(row_dict, restriction_list):
 
         for field in matching_fieldnames:
             restriction_type = restriction['validateAs']['type']
-            try:
-                restriction_params = restriction['validateAs']['allowedValues']
-            except KeyError:
-                restriction_params = {}
 
-            if restriction_type == 'number':
-                check_number(num=row_dict[field], **restriction_params)
-            elif restriction_type == 'string':
-                check_regexp(string=row_dict[field], **restriction_params)
-            else:
-                raise Exception('Unsupported restriction type %s' %
-                                restriction_type)
+            restriction_params = dict((k, v) for (k, v) in
+                                      restriction['validateAs'].iteritems()
+                                      if k != 'type')
+
+            try:
+                if restriction_type == 'number':
+                    check_number(num=row_dict[field], **restriction_params)
+                elif restriction_type == 'string':
+                    check_regexp(string=row_dict[field], **restriction_params)
+                else:
+                    raise Exception('Unsupported restriction type %s' %
+                                    restriction_type)
+            except ValidationError as validation_error:
+                raise ValidationError('Field %s: %s' % (
+                    field, str(validation_error)))
 
 
 def check_csv(path, fieldsExist=None, restrictions=None):
@@ -204,8 +219,12 @@ def check_csv(path, fieldsExist=None, restrictions=None):
         check_table_fields(opened_file.fieldnames, fieldsExist)
 
     if restrictions:
-        for row_dict in opened_file:
-            check_table_restrictions(row_dict, restrictions)
+        for row_index, row_dict in enumerate(opened_file):
+            try:
+                check_table_restrictions(row_dict, restrictions)
+            except ValidationError as validation_error:
+                raise ValidationError('Row %s, %s' % (
+                    row_index, str(validation_error)))
 
 
 def check_vector(path, mustExist=True, permissions='r', fieldsExist=None,
@@ -226,11 +245,13 @@ def check_vector(path, mustExist=True, permissions='r', fieldsExist=None,
             for feature in layer:
                 row_dict = dict((field, feature.GetField(field))
                                 for field in vector_fieldnames)
+                feature_index = feature.GetFID()
                 try:
                     check_table_restrictions(row_dict, restrictions)
                 except ValidationError as validation_error:
-                    raise ValidationError('Validation error in layer %s: %s' %
-                                          (layer_index, validation_error))
+                    raise ValidationError(
+                        'Validation error in feature %s of layer %s: %s' %
+                        (feature_index, layer_index, validation_error))
 
     if layers:
         for layer_info in layers:

@@ -582,10 +582,9 @@ class Primitive(Element):
                 LOGGER.debug('Element %s does not have an args_id', self)
                 return False
 
-            return_if_hidden = self.config['returns']['ifHidden']
-            if return_if_hidden or self.is_hidden():
-                LOGGER.debug('Element %s is hidden.', self)
-                return False
+            if self.config['returns']['ifHidden']:
+                LOGGER.debug('Element %s should return, even if hidden.', self)
+                return True
 
             # if element is disabled and we're not supposed to return if disabled,
             # return False.

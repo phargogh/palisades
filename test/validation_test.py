@@ -707,6 +707,42 @@ class TestCSVValidation(unittest.TestCase):
                 '1, 2, 3\n'
                 '2, "b", "c"\n')
 
+    @staticmethod
+    def create_csv_with_blank_rows(filepath):
+        """Create a CSV at the given filepath that contains blank rows.
+
+        Parameters:
+            filepath (string): The string path to where the file should be
+                created on disk.
+
+        Returns:
+            ``None``
+        """
+        with open(filepath, 'w') as open_file:
+            open_file.write(
+                '"foo", "bar", "baz"\n'
+                ',,\n'
+                '1, 2, 3\n'
+                ',,\n'
+                '2, "b", "c"\n')
+
+    def test_csv_validate_blank_rows_fails(self):
+        """Validation (CSV): raise error when blank rows present."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'test.csv')
+        TestCSVValidation.create_csv_with_blank_rows(filename)
+        with self.assertRaises(validation.ValidationError):
+            validation.check_csv(filename, allowBlankRows=False)
+
+    def test_csv_validate_blank_rows_passes(self):
+        """Validation (CSV): csv validates presence of blank rows."""
+        from palisades import validation
+
+        filename = os.path.join(self.workspace_dir, 'test.csv')
+        TestCSVValidation.create_csv_with_blank_rows(filename)
+        validation.check_csv(filename, allowBlankRows=True)
+
     def test_csv_detect_dialect(self):
         """Validation (CSV): csv dialect detection"""
         from palisades import validation

@@ -199,7 +199,7 @@ def check_table_restrictions(row_dict, restriction_list):
                     field, str(validation_error)))
 
 
-def check_csv(path, fieldsExist=None, restrictions=None):
+def check_csv(path, fieldsExist=None, restrictions=None, allowBlankRows=False):
     # Before we actually open up the CSV for use, we need to check it for
     # consistency.  Specifically, all CSV inputs to InVEST must adhere to
     # the following:
@@ -225,6 +225,14 @@ def check_csv(path, fieldsExist=None, restrictions=None):
             except ValidationError as validation_error:
                 raise ValidationError('Row %s, %s' % (
                     row_index, str(validation_error)))
+
+    if not allowBlankRows:
+        with open(path, 'rbU') as csv_file:
+            for row_index, line in enumerate(csv_file):
+                if re.match('^,+$', line):
+                    raise ValidationError(
+                        ('Row %s is blank, which is not allowed.') % row_index)
+
 
 
 def check_vector(path, mustExist=True, permissions='r', fieldsExist=None,

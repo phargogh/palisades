@@ -669,16 +669,32 @@ class FileField(TextField):
         """Overriding the default dragEnterEvent function for when a file is
         dragged and dropped onto this qlineedit.  This reimplementation is
         necessary for the dropEvent function to work on Windows."""
-        event.accept()
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
 
     def dropEvent(self, event=None):
-         """Overriding the default Qt DropEvent function when a file is
-         dragged and dropped onto this qlineedit."""
-         path = event.mimeData().urls()[0].path()
-         if platform.system() == 'Windows':
-             path = path[1:]  # Remove the '/' ahead of disk letter
-         self.setText(path)
-         event.acceptProposedAction()
+        """Overriding the default Qt DropEvent function when a file is
+        dragged and dropped onto this qlineedit."""
+        path = event.mimeData().urls()[0].path()
+        if platform.system() == 'Windows':
+            path = path[1:]  # Remove the '/' ahead of disk letter
+        elif platform.system() == 'Darwin':
+            # On mac, we need to ask the OS nicely for the fileid.
+            # This is only needed on Qt<5.4.1.
+            # See bug report at https://bugreports.qt.io/browse/QTBUG-40449
+            command = (
+                "osascript -e 'get posix path of my posix file \""
+                "file://{fileid}\" -- kthx. bai'").format(
+                    fileid=path)
+            process = subprocess.Popen(
+                command, shell=True,
+                stderr=subprocess.STDOUT,
+                stdout=subprocess.PIPE)
+            path = process.communicate()[0].lstrip().rstrip()
+        self.setText(path)
+        event.acceptProposedAction()
 
 class CheckBox(QtGui.QCheckBox, QtWidget):
     error_changed = Signal(bool)

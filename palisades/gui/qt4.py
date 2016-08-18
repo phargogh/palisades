@@ -669,7 +669,9 @@ class FileField(TextField):
         """Overriding the default dragEnterEvent function for when a file is
         dragged and dropped onto this qlineedit.  This reimplementation is
         necessary for the dropEvent function to work on Windows."""
-        if event.mimeData().hasUrls():
+        # If the user tries to drag multiple files into this text field,
+        # reject the event!
+        if event.mimeData().hasUrls() and len(event.mimeData().urls()) == 1:
             event.accept()
         else:
             event.ignore()
@@ -693,8 +695,9 @@ class FileField(TextField):
                 stderr=subprocess.STDOUT,
                 stdout=subprocess.PIPE)
             path = process.communicate()[0].lstrip().rstrip()
+
+        event.accept()
         self.setText(path)
-        event.acceptProposedAction()
 
 class CheckBox(QtGui.QCheckBox, QtWidget):
     error_changed = Signal(bool)

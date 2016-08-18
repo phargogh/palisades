@@ -140,6 +140,10 @@ class SplashScreen(QtGui.QSplashScreen):
 
 class QtWidget(QtGui.QWidget):
     # REQUIRED: subclasses must also be a subclass of QWidget
+    def __init__(self, *args, **kwargs):
+        QtGui.QWidget.__init__(self, *args, **kwargs)
+        self.lock = threading.RLock()
+
     def set_visible(self, is_visible):
         self.setVisible(is_visible)
 
@@ -627,16 +631,17 @@ class TextField(QtGui.QLineEdit, QtWidget):
 
     def set_text(self, new_value, force=False):
         # only set the new text if the user is not editing the text.
-        if not self._is_editing or force is True:
-            try:
-                if type(new_value) in (FloatType, IntType):
-                    new_value = str(new_value)
+        with self.lock:
+            if not self._is_editing or force is True:
+                try:
+                    if type(new_value) in (FloatType, IntType):
+                        new_value = str(new_value)
 
-                cast_value = unicode(new_value, 'utf-8')
-            except TypeError:
-                # When we already have unicode
-                cast_value = new_value
-            self.setText(cast_value)
+                    cast_value = unicode(new_value, 'utf-8')
+                except TypeError:
+                    # When we already have unicode
+                    cast_value = new_value
+                self.setText(cast_value)
 
     def _reset_requested(self, qstring_value):
         self.clearFocus()
@@ -697,7 +702,7 @@ class FileField(TextField):
             path = process.communicate()[0].lstrip().rstrip()
 
         event.accept()
-        self.setText(path)
+        self.set_text(path)
 
 class CheckBox(QtGui.QCheckBox, QtWidget):
     error_changed = Signal(bool)

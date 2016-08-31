@@ -65,7 +65,7 @@ class Language(object):
         }
 
     def __call__(self):
-        print 'current language is %s' % self.current_lang
+        LOGGER.info('current language is %s', self.current_lang)
         current_language = self.available_langs[self.current_lang]
         current_language.install()
         return current_language
@@ -75,7 +75,7 @@ class Language(object):
 
     def set(self, lang_code):
         self.current_lang = lang_code
-        print 'setting current lang to %s' % lang_code
+        LOGGER.info('setting current lang to %s', lang_code)
 #        self.available_langs[self.current_lang].install()
 
     def ugettext(self, message):

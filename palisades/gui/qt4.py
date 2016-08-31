@@ -815,7 +815,7 @@ class FileDialog(QtGui.QFileDialog):
             if savefile is not None:
                 default_folder = os.path.join(default_folder, savefile)
 
-            print 'DEFAULT_DIR', default_folder
+            LOGGER.debug('default_dir', default_folder)
             filename, filter = self.getSaveFileNameAndFilter(
                 self, dialog_title, default_folder, initialFilter=self.last_filter)
         else:
@@ -996,7 +996,7 @@ class ErrorDialog(InfoDialog):
     def showEvent(self, event=None):
         label_string = '<ul>'
         for element_id, exception in self.messages:
-            print exception
+            LOGGER.error(exception)
             label_string += '<li><b>%s</b>: <br/>%s</li>' % (element_id,
                                                              str(exception))
         label_string += '</ul>'
@@ -1265,7 +1265,6 @@ class RealtimeMessagesDialog(QtGui.QDialog):
 
     def _emit_workspace(self, event=None):
         if not self.openWorkspaceCB.isVisible():
-            print 'button visible'
             requested = True
         else:
             requested = self.workspace_open_requested()
@@ -1388,7 +1387,7 @@ class FormWindow(QtWidget, QtGui.QWidget):
         # set the window title
         if window_title is None:
             window_title = ''
-        print 'WINDOW TITLE ' + str(window_title)
+        LOGGER.debug('Window title ', window_title)
         self.setWindowTitle(window_title)
 
         self.menu_bar = QtGui.QMenuBar()

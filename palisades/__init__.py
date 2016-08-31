@@ -2,12 +2,14 @@ import sys
 import glob
 import os
 import json
+import logging
 
 import palisades.i18n
 _ = palisades.i18n.language.ugettext
 
 import natcap.versioner
 __version__ = natcap.versioner.get_version('palisades')
+LOGGER = logging.getLogger(__name__)
 
 
 # Layouts, for later reference.
@@ -59,7 +61,7 @@ def locate_config(expected_uri):
                 "json_uri": json_uri,
                 "possible_paths": possible_paths
             })
-    print found_json
+    LOGGER.debug('Found json file %s', found_json)
     return found_json
 
 def launch(json_uri, splash_img=None, runner=None, interactive=False):
@@ -88,14 +90,14 @@ def launch(json_uri, splash_img=None, runner=None, interactive=False):
     gui_app = palisades.gui.get_application()
 
     if splash_img is not None:
-        print _('Showing splash %s') % splash_img
+        LOGGER.info(_('Showing splash %s'), splash_img)
         gui_app.show_splash(splash_img)
         gui_app.set_splash_message(SPLASH_MSG_CORE_APP())
 
     ui = elements.Application(found_json, dist_language)
 
     if runner is not None:
-        print _('Setting runner class to %s') % runner
+        LOGGER.info(_('Setting runner class to %s'), runner)
         ui._window.set_runner(runner)
 
     if splash_img is not None:
@@ -103,7 +105,7 @@ def launch(json_uri, splash_img=None, runner=None, interactive=False):
 
     gui_app.add_window(ui._window)
 
-    print _('Starting application')
+    LOGGER.info(_('Starting application'))
     gui_app.execute(interactive=interactive)
 
 def locate_dist_config():
@@ -136,8 +138,9 @@ def locate_dist_config():
             try:
                 config = json.load(open(possible_json_path))
             except Exception as error:
-                print ('File %s exists, but an error was encountered: %s' %
-                    (possible_json_path, str(error)))
+                LOGGER.warning(
+                    'File %s exists, but an error was encountered: %s',
+                    possible_json_path, str(error))
 
     # if we can't find the distribution JSON configuration file, make
     # reasonable assumptions about default values and return the dictionary.
@@ -146,6 +149,6 @@ def locate_dist_config():
         config = {
             'lang': lang_to_use,
         }
-        print "Defaulting to OS language: %s" % lang_to_use
+        LOGGER.warning("Defaulting to OS language: %s", lang_to_use)
 
     return config

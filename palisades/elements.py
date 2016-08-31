@@ -491,7 +491,8 @@ class Primitive(Element):
             LOGGER.debug('Emitting validation_completed')
             try:
                 if len(error_msg) > 0:
-                    LOGGER.debug('Validation error: %s', error_msg)
+                    LOGGER.warning('Element %s - validation error: %s',
+                                   self.get_id('user'), error_msg)
             except TypeError:
                 # when error_msg is None, there's no len().
                 # Error_msg of None means no validation error.
